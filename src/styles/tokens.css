@@ -14,10 +14,11 @@
   --chocolat: #412d1e; /* texte, logo, boutons principaux */
   --sable: #f2e6d6; /* fond de section alterné */
   --lin: #e6d5bf; /* bordures, filets, aplats discrets : jamais du texte sur fond clair */
-  --noyer: #6b4f3a; /* texte secondaire */
+  --noyer: #5f3e27; /* texte secondaire ; le noyer du socle du prototype */
   --terre: #9a4e2b; /* liens, accents, survol des boutons */
   --caramel: #b9773f; /* illustrations et décor uniquement : jamais du texte */
   --olive: #5e6b45; /* pastilles de confiance, états de réussite */
+  --pierre: #bab1a7; /* fond « studio » des images du prototype et de la scène 3D */
   --todo: #ffe066; /* surlignage des informations manquantes uniquement */
 
   /* ---------- Typographie ---------- */
@@ -109,8 +110,8 @@
  * ---------- Surfaces ----------
  * Chaque surface fixe son fond et redéfinit les rôles de texte.
  * Une section choisit sa surface avec la classe .surface-creme,
- * .surface-sable ou .surface-chocolat. `npm run contrast` vérifie
- * chaque rôle contre le fond de chaque surface.
+ * .surface-sable, .surface-pierre ou .surface-chocolat. `npm run contrast`
+ * vérifie chaque rôle contre le fond de chaque surface.
  */
 :root,
 .surface-creme {
@@ -137,6 +138,20 @@
   --focus: var(--terre);
 }
 
+/* Pierre : le fond des images du prototype. Seul le chocolat y est assez
+   contrasté pour du texte (6,1:1) ; noyer, terre et olive n'y vont jamais. */
+.surface-pierre {
+  --surface: var(--pierre);
+  --text: var(--chocolat);
+  --text-muted: var(--chocolat);
+  --link: var(--chocolat);
+  --link-hover: var(--chocolat);
+  --success: var(--chocolat);
+  --line: rgb(65 45 30 / 0.25);
+  --line-strong: var(--chocolat);
+  --focus: var(--chocolat);
+}
+
 .surface-chocolat {
   --surface: var(--chocolat);
   --text: var(--creme);
@@ -151,6 +166,7 @@
 
 .surface-creme,
 .surface-sable,
+.surface-pierre,
 .surface-chocolat {
   background-color: var(--surface);
   color: var(--text);

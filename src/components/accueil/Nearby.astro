@@ -1,0 +1,182 @@
+---
+/**
+ * g. Zone d’intervention (carte) et un aperçu de l’équipe : les trois rôles,
+ * avec les prénoms et noms tirés de src/data/entreprise.ts.
+ * La phrase sur la zone d’intervention est affichée par la carte elle-même
+ * (sa légende) : elle n’est pas répétée ici.
+ */
+import Fact from '../Fact.astro';
+import ZoneMap from '../carte/ZoneMap.astro';
+import Arrow from './Arrow.astro';
+import RichText from './RichText.astro';
+import SectionHeader from './SectionHeader.astro';
+import { nearby } from '../../content/accueil';
+import { company } from '../../data/entreprise';
+---
+
+<section class="nearby" aria-labelledby="titre-proximite">
+  <div class="container">
+    <div class="nearby__grid">
+      <div class="nearby__text">
+        <SectionHeader id="titre-proximite" kicker={nearby.kicker} title={nearby.title} />
+        <p class="nearby__lead">
+          <RichText text={nearby.text} />
+        </p>
+        <p class="nearby__outside">
+          {nearby.outsideLead} <Fact value={company.serviceArea.outside} />.
+        </p>
+      </div>
+      <div class="nearby__map">
+        <ZoneMap />
+      </div>
+    </div>
+
+    <div class="team">
+      <div class="team__intro">
+        <h3 class="team__title">
+          <RichText text={nearby.teamTitle} />
+        </h3>
+        <p class="team__text">
+          <RichText text={nearby.teamText} />
+        </p>
+        <a class="team__more" href={nearby.more.href}>
+          {nearby.more.label}
+          <Arrow />
+        </a>
+      </div>
+      <ul class="team__list" aria-label={nearby.teamListLabel}>
+        {company.founders.map((founder) => (
+          <li class="team__member">
+            <span class="team__role">{founder.role}</span>
+            <span class="team__name">
+              <Fact value={founder.name} />
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .nearby {
+    padding-block: var(--space-section);
+  }
+
+  .nearby__grid {
+    display: grid;
+    gap: var(--space-xl);
+    align-items: start;
+  }
+
+  .nearby__text {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .nearby__lead {
+    max-inline-size: 40ch;
+    margin: var(--space-2xs) 0 0;
+    font-size: var(--step-1);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  .nearby__outside {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  /* Un repère « à compléter » ne se coupe pas au milieu. */
+  .nearby__outside :global(.todo) {
+    white-space: nowrap;
+  }
+
+  .nearby__map {
+    inline-size: 100%;
+  }
+
+  .team {
+    display: grid;
+    gap: var(--space-xl);
+    margin-block-start: var(--space-2xl);
+    padding-block-start: var(--space-xl);
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  .team__intro {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+  }
+
+  .team__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 400;
+    font-variation-settings: var(--font-display-variation);
+    line-height: var(--leading-snug);
+  }
+
+  .team__text {
+    max-inline-size: 44ch;
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  .team__more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    min-block-size: var(--target-min);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .team__list {
+    display: grid;
+    gap: var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .team__member {
+    display: grid;
+    align-content: space-between;
+    gap: var(--space-2xs);
+    padding: var(--space-m);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .team__role {
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text-muted);
+  }
+
+  .team__name {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-variation-settings: var(--font-display-variation);
+  }
+
+  @media (min-width: 48rem) {
+    .team__list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 60rem) {
+    .nearby__grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+      gap: var(--space-2xl);
+    }
+  }
+</style>

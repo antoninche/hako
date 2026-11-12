@@ -105,14 +105,19 @@ const current = (href: string) => (isCurrentPage(href, pathname) ? 'page' : unde
     border-block-end: var(--rule-width) solid var(--line);
   }
 
-  /* Si le texte est très agrandi (réglage de taille de police du navigateur),
-     « Commander » et « Menu » passent sous le logo au lieu de déborder de l'écran. */
+  /* L'en-tête, filet du bas compris, mesure exactement --header-height : la
+     scène 3D collante de l'accueil se place juste dessous, et
+     scroll-padding-top (global.css) arrête les ancres sous lui. Vérifié de
+     320 à 1440 px par tests/scene-3d.spec.ts. Si le texte est très agrandi
+     (réglage de taille de police du navigateur), « Commander » et « Menu »
+     passent sous le logo au lieu de déborder de l'écran : l'en-tête est
+     alors plus haut. */
   .site-header__bar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-xs);
-    min-height: var(--header-height);
+    min-height: calc(var(--header-height) - var(--rule-width));
   }
 
   /* ---------- Logo ---------- */

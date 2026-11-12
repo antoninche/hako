@@ -1,0 +1,146 @@
+---
+/**
+ * e. Les deux offres. Tous les montants viennent de src/data/tarifs.ts :
+ * aucun prix n’est écrit ici. Une valeur null devient un repère jaune, avec
+ * le même texte que sur les autres pages (missingPrice, src/data/faits.ts).
+ */
+import Arrow from './Arrow.astro';
+import OfferCard from './OfferCard.astro';
+import RichText from './RichText.astro';
+import SectionHeader from './SectionHeader.astro';
+import { offers } from '../../content/accueil';
+import { missingPrice } from '../../data/faits';
+import { routes } from '../../data/navigation';
+import { pricing } from '../../data/tarifs';
+import { orMissing } from '../../lib/commande/inline';
+import { formatEur, formatList } from '../../lib/format';
+
+const { home, pro } = pricing.offers;
+
+const included = pricing.storage.find((option) => option.id === pricing.includedStorage);
+if (!included) {
+  throw new Error('Accueil : le stockage inclus (includedStorage) est absent de pricing.storage.');
+}
+const extraStorage = pricing.storage
+  .filter((option) => option.id !== pricing.includedStorage)
+  .map((option) => option.label);
+
+const orderHref = (id: string) => `${routes.order}?offre=${id}`;
+
+const homeValues = {
+  stockage: included.label,
+  majSecurite: orMissing(home.securityUpdates, missingPrice.securityUpdates(home)),
+  tarifSav:
+    home.afterSalesRateEur == null
+      ? missingPrice.afterSalesRate(home)
+      : formatEur(home.afterSalesRateEur),
+};
+
+const subscription = pro.subscription;
+if (!subscription) {
+  throw new Error('Accueil : l’abonnement de Hako Pro est absent de src/data/tarifs.ts.');
+}
+const proValues = {
+  stockage: included.label,
+  mensuel: formatEur(subscription.monthlyEur),
+  taxeAbonnement: orMissing(subscription.taxStatus, missingPrice.subscriptionTax(pro)),
+  engagement: orMissing(subscription.commitment, missingPrice.commitment(pro)),
+  delai: orMissing(subscription.responseTime, missingPrice.responseTime(pro)),
+};
+---
+
+<section class="offers" aria-labelledby="titre-offres">
+  <div class="container">
+    <SectionHeader
+      id="titre-offres"
+      kicker={offers.kicker}
+      title={offers.title}
+      intro={offers.intro}
+    />
+
+    <div class="offers__grid">
+      <OfferCard
+        id={home.id}
+        name={home.name}
+        audience={home.audience}
+        illustration={offers.home.illustration}
+        price={formatEur(home.priceEur)}
+        tax={orMissing(home.taxStatus, missingPrice.taxStatus(home))}
+        priceNote={offers.home.priceNote}
+        details={offers.home.details}
+        features={offers.home.features}
+        values={homeValues}
+        cta={{ label: offers.home.cta, href: orderHref(home.id) }}
+      />
+      <OfferCard
+        id={pro.id}
+        name={pro.name}
+        audience={pro.audience}
+        illustration={offers.pro.illustration}
+        price={formatEur(pro.priceEur)}
+        tax={orMissing(pro.taxStatus, missingPrice.taxStatus(pro))}
+        priceNote={offers.pro.priceNote}
+        monthly={offers.pro.monthly}
+        details={offers.pro.details}
+        features={offers.pro.features}
+        values={proValues}
+        cta={{ label: offers.pro.cta, href: orderHref(pro.id) }}
+      />
+    </div>
+
+    <div class="offers__footer">
+      <p class="offers__storage">
+        <RichText
+          text={offers.storageNote}
+          values={{ inclus: included.label, options: formatList(extraStorage) }}
+        />
+      </p>
+      <a class="offers__compare" href={offers.compare.href}>
+        {offers.compare.label}
+        <Arrow />
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .offers {
+    padding-block: var(--space-section);
+  }
+
+  .offers__grid {
+    display: grid;
+    gap: var(--space-l);
+    margin-block-start: var(--space-2xl);
+  }
+
+  .offers__footer {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+    margin-block-start: var(--space-xl);
+  }
+
+  .offers__storage {
+    margin: 0;
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  .offers__compare {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    min-block-size: var(--target-min);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  @media (min-width: 48rem) {
+    .offers__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-xl);
+    }
+  }
+</style>

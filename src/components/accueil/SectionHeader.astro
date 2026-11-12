@@ -1,0 +1,66 @@
+---
+/**
+ * En-tête d’une section de l’accueil : surtitre, titre (h2) et introduction.
+ *
+ *   <SectionHeader id="titre-offres" kicker="Nos offres" title="…" intro="…" />
+ */
+import Kicker from './Kicker.astro';
+import RichText from './RichText.astro';
+
+interface Props {
+  /** id du titre, repris par aria-labelledby sur la section. */
+  id: string;
+  kicker?: string;
+  title: string;
+  intro?: string;
+  align?: 'start' | 'center';
+}
+
+const { id, kicker, title, intro, align = 'start' } = Astro.props;
+---
+
+<div class:list={['section-header', `section-header--${align}`]}>
+  {kicker && <Kicker text={kicker} />}
+  <h2 id={id} class="section-header__title">
+    <RichText text={title} />
+  </h2>
+  {intro && (
+    <p class="section-header__intro">
+      <RichText text={intro} />
+    </p>
+  )}
+</div>
+
+<style>
+  .section-header {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+  }
+
+  .section-header--center {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .section-header__title {
+    max-inline-size: 22ch;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    font-weight: 400;
+    font-variation-settings: var(--font-display-variation);
+    line-height: var(--leading-tight);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .section-header__intro {
+    max-inline-size: 52ch;
+    margin: 0;
+    font-size: var(--step-1);
+    line-height: 1.5;
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+</style>

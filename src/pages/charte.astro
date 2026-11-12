@@ -14,6 +14,7 @@ import Section from '../components/Section.astro';
 import Todo from '../components/Todo.astro';
 import { LOGO_VARIANTS, logoFile } from '../components/logo-files';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { formatEur, formatNumber } from '../lib/format';
 import tokensCss from '../styles/tokens.css?raw';
 
 // ---------- Lecture des jetons ----------
@@ -30,8 +31,8 @@ for (const m of tokensCss.matchAll(/--([a-z]+):\s*(#[0-9a-f]{6});\s*(?:\/\*\s*(.
 }
 const hexOf = (name: string) => palette.find((c) => c.name === name)?.hex;
 
-type SurfaceName = 'creme' | 'sable' | 'chocolat';
-const SURFACES: SurfaceName[] = ['creme', 'sable', 'chocolat'];
+type SurfaceName = 'creme' | 'sable' | 'pierre' | 'chocolat';
+const SURFACES: SurfaceName[] = ['creme', 'sable', 'pierre', 'chocolat'];
 const ROLES = [
   ['text', 'Texte'],
   ['text-muted', 'Texte secondaire'],
@@ -68,8 +69,7 @@ function contrast(a: string, b: string): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-const fr1 = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-const ratioText = (r: number) => `${fr1.format(r)}:1`;
+const ratioText = (r: number) => `${formatNumber(r, 1)}:1`;
 const verdict = (r: number) =>
   r >= 7 ? 'AAA' : r >= 4.5 ? 'AA' : r >= 3 ? 'grand texte et non-texte' : 'décor seulement';
 
@@ -90,21 +90,28 @@ const px = (n: number) => `${Math.round(n * 10) / 10} px`;
 
 // ---------- Exemples ----------
 
-const price = new Intl.NumberFormat('fr-FR', {
-  style: 'currency',
-  currency: 'EUR',
-  maximumFractionDigits: 0,
-}).format(1000);
+const price = formatEur(1000);
 
 // Exemples de texte provisoire. Écrits en variables, ils ne sont pas comptés
 // par `npm run todos` : ce ne sont pas de vraies informations manquantes.
 const todoExamples = {
   surface: { what: 'Exemple de la charte : texte provisoire', placeholder: '[texte provisoire]' },
   sentence: { what: 'Exemple de la charte : durée des mises à jour', placeholder: '[durée]' },
-  price: { what: 'Exemple de la charte : prix HT ou TTC', placeholder: '[HT ou TTC]' },
+  price: { what: 'Exemple de la charte : prix TTC ou HT', placeholder: '[TTC ou HT]' },
 };
 
-const uiIcons: IconName[] = ['menu', 'close', 'mail', 'map-pin', 'arrow-right', 'external'];
+const uiIcons: IconName[] = [
+  'menu',
+  'close',
+  'mail',
+  'phone',
+  'map-pin',
+  'arrow-right',
+  'external',
+  'box',
+  'video',
+  'clock',
+];
 const socialIcons: IconName[] = ['linkedin', 'youtube', 'facebook', 'instagram', 'peertube'];
 const logos = LOGO_VARIANTS.map((variant) => ({ variant, available: Boolean(logoFile(variant)) }));
 ---
@@ -120,8 +127,8 @@ const logos = LOGO_VARIANTS.map((variant) => ({ variant, available: Boolean(logo
       <h1>Charte graphique</h1>
       <p class="lead text-muted">
         Les couleurs, les textes et les composants du site, tels qu’ils sont dans le code. Les
-        valeurs viennent de <code>src/styles/tokens.css</code>&#8239;; les contrastes sont
-        recalculés à chaque construction du site.
+        valeurs viennent de <code>src/styles/tokens.css</code>&nbsp;; les contrastes sont recalculés
+        à chaque construction du site.
       </p>
     </div>
   </Section>
@@ -131,7 +138,7 @@ const logos = LOGO_VARIANTS.map((variant) => ({ variant, available: Boolean(logo
     <div class="stack stack--l">
       <h2 id="palette">Palette</h2>
       <p>
-        Contraste de chaque couleur sur les trois fonds (WCAG 2.x)&nbsp;: 4,5:1 au moins pour du
+        Contraste de chaque couleur sur les quatre fonds (WCAG 2.x)&nbsp;: 4,5:1 au moins pour du
         texte courant, 3:1 pour du grand texte et les éléments d’interface.
       </p>
       <ul class="colors">
@@ -174,8 +181,8 @@ const logos = LOGO_VARIANTS.map((variant) => ({ variant, available: Boolean(logo
       <h2 id="surfaces">Surfaces et rôles</h2>
       <p>
         Une section choisit sa surface&nbsp;: <code>.surface-creme</code>,{' '}
-        <code>.surface-sable</code> ou <code>.surface-chocolat</code>. Les rôles de texte s’adaptent
-        et les composants n’emploient que ces rôles.
+        <code>.surface-sable</code>, <code>.surface-pierre</code> ou <code>.surface-chocolat</code>.
+        Les rôles de texte s’adaptent et les composants n’emploient que ces rôles.
       </p>
       <div class="surfaces">
         {SURFACES.map((surface) => {
@@ -315,7 +322,7 @@ const logos = LOGO_VARIANTS.map((variant) => ({ variant, available: Boolean(logo
           <span class="price price--large">{price}</span>
           <Todo what={todoExamples.price.what}>{todoExamples.price.placeholder}</Todo>
           <span class="small text-muted">
-            Espace insécable fine entre les milliers, insécable avant €.
+            Espace insécable entre les milliers et avant € (src/lib/format.ts).
           </span>
         </div>
       </div>
@@ -327,8 +334,8 @@ const logos = LOGO_VARIANTS.map((variant) => ({ variant, available: Boolean(logo
     <div class="stack stack--l">
       <h2 id="boutons">Boutons et liens</h2>
       <p>
-        Bouton principal&nbsp;: fond chocolat, texte crème&#8239;; au survol et au focus, fond
-        terre. Bouton secondaire&nbsp;: contour fin. Hauteur minimale 44 px.
+        Bouton principal&nbsp;: fond chocolat, texte crème&nbsp;; au survol et au focus, fond terre.
+        Bouton secondaire&nbsp;: contour fin. Hauteur minimale 44 px.
       </p>
       {SURFACES.map((surface) => (
         <div class:list={['states', `surface-${surface}`]}>
@@ -361,7 +368,7 @@ const logos = LOGO_VARIANTS.map((variant) => ({ variant, available: Boolean(logo
         </div>
         <p>
           Un lien dans une phrase&nbsp;: <a href="#boutons">revenir au début de cette partie</a>. Il
-          est toujours souligné&#8239;; le soulignement s’épaissit au survol.
+          est toujours souligné&nbsp;; le soulignement s’épaissit au survol.
         </p>
       </div>
     </div>

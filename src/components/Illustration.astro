@@ -1,0 +1,84 @@
+---
+/**
+ * Illustration du site.
+ *
+ * Affiche le dessin src/assets/illustrations/<name>.svg, inséré dans la page.
+ * Tant que le dessin n'existe pas, un cadre discret aux mêmes proportions
+ * prend sa place, pour que la mise en page ne bouge pas à son arrivée.
+ *
+ *   <Illustration name="probleme" ratio="4/3" alt="Des photos qui s’envolent vers des nuages lointains." />
+ *   <Illustration name="etape-commande" ratio="1/1" decorative />
+ */
+interface Props {
+  /** Nom du fichier, sans extension (sous-dossier permis : "icones/engagement-zero-acces"). */
+  name: string;
+  /** Proportions du dessin. */
+  ratio: '4/3' | '1/1' | '16/10' | '16/9';
+  /** Texte de remplacement ; obligatoire sauf si le dessin est purement décoratif. */
+  alt?: string;
+  decorative?: boolean;
+  class?: string;
+}
+
+const { name, ratio, alt = '', decorative = false, class: className } = Astro.props;
+
+const files = import.meta.glob<string>('../assets/illustrations/**/*.svg', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+});
+const raw = files[`../assets/illustrations/${name}.svg`];
+
+// Le dessin est inséré tel quel : on retire son <title>/<desc> au profit du
+// texte de remplacement de la page (ou on le masque s'il est décoratif).
+const svg = raw
+  ?.replace(/<title>[\s\S]*?<\/title>/, '')
+  .replace(/<desc>[\s\S]*?<\/desc>/, '')
+  .replace(
+    '<svg',
+    decorative
+      ? '<svg aria-hidden="true" focusable="false"'
+      : `<svg role="img" aria-label="${alt.replace(/"/g, '&quot;')}"`,
+  );
+const ratioClass = `ratio-${ratio.replace('/', '-')}`;
+---
+
+{svg ? (
+  <div class:list={['illustration', ratioClass, className]} set:html={svg} />
+) : (
+  <div
+    class:list={['illustration', 'illustration--attente', ratioClass, className]}
+    role={decorative ? undefined : 'img'}
+    aria-label={decorative ? undefined : alt}
+    aria-hidden={decorative ? 'true' : undefined}
+    data-illustration={name}
+  />
+)}
+
+<style>
+  .illustration {
+    inline-size: 100%;
+  }
+  .illustration :global(svg) {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+  }
+  .illustration--attente {
+    border: var(--rule-width) dashed var(--line);
+    border-radius: var(--radius);
+    background-color: var(--surface);
+  }
+  .ratio-4-3 {
+    aspect-ratio: 4 / 3;
+  }
+  .ratio-1-1 {
+    aspect-ratio: 1 / 1;
+  }
+  .ratio-16-10 {
+    aspect-ratio: 16 / 10;
+  }
+  .ratio-16-9 {
+    aspect-ratio: 16 / 9;
+  }
+</style>

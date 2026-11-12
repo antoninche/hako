@@ -59,8 +59,8 @@ test.describe('npm run contrast', () => {
     const roles = results.filter(
       (result) => result.check === 'role' || result.check === 'non-text',
     );
-    // 3 surfaces × (5 rôles de texte + 2 éléments non textuels)
-    expect(roles).toHaveLength(21);
+    // 4 surfaces (crème, sable, pierre, chocolat) × (5 rôles de texte + 2 éléments non textuels)
+    expect(roles).toHaveLength(28);
     expect(roles.filter((result) => !result.ok)).toEqual([]);
   });
 

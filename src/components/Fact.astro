@@ -8,6 +8,7 @@
  *   <Fact value={company.email} link="email" />  → lien « mailto: » une fois connue
  */
 import Todo from './Todo.astro';
+import { formatNumber } from '../lib/format';
 import { isTodo, type Maybe } from '../lib/todo';
 
 interface Props {
@@ -22,7 +23,8 @@ let text = '';
 let href: string | undefined;
 
 if (!isTodo(value)) {
-  text = typeof value === 'number' ? new Intl.NumberFormat('fr-FR').format(value) : value;
+  // Un nombre s'écrit comme partout sur le site : « 1 500 » (src/lib/format.ts).
+  text = typeof value === 'number' ? formatNumber(value) : value;
   if (link === 'email') href = `mailto:${text}`;
   else if (link === 'phone') href = `tel:${text.replace(/[^\d+]/g, '')}`;
   else if (link === 'url') href = text;

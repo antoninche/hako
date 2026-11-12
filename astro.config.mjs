@@ -1,4 +1,5 @@
 // @ts-check
+import mdx from '@astrojs/mdx';
 import { defineConfig, envField } from 'astro/config';
 import { loadEnv } from 'vite';
 
@@ -27,6 +28,11 @@ export default defineConfig({
   devToolbar: { enabled: false },
   // Pas de préchargement spéculatif de pages.
   prefetch: false,
+  // MDX : les textes longs (FAQ, pages légales) dans src/content/, avec le composant <Todo>.
+  integrations: [mdx()],
+  // Pas de coloration des blocs de code : elle écrit des attributs style=,
+  // interdits par la politique de sécurité (CSP) du site. Voir docs/hebergement.md.
+  markdown: { syntaxHighlight: false },
   env: {
     schema: {
       // true : les informations manquantes s'affichent surlignées en jaune.
@@ -42,6 +48,10 @@ export default defineConfig({
     build: {
       // Aucun script ni fichier en ligne (data: URI) : tout part dans /_astro/.
       assetsInlineLimit: 0,
+      // three.js forme un seul fichier d'environ 630 Ko (160 Ko compressé), chargé
+      // seulement quand la scène 3D approche de l'écran : l'avertissement de Vite
+      // (500 Ko) est relevé pour ce cas connu.
+      chunkSizeWarningLimit: 700,
     },
   },
 });

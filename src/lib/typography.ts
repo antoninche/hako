@@ -5,8 +5,9 @@
  *
  * Dans les fichiers de données, on peut donc écrire une espace ordinaire avant
  * « : » ou « ? », et l'apostrophe droite dans un mot :
- * - l'espace avant « : » et « » », et après « « », devient insécable (U+00A0) ;
- * - l'espace avant « ; », « ! » et « ? » devient fine et insécable (U+202F) ;
+ * - l'espace avant « : », « ; », « ! », « ? » et « » », et après « « », devient
+ *   insécable (U+00A0) ; le site n'écrit jamais l'espace fine insécable, que
+ *   ses polices n'ont pas (voir tests/unit/typographie.test.ts) ;
  * - l'apostrophe droite entre deux lettres devient l'apostrophe courbe (’).
  * Seule une espace déjà écrite est remplacée : une adresse (https://…), une
  * heure (10:30) ou une adresse e-mail ne changent pas. Le texte déjà correct
@@ -15,11 +16,11 @@
 
 /** Applique la typographie française à un texte. */
 export function frenchTypography(text: string): string {
+  // [^\S\n] : toute espace sauf le retour à la ligne (ordinaire, insécable, fine…).
   return text
     .replace(/(\p{L})'(?=\p{L})/gu, '$1\u2019')
-    .replace(/[ \u202f]+(?=[:\u00bb])/g, '\u00a0')
-    .replace(/\u00ab[ \u202f]+/g, '\u00ab\u00a0')
-    .replace(/[ \u00a0]+(?=[;!?])/g, '\u202f');
+    .replace(/[^\S\n]+(?=[:;!?\u00bb])/g, '\u00a0')
+    .replace(/\u00ab[^\S\n]+/g, '\u00ab\u00a0');
 }
 
 /**

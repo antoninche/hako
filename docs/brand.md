@@ -14,25 +14,27 @@ Les valeurs communes (couleurs, polices, échelle typographique, espacements, ra
 | `--chocolat` | #412D1E | texte, logo, boutons principaux                                    |
 | `--sable`    | #F2E6D6 | fond de section alterné                                            |
 | `--lin`      | #E6D5BF | filets, bordures, aplats discrets (jamais du texte sur fond clair) |
-| `--noyer`    | #6B4F3A | texte secondaire                                                   |
+| `--noyer`    | #5F3E27 | texte secondaire ; le noyer du socle du prototype                  |
 | `--terre`    | #9A4E2B | liens, accents, survol des boutons                                 |
 | `--caramel`  | #B9773F | illustrations et décor (jamais du texte)                           |
 | `--olive`    | #5E6B45 | états de réussite                                                  |
+| `--pierre`   | #BAB1A7 | fond des images du prototype et de la scène 3D                     |
 | `--todo`     | #FFE066 | surlignage des informations manquantes, rien d’autre               |
 
-Un composant ne colore jamais du texte avec une couleur de la palette. Il passe par les rôles de la surface où il se trouve : `--text`, `--text-muted`, `--link`, `--link-hover`, `--success`, `--line`, `--line-strong`, `--focus` et `--surface`. Seule exception : une règle qui fixe le texte et le fond ensemble, comme les boutons ou le surlignage jaune. `npm run contrast` vérifie chaque rôle sur chaque surface et chaque couple texte/fond déclaré (4,5:1 pour le texte, 3:1 pour les filets forts et l’anneau de focus) ; il échoue si un texte reçoit une couleur de la palette sans fond associé.
+Un composant ne colore jamais du texte avec une couleur de la palette. Il passe par les rôles de la surface où il se trouve : `--text`, `--text-muted`, `--link`, `--link-hover`, `--success`, `--line`, `--line-strong`, `--focus` et `--surface`. Seule exception : une règle qui fixe le texte et le fond ensemble, comme les boutons ou le surlignage jaune. `npm run contrast` vérifie chaque rôle sur chaque surface et chaque couple texte/fond déclaré (4,5:1 pour le texte, 3:1 pour les filets forts et l’anneau de focus) ; il échoue si un texte reçoit une couleur de la palette sans fond associé. Un fond posé seul est vérifié avec le texte hérité (`--text` de chaque surface) ; une forme sans texte (puce, pastille, filet) l’indique avec `color: transparent`, et un bloc qui contient du texte déclare sa couleur avec son fond.
 
 ## Surfaces
 
-Trois surfaces existent, chacune définit son fond et ses rôles de texte.
+Quatre surfaces existent, chacune définit son fond et ses rôles de texte.
 
 - `.surface-creme` : la page par défaut.
 - `.surface-sable` : une section sur deux quand une page alterne les fonds.
+- `.surface-pierre` : le fond « studio » des images du prototype et de la scène 3D, le même gris chaud que sur les rendus de l’équipe ; la box y ressort comme sur ces rendus. Seul le chocolat y est assez contrasté pour du texte (6,1:1).
 - `.surface-chocolat` : le pied de page et, avec parcimonie, un moment fort (un appel à commander en fin de page, par exemple).
 
 On choisit la surface d’une section avec le composant `Section` (`<Section surface="sable">`) ou la classe directement. Le bouton principal s’inverse tout seul sur fond chocolat (fond crème, texte chocolat) ; pour que cette inversion reste juste, on ne place pas de bloc crème ou sable à l’intérieur d’une surface chocolat. Le pied de page est en chocolat : il ferme la page nettement et le logo y passe en crème.
 
-Le fond reste uni. Un grain de papier a été envisagé, puis écarté : il assombrit le fond par endroits, donc il réduit un peu le contraste, et le lien terre sur sable n’a déjà que 4,9:1 de marge.
+Le fond reste uni. Les couleurs suivent le prototype : la coque est crème (#FDF7EF, l’une des deux teintes à l’essai), le kanji chocolat, le socle en noyer, et les rendus sont posés sur la pierre. Un grain de papier a été envisagé, puis écarté : il assombrit le fond par endroits, donc il réduit un peu le contraste, et le lien terre sur sable n’a déjà que 4,9:1 de marge.
 
 ## Typographie
 
@@ -44,9 +46,9 @@ Atkinson Hyperlegible Next pour le texte courant : 18 px (`--step-0`), interlign
 
 D-DIN pour l’interface : navigation, boutons, étiquettes, prix, noms d’offres. Toujours en gras (700), en casse normale, avec un interlettrage de 0,02 em (`--tracking-ui`). La casse normale garde la silhouette des mots et se lit plus vite que les capitales, ce qui compte pour un public peu à l’aise avec l’informatique ; le léger interlettrage aère ce dessin étroit aux petites tailles. Les capitales sont réservées aux surtitres de deux ou trois mots (`.kicker`, interlettrage 0,08 em).
 
-Les prix utilisent `.price` : jamais coupés en fin de ligne. D-DIN n’a pas de chiffres de largeur fixe (voir [fonts.md](fonts.md)) : un montant qui change, comme le total d’une commande, change donc un peu de largeur ; on lui réserve sa place si besoin. On les formate avec `Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })`, qui place une espace insécable fine entre les milliers et une espace insécable avant l’euro (« 1 000 € »).
+Les prix utilisent `.price` : jamais coupés en fin de ligne. D-DIN n’a pas de chiffres de largeur fixe (voir [fonts.md](fonts.md)) : un montant qui change, comme le total d’une commande, change donc un peu de largeur ; on lui réserve sa place si besoin. On les met en forme avec `formatEur()` de `src/lib/format.ts`, le seul fichier du site qui appelle `Intl` : espace insécable entre les milliers et avant l’euro (« 1 000 € »).
 
-Typographie française : apostrophe courbe (’), espace insécable avant « : » et à l’intérieur des guillemets « », espace fine insécable avant « ; », « ! » et « ? ». Dans un gabarit Astro on écrit `&nbsp;` et `&#8239;`. Dans un fichier de données, une espace ordinaire suffit : `withFrenchTypography()` (dans `src/lib/typography.ts`) pose ces espaces et l’apostrophe courbe là où les données sont définies. Les noms composés comme Salon-de-Provence ne doivent pas être coupés : `keepHyphenatedWords()` (dans `src/components/typo.ts`) les entoure d’un `<span class="nowrap">`.
+Typographie française : apostrophe courbe (’), espace insécable (U+00A0) avant « : », « ; », « ! » et « ? » et à l’intérieur des guillemets « ». L’espace fine insécable (U+202F) et le trait d’union insécable (U+2011) ne servent pas : les polices du site ne les ont pas, et `tests/unit/typographie.test.ts` vérifie qu’aucun fichier de `src/` ne les écrit. Dans un gabarit Astro on écrit `&nbsp;`. Dans un fichier de données, une espace ordinaire suffit : `withFrenchTypography()` (dans `src/lib/typography.ts`) pose ces espaces et l’apostrophe courbe là où les données sont définies. Les noms composés comme Salon-de-Provence ne doivent pas être coupés : `keepHyphenatedWords()` (dans `src/components/typo.ts`) les entoure d’un `<span class="nowrap">`.
 
 Attention aux espaces dans les gabarits : Astro 7 supprime les blancs comme JSX. Un mot suivi d’un retour à la ligne puis d’une balise (`<a>`, `<code>`, `<Todo>`…) perd son espace. On garde le mot et la balise sur la même ligne, ou on ajoute `{' '}`.
 
@@ -78,7 +80,7 @@ L’espace vide fait partie de la mise en page : chaque section garde de larges 
 
 `Logo` affiche une des cinq variantes (`paysage`, `carre`, `reseaux`, `kanji`, `mot`) en SVG dans la page, à la couleur du texte. Sa taille se règle en CSS par la hauteur. Le cadre des fichiers est serré autour du dessin (sauf `reseaux`, qui garde sa marge) : 36 px de haut donnent 36 px de logo visible. Il est annoncé « HAKO » par les lecteurs d’écran, ou ignoré avec `decorative` quand le nom est déjà écrit à côté. Le logo n’est jamais retapé dans une police (voir [logo.md](logo.md)).
 
-`Icon` affiche une icône d’interface (`menu`, `close`, `mail`, `map-pin`, `arrow-right`, `external`, trait de 1,5 sur une grille de 24) ou de réseau social (`linkedin`, `youtube`, `facebook`, `instagram`, `peertube`). Elle est décorative par défaut ; si elle est seule, on lui donne un `label`. Les icônes de réseaux sont décrites dans [icons.md](icons.md).
+`Icon` affiche une icône d’interface (`menu`, `close`, `mail`, `phone`, `map-pin`, `arrow-right`, `external`, `box`, `video`, `clock`, trait de 1,5 sur une grille de 24) ou de réseau social (`linkedin`, `youtube`, `facebook`, `instagram`, `peertube`). Elle est décorative par défaut ; si elle est seule, on lui donne un `label`. Les icônes de réseaux sont décrites dans [icons.md](icons.md).
 
 Boutons : `.btn` avec `.btn--primary` (fond chocolat, texte crème ; au survol et au focus, fond terre) ou `.btn--secondary` (contour fin aux couleurs de la surface). `.btn--compact` sert dans l’en-tête. Cibles de 44 × 44 px au moins (`--target-min`) pour tous les boutons et liens d’interface, « FAQ » compris : les liens courts reçoivent une largeur minimale.
 
@@ -104,6 +106,6 @@ On écrit en français, en vouvoyant, avec des phrases courtes et des mots simpl
 
 ## Touche japonaise
 
-Elle reste discrète. On garde le kanji 箱 dans le logo et le favicon, de l’espace autour des éléments, des filets fins, et une seule phrase qui explique le nom (« Hako » veut dire « boîte » en japonais), placée là où l’on présente l’entreprise.
+Elle reste discrète. On garde le kanji 箱 dans le logo et le favicon, de l’espace autour des éléments, des filets fins, et une seule phrase qui explique le nom, « Hako (箱) veut dire « boîte » en japonais. » (`nameMeaning` dans `src/data/entreprise.ts`), placée là où l’on présente l’entreprise.
 
 On évite les cerisiers en fleur, les torii, les geishas, le soleil rouge, les pinceaux et les polices qui imitent la calligraphie, les mots japonais semés dans le texte et le kanji utilisé comme motif décoratif en dehors du logo. Quand le kanji apparaît dans du texte, il est balisé `<span lang="ja">箱</span>` pour que les lecteurs d’écran le prononcent correctement.

@@ -10,14 +10,13 @@ import { isTodo, todo } from '../src/lib/todo';
 import { frenchTypography, withFrenchTypography } from '../src/lib/typography';
 
 const NBSP = '\u00a0';
-const THIN = '\u202f';
 
 test.describe('Typographie française', () => {
   test('espaces insécables et apostrophe courbe', () => {
     expect(
       frenchTypography("Nos engagements : nous n'avons pas « accès » ; vraiment ? Oui !"),
     ).toBe(
-      `Nos engagements${NBSP}: nous n’avons pas «${NBSP}accès${NBSP}»${THIN}; vraiment${THIN}? Oui${THIN}!`,
+      `Nos engagements${NBSP}: nous n’avons pas «${NBSP}accès${NBSP}»${NBSP}; vraiment${NBSP}? Oui${NBSP}!`,
     );
   });
 
@@ -41,7 +40,7 @@ test.describe('Typographie française', () => {
       count: 3,
     });
     expect(data.note).toBe(`Note${NBSP}: oui`);
-    expect(data.list).toEqual([`Pourquoi${THIN}?`]);
+    expect(data.list).toEqual([`Pourquoi${NBSP}?`]);
     expect(isTodo(data.missing)).toBe(true);
     expect(data.missing).toEqual({
       todo: `Ce qui manque${NBSP}: l’adresse`,

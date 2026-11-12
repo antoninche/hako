@@ -1,0 +1,249 @@
+---
+/**
+ * Carte d’une offre sur l’accueil. Les prix arrivent déjà mis en forme
+ * (voir Offers.astro) ; une information manquante s’affiche en repère jaune.
+ */
+import Fact from '../Fact.astro';
+import Illustration from '../Illustration.astro';
+import RichText from './RichText.astro';
+import type { HomeIllustration } from '../../content/accueil';
+import type { Maybe } from '../../lib/todo';
+
+interface Props {
+  id: string;
+  name: string;
+  audience: string;
+  illustration: HomeIllustration;
+  /** Prix d’achat, déjà mis en forme (« 600 € »). */
+  price: string;
+  /** TTC, HT… ou repère à compléter. */
+  tax: Maybe<string>;
+  priceNote: string;
+  /** Ligne de l’abonnement, s’il y en a un (texte avec {valeurs}). */
+  monthly?: string | undefined;
+  /** Précisions en petit sous le prix (textes avec {valeurs}). */
+  details: readonly string[];
+  features: readonly string[];
+  values: Readonly<Record<string, Maybe<string>>>;
+  cta: { label: string; href: string };
+}
+
+const {
+  id,
+  name,
+  audience,
+  illustration,
+  price,
+  tax,
+  priceNote,
+  monthly,
+  details,
+  features,
+  values,
+  cta,
+} = Astro.props;
+const titleId = `offre-${id}`;
+---
+
+<article class="offer" aria-labelledby={titleId}>
+  <div class="offer__visual surface-sable">
+    <Illustration name={illustration} ratio="16/10" decorative />
+  </div>
+  <div class="offer__body">
+    <div class="offer__head">
+      <h3 id={titleId} class="offer__name">
+        {name}
+      </h3>
+      <p class="offer__audience">{audience}</p>
+    </div>
+
+    <div class="offer__pricing">
+      <p class="offer__price">
+        <span class="offer__amount">{price}</span>
+        <span class="offer__tax">
+          <Fact value={tax} />
+        </span>
+      </p>
+      {monthly && (
+        <p class="offer__monthly">
+          <RichText text={monthly} values={values} />
+        </p>
+      )}
+      <p class="offer__note">{priceNote}</p>
+      {details.map((detail) => (
+        <p class="offer__detail">
+          <RichText text={detail} values={values} />
+        </p>
+      ))}
+    </div>
+
+    <ul class="offer__features">
+      {features.map((feature) => (
+        <li class="offer__feature">
+          <svg
+            class="offer__check"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="m5 12.5 4.5 4.5L19 7.5" />
+          </svg>
+          <span>
+            <RichText text={feature} values={values} />
+          </span>
+        </li>
+      ))}
+    </ul>
+
+    <a class="btn btn--primary offer__cta" href={cta.href}>
+      {cta.label}
+    </a>
+  </div>
+</article>
+
+<style>
+  .offer {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: var(--surface);
+    border: var(--rule-width) solid var(--line);
+    border-radius: calc(var(--radius) * 1.5);
+    box-shadow: var(--shadow-s);
+    transition: box-shadow var(--dur-3) var(--ease-out);
+  }
+
+  .offer:hover {
+    box-shadow: var(--shadow-m);
+  }
+
+  .offer__visual {
+    padding: var(--space-m) var(--space-l);
+    border-block-end: var(--rule-width) solid var(--line);
+  }
+
+  .offer__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--space-l);
+    padding: var(--space-l) var(--space-m) var(--space-m);
+  }
+
+  .offer__head {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .offer__name {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-2);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .offer__audience {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  .offer__pricing {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-block: var(--space-m);
+    border-block: var(--rule-width) solid var(--line);
+  }
+
+  .offer__price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2xs) var(--space-xs);
+    margin: 0;
+  }
+
+  .offer__amount {
+    font-family: var(--font-ui);
+    font-size: var(--step-4);
+    font-weight: 700;
+    font-variant-numeric: lining-nums tabular-nums;
+    line-height: 1;
+    letter-spacing: var(--tracking-ui);
+    white-space: nowrap;
+  }
+
+  .offer__tax {
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  /* Un repère « à compléter » ne se coupe pas au milieu, à côté d'un prix. */
+  .offer__pricing :global(.todo) {
+    white-space: nowrap;
+  }
+
+  .offer__monthly {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .offer__detail,
+  .offer__note {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
+  .offer__features {
+    display: grid;
+    flex: 1;
+    align-content: start;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .offer__feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6em;
+    text-wrap: pretty;
+  }
+
+  .offer__check {
+    flex: none;
+    inline-size: 1.2em;
+    block-size: 1.2em;
+    margin-block-start: 0.2em;
+    color: var(--success);
+  }
+
+  .offer__cta {
+    inline-size: 100%;
+  }
+
+  @media (min-width: 30rem) {
+    .offer__body {
+      padding: var(--space-l);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .offer {
+      transition: none;
+    }
+  }
+</style>

@@ -1,0 +1,89 @@
+---
+/**
+ * Texte de l’accueil, avec des valeurs insérées et une typographie française.
+ *
+ * - Chaque {clé} est remplacée par la valeur donnée dans `values` ; une valeur
+ *   encore inconnue s’affiche en repère jaune (composant Fact).
+ * - Les mots composés (« c’est-à-dire », « Salon-de-Provence ») ne se coupent
+ *   pas au trait d’union ; un mot d’une lettre (« à ») ne reste pas seul en
+ *   fin de ligne ; « Hako Pro » ou « Google Photos » restent d’un seul tenant
+ *   (voir no-break.ts). Un repère « à compléter », toujours court, ne se coupe
+ *   pas non plus.
+ *
+ * Une valeur mal écrite ({ acompte }, {majSécurite}, {inconnue}) ou une
+ * accolade seule arrête la construction du site, avec un message qui cite la
+ * phrase à corriger : rien de tel ne peut s’afficher sur la page.
+ *
+ *   <RichText text="Un acompte de {acompte} est demandé." values={{ acompte }} />
+ */
+import Fact from '../Fact.astro';
+import { keepHyphenatedWords } from '../typo';
+import { keepWordsTogether } from './no-break';
+import { isTodo, type Maybe } from '../../lib/todo';
+
+interface Props {
+  text: string;
+  values?: Readonly<Record<string, Maybe<string | number>>>;
+}
+
+const { text, values = {} } = Astro.props;
+
+type Piece =
+  { kind: 'text'; text: string; keep: boolean } | { kind: 'value'; value: Maybe<string | number> };
+
+function problem(what: string): Error {
+  return new Error(`Accueil : ${what}, dans le texte « ${text} ».`);
+}
+
+const known = Object.keys(values)
+  .map((key) => `{${key}}`)
+  .join(', ');
+
+const pieces: Piece[] = text
+  // Tout ce qui est entre accolades est isolé, bien écrit ou non.
+  .split(/(\{[^{}]*\})/)
+  .filter((part) => part !== '')
+  .flatMap((part): Piece[] => {
+    if (part.startsWith('{') && part.endsWith('}')) {
+      const key = part.slice(1, -1);
+      if (!/^[A-Za-z]+$/.test(key)) {
+        throw problem(
+          `la valeur ${part} est mal écrite (lettres sans accent ni espace, comme {acompte})`,
+        );
+      }
+      const value = Object.hasOwn(values, key) ? values[key] : undefined;
+      if (value === undefined) {
+        throw problem(`la valeur ${part} n’existe pas (valeurs possibles : ${known || 'aucune'})`);
+      }
+      return [{ kind: 'value', value }];
+    }
+    if (/[{}]/.test(part)) {
+      throw problem('une accolade est seule');
+    }
+    return keepHyphenatedWords(keepWordsTogether(part)).map((segment) => ({
+      kind: 'text',
+      text: segment.text,
+      keep: segment.keep,
+    }));
+  });
+---
+
+{pieces.map((piece) => {
+  if (piece.kind === 'text') {
+    return piece.keep ? <span class="keep">{piece.text}</span> : piece.text;
+  }
+  return isTodo(piece.value) ? (
+    <span class="keep">
+      <Fact value={piece.value} />
+    </span>
+  ) : (
+    <Fact value={piece.value} />
+  );
+})}
+
+<style>
+  /* Mot composé ou repère « à compléter » : jamais coupé en fin de ligne. */
+  .keep {
+    white-space: nowrap;
+  }
+</style>

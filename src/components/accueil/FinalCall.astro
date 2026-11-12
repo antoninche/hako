@@ -1,0 +1,108 @@
+---
+/**
+ * h. Dernier appel : commander, ou poser d’abord une question.
+ * La petite boîte dessinée en CSS reprend celle de l’ouverture.
+ */
+import Arrow from './Arrow.astro';
+import RichText from './RichText.astro';
+import { finalCall } from '../../content/accueil';
+---
+
+<section class="final surface-sable" aria-labelledby="titre-appel">
+  <div class="container final__inner">
+    <div class="final__box" aria-hidden="true"></div>
+    <h2 id="titre-appel" class="final__title">
+      <RichText text={finalCall.title} />
+    </h2>
+    <p class="final__text">
+      <RichText text={finalCall.text} />
+    </p>
+    <div class="final__actions">
+      <a class="btn btn--primary" href={finalCall.primary.href}>
+        {finalCall.primary.label}
+      </a>
+      <a class="btn btn--secondary" href={finalCall.secondary.href}>
+        {finalCall.secondary.label}
+      </a>
+    </div>
+    <a class="final__faq" href={finalCall.faq.href}>
+      {finalCall.faq.label}
+      <Arrow />
+    </a>
+  </div>
+</section>
+
+<style>
+  .final {
+    padding-block: var(--space-section);
+  }
+
+  .final__inner {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+  }
+
+  /* Une boîte en miniature : contour fin et filet du couvercle. */
+  .final__box {
+    position: relative;
+    inline-size: 3.25rem;
+    block-size: 2.25rem;
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--radius-s);
+  }
+
+  .final__box::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 28%;
+    border-block-start: 1.5px solid var(--line-strong);
+  }
+
+  .final__title {
+    max-inline-size: 18ch;
+    margin: var(--space-l) 0 0;
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    font-weight: 400;
+    font-variation-settings: var(--font-display-variation);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  .final__text {
+    max-inline-size: 44ch;
+    margin: var(--space-m) 0 0;
+    font-size: var(--step-1);
+    line-height: 1.5;
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  /* Deux boutons de même largeur, côte à côte ou l'un sous l'autre. */
+  .final__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-s);
+    inline-size: min(100%, 32rem);
+    margin-block-start: var(--space-xl);
+  }
+
+  .final__actions > :global(.btn) {
+    flex: 1 1 13rem;
+  }
+
+  .final__faq {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    min-block-size: var(--target-min);
+    margin-block-start: var(--space-m);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+</style>

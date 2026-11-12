@@ -1,0 +1,156 @@
+---
+/**
+ * d. Comment ça marche : quatre étapes, chacune avec son dessin.
+ * Le pourcentage de l’acompte vient de src/data/tarifs.ts, mis en forme
+ * comme sur les autres pages (depositText, src/data/faits.ts).
+ */
+import Illustration from '../Illustration.astro';
+import RichText from './RichText.astro';
+import SectionHeader from './SectionHeader.astro';
+import './rules.css';
+import { steps } from '../../content/accueil';
+import { depositText } from '../../data/faits';
+
+const values = { acompte: depositText };
+---
+
+<section class="steps surface-sable" aria-labelledby="titre-etapes">
+  <div class="container">
+    <SectionHeader
+      id="titre-etapes"
+      kicker={steps.kicker}
+      title={steps.title}
+      intro={steps.intro}
+    />
+    <ol class="steps__list">
+      {steps.items.map((step, index) => (
+        <li class="step">
+          <div class="step__visual">
+            <Illustration name={step.illustration} ratio="1/1" decorative />
+          </div>
+          <div class="step__head">
+            <p class="step__number" aria-hidden="true">
+              {String(index + 1).padStart(2, '0')}
+            </p>
+            <h3 class="step__title">
+              <RichText text={step.title} />
+            </h3>
+          </div>
+          <p class="step__text">
+            <RichText text={step.text} values={values} />
+          </p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .steps {
+    padding-block: var(--space-section);
+  }
+
+  .steps__list {
+    display: grid;
+    gap: var(--space-xl);
+    margin: var(--space-2xl) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /*
+   * Petit écran : le dessin à côté du numéro et du titre, puis le texte sur
+   * toute la largeur, pour garder des lignes confortables à lire.
+   */
+  .step {
+    display: grid;
+    grid-template-areas:
+      'visual head'
+      'text text';
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: var(--space-s) var(--space-m);
+    align-items: center;
+  }
+
+  .step__visual {
+    grid-area: visual;
+    inline-size: 100%;
+  }
+
+  .step__head {
+    display: grid;
+    grid-area: head;
+    gap: var(--space-2xs);
+  }
+
+  /* Numéro de l’étape, prolongé par un filet fin vers l’étape suivante. */
+  .step__number {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-1);
+    font-weight: 700;
+    font-variant-numeric: lining-nums tabular-nums;
+    letter-spacing: var(--tracking-ui);
+    line-height: 1;
+    color: var(--link);
+  }
+
+  .step__number::after {
+    content: '';
+    flex: 1;
+    border-block-start: var(--rule-width) solid var(--rule-soft);
+  }
+
+  .step__title {
+    margin: var(--space-2xs) 0 0;
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 500;
+    font-variation-settings: var(--font-display-variation);
+    line-height: var(--leading-snug);
+    text-wrap: balance;
+  }
+
+  .step__text {
+    grid-area: text;
+    max-inline-size: 60ch;
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  @media (min-width: 40rem) {
+    .steps__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-2xl) var(--space-xl);
+    }
+
+    /* Le dessin au-dessus ; les numéros restent alignés d’une étape à l’autre. */
+    .step {
+      grid-template-areas:
+        'visual'
+        'head'
+        'text';
+      grid-template-columns: minmax(0, 1fr);
+      align-content: start;
+      align-items: start;
+    }
+
+    .step__visual {
+      max-inline-size: 15rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .steps__list {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-l);
+    }
+
+    .step__visual {
+      max-inline-size: none;
+    }
+  }
+</style>

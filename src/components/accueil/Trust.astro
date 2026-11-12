@@ -1,0 +1,142 @@
+---
+/**
+ * f. Pourquoi nous faire confiance : le résumé des sept engagements, avec un
+ * lien vers la page Notre engagement. Le premier, la promesse centrale,
+ * occupe toute la largeur.
+ */
+import Illustration from '../Illustration.astro';
+import Arrow from './Arrow.astro';
+import RichText from './RichText.astro';
+import SectionHeader from './SectionHeader.astro';
+import './rules.css';
+import { trust } from '../../content/accueil';
+import { remoteAccess } from '../../data/faits';
+
+const values = { exterieur: remoteAccess.option };
+---
+
+<section class="trust surface-sable" aria-labelledby="titre-confiance">
+  <div class="container">
+    <SectionHeader
+      id="titre-confiance"
+      kicker={trust.kicker}
+      title={trust.title}
+      intro={trust.intro}
+    />
+
+    <ul class="commitments">
+      {trust.items.map((item, index) => (
+        <li class:list={['commitment', index === 0 && 'commitment--main']}>
+          <div class="commitment__icon">
+            <Illustration name={item.icon} ratio="1/1" decorative />
+          </div>
+          <div class="commitment__body">
+            <h3 class="commitment__title">
+              <RichText text={item.title} />
+            </h3>
+            <p class="commitment__text">
+              <RichText text={item.text} values={values} />
+            </p>
+          </div>
+        </li>
+      ))}
+    </ul>
+
+    <a class="trust__more" href={trust.more.href}>
+      {trust.more.label}
+      <Arrow />
+    </a>
+  </div>
+</section>
+
+<style>
+  .trust {
+    padding-block: var(--space-section);
+  }
+
+  .commitments {
+    display: grid;
+    gap: 0 var(--space-xl);
+    margin: var(--space-2xl) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .commitment {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    gap: var(--space-m);
+    align-items: start;
+    padding-block: var(--space-l);
+    border-block-start: var(--rule-width) solid var(--rule-soft);
+  }
+
+  .commitment__icon {
+    inline-size: 3rem;
+  }
+
+  .commitment__body {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .commitment__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 500;
+    font-variation-settings: var(--font-display-variation);
+    line-height: var(--leading-snug);
+    text-wrap: balance;
+  }
+
+  .commitment__text {
+    max-inline-size: 48ch;
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  /* La promesse centrale, un cran plus grande. */
+  .commitment--main .commitment__title {
+    font-size: var(--step-2);
+    font-weight: 400;
+  }
+
+  .commitment--main .commitment__text {
+    max-inline-size: 60ch;
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  .trust__more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    min-block-size: var(--target-min);
+    margin-block-start: var(--space-l);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  @media (min-width: 40rem) {
+    .commitments {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .commitment--main {
+      grid-column: 1 / -1;
+      grid-template-columns: 4rem minmax(0, 1fr);
+    }
+
+    .commitment--main .commitment__icon {
+      inline-size: 4rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .commitments {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

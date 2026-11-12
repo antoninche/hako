@@ -28,10 +28,12 @@ Ces licences portent sur le droit d’auteur. Les marques (LinkedIn, YouTube, Fa
 Le reste appartient à HAKO ou a été dessiné pour le site :
 
 - le logo, dans toutes ses versions (SVG, favicon, icônes d’application, image de partage), tiré des PNG de `brand/` (voir [logo.md](logo.md)) ;
-- les icônes d’interface (menu, fermer, e-mail, repère, flèche, lien externe), dessinées dans `src/components/Icon.astro` ;
-- le seul script envoyé au navigateur, celui du menu de l’en-tête (`src/components/header-menu.ts`, 1 401 octets une fois construit). Aucune bibliothèque tierce n’est envoyée aux visiteurs.
+- les icônes d’interface (menu, fermer, e-mail, téléphone, repère, flèche, lien externe, box, vidéo, horloge), dessinées dans `src/components/Icon.astro` ;
+- les scripts écrits pour le site : menu de l’en-tête (`src/components/header-menu.ts`), questions de la FAQ, formulaire de commande et scène 3D de l’accueil (`src/scripts/scene-3d/`).
 
-Pour l’instant, le kanji 箱 n’apparaît que dans le logo, en tracés. Si une page l’écrit un jour comme texte, il s’affichera avec une police japonaise déjà installée sur l’appareil du visiteur (règle `[lang='ja']` de `src/styles/global.css`) ; aucun fichier de police japonaise n’est envoyé.
+Une bibliothèque tierce est envoyée aux visiteurs, seulement quand la scène 3D de l’accueil approche de l’écran : three.js 0.187.0 et quelques modules de son dossier `examples/` (licence MIT, « Copyright © 2010-2026 three.js authors »), dont le décodeur de meshoptimizer (licence MIT, « Copyright (C) 2016-2026, by Arseny Kapoulkine »), chargé seulement pour un modèle compressé. La licence MIT demande de joindre sa notice à chaque copie : les fichiers construits ne la gardent pas, et le site ne la sert pas encore ni ne la cite dans ses crédits. C’est à régler avant la mise en ligne.
+
+Le kanji 箱 apparaît dans le logo, en tracés, et comme texte dans quelques phrases (accueil, La box, Notre engagement) : il s’affiche alors avec une police japonaise déjà installée sur l’appareil du visiteur (règle `[lang='ja']` de `src/styles/global.css`) ; aucun fichier de police japonaise n’est envoyé.
 
 ## Outils qui fabriquent les fichiers
 

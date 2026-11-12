@@ -1,0 +1,32 @@
+---
+/**
+ * Surtitre, précédé d’un petit carré qui rappelle la boîte du logo. À placer
+ * juste avant un titre. Le style du texte est celui de la classe .kicker du
+ * site (src/styles/global.css) ; ce composant n’ajoute que le carré.
+ */
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+---
+
+<p class="kicker accueil-kicker">{text}</p>
+
+<style>
+  .accueil-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65em;
+    margin: 0;
+  }
+
+  .accueil-kicker::before {
+    content: '';
+    flex: none;
+    inline-size: 0.55em;
+    block-size: 0.55em;
+    border: 1.5px solid var(--link);
+    border-radius: 1px;
+  }
+</style>

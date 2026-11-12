@@ -15,6 +15,8 @@ import { baseURL, isCI, resultsDir, webServerCommand } from './tests/support/set
 
 export default defineConfig({
   testDir: './tests',
+  // Les tests unitaires (node --test, npm run test:unit) ne sont pas pour Playwright.
+  testIgnore: ['**/unit/**'],
   outputDir: resultsDir,
   fullyParallel: true,
   forbidOnly: isCI,

@@ -1,0 +1,509 @@
+---
+/**
+ * Section « la box en 3D » de l'accueil, pilotée par le défilement.
+ *
+ *   <BoxScene title="Regardez à l’intérieur" intro="Rien n’est caché : …" kicker="La box" />
+ *
+ * Sans JavaScript, avec « réduire les animations », sans WebGL ou sur un
+ * appareil modeste : image fixe de la vue éclatée et liste des pièces.
+ * Sinon : une longue piste de défilement dont la scène 3D reste à l'écran
+ * (position sticky) pendant que la box tourne, s'ouvre et se referme.
+ * L'introduction doit donc se lire dans les deux cas (pas de « faites
+ * défiler »).
+ *
+ * La feuille de style prévoit la longue piste dès le premier affichage quand
+ * la 3D est probable : le script (boot.ts) ne fait que confirmer, ou revenir
+ * à l'image fixe, sans faire bouger la page.
+ *
+ * Les textes des étiquettes et de la liste, l'ordre des pièces et tout le
+ * déroulé sont dans src/data/model.config.json. Le modèle réel est utilisé
+ * automatiquement si public/models/hako.glb existe au moment de la
+ * construction.
+ */
+import rawConfig from '../../data/model.config.json';
+import { parseModelConfig } from '../../scripts/scene-3d/config';
+import { MODEL_URL } from '../../scripts/scene-3d/contract';
+
+interface Props {
+  /** Titre de la section (h2). */
+  title: string;
+  /** Phrase d'introduction, sous le titre. */
+  intro?: string;
+  /** Surtitre, au-dessus du titre. */
+  kicker?: string;
+  /** Identifiant de la section (ancre). */
+  id?: string;
+}
+
+const { title, intro, kicker, id = 'la-box-en-3d' } = Astro.props;
+
+// Vérifié à la construction : une erreur dans le JSON arrête `npm run build`.
+const config = parseModelConfig(rawConfig);
+
+/**
+ * Image fixe PROVISOIRE de la vue éclatée (rendu de la scène,
+ * `node scripts/model/capture-fallback.mjs`). Dès que
+ * src/assets/illustrations/vue-eclatee.svg existe, l'illustration la
+ * remplace automatiquement.
+ */
+const FALLBACK_IMAGE = {
+  src: '/images/vue-eclatee-provisoire.webp',
+  srcset: '/images/vue-eclatee-provisoire.webp 800w, /images/vue-eclatee-provisoire@2x.webp 1600w',
+  sizes: '(min-width: 80rem) 36rem, (min-width: 48rem) 46vw, 92vw',
+  width: 800,
+  height: 800,
+} as const;
+
+/**
+ * Image d'attente de la scène : la box fermée, cadrée comme au début de la
+ * piste (même script). Elle s'affiche le temps que three.js arrive, ou si la
+ * 3D tombe en panne pendant que le visiteur regarde la section.
+ */
+const POSTER_IMAGE = {
+  src: '/images/box-fermee-provisoire.webp',
+  srcset: '/images/box-fermee-provisoire.webp 960w, /images/box-fermee-provisoire@2x.webp 1600w',
+  sizes: '(min-aspect-ratio: 1/1) 100vh, 110vw',
+  width: 960,
+  height: 768,
+} as const;
+
+/** Logo posé sur le côté du modèle provisoire (copie publiée par l'équipe marque). */
+const LOGO_URL = '/brand/HAKO_Landscape_Transparent.png';
+
+// On ne demande au navigateur que des fichiers qui existent : aucune erreur 404.
+// (Vérification faite par Node pendant la construction ; le projet n'embarque
+// pas les types de Node, d'où l'import non typé.)
+const nodeFs = 'node:fs';
+const { existsSync } = (await import(/* @vite-ignore */ nodeFs)) as {
+  existsSync(path: string): boolean;
+};
+const projectRoot = (globalThis as unknown as { process: { cwd(): string } }).process.cwd();
+const inPublic = (url: string) => existsSync(`${projectRoot}/public${url}`);
+const modelUrl = inPublic(MODEL_URL) ? MODEL_URL : undefined;
+const logoUrl = inPublic(LOGO_URL) ? LOGO_URL : undefined;
+const hasFallbackImage = inPublic(FALLBACK_IMAGE.src);
+const hasPoster = inPublic(POSTER_IMAGE.src);
+
+// Composants partagés, utilisés s'ils existent : l'illustration « vue-eclatee »
+// (Lot 4) et l'en-tête de section de l'accueil. Sans eux, la section garde son
+// image provisoire et son propre en-tête, au même style.
+type ComponentOf<P> = (props: P) => unknown;
+const illustrationModules = import.meta.glob<{
+  default: ComponentOf<{ name: string; ratio: '1/1'; alt: string }>;
+}>('../Illustration.astro', { eager: true });
+const hasIllustrationFile =
+  Object.keys(import.meta.glob('../../assets/illustrations/vue-eclatee.svg')).length > 0;
+const Illustration = hasIllustrationFile
+  ? Object.values(illustrationModules)[0]?.default
+  : undefined;
+const headerModules = import.meta.glob<{
+  default: ComponentOf<{ id: string; kicker?: string; title: string; intro?: string }>;
+}>('../accueil/SectionHeader.astro', { eager: true });
+const SectionHeader = Object.values(headerModules)[0]?.default;
+
+const titleId = `${id}-titre`;
+const headerProps = {
+  id: titleId,
+  title,
+  ...(kicker ? { kicker } : {}),
+  ...(intro ? { intro } : {}),
+};
+const listId = `${id}-pieces`;
+const parts = config.order.map((name) => ({ name, ...config.labels[name] }));
+---
+
+<section
+  class="box-scene"
+  id={id}
+  aria-labelledby={titleId}
+  data-box-scene
+  data-state="idle"
+  data-model-url={modelUrl}
+  data-logo-url={logoUrl}
+>
+  <div class="container">
+    {SectionHeader ? (
+      <SectionHeader {...headerProps} />
+    ) : (
+      <div class="box-scene__header">
+        {kicker && <p class="box-scene__kicker">{kicker}</p>}
+        <h2 class="box-scene__title" id={titleId}>
+          {title}
+        </h2>
+        {intro && <p class="box-scene__lead">{intro}</p>}
+      </div>
+    )}
+  </div>
+
+  <div class="box-scene__track" data-box-scene-track>
+    <div class="box-scene__stage" data-box-scene-stage>
+      {hasPoster && (
+        <img
+          class="box-scene__poster"
+          src={POSTER_IMAGE.src}
+          srcset={POSTER_IMAGE.srcset}
+          sizes={POSTER_IMAGE.sizes}
+          width={POSTER_IMAGE.width}
+          height={POSTER_IMAGE.height}
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
+      )}
+      <div class="box-scene__canvas" data-box-scene-canvas></div>
+      <div class="box-scene__labels" aria-hidden="true">
+        {parts.map((part) => (
+          <div class="box-scene__label" data-box-scene-label={part.name}>
+            <span class="box-scene__leader" data-box-scene-leader />
+            <span class="box-scene__dot" data-box-scene-dot />
+            <p class="box-scene__label-text" data-box-scene-text>
+              <span class="box-scene__label-title">{part.title}</span>
+              {part.detail && <span class="box-scene__label-detail">{part.detail}</span>}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <div class="container box-scene__fallback" data-box-scene-fallback>
+    {(Illustration || hasFallbackImage) && (
+      <figure class="box-scene__figure">
+        {Illustration ? (
+          <Illustration name="vue-eclatee" ratio="1/1" alt={config.copy.imageAlt} />
+        ) : (
+          <img
+            src={FALLBACK_IMAGE.src}
+            srcset={FALLBACK_IMAGE.srcset}
+            sizes={FALLBACK_IMAGE.sizes}
+            width={FALLBACK_IMAGE.width}
+            height={FALLBACK_IMAGE.height}
+            alt={config.copy.imageAlt}
+            loading="lazy"
+            decoding="async"
+          />
+        )}
+      </figure>
+    )}
+    <div class="box-scene__parts">
+      <p class="box-scene__parts-title" id={listId}>
+        {config.copy.partsHeading}
+      </p>
+      <ul class="box-scene__list" aria-labelledby={listId}>
+        {parts.map((part) => (
+          <li class="box-scene__part">
+            <span class="box-scene__part-title">{part.title}</span>
+            {part.detail && <span class="box-scene__part-detail">{part.detail}</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { bootBoxScenes } from '../../scripts/scene-3d/boot';
+
+  bootBoxScenes();
+</script>
+
+<style>
+  .box-scene {
+    position: relative;
+    padding-block: var(--space-section);
+  }
+
+  /* ---------- En-tête (même dessin que les autres sections de l'accueil) ---------- */
+
+  .box-scene__header {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+  }
+
+  .box-scene__header > * {
+    margin: 0;
+  }
+
+  .box-scene__kicker {
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .box-scene__title {
+    max-inline-size: 22ch;
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    font-weight: 400;
+    font-variation-settings: var(--font-display-variation);
+    line-height: var(--leading-tight);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .box-scene__lead {
+    max-inline-size: 52ch;
+    font-size: var(--step-1);
+    line-height: 1.5;
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  /* ---------- Mode 3D : piste de défilement et scène collante ----------
+   * Mise en page de la 3D quand le script l'a confirmée (data-mode="3d"),
+   * et AVANT qu'il ne s'exécute, quand elle est probable (JavaScript actif,
+   * animations non réduites) : la page a sa hauteur définitive dès le premier
+   * affichage, et le navigateur peut restaurer la position de défilement
+   * (rechargement, retour arrière) sans saut. Les deux blocs de règles
+   * doivent rester identiques.
+   */
+
+  .box-scene__track {
+    display: none;
+    position: relative;
+  }
+
+  .box-scene[data-mode='3d'] {
+    padding-block-end: var(--space-xl);
+  }
+
+  .box-scene[data-mode='3d'] .box-scene__track {
+    display: block;
+    block-size: 350vh;
+    block-size: 350svh;
+    margin-block-start: var(--space-l);
+  }
+
+  .box-scene[data-mode='3d'] .box-scene__figure {
+    display: none;
+  }
+
+  /* La liste reste lisible par les lecteurs d'écran, sans s'afficher. */
+  .box-scene[data-mode='3d'] .box-scene__fallback {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+    .box-scene:not([data-mode]) {
+      padding-block-end: var(--space-xl);
+    }
+
+    .box-scene:not([data-mode]) .box-scene__track {
+      display: block;
+      block-size: 350vh;
+      block-size: 350svh;
+      margin-block-start: var(--space-l);
+    }
+
+    .box-scene:not([data-mode]) .box-scene__figure {
+      display: none;
+    }
+
+    .box-scene:not([data-mode]) .box-scene__fallback {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border: 0;
+    }
+  }
+
+  .box-scene__stage {
+    position: sticky;
+    inset-block-start: var(--header-height);
+    block-size: calc(100vh - var(--header-height));
+    block-size: calc(100svh - var(--header-height));
+    overflow: hidden;
+    container-type: size;
+  }
+
+  /* Image d'attente, cadrée comme la box au début de la piste (5:4, centrée). */
+  .box-scene__poster {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    inline-size: auto;
+    max-inline-size: none;
+    block-size: min(80cqh, 88cqw);
+    transform: translate(-50%, -50%);
+    transition:
+      opacity var(--dur-3) var(--ease-out),
+      visibility 0s linear 0s;
+  }
+
+  .box-scene[data-state='ready'] .box-scene__poster {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--dur-3) var(--ease-out),
+      visibility 0s linear var(--dur-3);
+  }
+
+  /* La scène et ses étiquettes apparaissent en fondu, par-dessus l'image d'attente. */
+  .box-scene__canvas,
+  .box-scene__labels {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity var(--dur-3) var(--ease-out);
+  }
+
+  .box-scene[data-state='ready'] .box-scene__canvas,
+  .box-scene[data-state='ready'] .box-scene__labels {
+    opacity: 1;
+  }
+
+  .box-scene__canvas :global(canvas) {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .box-scene__labels {
+    pointer-events: none;
+  }
+
+  .box-scene__label {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    opacity: 0;
+  }
+
+  .box-scene__leader,
+  .box-scene__dot,
+  .box-scene__label-text {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    will-change: transform;
+  }
+
+  .box-scene__leader {
+    inline-size: 1px;
+    block-size: 1px;
+    /* Forme sans texte : aucune couleur de texte à contrôler (npm run contrast). */
+    color: transparent;
+    background-color: var(--line-strong);
+    transform-origin: 0 50%;
+  }
+
+  .box-scene__dot {
+    inline-size: 7px;
+    block-size: 7px;
+    margin: -3.5px 0 0 -3.5px;
+    border: 1.5px solid var(--line-strong);
+    border-radius: 50%;
+    background-color: var(--surface);
+  }
+
+  .box-scene__label-text {
+    display: grid;
+    gap: 0.125rem;
+    inline-size: max-content;
+    max-inline-size: min(17rem, var(--box-scene-label-max, 17rem));
+    margin: 0;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-s);
+    color: var(--text);
+    background-color: var(--surface);
+    white-space: normal;
+  }
+
+  .box-scene__label-title {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--step--1);
+    letter-spacing: var(--tracking-ui);
+    line-height: 1.25;
+  }
+
+  .box-scene__label-detail {
+    display: none;
+    font-size: 0.9375rem;
+    line-height: 1.35;
+    color: var(--text-muted);
+  }
+
+  @media (min-width: 48rem) {
+    .box-scene__label-detail {
+      display: block;
+    }
+  }
+
+  /* ---------- Image fixe et liste des pièces ---------- */
+
+  .box-scene__fallback {
+    display: grid;
+    gap: var(--space-l);
+    align-items: center;
+    margin-block-start: var(--space-xl);
+  }
+
+  @media (min-width: 48rem) {
+    .box-scene__fallback {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-2xl);
+    }
+  }
+
+  .box-scene__figure {
+    margin: 0;
+    max-inline-size: 36rem;
+  }
+
+  .box-scene__figure img {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+  }
+
+  .box-scene__parts-title {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--step--1);
+    letter-spacing: var(--tracking-ui);
+    color: var(--text-muted);
+  }
+
+  .box-scene__list {
+    margin: var(--space-s) 0 0;
+    padding: 0;
+    list-style: none;
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  .box-scene__part {
+    display: grid;
+    gap: var(--space-3xs);
+    padding-block: var(--space-s);
+    border-block-end: var(--rule-width) solid var(--line);
+  }
+
+  .box-scene__part-title {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .box-scene__part-detail {
+    color: var(--text-muted);
+  }
+</style>

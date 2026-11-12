@@ -31,6 +31,12 @@ export interface Company {
   readonly name: string;
   /** Le kanji du logo, et une phrase qui explique le nom. */
   readonly kanji: string;
+  /**
+   * La seule phrase qui explique le nom, reprise telle quelle sur l'accueil
+   * et sur la page Notre engagement. Elle contient le kanji une fois : il y
+   * est lu en japonais par les lecteurs d'écran (voir nameSentence, dans
+   * src/data/faits.ts).
+   */
   readonly nameMeaning: string;
   /** Phrase d'accroche principale. */
   readonly headline: string;
@@ -43,7 +49,10 @@ export interface Company {
   readonly serviceArea: {
     /** Phrase affichée dans le pied de page. */
     readonly sentence: string;
-    /** Ce que nous proposons en dehors de cette zone. */
+    /**
+     * Ce que nous proposons en dehors de cette zone. Écrit sans majuscule ni
+     * point final : les pages l'écrivent après « Hors de cette zone : ».
+     */
     readonly outside: Maybe<string>;
   };
   readonly social: readonly SocialLink[];

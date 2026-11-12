@@ -1,77 +1,30 @@
 ---
 /**
- * Accueil, version provisoire : une ouverture calme avec le logo, l'accroche,
- * la promesse et deux boutons. La page complète (scène 3D, offres, confiance…)
- * arrive au lot 1.
+ * Accueil. Chaque section est un composant de src/components/accueil/ ;
+ * les textes, et la description pour les moteurs de recherche, sont dans
+ * src/content/accueil.ts, les prix dans src/data/tarifs.ts.
+ * Sans titre, le gabarit affiche « HAKO · Vos souvenirs restent à la maison ».
  */
-import Icon from '../components/Icon.astro';
-import Logo from '../components/Logo.astro';
+import BoxScene from '../components/home/BoxScene.astro';
+import FinalCall from '../components/accueil/FinalCall.astro';
+import Hero from '../components/accueil/Hero.astro';
+import Nearby from '../components/accueil/Nearby.astro';
+import Offers from '../components/accueil/Offers.astro';
+import Problem from '../components/accueil/Problem.astro';
+import Steps from '../components/accueil/Steps.astro';
+import Trust from '../components/accueil/Trust.astro';
+import { keepWordsTogether } from '../components/accueil/no-break';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { company } from '../data/entreprise';
-import { orderLink, routes } from '../data/navigation';
-import { homePage } from '../data/pages';
+import { boxScene, meta } from '../content/accueil';
 ---
 
-<BaseLayout description={homePage.description}>
-  <section class="hero" aria-labelledby="titre-accueil">
-    <div class="container hero__inner">
-      <Logo variant="carre" decorative class="hero__logo" />
-      <div class="rule hero__rule"></div>
-      <h1 id="titre-accueil" class="display hero__title">
-        {company.headline}
-      </h1>
-      <p class="lead hero__promise">{company.promise}</p>
-      <div class="cluster hero__actions">
-        <a class="btn btn--primary" href={orderLink.href}>
-          {orderLink.label}
-        </a>
-        <a class="btn btn--secondary" href={routes.box}>
-          {homePage.discoverLabel}
-          <Icon name="arrow-right" />
-        </a>
-      </div>
-    </div>
-  </section>
+<BaseLayout description={meta.description}>
+  <Hero />
+  <Problem />
+  <BoxScene title={keepWordsTogether(boxScene.title)} intro={keepWordsTogether(boxScene.intro)} />
+  <Steps />
+  <Offers />
+  <Trust />
+  <Nearby />
+  <FinalCall />
 </BaseLayout>
-
-<style>
-  .hero {
-    display: grid;
-    align-items: center;
-    min-height: min(46rem, calc(100svh - var(--header-height)));
-    padding-block: var(--space-2xl) var(--space-3xl);
-  }
-
-  .hero__inner {
-    display: grid;
-    justify-items: center;
-    text-align: center;
-  }
-
-  .hero :global(.hero__logo) {
-    width: auto;
-    height: clamp(5.5rem, 4.6rem + 4vw, 8rem);
-    color: var(--text);
-  }
-
-  .hero__rule {
-    width: var(--space-xl);
-    margin-block: var(--space-xl) var(--space-l);
-    border-block-start-color: var(--line-strong);
-  }
-
-  .hero__title {
-    max-width: 14ch;
-  }
-
-  .hero__promise {
-    max-width: 34ch;
-    margin-block-start: var(--space-m);
-    color: var(--text-muted);
-  }
-
-  .hero__actions {
-    justify-content: center;
-    margin-block-start: var(--space-xl);
-  }
-</style>

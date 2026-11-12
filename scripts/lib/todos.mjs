@@ -18,11 +18,31 @@ import { createLocator, plural } from './text.mjs';
  * @typedef {{ file: string, line: number, column: number, what: string, placeholder: string, source: string }} TodoItem
  * @typedef {{ file: string, line: number, column: number, message: string }} TodoWarning
  * @typedef {{ relative: string, text: string, scan: () => import('./source-scanner.mjs').ScanResult }} SourceFile
- * @typedef {{ name: string, extensions: string[], appliesTo?: (relative: string) => boolean, extract: (file: SourceFile) => { offset: number, what: string, placeholder: string }[] }} Extractor
+ * @typedef {{ name: string, extensions: string[], appliesTo?: (relative: string) => boolean, scanless?: boolean, extract: (file: SourceFile) => { offset: number, what: string, placeholder: string }[] }} Extractor
  */
 
 /** Données du site : seules ces valeurs `null` commentées comptent. */
 const DATA_FILE = /^src\/data\/.+\.ts$/;
+
+/** Données du site au format JSON : chaque clé "todo" compte. */
+const DATA_JSON_FILE = /^src\/data\/.+\.json$/;
+
+/**
+ * Clés "todo" d'un fichier JSON de données (par exemple les cotes provisoires
+ * du modèle 3D dans src/data/model.config.json), avec leur position.
+ * @param {string} text
+ */
+function jsonTodos(text) {
+  const found = [];
+  for (const match of text.matchAll(/"todo"\s*:\s*("(?:[^"\\]|\\.)*")/g)) {
+    found.push({
+      offset: match.index,
+      what: JSON.parse(match[1]),
+      placeholder: '(valeurs provisoires)',
+    });
+  }
+  return found;
+}
 
 /** @type {Extractor[]} */
 export const EXTRACTORS = [
@@ -44,6 +64,14 @@ export const EXTRACTORS = [
     extensions: ['.ts'],
     appliesTo: (relative) => DATA_FILE.test(relative),
     extract: (file) => file.scan().todos.filter((todo) => todo.type === 'null'),
+  },
+  {
+    // "procedural": { "todo": "Cotes provisoires, à confirmer…" } (src/data/*.json)
+    name: 'json',
+    extensions: ['.json'],
+    appliesTo: (relative) => DATA_JSON_FILE.test(relative),
+    scanless: true,
+    extract: (file) => jsonTodos(file.text),
   },
 ];
 
@@ -68,7 +96,10 @@ export function extractTodos(relative, text, extractors = EXTRACTORS) {
   const items = [];
   /** @type {TodoWarning[]} */
   const warnings = [];
-  if (!kind || applicable.length === 0) return { items, warnings };
+  if (applicable.length === 0) return { items, warnings };
+  // Sans analyseur pour ce type de fichier, seuls les extracteurs qui lisent
+  // le texte brut (scanless) s'appliquent.
+  if (!kind && applicable.some((extractor) => !extractor.scanless)) return { items, warnings };
 
   /** @type {import('./source-scanner.mjs').ScanResult | null} */
   let cache = null;
@@ -76,7 +107,7 @@ export function extractTodos(relative, text, extractors = EXTRACTORS) {
   const file = {
     relative,
     text,
-    scan: () => (cache ??= scanSource(text, { kind, nullTodos })),
+    scan: () => (cache ??= scanSource(text, { kind: kind ?? 'code', nullTodos })),
   };
   const locate = createLocator(text);
 
@@ -93,9 +124,11 @@ export function extractTodos(relative, text, extractors = EXTRACTORS) {
       });
     }
   }
-  for (const warning of file.scan().warnings) {
-    const { line, column } = locate(warning.offset);
-    warnings.push({ file: relative, line, column, message: warning.message });
+  if (kind) {
+    for (const warning of file.scan().warnings) {
+      const { line, column } = locate(warning.offset);
+      warnings.push({ file: relative, line, column, message: warning.message });
+    }
   }
   return { items: sortItems(items), warnings };
 }

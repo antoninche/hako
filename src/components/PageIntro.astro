@@ -3,6 +3,10 @@
  * Ouverture d'une page intérieure : titre principal (h1), filet court,
  * puis le texte d'introduction passé en contenu.
  *
+ * Par défaut, l'ouverture a la largeur normale du site. Avec
+ * width="narrow", elle suit la colonne étroite d'un texte long ou d'un
+ * formulaire (pages légales, Commander), pour partager son bord gauche.
+ *
  * Exemple :
  *   <PageIntro title="Nos offres">
  *     <p class="lead">Texte d’introduction de la page.</p>
@@ -14,15 +18,17 @@ interface Props {
   title: string;
   /** Petit surtitre au-dessus du titre (facultatif, quelques mots). */
   kicker?: string;
+  /** Largeur du contenu : normale, ou étroite (texte long, formulaire). */
+  width?: 'normal' | 'narrow';
 }
 
-const { title, kicker } = Astro.props;
+const { title, kicker, width = 'normal' } = Astro.props;
 ---
 
-<Section space="l" class="page-intro">
+<Section space="l" width={width} class="page-intro">
   <div class="page-intro__inner">
     {kicker && <p class="kicker">{kicker}</p>}
-    <h1>{title}</h1>
+    <h1 class="page-intro__title">{title}</h1>
     <div class="rule rule--short page-intro__rule"></div>
     <div class="stack page-intro__body">
       <slot />
@@ -35,6 +41,19 @@ const { title, kicker } = Astro.props;
     display: grid;
     gap: var(--space-m);
     justify-items: start;
+  }
+
+  /* Un mot long (« confidentialité ») ne dépasse jamais de l'écran, même
+     quand le lecteur agrandit l'espacement du texte (WCAG 1.4.12) : les
+     éléments peuvent se resserrer, et le titre passe à la ligne en dernier
+     recours. */
+  .page-intro__inner > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .page-intro__title {
+    overflow-wrap: anywhere;
   }
 
   .page-intro__rule {

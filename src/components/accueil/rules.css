@@ -1,0 +1,8 @@
+/*
+ * Filet discret des listes de l’accueil (constat, étapes, engagements).
+ * Sur le fond sable, --line se voit à peine : ce filet mélange --line-strong
+ * à de la transparence. Il est défini ici une seule fois, sur la surface.
+ */
+.surface-sable {
+  --rule-soft: color-mix(in srgb, var(--line-strong) 28%, transparent);
+}

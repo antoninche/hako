@@ -25,10 +25,9 @@ import type { Company } from './types';
 export const company: Company = withFrenchTypography<Company>({
   name: 'HAKO',
   kanji: '箱',
-  nameMeaning: '« Hako » veut dire « boîte » en japonais.',
+  nameMeaning: 'Hako (箱) veut dire « boîte » en japonais.',
   headline: 'Vos souvenirs restent à la maison.',
-  promise:
-    'Les données de toute la famille chez vous, et quelqu’un pour vous aider à les maîtriser.',
+  promise: 'Les données de toute la famille, chez vous.',
 
   email: todo(
     'Adresse e-mail de contact, sur notre propre nom de domaine ou chez Proton Mail (jamais une adresse Gmail)',
@@ -40,10 +39,8 @@ export const company: Company = withFrenchTypography<Company>({
   serviceArea: {
     sentence:
       'Nous intervenons de Salon-de-Provence à Toulon, en passant par Aix-en-Provence et Marseille.',
-    outside: todo(
-      'Ce que nous proposons aux personnes situées hors de notre zone d’intervention',
-      '[offre hors zone]',
-    ),
+    outside:
+      'nous vous envoyons la box, puis vous l’installez en suivant notre guide d’installation pas à pas, à venir sur ce site, et nos tutoriels vidéo',
   },
 
   social: [
@@ -77,54 +74,27 @@ export const company: Company = withFrenchTypography<Company>({
   founders: [
     {
       role: 'Logiciel & système',
-      name: todo('Prénom et nom de la personne chargée du logiciel et du système', '[Prénom Nom]'),
-      portrait: todo('Portrait de la personne chargée du logiciel et du système', '[portrait]'),
-      bio: todo(
-        'Présentation courte de la personne chargée du logiciel et du système',
-        '[présentation]',
-      ),
-      linkedin: todo(
-        'Profil LinkedIn de la personne chargée du logiciel et du système',
-        '[profil LinkedIn]',
-      ),
-    },
-    {
-      role: 'Matériel, boîtier & tests',
-      name: todo(
-        'Prénom et nom de la personne chargée du matériel, du boîtier et des tests',
-        '[Prénom Nom]',
-      ),
-      portrait: todo(
-        'Portrait de la personne chargée du matériel, du boîtier et des tests',
-        '[portrait]',
-      ),
-      bio: todo(
-        'Présentation courte de la personne chargée du matériel, du boîtier et des tests',
-        '[présentation]',
-      ),
-      linkedin: todo(
-        'Profil LinkedIn de la personne chargée du matériel, du boîtier et des tests',
-        '[profil LinkedIn]',
-      ),
+      name: 'Antonin Chenavaz',
+      portrait: todo('Portrait d’Antonin Chenavaz (logiciel et système)', '[portrait]'),
+      bio: todo('Présentation courte d’Antonin Chenavaz (logiciel et système)', '[présentation]'),
+      linkedin: todo('Profil LinkedIn d’Antonin Chenavaz', '[profil LinkedIn]'),
     },
     {
       role: 'Commerce & relation client',
-      name: todo(
-        'Prénom et nom de la personne chargée du commerce et de la relation client',
-        '[Prénom Nom]',
-      ),
-      portrait: todo(
-        'Portrait de la personne chargée du commerce et de la relation client',
-        '[portrait]',
-      ),
+      name: 'Maxime Pallaud',
+      portrait: todo('Portrait de Maxime Pallaud (commerce et relation client)', '[portrait]'),
       bio: todo(
-        'Présentation courte de la personne chargée du commerce et de la relation client',
+        'Présentation courte de Maxime Pallaud (commerce et relation client)',
         '[présentation]',
       ),
-      linkedin: todo(
-        'Profil LinkedIn de la personne chargée du commerce et de la relation client',
-        '[profil LinkedIn]',
-      ),
+      linkedin: todo('Profil LinkedIn de Maxime Pallaud', '[profil LinkedIn]'),
+    },
+    {
+      role: 'Design',
+      name: 'Martin Dugail',
+      portrait: todo('Portrait de Martin Dugail (design)', '[portrait]'),
+      bio: todo('Présentation courte de Martin Dugail (design)', '[présentation]'),
+      linkedin: todo('Profil LinkedIn de Martin Dugail', '[profil LinkedIn]'),
     },
   ],
 

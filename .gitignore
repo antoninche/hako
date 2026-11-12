@@ -29,3 +29,6 @@ design/illustrations/renders/
 .tmp/
 __pycache__/
 *.pyc
+
+# Modèles 3D de travail (sources Blender exportées) : seul public/models/hako.glb est publié
+design/3d/*.glb
