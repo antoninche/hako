@@ -1,0 +1,100 @@
+---
+/**
+ * Gabarit des pages légales : mentions légales, confidentialité, conditions
+ * générales de vente. Le texte de chaque page est dans src/content/legal/,
+ * un fichier MDX par page ; ce gabarit l'affiche avec son titre, son
+ * introduction et, si l'en-tête du fichier le demande (toc: true), un
+ * sommaire de ses intertitres.
+ *
+ * Exemple (src/pages/cgv/index.astro) :
+ *   const entry = await getEntry('legal', 'cgv');
+ *   <LegalPage entry={entry} />
+ */
+import { render, type CollectionEntry } from 'astro:content';
+
+import { mdxComponents } from './mdx-components';
+import PageIntro from '../PageIntro.astro';
+import Prose from '../texte/Prose.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+interface Props {
+  entry: CollectionEntry<'legal'>;
+}
+
+const { entry } = Astro.props;
+const { title, description, intro, toc } = entry.data;
+const { Content, headings } = await render(entry);
+const sections = headings.filter((heading) => heading.depth === 2);
+---
+
+<BaseLayout title={title} description={description}>
+  <PageIntro title={title} width="narrow">
+    <p class="lead text-muted">{intro}</p>
+  </PageIntro>
+
+  <div class="container-narrow legal">
+    {toc && sections.length > 0 && (
+      <nav class="legal__toc" aria-labelledby="sommaire">
+        <p class="kicker legal__toc-label" id="sommaire">
+          Sommaire
+        </p>
+        <ol class="legal__toc-list">
+          {sections.map((section) => (
+            <li>
+              <a href={`#${section.slug}`}>{section.text}</a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    )}
+
+    <Prose>
+      <Content components={mdxComponents} />
+    </Prose>
+  </div>
+</BaseLayout>
+
+<style>
+  .legal {
+    padding-block-end: var(--space-section);
+  }
+
+  .legal__toc {
+    margin-block-end: var(--space-xl);
+    padding-block: var(--space-m);
+    border-block: var(--rule-width) solid var(--line);
+  }
+
+  .legal__toc-label {
+    margin: 0 0 var(--space-xs);
+  }
+
+  .legal__toc-list {
+    margin: 0;
+    padding-inline-start: 1.6em;
+    list-style: decimal;
+  }
+
+  @media (min-width: 48rem) {
+    .legal__toc-list {
+      columns: 2;
+      column-gap: var(--space-xl);
+    }
+  }
+
+  .legal__toc-list li {
+    break-inside: avoid;
+  }
+
+  .legal__toc-list li::marker {
+    font-family: var(--font-ui);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+  }
+
+  .legal__toc-list a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target-min);
+  }
+</style>

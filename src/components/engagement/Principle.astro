@@ -1,0 +1,121 @@
+---
+/**
+ * Un principe de la page « Notre engagement » : icône, numéro, titre (h2),
+ * paragraphes et lien facultatif. À placer dans une liste <ol>.
+ * Textes : src/content/engagement.ts, clé principles.
+ */
+import Illustration from '../Illustration.astro';
+import Prose from '../texte/Prose.astro';
+import TextLink from '../texte/TextLink.astro';
+import type { Principle } from '../../content/engagement';
+
+interface Props {
+  principle: Principle;
+  /** Rang dans la liste, à partir de 1. */
+  number: number;
+}
+
+const { principle, number } = Astro.props;
+---
+
+<li class="principle">
+  <div class="principle__aside" aria-hidden="true">
+    <div class="principle__icon">
+      <Illustration name={`icones/engagement-${principle.icon}`} ratio="1/1" decorative />
+    </div>
+    <span class="principle__number">{String(number).padStart(2, '0')}</span>
+  </div>
+  <div class="principle__body">
+    <h2 class="principle__title">{principle.title}</h2>
+    <Prose paragraphs={principle.text} />
+    {principle.link && (
+      <p class="principle__more">
+        <TextLink link={principle.link} arrow />
+      </p>
+    )}
+  </div>
+</li>
+
+<style>
+  .principle {
+    display: grid;
+    gap: var(--space-s);
+    padding-block: var(--space-xl);
+    border-block-end: var(--rule-width) solid var(--line);
+  }
+
+  /* Le premier principe suit l'ouverture de la page, qui a déjà son espace. */
+  .principle:first-child {
+    padding-block-start: 0;
+  }
+
+  .principle__aside {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+  }
+
+  .principle__icon {
+    flex: none;
+    inline-size: 3rem;
+    color: var(--text);
+  }
+
+  .principle__number {
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  .principle__body {
+    display: grid;
+    align-content: start;
+    gap: var(--space-xs);
+    min-inline-size: 0;
+  }
+
+  .principle__title {
+    margin: 0 0 var(--space-2xs);
+    font-size: var(--step-2);
+    font-weight: 450;
+    line-height: var(--leading-tight);
+    text-wrap: balance;
+  }
+
+  .principle__more {
+    margin: 0;
+  }
+
+  @media (min-width: 40rem) {
+    .principle {
+      grid-template-columns: 4rem 1fr;
+      column-gap: var(--space-l);
+    }
+
+    .principle__aside {
+      flex-direction: column;
+      align-items: center;
+      align-self: start;
+      gap: var(--space-xs);
+    }
+
+    .principle__icon {
+      inline-size: 100%;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .principle {
+      grid-template-columns: 5rem 1fr;
+      column-gap: var(--space-xl);
+      padding-block: var(--space-2xl);
+    }
+
+    .principle:first-child {
+      padding-block-start: 0;
+    }
+  }
+</style>

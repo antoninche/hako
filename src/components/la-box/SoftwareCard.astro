@@ -1,0 +1,150 @@
+---
+/**
+ * Carte d'un logiciel de la box : nom, rôle, explication, licence et liens.
+ * Textes : src/content/la-box.ts, clé software.groups[].items[].
+ * Le titre est un h4 : la carte se place sous un titre de groupe (h3).
+ */
+import Fact from '../Fact.astro';
+import Prose from '../texte/Prose.astro';
+import TextLink from '../texte/TextLink.astro';
+import { laBox, type Software } from '../../content/la-box';
+
+interface Props {
+  item: Software;
+}
+
+const { item } = Astro.props;
+const { labels } = laBox;
+const titleId = `${item.id}-titre`;
+---
+
+<article class="software surface-creme" id={item.id} aria-labelledby={titleId}>
+  <div class="software__head">
+    <h4 class="software__name" id={titleId}>
+      {item.name}
+    </h4>
+    <p class="software__role">{item.role}</p>
+  </div>
+
+  <Prose paragraphs={item.text} />
+
+  <dl class="software__facts">
+    {item.address && (
+      <div class="software__fact">
+        <dt>{labels.address}</dt>
+        <dd>
+          <span class="software__address" translate="no">
+            {item.address}
+          </span>
+        </dd>
+      </div>
+    )}
+    <div class="software__fact">
+      <dt>{labels.license}</dt>
+      <dd>
+        <Fact value={item.license} />
+      </dd>
+    </div>
+  </dl>
+
+  {item.links.length > 0 && (
+    <ul class="software__links">
+      {item.links.map((link) => (
+        <li>
+          <TextLink link={link} />
+        </li>
+      ))}
+    </ul>
+  )}
+</article>
+
+<style>
+  .software {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+    block-size: 100%;
+    padding: var(--space-m);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-s);
+  }
+
+  .software__head {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .software__name {
+    margin: 0;
+    font-family: var(--font-display);
+    font-variation-settings: var(--font-display-variation);
+    font-size: var(--step-2);
+    font-weight: 500;
+    line-height: var(--leading-tight);
+    text-wrap: balance;
+  }
+
+  .software__role {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .software__facts {
+    display: grid;
+    gap: var(--space-2xs);
+    margin: auto 0 0;
+    padding-block-start: var(--space-s);
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  /* Libellé à gauche, valeur à droite ; la valeur passe à la ligne au besoin
+     plutôt que de déborder de la carte (texte agrandi, écran étroit). */
+  .software__fact {
+    display: grid;
+    grid-template-columns: minmax(5.5rem, auto) minmax(0, 1fr);
+    gap: var(--space-xs);
+    align-items: baseline;
+  }
+
+  .software__fact dt {
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text-muted);
+  }
+
+  .software__fact dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .software__address {
+    padding: 0.1em 0.4em;
+    border-radius: var(--radius-s);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--chocolat);
+    background-color: var(--sable);
+    box-decoration-break: clone;
+  }
+
+  .software__links {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 64rem) {
+    .software {
+      padding: var(--space-l);
+    }
+  }
+</style>

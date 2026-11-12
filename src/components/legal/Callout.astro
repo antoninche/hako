@@ -1,0 +1,51 @@
+---
+/**
+ * Encadré, pour mettre à part un calcul (FAQ) ou un avertissement (pages
+ * légales). S'utilise dans un fichier MDX, le contenu écrit en Markdown
+ * sur des lignes à part :
+ *
+ *   <Callout label="Le calcul, pas à pas">
+ *
+ *   1. Première étape…
+ *   2. Deuxième étape…
+ *
+ *   </Callout>
+ */
+interface Props {
+  /** Petit titre de l'encadré (facultatif). */
+  label?: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="callout surface-sable">
+  {label && <p class="kicker callout__label">{label}</p>}
+  <div class="callout__body">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .callout {
+    padding: var(--space-m) clamp(var(--space-s), 3vw, var(--space-l));
+    border: var(--rule-width) solid var(--line);
+    border-inline-start: 3px solid var(--line-strong);
+    border-radius: var(--radius);
+  }
+
+  .callout__label {
+    margin: 0 0 var(--space-xs);
+  }
+
+  /* Un rythme plus serré que celui du texte autour. Les listes, elles,
+     gardent la mise en forme du texte MDX qui entoure l'encadré
+     (src/components/texte/Prose.astro). */
+  .callout__body > :global(*) {
+    margin-block: 0;
+  }
+
+  .callout__body > :global(* + *) {
+    margin-block-start: var(--space-xs);
+  }
+</style>

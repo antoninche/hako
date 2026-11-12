@@ -1,0 +1,65 @@
+---
+/**
+ * Liste des pièces de la box (section « Ce qu'il y a dedans »).
+ * Textes : src/content/la-box.ts, clé hardware.parts.
+ */
+import Prose from '../texte/Prose.astro';
+import type { Part } from '../../content/la-box';
+
+interface Props {
+  parts: readonly Part[];
+}
+
+const { parts } = Astro.props;
+---
+
+<ul class="parts">
+  {parts.map((part) => (
+    <li class="part">
+      <h3 class="part__name">{part.name}</h3>
+      <div class="part__text">
+        <Prose paragraphs={part.text} />
+      </div>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .parts {
+    container-type: inline-size;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  .part {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-block: var(--space-m);
+    border-block-end: var(--rule-width) solid var(--line);
+  }
+
+  .part__name {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    line-height: var(--leading-snug);
+  }
+
+  .part__text {
+    color: var(--text-muted);
+  }
+
+  /* Nom et texte côte à côte seulement si la liste a la place (elle est
+     plus étroite à côté de l'illustration, sur grand écran). */
+  @container (min-width: 38rem) {
+    .part {
+      grid-template-columns: minmax(11rem, 2fr) 3fr;
+      column-gap: var(--space-l);
+      align-items: baseline;
+    }
+  }
+</style>

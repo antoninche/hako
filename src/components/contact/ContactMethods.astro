@@ -1,0 +1,151 @@
+---
+/**
+ * Moyens de nous joindre : e-mail, téléphone, et un renvoi vers le
+ * formulaire de commande. Il n'y a pas de formulaire de contact : pour une
+ * commande, la page Commander en tient lieu.
+ *
+ * Textes : src/content/contact.ts. Coordonnées : src/data/entreprise.ts.
+ * Tant qu'une coordonnée manque, le texte provisoire s'affiche surligné,
+ * sans lien ; une fois connue, <Fact> en fait un lien « mailto: » ou « tel: ».
+ */
+import Fact from '../Fact.astro';
+import Icon from '../Icon.astro';
+import { contactPage } from '../../content/contact';
+import { company } from '../../data/entreprise';
+
+const { reach } = contactPage;
+const { email, phone } = company;
+---
+
+<ul class="methods">
+  <li class="method">
+    <span class="method__badge">
+      <Icon name="mail" />
+    </span>
+    <h3 class="kicker method__title">{reach.emailLabel}</h3>
+    <p class="method__value">
+      <Fact value={email} link="email" />
+    </p>
+  </li>
+
+  <li class="method">
+    <span class="method__badge">
+      <Icon name="phone" />
+    </span>
+    <h3 class="kicker method__title">{reach.phoneLabel}</h3>
+    <p class="method__value">
+      <Fact value={phone} link="phone" />
+    </p>
+  </li>
+
+  <li class="method method--order">
+    <span class="method__badge">
+      <Icon name="box" />
+    </span>
+    <h3 class="kicker method__title">{reach.order.title}</h3>
+    <p class="method__text">{reach.order.text}</p>
+    <a class="btn btn--primary method__button" href={reach.order.link.href}>
+      <span>{reach.order.link.label}</span>
+      <Icon name="arrow-right" />
+    </a>
+  </li>
+</ul>
+
+<style>
+  .methods {
+    display: grid;
+    gap: var(--space-m);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 40rem) {
+    .methods {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .method--order {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .methods {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .method--order {
+      grid-column: auto;
+    }
+  }
+
+  .method {
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: var(--space-xs);
+    padding: var(--space-m);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .method > * {
+    margin: 0;
+  }
+
+  .method__badge {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-block-end: var(--space-2xs);
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: 50%;
+    color: var(--text);
+  }
+
+  .method__value {
+    font-size: var(--step-1);
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  /* Lien principal de la carte (écrit par <Fact>) : une cible d'au moins
+     44 px de haut. */
+  .method__value :global(a) {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target-min);
+  }
+
+  .method__text {
+    max-width: 34ch;
+  }
+
+  .method__button {
+    gap: 0.5em;
+    margin-block-start: var(--space-2xs);
+  }
+
+  /* Entre deux et trois colonnes, la carte « commander » occupe toute la
+     largeur : le bouton se place à droite du texte. */
+  @media (min-width: 40rem) and (max-width: 63.99rem) {
+    .method--order {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      column-gap: var(--space-m);
+    }
+
+    .method--order .method__badge {
+      grid-row: 1 / 3;
+      margin: 0;
+    }
+
+    .method--order .method__button {
+      grid-column: 3;
+      grid-row: 1 / 3;
+      margin: 0;
+    }
+  }
+</style>

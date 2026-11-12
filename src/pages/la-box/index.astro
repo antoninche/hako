@@ -1,0 +1,443 @@
+---
+/**
+ * Page « La box » : ce qu'il y a dedans, ce qui tourne dedans, pourquoi des
+ * logiciels libres, et les limites dites franchement.
+ * Tous les textes sont dans src/content/la-box.ts.
+ */
+import Illustration from '../../components/Illustration.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import Section from '../../components/Section.astro';
+import Todo from '../../components/Todo.astro';
+import PartList from '../../components/la-box/PartList.astro';
+import SoftwareCard from '../../components/la-box/SoftwareCard.astro';
+import Prose from '../../components/texte/Prose.astro';
+import Text from '../../components/texte/Text.astro';
+import TextLink from '../../components/texte/TextLink.astro';
+import { laBox } from '../../content/la-box';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { isTodo } from '../../lib/todo';
+
+const { meta, intro, hardware, software, openSource, limits, next } = laBox;
+const { recipe } = openSource;
+---
+
+<BaseLayout title={meta.title} description={meta.description}>
+  <PageIntro title={intro.title}>
+    <p class="lead text-muted">
+      <Text text={intro.lead} />
+    </p>
+    <ul class="highlights" aria-label={intro.highlightsLabel}>
+      {intro.highlights.map((item) => (
+        <li>{item}</li>
+      ))}
+    </ul>
+  </PageIntro>
+
+  <section class="hardware-section" id={hardware.id} aria-labelledby="titre-materiel">
+    <div class="container hardware">
+      <div class="section-head hardware__head">
+        <h2 id="titre-materiel">{hardware.title}</h2>
+        <p class="text-muted">
+          <Text text={hardware.lead} />
+        </p>
+      </div>
+      <div class="hardware__figure">
+        <Illustration name="vue-eclatee" ratio="1/1" alt={hardware.illustrationAlt} />
+      </div>
+      <div class="hardware__body">
+        <PartList parts={hardware.parts} />
+        <p class="handmade">
+          <svg class="handmade__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <circle
+              cx="10"
+              cy="10"
+              r="8.25"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            ></circle>
+            <path
+              d="m6.5 10.25 2.4 2.4 4.6-5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            ></path>
+          </svg>
+          <span>{hardware.handmade}</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <Section surface="sable" id={software.id} labelledby="titre-logiciels">
+    <div class="section-head">
+      <h2 id="titre-logiciels">{software.title}</h2>
+      <p class="text-muted">
+        <Text text={software.lead} />
+      </p>
+    </div>
+    {software.groups.map((group, index) => (
+      <div class="software-group">
+        <h3 class="software-group__title" id={`groupe-logiciels-${index + 1}`}>
+          {group.title}
+        </h3>
+        <ul class="software-grid" aria-labelledby={`groupe-logiciels-${index + 1}`}>
+          {group.items.map((item) => (
+            <li>
+              <SoftwareCard item={item} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </Section>
+
+  <Section id={openSource.id} labelledby="titre-libres">
+    <div class="section-head">
+      <h2 id="titre-libres">{openSource.title}</h2>
+      <p class="text-muted">
+        <Text text={openSource.lead} />
+      </p>
+    </div>
+    <ul class="reasons">
+      {openSource.reasons.map((reason) => (
+        <li class="reason">
+          <h3 class="reason__title">{reason.title}</h3>
+          <Prose paragraphs={reason.text} />
+        </li>
+      ))}
+    </ul>
+    <div class="recipe surface-sable">
+      <h3 class="recipe__title">{recipe.title}</h3>
+      <Prose paragraphs={[recipe.text]} />
+      <p class="recipe__link">
+        {isTodo(recipe.link) ? (
+          <>
+            {recipe.linkLabel}&nbsp;: <Todo what={recipe.link.todo}>{recipe.link.placeholder}</Todo>
+          </>
+        ) : (
+          <TextLink link={{ label: recipe.linkLabel, href: recipe.link }} />
+        )}
+      </p>
+    </div>
+  </Section>
+
+  <Section surface="sable" id={limits.id} labelledby="titre-limites">
+    <div class="section-head">
+      <h2 id="titre-limites">{limits.title}</h2>
+      <p class="text-muted">
+        <Text text={limits.lead} />
+      </p>
+    </div>
+    <ul class="limits">
+      {limits.items.map((item) => (
+        <li class="limit" id={item.id}>
+          <h3 class="limit__title">{item.title}</h3>
+          <div class="limit__body">
+            <Prose paragraphs={item.text} />
+            {'links' in item && item.links.length > 0 && (
+              <ul class="limit__links">
+                {item.links.map((link) => (
+                  <li>
+                    <TextLink link={link} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </li>
+      ))}
+    </ul>
+  </Section>
+
+  <Section labelledby="titre-suite">
+    <div class="next">
+      <h2 id="titre-suite">{next.title}</h2>
+      <p class="text-muted">
+        <Text text={next.text} />
+      </p>
+      <ul class="next__actions">
+        <li>
+          <a class="btn btn--primary" href={next.primary.href}>
+            {next.primary.label}
+          </a>
+        </li>
+        <li>
+          <a class="btn btn--secondary" href={next.secondary.href}>
+            {next.secondary.label}
+          </a>
+        </li>
+      </ul>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  /* ---------- Ouverture : la liste « En bref » sous le texte d'introduction ---------- */
+  .highlights {
+    display: grid;
+    gap: var(--space-2xs);
+    margin: var(--space-l) 0 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .highlights li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  .highlights li::before {
+    content: '';
+    flex: none;
+    inline-size: 0.375rem;
+    block-size: 0.375rem;
+    border-radius: 50%;
+    /* Forme sans texte : aucune couleur de texte à contrôler (npm run contrast). */
+    color: transparent;
+    background-color: var(--caramel);
+  }
+
+  @media (min-width: 40rem) {
+    .highlights {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2xs) var(--space-l);
+    }
+  }
+
+  /* ---------- En-tête des sections ---------- */
+  .section-head {
+    display: grid;
+    gap: var(--space-s);
+    margin-block-end: var(--space-xl);
+  }
+
+  .section-head p {
+    max-inline-size: 42rem;
+  }
+
+  /* ---------- Ce qu'il y a dedans ----------
+   * Première section après l'ouverture : l'espace au-dessus vient déjà de
+   * l'ouverture (PageIntro), seul l'espace au-dessous est ajouté. */
+  .hardware-section {
+    padding-block-end: var(--space-section);
+  }
+
+  .hardware {
+    display: grid;
+    grid-template-areas:
+      'head'
+      'figure'
+      'body';
+    row-gap: var(--space-l);
+  }
+
+  .hardware__head {
+    grid-area: head;
+    margin-block-end: 0;
+  }
+
+  .hardware__figure {
+    grid-area: figure;
+    justify-self: center;
+    inline-size: min(100%, 26rem);
+  }
+
+  .hardware__body {
+    grid-area: body;
+  }
+
+  .handmade {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin: var(--space-l) 0 0;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    line-height: var(--leading-snug);
+    color: var(--success);
+    text-wrap: balance;
+  }
+
+  .handmade__icon {
+    flex: none;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+  }
+
+  @media (min-width: 64rem) {
+    .hardware {
+      grid-template-columns: 5fr 6fr;
+      grid-template-areas:
+        'figure head'
+        'figure body';
+      grid-template-rows: auto 1fr;
+      column-gap: var(--space-2xl);
+    }
+
+    .hardware__figure {
+      position: sticky;
+      top: calc(var(--header-height) + var(--space-l));
+      align-self: start;
+      inline-size: 100%;
+    }
+  }
+
+  /* ---------- Ce qui tourne dedans ---------- */
+  .software-group + .software-group {
+    margin-block-start: var(--space-2xl);
+  }
+
+  .software-group__title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    margin: 0 0 var(--space-m);
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .software-group__title::after {
+    content: '';
+    flex: 1;
+    border-block-start: var(--rule-width) solid var(--line-strong);
+    opacity: 0.35;
+  }
+
+  .software-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: var(--space-m);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* ---------- Pourquoi des logiciels libres ---------- */
+  .reasons {
+    display: grid;
+    gap: var(--space-xl);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .reason {
+    display: grid;
+    align-content: start;
+    gap: var(--space-xs);
+    padding-block-start: var(--space-m);
+    border-block-start: var(--rule-width) solid var(--line-strong);
+  }
+
+  .reason__title {
+    margin: 0;
+    font-size: var(--step-2);
+    font-weight: 450;
+    line-height: var(--leading-snug);
+  }
+
+  @media (min-width: 56rem) {
+    .reasons {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .recipe {
+    display: grid;
+    gap: var(--space-xs);
+    max-inline-size: 48rem;
+    margin-block-start: var(--space-2xl);
+    padding: var(--space-m);
+    border-radius: var(--radius);
+  }
+
+  .recipe__title {
+    margin: 0;
+    font-size: var(--step-1);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+  }
+
+  .recipe__link {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  @media (min-width: 48rem) {
+    .recipe {
+      padding: var(--space-l) var(--space-xl);
+    }
+  }
+
+  /* ---------- Les limites ---------- */
+  .limits {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-block-start: var(--rule-width) solid var(--line-strong);
+  }
+
+  .limit {
+    display: grid;
+    gap: var(--space-xs);
+    padding-block: var(--space-l);
+    border-block-end: var(--rule-width) solid var(--line-strong);
+  }
+
+  .limit__title {
+    margin: 0;
+    font-size: var(--step-2);
+    font-weight: 450;
+    line-height: var(--leading-snug);
+    text-wrap: balance;
+  }
+
+  .limit__links {
+    margin: var(--space-2xs) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 56rem) {
+    .limit {
+      grid-template-columns: 2fr 3fr;
+      column-gap: var(--space-2xl);
+      align-items: baseline;
+    }
+  }
+
+  /* ---------- Pour la suite ---------- */
+  .next {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-s);
+    text-align: center;
+  }
+
+  .next__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-s);
+    margin: var(--space-s) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+</style>

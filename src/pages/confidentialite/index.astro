@@ -1,0 +1,16 @@
+---
+/**
+ * Page « Politique de confidentialité » (/confidentialite/).
+ * Le texte est dans src/content/legal/confidentialite.mdx.
+ */
+import { getEntry } from 'astro:content';
+
+import LegalPage from '../../components/legal/LegalPage.astro';
+
+const entry = await getEntry('legal', 'confidentialite');
+if (!entry) {
+  throw new Error('Texte introuvable : src/content/legal/confidentialite.mdx');
+}
+---
+
+<LegalPage entry={entry} />

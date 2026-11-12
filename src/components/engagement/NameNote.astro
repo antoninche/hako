@@ -1,0 +1,54 @@
+---
+/**
+ * La phrase qui explique le nom, sous le logo kanji :
+ * « Hako (箱) signifie « boîte » en japonais. »
+ * Le kanji du texte porte lang="ja" pour être lu en japonais.
+ * Textes : src/content/engagement.ts, clé name.
+ */
+import KanjiMark from '../../assets/brand/hako-kanji.svg';
+import { engagement } from '../../content/engagement';
+
+const { name } = engagement;
+---
+
+<div class="name-note">
+  <div class="name-note__mark" aria-hidden="true">
+    <KanjiMark />
+  </div>
+  <p class="name-note__text">
+    {
+      // Une seule expression : aucune espace ne s'invite autour du kanji.
+      [name.before, <span lang="ja">{name.kanji}</span>, name.after]
+    }
+  </p>
+</div>
+
+<style>
+  .name-note {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-m);
+    text-align: center;
+  }
+
+  .name-note__mark {
+    inline-size: 3.25rem;
+    color: var(--text);
+  }
+
+  .name-note__mark :global(svg) {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+  }
+
+  .name-note__text {
+    margin: 0;
+    max-inline-size: 32rem;
+    font-family: var(--font-display);
+    font-variation-settings: var(--font-display-variation);
+    font-size: var(--step-2);
+    line-height: var(--leading-snug);
+    text-wrap: balance;
+  }
+</style>

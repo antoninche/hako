@@ -1,33 +1,119 @@
 ---
 /**
- * Page affichée quand une adresse n'existe pas. L'illustration de la boîte
- * vide arrive avec les illustrations (lot 4). Textes : src/data/pages.ts.
+ * Page affichée quand une adresse n'existe pas (erreur 404) : une boîte vide,
+ * un mot gentil et quelques chemins pour continuer. Non indexée.
+ * Textes : src/content/erreur-404.ts.
  */
+import Illustration from '../components/Illustration.astro';
 import PageIntro from '../components/PageIntro.astro';
+import Text from '../components/texte/Text.astro';
+import { erreur404 } from '../content/erreur-404';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { routes } from '../data/navigation';
-import { notFoundPage } from '../data/pages';
+
+const { meta, kicker, title, lead, illustrationAlt, linksTitle, links } = erreur404;
 ---
 
-<BaseLayout title={notFoundPage.title} description={notFoundPage.description} noindex>
-  <PageIntro title={notFoundPage.heading}>
-    <p class="lead text-muted">{notFoundPage.lead}</p>
-    <ul class="cluster">
-      <li>
-        <a class="btn btn--primary" href={routes.home}>
-          {notFoundPage.links.home}
-        </a>
-      </li>
-      <li>
-        <a class="btn btn--secondary" href={routes.offers}>
-          {notFoundPage.links.offers}
-        </a>
-      </li>
-      <li>
-        <a class="btn btn--secondary" href={routes.contact}>
-          {notFoundPage.links.contact}
-        </a>
-      </li>
-    </ul>
+<BaseLayout title={meta.title} description={meta.description} noindex>
+  <PageIntro title={title} kicker={kicker}>
+    <div class="not-found">
+      <p class="lead text-muted not-found__lead">
+        <Text text={lead} />
+      </p>
+      <nav class="not-found__nav" aria-labelledby="titre-chemins">
+        <h2 class="not-found__links-title" id="titre-chemins">
+          {linksTitle}
+        </h2>
+        <ul class="not-found__links">
+          {links.map((link, index) => (
+            <li>
+              <a
+                class:list={['btn', index === 0 ? 'btn--primary' : 'btn--secondary']}
+                href={link.href}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <div class="not-found__figure">
+        <Illustration name="404" ratio="1/1" alt={illustrationAlt} />
+      </div>
+    </div>
   </PageIntro>
 </BaseLayout>
+
+<style>
+  /* Sur téléphone : texte, chemins, puis la boîte vide. Plus large : la boîte
+     vide se place à droite du texte et des chemins. */
+  .not-found {
+    display: grid;
+    grid-template-areas:
+      'lead'
+      'nav'
+      'figure';
+    gap: var(--space-xl);
+  }
+
+  .not-found__lead {
+    grid-area: lead;
+  }
+
+  .not-found__nav {
+    grid-area: nav;
+  }
+
+  .not-found__figure {
+    grid-area: figure;
+    justify-self: center;
+    inline-size: min(100%, 12rem);
+  }
+
+  .not-found__links-title {
+    margin: 0 0 var(--space-s);
+    font-family: var(--font-ui);
+    font-size: var(--step-0);
+    font-weight: 700;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .not-found__links {
+    display: grid;
+    gap: var(--space-s);
+    max-inline-size: 22rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .not-found__links a {
+    inline-size: 100%;
+  }
+
+  @media (min-width: 48rem) {
+    .not-found {
+      grid-template-columns: minmax(0, 3fr) minmax(12rem, 2fr);
+      grid-template-areas:
+        'lead figure'
+        'nav figure';
+      grid-template-rows: auto 1fr;
+      column-gap: var(--space-2xl);
+      row-gap: var(--space-xl);
+    }
+
+    .not-found__figure {
+      align-self: start;
+      inline-size: 100%;
+      max-inline-size: 20rem;
+    }
+  }
+
+  /* Sur grand écran, les quatre chemins se rangent en deux colonnes. */
+  @media (min-width: 64rem) {
+    .not-found__links {
+      grid-template-columns: repeat(2, max-content);
+      max-inline-size: none;
+    }
+  }
+</style>

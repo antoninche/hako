@@ -1,0 +1,16 @@
+---
+/**
+ * Page « Mentions légales » (/mentions-legales/).
+ * Le texte est dans src/content/legal/mentions-legales.mdx.
+ */
+import { getEntry } from 'astro:content';
+
+import LegalPage from '../../components/legal/LegalPage.astro';
+
+const entry = await getEntry('legal', 'mentions-legales');
+if (!entry) {
+  throw new Error('Texte introuvable : src/content/legal/mentions-legales.mdx');
+}
+---
+
+<LegalPage entry={entry} />

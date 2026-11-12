@@ -1,0 +1,22 @@
+---
+/**
+ * Un texte, sans balise autour, dont les noms composés (« Salon-de-Provence »,
+ * « c’est-à-dire », « posez-nous ») ne sont jamais coupés en fin de ligne
+ * (keepHyphenatedWords, src/components/typo.ts, et la classe .nowrap).
+ * Sert aux paragraphes de <Prose>, aux introductions des pages et aux
+ * informations reprises dans les textes MDX (<Detail>).
+ *
+ *   <p class="lead"><Text text={intro.lead} /></p>
+ */
+import { keepHyphenatedWords } from '../typo';
+
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+---
+
+{keepHyphenatedWords(text).map((segment) =>
+  segment.keep ? <span class="nowrap">{segment.text}</span> : segment.text,
+)}

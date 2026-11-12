@@ -1,0 +1,16 @@
+---
+/**
+ * Page « Conditions générales de vente » (/cgv/).
+ * Le texte est dans src/content/legal/cgv.mdx.
+ */
+import { getEntry } from 'astro:content';
+
+import LegalPage from '../../components/legal/LegalPage.astro';
+
+const entry = await getEntry('legal', 'cgv');
+if (!entry) {
+  throw new Error('Texte introuvable : src/content/legal/cgv.mdx');
+}
+---
+
+<LegalPage entry={entry} />

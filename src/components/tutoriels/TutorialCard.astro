@@ -1,0 +1,131 @@
+---
+/**
+ * Carte d'un tutoriel : vignette, titre (h2), courte description et liens
+ * vers la vidéo sur YouTube et sur PeerTube. Un tutoriel pas encore prêt
+ * (soon: true) porte l'étiquette « Bientôt » et n'a pas de liens.
+ * Textes : src/content/tutoriels.ts, clé items.
+ */
+import Illustration from '../Illustration.astro';
+import Prose from '../texte/Prose.astro';
+import VideoLink from './VideoLink.astro';
+import { tutoriels, type Platform, type Tutorial } from '../../content/tutoriels';
+
+interface Props {
+  tutorial: Tutorial;
+}
+
+const { tutorial } = Astro.props;
+const { labels } = tutoriels;
+const titleId = `tutoriel-${tutorial.slug}`;
+const platforms = Object.keys(labels.platforms) as Platform[];
+const videos = tutorial.videos;
+---
+
+<article
+  class:list={['tutorial', { 'tutorial--soon': tutorial.soon }]}
+  id={tutorial.slug}
+  aria-labelledby={titleId}
+>
+  <div class="tutorial__media">
+    <Illustration name={`tutoriels/${tutorial.slug}`} ratio="16/9" decorative />
+  </div>
+  <div class="tutorial__body">
+    <h2 class="tutorial__title" id={titleId}>
+      <span>{tutorial.title}</span>{' '}
+      {tutorial.soon && (
+        <span class="tutorial__badge">
+          <span class="visually-hidden">(</span>
+          {labels.soon}
+          <span class="visually-hidden">)</span>
+        </span>
+      )}
+    </h2>
+    <Prose paragraphs={tutorial.text} />
+    {videos && (
+      <ul class="tutorial__videos">
+        {platforms.map((platform) => (
+          <li>
+            <VideoLink platform={platform} url={videos[platform]} title={tutorial.title} />
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</article>
+
+<style>
+  .tutorial {
+    display: flex;
+    flex-direction: column;
+    block-size: 100%;
+    overflow: hidden;
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+    background-color: var(--surface);
+    box-shadow: var(--shadow-s);
+  }
+
+  .tutorial--soon {
+    border-style: dashed;
+    border-color: var(--line-strong);
+    box-shadow: none;
+  }
+
+  .tutorial__media {
+    border-block-end: var(--rule-width) solid var(--line);
+  }
+
+  /* La vignette d'attente garde un cadre propre à l'intérieur de la carte. */
+  .tutorial__media :global(.illustration--attente) {
+    border: 0;
+    border-radius: 0;
+  }
+
+  .tutorial__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-m);
+  }
+
+  .tutorial__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2xs) var(--space-s);
+    margin: 0;
+    font-size: var(--step-2);
+    font-weight: 450;
+    line-height: var(--leading-snug);
+    text-wrap: balance;
+  }
+
+  .tutorial__badge {
+    padding: 0.1rem 0.55rem;
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: 999px;
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    line-height: 1.4;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .tutorial__videos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-m);
+    margin: auto 0 0;
+    padding: var(--space-s) 0 0;
+    list-style: none;
+  }
+
+  @media (min-width: 64rem) {
+    .tutorial__body {
+      padding: var(--space-l);
+    }
+  }
+</style>

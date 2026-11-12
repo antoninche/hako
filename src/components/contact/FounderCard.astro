@@ -1,0 +1,174 @@
+---
+/**
+ * Carte d'une personne de l'équipe (données : src/data/entreprise.ts, liste
+ * `founders` : domaine, nom, portrait, présentation, profil LinkedIn).
+ *
+ * Portrait : tant qu'il manque, un cadre neutre avec le repère jaune prend sa
+ * place. Une fois la photo choisie, placez-la dans public/equipe/ et écrivez
+ * son chemin dans entreprise.ts, par exemple portrait: '/equipe/prenom.jpg'
+ * (format portrait 4:5, environ 800 × 1000 pixels).
+ *
+ * LinkedIn : tant que l'adresse manque, le texte provisoire s'affiche sans
+ * lien (jamais de lien mort).
+ */
+import Fact from '../Fact.astro';
+import Icon from '../Icon.astro';
+import Todo from '../Todo.astro';
+import type { Founder } from '../../data/types';
+import { isTodo } from '../../lib/todo';
+
+interface Props {
+  founder: Founder;
+  /** Texte du lien vers le profil LinkedIn (« Profil LinkedIn »). */
+  linkedinLabel: string;
+}
+
+const { founder, linkedinLabel } = Astro.props;
+const { role, name, portrait, bio, linkedin } = founder;
+const knownName = isTodo(name) ? undefined : name;
+const portraitAlt = knownName ? `Portrait de ${knownName}` : `Portrait (${role})`;
+---
+
+<article class="founder surface-creme">
+  <div class="founder__portrait">
+    {isTodo(portrait) ? (
+      <div class="founder__placeholder">
+        <Todo what={portrait.todo}>{portrait.placeholder}</Todo>
+      </div>
+    ) : (
+      <img
+        class="founder__photo"
+        src={portrait}
+        alt={portraitAlt}
+        width="800"
+        height="1000"
+        loading="lazy"
+        decoding="async"
+      />
+    )}
+  </div>
+
+  <div class="founder__text">
+    <h3 class="founder__name">
+      <Fact value={name} />
+    </h3>
+    <p class="kicker founder__role">{role}</p>
+    <p class="founder__bio">
+      <Fact value={bio} />
+    </p>
+    <p class="founder__linkedin">
+      {isTodo(linkedin) ? (
+        <span class="founder__link">
+          <Icon name="linkedin" class="founder__icon" />
+          <Todo what={linkedin.todo}>{linkedin.placeholder}</Todo>
+        </span>
+      ) : (
+        <a class="founder__link" href={linkedin}>
+          <Icon name="linkedin" class="founder__icon" />
+          <span>
+            {linkedinLabel}
+            {knownName && <span class="visually-hidden"> de {knownName}</span>}
+          </span>
+        </a>
+      )}
+    </p>
+  </div>
+</article>
+
+<style>
+  .founder {
+    display: grid;
+    grid-template-columns: clamp(6rem, 26vw, 10rem) minmax(0, 1fr);
+    gap: var(--space-m);
+    align-items: start;
+    height: 100%;
+    padding: var(--space-m);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-s);
+  }
+
+  @media (min-width: 64rem) {
+    .founder {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+      gap: var(--space-l);
+      padding: var(--space-m) var(--space-m) var(--space-l);
+    }
+  }
+
+  /* ---------- Portrait ---------- */
+
+  .founder__portrait {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: var(--radius-s);
+  }
+
+  .founder__placeholder {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    padding: var(--space-2xs);
+    border: var(--rule-width) dashed var(--line-strong);
+    border-radius: var(--radius-s);
+    /* Texte et fond ensemble : le texte provisoire reste lisible sur le sable,
+       même sans surlignage (PUBLIC_SHOW_TODOS=false). */
+    color: var(--chocolat);
+    background-color: var(--sable);
+    font-size: var(--step--1);
+    text-align: center;
+  }
+
+  .founder__photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ---------- Texte ---------- */
+
+  /* Le nom (h3, .founder__name) garde le style des titres de niveau 3 du
+     site (global.css) ; seules les marges sont gérées ici. */
+  .founder__text > * {
+    margin: 0;
+  }
+
+  .founder__role {
+    margin-block-start: var(--space-2xs);
+  }
+
+  .founder__bio {
+    margin-block-start: var(--space-s);
+  }
+
+  .founder__linkedin {
+    margin-block-start: var(--space-s);
+    font-size: var(--step--1);
+  }
+
+  .founder__link {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs);
+    min-height: var(--target-min);
+  }
+
+  a.founder__link {
+    color: var(--link);
+  }
+
+  a.founder__link:hover {
+    color: var(--link-hover);
+  }
+
+  .founder__link :global(.founder__icon) {
+    display: block;
+    flex: none;
+    width: 1.125rem;
+    height: 1.125rem;
+    color: var(--text-muted);
+  }
+</style>

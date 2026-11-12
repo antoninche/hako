@@ -1,0 +1,121 @@
+---
+/**
+ * Lien texte des pages La box, Notre engagement et Tutoriels.
+ *
+ * - Vers un autre site : petite flèche oblique, et la mention « (en anglais) »
+ *   quand la page visée n'existe pas en français (hreflang: 'en'). Ce sont de
+ *   simples liens : rien n'est chargé depuis ces sites.
+ * - arrow : flèche « → » pour un lien « pour aller plus loin » dans le site.
+ *
+ * Tout le texte est souligné d'un seul trait. La flèche ne passe jamais seule
+ * à la ligne : elle reste collée au dernier mot, ou à « (en anglais) ». Un nom
+ * à ne pas couper s'écrit avec des espaces insécables dans src/content/
+ * (« Raspberry Pi OS »). La zone cliquable fait au moins 44 px de haut.
+ *
+ *   <TextLink link={{ label: 'Site officiel d’Immich', href: 'https://immich.app/', hreflang: 'en' }} />
+ *   <TextLink link={{ label: 'Comparer les offres', href: '/offres/' }} arrow />
+ */
+import { laBox, type Link } from '../../content/la-box';
+
+interface Props {
+  link: Link;
+  /** Flèche « → » après le texte (lien vers une autre page du site). */
+  arrow?: boolean;
+}
+
+const { link, arrow = false } = Astro.props;
+const external = /^https?:\/\//.test(link.href);
+const language = link.hreflang === 'en' ? `(${laBox.labels.inEnglish})` : '';
+
+// Ce qui reste groupé avec la flèche : « (en anglais) » s'il y a lieu, sinon le dernier mot.
+const cut = language ? link.label.length : link.label.lastIndexOf(' ');
+const start = cut > 0 ? `${link.label.slice(0, cut)} ` : '';
+const last = language ? '' : cut > 0 ? link.label.slice(cut + 1) : link.label;
+---
+
+<a class="text-link" href={link.href} hreflang={link.hreflang}>
+  {start}
+  <span class="text-link__keep">
+    {last}
+    {language && <span class="text-link__lang">{language}</span>}
+    {external ? (
+      <svg class="text-link__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path
+          d="M6 3.5h6.5V10M12.5 3.5 3.5 12.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    ) : arrow ? (
+      <svg
+        class="text-link__icon text-link__icon--next"
+        viewBox="0 0 16 16"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path
+          d="M2.5 8h11m-4-4 4 4-4 4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    ) : null}
+  </span>
+</a>
+
+<style>
+  .text-link {
+    display: inline-block;
+    min-block-size: var(--target-min);
+    padding-block: 0.6rem;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: var(--tracking-ui);
+    color: var(--link);
+    text-decoration-line: underline;
+    text-decoration-thickness: max(1px, 0.06em);
+    text-underline-offset: 0.22em;
+  }
+
+  .text-link:hover {
+    color: var(--link-hover);
+    text-decoration-thickness: max(2px, 0.1em);
+  }
+
+  .text-link__keep {
+    white-space: nowrap;
+  }
+
+  .text-link__lang {
+    font-family: var(--font-body);
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  .text-link__icon {
+    display: inline-block;
+    inline-size: 0.8em;
+    block-size: 0.8em;
+    margin-inline-start: 0.3em;
+    vertical-align: -0.05em;
+  }
+
+  .text-link__icon--next {
+    inline-size: 1em;
+    block-size: 1em;
+    margin-inline-start: 0.4em;
+    vertical-align: -0.15em;
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+
+  .text-link:hover .text-link__icon--next {
+    transform: translateX(3px);
+  }
+</style>

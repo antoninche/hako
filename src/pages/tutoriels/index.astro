@@ -1,0 +1,168 @@
+---
+/**
+ * Page « Tutoriels » : quatre courtes vidéos, publiées sur YouTube et sur
+ * PeerTube. Aucun lecteur intégré : la page ne fait aucune requête vers
+ * ces plateformes, elle propose de simples liens.
+ * Tous les textes sont dans src/content/tutoriels.ts.
+ */
+import PageIntro from '../../components/PageIntro.astro';
+import Section from '../../components/Section.astro';
+import Todo from '../../components/Todo.astro';
+import Prose from '../../components/texte/Prose.astro';
+import Text from '../../components/texte/Text.astro';
+import TextLink from '../../components/texte/TextLink.astro';
+import TutorialCard from '../../components/tutoriels/TutorialCard.astro';
+import { tutoriels } from '../../content/tutoriels';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { isTodo } from '../../lib/todo';
+
+const { meta, intro, listLabel, items, platformsNote, help } = tutoriels;
+---
+
+<BaseLayout title={meta.title} description={meta.description}>
+  <PageIntro title={intro.title}>
+    <p class="lead text-muted">
+      <Text text={intro.lead} />
+    </p>
+  </PageIntro>
+
+  <div class="container">
+    <ul class="tutorials" aria-label={listLabel}>
+      {items.map((tutorial) => (
+        <li>
+          <TutorialCard tutorial={tutorial} />
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <Section surface="sable" labelledby="titre-plateformes">
+    <div class="platforms">
+      <div class="platforms__text">
+        <h2 id="titre-plateformes">{platformsNote.title}</h2>
+        <Prose paragraphs={platformsNote.text} />
+        <p class="platforms__more">
+          <TextLink link={platformsNote.peertubeSite} />
+        </p>
+      </div>
+      <div class="channels surface-creme">
+        <h3 class="channels__title">{platformsNote.channelsLabel}</h3>
+        <ul class="channels__list">
+          {platformsNote.channels.map((channel) => (
+            <li class="channels__item">
+              {isTodo(channel.url) ? (
+                <>
+                  <span class="channels__name">{channel.name}&nbsp;:</span>
+                  <Todo what={channel.url.todo}>{channel.url.placeholder}</Todo>
+                </>
+              ) : (
+                <TextLink link={{ label: channel.name, href: channel.url }} />
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </Section>
+
+  <Section space="s" as="div">
+    <p class="help">
+      <Text text={help.text} /> <TextLink link={help.link} />
+    </p>
+  </Section>
+</BaseLayout>
+
+<style>
+  /* ---------- Les tutoriels ----------
+   * L'espace au-dessus vient de l'ouverture (PageIntro). */
+  .tutorials {
+    display: grid;
+    gap: var(--space-l);
+    margin: 0 0 var(--space-section);
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 44rem) {
+    .tutorials {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-xl) var(--space-l);
+    }
+  }
+
+  /* ---------- YouTube et PeerTube ---------- */
+  .platforms {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .platforms__text {
+    display: grid;
+    align-content: start;
+    gap: var(--space-s);
+  }
+
+  .platforms__more {
+    margin: 0;
+  }
+
+  .channels {
+    align-self: start;
+    padding: var(--space-m);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .channels__title {
+    margin: 0 0 var(--space-2xs);
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .channels__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .channels__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs);
+    min-block-size: var(--target-min);
+  }
+
+  .channels__item + .channels__item {
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  .channels__name {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  @media (min-width: 56rem) {
+    .platforms {
+      grid-template-columns: 3fr 2fr;
+      column-gap: var(--space-2xl);
+    }
+
+    .channels {
+      padding: var(--space-l);
+    }
+  }
+
+  /* ---------- Aide ---------- */
+  .help {
+    margin-inline: auto;
+    text-align: center;
+    text-wrap: balance;
+  }
+</style>

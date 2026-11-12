@@ -1,0 +1,40 @@
+---
+/**
+ * <Todo> des textes MDX (FAQ, pages légales) : le même repère jaune que
+ * src/components/Todo.astro, sans risque de HTML invalide.
+ *
+ * Dans un fichier MDX, un <Todo> écrit seul sur sa ligne, avec son texte
+ * provisoire à la ligne suivante (Prettier le met en forme ainsi quand la
+ * ligne est trop longue), reçoit ce texte dans un paragraphe :
+ * <mark><p>…</p></mark>, ce que le HTML n'autorise pas. Ce composant sort
+ * alors le paragraphe du repère : <p><mark>…</mark></p>. Dans une phrase
+ * (« Durée : <Todo what="…">[durée]</Todo> »), rien ne change.
+ */
+import Todo from '../Todo.astro';
+
+interface Props {
+  /** Ce qui manque, en clair (repris par `npm run todos`). */
+  what: string;
+}
+
+const { what } = Astro.props;
+const html = Astro.slots.has('default') ? await Astro.slots.render('default') : '';
+
+// Contenu fait seulement de paragraphes : leur texte est réuni dans un seul.
+const paragraph = /<p>([\s\S]*?)<\/p>/g;
+const texts = [...html.matchAll(paragraph)].map((match) => (match[1] ?? '').trim());
+const onlyParagraphs = texts.length > 0 && html.replace(paragraph, '').trim() === '';
+const inner = onlyParagraphs ? texts.join(' ') : html.trim();
+---
+
+{onlyParagraphs ? (
+  <p>
+    <Todo what={what}>
+      <Fragment set:html={inner} />
+    </Todo>
+  </p>
+) : (
+  <Todo what={what}>
+    <Fragment set:html={inner} />
+  </Todo>
+)}

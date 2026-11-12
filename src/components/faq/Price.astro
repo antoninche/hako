@@ -1,0 +1,74 @@
+---
+/**
+ * Prix tiré de src/data/tarifs.ts, à écrire dans un texte MDX sans
+ * recopier de chiffre :
+ *
+ *   <Price of="home" />          prix de Hako Home et son statut de TVA (« 600 € TTC »)
+ *   <Price of="pro" />           prix de Hako Pro et son statut de TVA
+ *   <Price of="pro-monthly" />   abonnement de Hako Pro (« 25 € HT par mois »)
+ *   <Price of="after-sales" />   tarif d'une intervention après-vente (Hako Home)
+ *
+ * Le prix s'écrit avec le même composant que sur les pages Offres et
+ * Commander (src/components/commande/Price.astro), donc au même format.
+ * Une valeur encore inconnue (null dans tarifs.ts) s'affiche en repère
+ * jaune, avec le même texte que partout (missingPrice, src/data/faits.ts) ;
+ * elle est déjà recensée dans TODO.md grâce au commentaire « // TODO: » de
+ * tarifs.ts.
+ */
+import Price from '../commande/Price.astro';
+import { missingPrice } from '../../data/faits';
+import { pricing } from '../../data/tarifs';
+import { orMissing } from '../../lib/commande/inline';
+import type { Maybe, TodoValue } from '../../lib/todo';
+
+export type PriceId = 'home' | 'pro' | 'pro-monthly' | 'after-sales';
+
+interface Props {
+  of: PriceId;
+}
+
+/** Montant (null = pas encore fixé), statut de TVA, puis « par mois ». */
+interface Line {
+  readonly amount: number | null;
+  readonly missing: TodoValue;
+  readonly tax?: Maybe<string>;
+  readonly per?: 'month';
+}
+
+const { of: id } = Astro.props;
+
+const { home, pro } = pricing.offers;
+const subscription = pro.subscription;
+
+const lines: Record<PriceId, Line> = {
+  home: {
+    amount: home.priceEur,
+    missing: missingPrice.offerPrice(home),
+    tax: orMissing(home.taxStatus, missingPrice.taxStatus(home)),
+  },
+  pro: {
+    amount: pro.priceEur,
+    missing: missingPrice.offerPrice(pro),
+    tax: orMissing(pro.taxStatus, missingPrice.taxStatus(pro)),
+  },
+  'pro-monthly': {
+    amount: subscription?.monthlyEur ?? null,
+    missing: missingPrice.subscriptionPrice(pro),
+    tax: orMissing(subscription?.taxStatus, missingPrice.subscriptionTax(pro)),
+    per: 'month',
+  },
+  'after-sales': {
+    amount: home.afterSalesRateEur ?? null,
+    missing: missingPrice.afterSalesRate(home),
+  },
+};
+
+const { amount, missing, tax, per } = lines[id];
+---
+
+<Price
+  amount={amount}
+  missing={missing}
+  {...(tax === undefined ? {} : { tax })}
+  {...(per === undefined ? {} : { per })}
+/>

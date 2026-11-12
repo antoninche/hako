@@ -1,0 +1,258 @@
+---
+/**
+ * Page « Contact et équipe » (/contact/).
+ *
+ * Textes : src/content/contact.ts. Coordonnées, zone d'intervention, réseaux
+ * sociaux et équipe : src/data/entreprise.ts. Pas de formulaire de contact :
+ * pour commander, le bouton mène au formulaire de commande.
+ *
+ * La phrase sur la zone d'intervention (« Nous intervenons de… ») est écrite
+ * sous la carte, par ZoneMap : elle n'est pas répétée à côté.
+ */
+import ZoneMap from '../../components/carte/ZoneMap.astro';
+import ContactMethods from '../../components/contact/ContactMethods.astro';
+import FounderCard from '../../components/contact/FounderCard.astro';
+import Fact from '../../components/Fact.astro';
+import Icon from '../../components/Icon.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import SocialLinks from '../../components/SocialLinks.astro';
+import { contactPage as copy } from '../../content/contact';
+import { company } from '../../data/entreprise';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title={copy.title} description={copy.description}>
+  <PageIntro title={copy.title}>
+    <p class="lead text-muted">{copy.intro}</p>
+  </PageIntro>
+
+  <section class="block block--first" aria-labelledby="nous-joindre">
+    <div class="container">
+      <h2 class="block__title" id="nous-joindre">
+        {copy.reach.title}
+      </h2>
+      <ContactMethods />
+      <p class="block__note">
+        <Icon name="clock" class="block__note-icon" />
+        <span>
+          <Fact value={copy.reach.responseTime} />
+        </span>
+      </p>
+
+      <div class="follow">
+        <div class="follow__text">
+          <h3 class="kicker follow__title">{copy.social.title}</h3>
+          <p>
+            {copy.social.text} <a href={copy.social.link.href}>{copy.social.link.label}</a>
+          </p>
+        </div>
+        <SocialLinks layout="row" />
+      </div>
+    </div>
+  </section>
+
+  <section class="block surface-sable" aria-labelledby="equipe">
+    <div class="container">
+      <div class="block__heading">
+        <h2 class="block__title" id="equipe">
+          {copy.team.title}
+        </h2>
+        <p class="block__lead">{copy.team.intro}</p>
+      </div>
+      <ul class="team">
+        {company.founders.map((founder) => (
+          <li class="team__member">
+            <FounderCard founder={founder} linkedinLabel={copy.team.linkedinLabel} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="zone">
+    <div class="container area">
+      <h2 class="block__title area__title" id="zone">
+        {copy.area.title}
+      </h2>
+      <div class="area__map">
+        <ZoneMap />
+      </div>
+      <ul class="area__facts">
+        <li>
+          <Icon name="arrow-right" class="area__icon" />
+          <span>
+            {copy.area.outsideLabel}&nbsp;: <Fact value={company.serviceArea.outside} />.
+          </span>
+        </li>
+        <li>
+          <Icon name="video" class="area__icon" />
+          <span>{copy.area.remote}</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* ---------- Blocs de la page ---------- */
+
+  .block {
+    padding-block: clamp(3rem, 2rem + 4vw, 6rem);
+  }
+
+  .block--first {
+    padding-block-start: 0;
+  }
+
+  .block__heading {
+    display: grid;
+    gap: var(--space-s);
+    margin-block-end: var(--space-xl);
+  }
+
+  .block__heading > * {
+    margin: 0;
+  }
+
+  .block__title {
+    margin: 0 0 var(--space-l);
+    font-family: var(--font-display);
+    font-variation-settings: var(--font-display-variation);
+    font-size: var(--step-3);
+    font-weight: 400;
+    line-height: var(--leading-tight);
+    color: var(--text);
+  }
+
+  .block__heading .block__title {
+    margin: 0;
+  }
+
+  .block__lead {
+    max-width: min(var(--measure), 60ch);
+    font-size: var(--step-1);
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+
+  .block__note {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: baseline;
+    margin: var(--space-m) 0 0;
+    color: var(--text-muted);
+  }
+
+  .block__note :global(.block__note-icon) {
+    width: 1.25rem;
+    height: 1.25rem;
+    transform: translateY(0.2em);
+  }
+
+  /* ---------- Réseaux sociaux (fin de « Nous joindre ») ---------- */
+
+  .follow {
+    display: grid;
+    gap: var(--space-m);
+    margin-block-start: var(--space-xl);
+    padding-block-start: var(--space-l);
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  @media (min-width: 64rem) {
+    .follow {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      align-items: center;
+      gap: var(--space-2xl);
+    }
+  }
+
+  .follow__text > * {
+    margin: 0;
+  }
+
+  .follow__text > * + * {
+    margin-block-start: var(--space-2xs);
+  }
+
+  .follow__text p {
+    max-width: var(--measure);
+    color: var(--text-muted);
+  }
+
+  /* ---------- Équipe ---------- */
+
+  .team {
+    display: grid;
+    gap: var(--space-m);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 64rem) {
+    .team {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-l);
+    }
+  }
+
+  /* ---------- Zone d'intervention ----------
+     Téléphone : titre, carte (avec la phrase sur la zone), puis le reste.
+     Grand écran : titre et compléments à gauche, carte à droite. */
+
+  .area {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  .area__title {
+    margin: 0;
+  }
+
+  @media (min-width: 64rem) {
+    .area {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      grid-template-rows: auto 1fr;
+      grid-template-areas:
+        'title map'
+        'facts map';
+      align-items: start;
+      gap: var(--space-l) var(--space-2xl);
+    }
+
+    .area__title {
+      grid-area: title;
+    }
+
+    .area__map {
+      grid-area: map;
+    }
+
+    .area__facts {
+      grid-area: facts;
+    }
+  }
+
+  .area__facts {
+    display: grid;
+    gap: var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .area__facts li {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: baseline;
+    max-width: var(--measure);
+  }
+
+  .area__facts :global(.area__icon) {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--text-muted);
+    transform: translateY(0.2em);
+  }
+</style>

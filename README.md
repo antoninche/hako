@@ -42,15 +42,18 @@ Les tests vérifient que chaque page s’affiche sans erreur, que la page 404 r�
 
 ## Modifier les textes et les informations
 
-Les textes et les informations de l’entreprise sont rassemblés dans `src/data/`. Les composants et les pages ne contiennent que des mots de structure (« Menu », « Plan du site », « Nous suivre », « Crédits »…) ; seule la charte interne `/charte/` garde ses textes d’exemple dans sa page.
+Les informations de l’entreprise sont rassemblées dans `src/data/`, les textes des pages dans `src/content/`, avec le titre et le résumé de chaque page (onglet du navigateur, moteurs de recherche). Les composants ne contiennent que des mots de structure (« Menu », « Plan du site », « Nous suivre », « Crédits »…) ; seule la charte interne `/charte/` garde ses textes d’exemple dans sa page.
 
 - `entreprise.ts` : nom, accroche, promesse, e-mail, téléphone, nom de domaine, réseaux sociaux, zone d’intervention, équipe et phrases du pied de page.
-- `pages.ts` : titre et résumé de chaque page (onglet du navigateur, moteurs de recherche), phrase des pages provisoires, textes de la page 404.
+- `tarifs.ts` : tous les prix et les options de stockage (voir [docs/commande.md](docs/commande.md)).
+- `faits.ts` : les faits que plusieurs pages reprennent (accès depuis l’extérieur, copie de secours, déménageur, paiement, garantie, frais d’envoi, acompte), écrits une seule fois.
 - `navigation.ts` : liens de l’en-tête, du plan du site et des pages légales.
 - `credits.ts` : auteurs et licences des polices et des icônes, affichés dans les mentions légales.
 - `types.ts` : forme des informations de `entreprise.ts` (à changer seulement pour un nouveau genre d’information).
 
-Dans ces fichiers, on peut écrire des espaces ordinaires : les espaces insécables avant « : » et à l’intérieur des guillemets « » sont posées automatiquement (`src/lib/typography.ts`). Pour l’apostrophe, on écrit ’ ; un texte qui contient l’apostrophe droite (') s’entoure de guillemets doubles ("quelqu'un"), sinon la construction échoue. Les autres règles de typographie et de ton sont dans [docs/brand.md](docs/brand.md).
+Les prix, les pourcentages et les nombres s’écrivent avec `src/lib/format.ts` (`formatEur()`, `formatPercent()`…), le seul fichier qui appelle `Intl` : « 1 000 € » s’écrit partout de la même façon, avec des espaces insécables.
+
+Dans `entreprise.ts` et `credits.ts`, on peut écrire des espaces ordinaires : les espaces insécables avant « : » et à l’intérieur des guillemets « » sont posées automatiquement (`src/lib/typography.ts`). Pour l’apostrophe, on écrit ’ ; un texte qui contient l’apostrophe droite (') s’entoure de guillemets doubles ("quelqu'un"), sinon la construction échoue. Les autres règles de typographie et de ton sont dans [docs/brand.md](docs/brand.md).
 
 Une information encore inconnue s’écrit avec l’outil `todo()` de `src/lib/todo.ts`, qui reçoit ce qui manque puis le texte provisoire affiché entre crochets. Quand l’information arrive, on remplace tout l’appel par la valeur :
 

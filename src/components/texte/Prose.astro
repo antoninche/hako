@@ -1,0 +1,156 @@
+---
+/**
+ * Texte courant d'une page, sous l'une de ses deux formes :
+ *
+ * - paragraphs : des paragraphes venus de src/content/*.ts (pages La box,
+ *   Notre engagement et Tutoriels). Chaque paragraphe est une liste de
+ *   morceaux mis bout à bout : du texte, une information manquante (affichée
+ *   en jaune avec <Todo>) ou un mot japonais (lu en japonais par les lecteurs
+ *   d'écran). Un paragraphe vide est ignoré. Le texte garde la couleur du
+ *   bloc qui l'entoure.
+ * - sans paragraphs : le texte écrit en MDX, passé en contenu (réponses de
+ *   la FAQ, pages légales). Ses éléments, produits par le Markdown sans
+ *   classe, sont mis en forme ici : paragraphes, listes, intertitres, liens,
+ *   adresses ; ces styles restent limités à ce bloc.
+ *
+ *   <Prose paragraphs={part.text} />
+ *   <Prose><Content components={mdxComponents} /></Prose>
+ */
+import Text from './Text.astro';
+import Todo from '../Todo.astro';
+import type { Paragraph } from '../../content/la-box';
+import { isTodo } from '../../lib/todo';
+
+interface Props {
+  /** Paragraphes venus de src/content/ ; sans eux, le contenu MDX passé entre les balises. */
+  paragraphs?: readonly Paragraph[];
+}
+
+const { paragraphs } = Astro.props;
+const filled = paragraphs?.filter((parts) => parts.length > 0);
+---
+
+{filled ? (
+  <div class="prose prose--paragraphs">
+    {filled.map((parts) => (
+      <p>
+        {parts.map((part) =>
+          typeof part === 'string' ? (
+            <Text text={part} />
+          ) : isTodo(part) ? (
+            <Todo what={part.todo}>{part.placeholder}</Todo>
+          ) : (
+            <span lang="ja">{part.ja}</span>
+          ),
+        )}
+      </p>
+    ))}
+  </div>
+) : (
+  <div class="prose prose--mdx">
+    <slot />
+  </div>
+)}
+
+<style>
+  /* ---------- Paragraphes venus de src/content/ ---------- */
+
+  .prose--paragraphs {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .prose--paragraphs p {
+    margin: 0;
+    max-inline-size: var(--measure);
+  }
+
+  /* ---------- Texte MDX ---------- */
+
+  .prose--mdx {
+    max-width: var(--measure);
+    color: var(--text);
+  }
+
+  /* Rythme vertical : un espace régulier entre les blocs, quel que soit le
+     reste de la feuille de style. */
+  .prose--mdx > :global(*) {
+    margin-block: 0;
+  }
+
+  .prose--mdx > :global(* + *) {
+    margin-block-start: var(--space-s);
+  }
+
+  .prose--mdx :global(p) {
+    text-wrap: pretty;
+  }
+
+  .prose--mdx :global(:is(ul, ol)) {
+    padding-inline-start: 1.35em;
+  }
+
+  .prose--mdx :global(ul) {
+    list-style: disc;
+  }
+
+  .prose--mdx :global(ol) {
+    list-style: decimal;
+  }
+
+  .prose--mdx :global(li) {
+    padding-inline-start: 0.25em;
+  }
+
+  .prose--mdx :global(li + li) {
+    margin-block-start: var(--space-2xs);
+  }
+
+  .prose--mdx :global(li::marker) {
+    color: var(--text-muted);
+  }
+
+  .prose--mdx :global(strong) {
+    font-weight: 700;
+  }
+
+  .prose--mdx :global(h2) {
+    margin-block-start: var(--space-xl);
+    font-family: var(--font-display);
+    font-variation-settings: var(--font-display-variation);
+    font-size: var(--step-2);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+    color: var(--text);
+  }
+
+  .prose--mdx :global(h3) {
+    margin-block-start: var(--space-l);
+    font-family: var(--font-display);
+    font-variation-settings: var(--font-display-variation);
+    font-size: var(--step-1);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+    color: var(--text);
+  }
+
+  .prose--mdx > :global(:is(h2, h3) + *) {
+    margin-block-start: var(--space-xs);
+  }
+
+  .prose--mdx > :global(:first-child) {
+    margin-block-start: 0;
+  }
+
+  /* Adresse à taper (ex. http://mabox.local) : jamais coupée en fin de ligne. */
+  .prose--mdx :global(code) {
+    padding: 0.05em 0.35em;
+    border-radius: var(--radius-s);
+    font-family: var(--font-ui);
+    font-size: 0.95em;
+    letter-spacing: var(--tracking-ui);
+    white-space: nowrap;
+    color: var(--chocolat);
+    background-color: var(--sable);
+  }
+</style>

@@ -1,0 +1,268 @@
+---
+/**
+ * Page « Questions fréquentes » (/faq/).
+ *
+ * Les questions et leurs réponses sont dans src/content/faq/, un fichier MDX
+ * par question ; les rubriques sont définies dans src/content.config.ts.
+ * Les textes de la page elle-même (titre, introduction, dernier bloc) sont
+ * réunis dans l'objet `page` ci-dessous.
+ */
+import { getCollection, render } from 'astro:content';
+
+import FaqItem from '../../components/faq/FaqItem.astro';
+import { mdxComponents } from '../../components/legal/mdx-components';
+import PageIntro from '../../components/PageIntro.astro';
+import { routes } from '../../data/navigation';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const page = {
+  title: 'Questions fréquentes',
+  description:
+    'Accès à vos photos, panne, abonnement, zone d’intervention : des réponses simples aux questions sur HAKO, la box qui garde vos photos chez vous.',
+  intro:
+    'Vos données, la box au quotidien, la commande : des réponses simples, en quelques phrases. Si votre question n’y est pas, écrivez-nous.',
+  topicsLabel: 'Rubriques',
+  more: {
+    title: 'Vous n’avez pas trouvé votre réponse ?',
+    text: 'Posez-nous votre question directement, par e-mail ou par téléphone. Nos coordonnées sont sur la page Contact.',
+    link: { label: 'Nous contacter', href: routes.contact },
+  },
+};
+
+/** « Vos données » → « vos-donnees » : identifiant lisible dans l'adresse. */
+function slugify(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+const entries = (await getCollection('faq')).sort(
+  (a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id),
+);
+
+// Les rubriques s'affichent dans l'ordre de leur première question.
+const byTopic = new Map<string, typeof entries>();
+for (const entry of entries) {
+  byTopic.set(entry.data.topic, [...(byTopic.get(entry.data.topic) ?? []), entry]);
+}
+
+const groups = await Promise.all(
+  [...byTopic].map(async ([title, list], index) => ({
+    id: slugify(title),
+    number: String(index + 1).padStart(2, '0'),
+    title,
+    items: await Promise.all(
+      list.map(async (entry) => ({
+        id: entry.id,
+        question: entry.data.question,
+        Content: (await render(entry)).Content,
+      })),
+    ),
+  })),
+);
+
+// Chaque identifiant sert d'ancre (/faq/#abonnement) : il doit être unique.
+const ids = groups.flatMap((group) => [group.id, ...group.items.map((item) => item.id)]);
+const duplicate = ids.find((id, index) => ids.indexOf(id) !== index);
+if (duplicate) {
+  throw new Error(`FAQ : l'identifiant « ${duplicate} » est utilisé deux fois.`);
+}
+---
+
+<BaseLayout title={page.title} description={page.description}>
+  <PageIntro title={page.title}>
+    <p class="lead text-muted">{page.intro}</p>
+  </PageIntro>
+
+  <div class="container faq">
+    <nav class="faq__topics" aria-labelledby="faq-rubriques">
+      <p class="kicker faq__topics-label" id="faq-rubriques">
+        {page.topicsLabel}
+      </p>
+      <ol class="faq__topics-list">
+        {groups.map((group) => (
+          <li>
+            <a class="faq__topic-link" href={`#${group.id}`}>
+              <span class="faq__number" aria-hidden="true">
+                {group.number}
+              </span>
+              <span>{group.title}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+
+    <div class="faq__groups">
+      {groups.map((group) => (
+        <section class="faq__group" aria-labelledby={group.id}>
+          <h2 class="faq__group-title" id={group.id}>
+            <span class="faq__number" aria-hidden="true">
+              {group.number}
+            </span>
+            <span>{group.title}</span>
+          </h2>
+          <div class="faq__list">
+            {group.items.map(({ id, question, Content }) => (
+              <FaqItem id={id} question={question}>
+                <Content components={mdxComponents} />
+              </FaqItem>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  </div>
+
+  <section class="faq-more surface-sable" aria-labelledby="faq-plus">
+    <div class="container faq-more__inner">
+      <div class="faq-more__text">
+        <h2 class="faq-more__title" id="faq-plus">
+          {page.more.title}
+        </h2>
+        <p>{page.more.text}</p>
+      </div>
+      <a class="btn btn--primary faq-more__button" href={page.more.link.href}>
+        {page.more.link.label}
+      </a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .faq {
+    display: grid;
+    gap: var(--space-xl);
+    padding-block-end: var(--space-section);
+  }
+
+  @media (min-width: 64rem) {
+    .faq {
+      grid-template-columns: 13rem minmax(0, 1fr);
+      gap: clamp(var(--space-xl), 6vw, var(--space-3xl));
+    }
+  }
+
+  /* ---------- Rubriques ---------- */
+
+  .faq__topics {
+    align-self: start;
+  }
+
+  @media (min-width: 64rem) {
+    .faq__topics {
+      position: sticky;
+      top: calc(var(--header-height) + var(--space-l));
+    }
+  }
+
+  .faq__topics-label {
+    margin: 0 0 var(--space-2xs);
+  }
+
+  .faq__topics-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  .faq__topics-list li {
+    border-block-end: var(--rule-width) solid var(--line);
+  }
+
+  .faq__topic-link {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-xs);
+    min-height: var(--target-min);
+    padding-block: var(--space-xs);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text);
+    text-decoration-line: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.22em;
+  }
+
+  .faq__topic-link:hover {
+    color: var(--text);
+    text-decoration-color: currentColor;
+  }
+
+  .faq__number {
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Questions ---------- */
+
+  .faq__group + .faq__group {
+    margin-block-start: var(--space-2xl);
+  }
+
+  .faq__group-title {
+    display: grid;
+    gap: var(--space-2xs);
+    margin: 0 0 var(--space-m);
+    font-family: var(--font-display);
+    font-variation-settings: var(--font-display-variation);
+    font-size: var(--step-3);
+    font-weight: 400;
+    line-height: var(--leading-tight);
+    color: var(--text);
+  }
+
+  .faq__list {
+    border-block-start: var(--rule-width) solid var(--line-strong);
+  }
+
+  /* ---------- Dernier bloc ---------- */
+
+  .faq-more {
+    padding-block: var(--space-2xl);
+  }
+
+  .faq-more__inner {
+    display: grid;
+    gap: var(--space-l);
+    justify-items: start;
+  }
+
+  @media (min-width: 48rem) {
+    .faq-more__inner {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+    }
+  }
+
+  .faq-more__text > * {
+    margin: 0;
+  }
+
+  .faq-more__text > * + * {
+    margin-block-start: var(--space-xs);
+  }
+
+  .faq-more__title {
+    font-family: var(--font-display);
+    font-variation-settings: var(--font-display-variation);
+    font-size: var(--step-2);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+    color: var(--text);
+  }
+
+  .faq-more__text p {
+    max-width: var(--measure);
+    color: var(--text-muted);
+  }
+</style>

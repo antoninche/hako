@@ -1,0 +1,23 @@
+---
+/**
+ * Rubrique « Crédits » des mentions légales : les polices et les icônes
+ * créées par d'autres, avec leur auteur, leur licence et nos modifications.
+ * Les textes sont dans src/data/credits.ts.
+ *
+ * S'écrit sans import dans src/content/legal/mentions-legales.mdx, sous son
+ * intertitre : <Credits /> (voir mdx-components.ts).
+ */
+import { credits, creditsIntro, trademarksNote } from '../../data/credits';
+---
+
+<p>{creditsIntro}</p>
+<ul>
+  {credits.map((credit) => (
+    <li>
+      <strong>{credit.work}</strong>&nbsp;: {credit.author}, licence{' '}
+      <a href={credit.license.href}>{credit.license.name}</a>
+      {credit.changes ? <>. Modifications&nbsp;: {credit.changes}.</> : '.'}
+    </li>
+  ))}
+</ul>
+<p class="text-muted">{trademarksNote}</p>
