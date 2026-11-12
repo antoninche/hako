@@ -1,0 +1,172 @@
+# Exemple de fichier .htaccess pour le site HAKO, chez un hébergeur mutualisé
+# sous Apache 2.4 (version 2.4.10 ou plus récente).
+#
+# Mise en place : copier ce fichier à la racine du site en ligne, à côté de
+# index.html, sous le nom « .htaccess » (avec le point au début). Les
+# explications et les vérifications à faire après la mise en ligne sont dans
+# docs/hebergement.md.
+#
+# À n'envoyer qu'une fois HTTPS en place, c'est-à-dire quand https:// s'ouvre
+# sans alerte de certificat, avec et sans www : ce fichier redirige toute
+# adresse http:// vers https://, et les navigateurs gardent en mémoire cette
+# redirection permanente. Sa politique de sécurité fait aussi charger chaque
+# fichier de la page en https://.
+#
+# Si le site affiche une erreur 500 juste après l'envoi de ce fichier,
+# l'hébergeur refuse l'une des directives : le journal d'erreurs de
+# l'hébergeur indique laquelle. Les blocs sans <IfModule> le sont exprès :
+# mieux vaut une erreur visible tout de suite qu'un site en ligne sans
+# protection.
+#
+# Les en-têtes de sécurité sont exactement ceux de scripts/serve-prod.mjs ;
+# tests/csp.spec.ts vérifie que les deux restent identiques.
+
+
+# ----------------------------------------------------------------------------
+# Adresses
+# ----------------------------------------------------------------------------
+
+# Pas de liste des fichiers d'un dossier, et pas de « devinette » d'adresse
+# (/offres ne doit jamais servir un fichier offres.html).
+Options -Indexes -MultiViews
+
+# Page servie pour une adresse de dossier.
+DirectoryIndex index.html
+
+# /offres est redirigé vers /offres/ : toutes les adresses du site finissent
+# par « / ». C'est le réglage par défaut d'Apache, rappelé ici ; la règle
+# « dossier sans / final », plus bas, passe avant lui.
+DirectorySlash On
+
+# Page « introuvable » du site, envoyée avec le code 404.
+ErrorDocument 404 /404.html
+
+# Fichiers cachés (.htaccess, .env…) : introuvables. Seul /.well-known/ reste
+# accessible, l'hébergeur s'en sert pour obtenir le certificat HTTPS.
+RedirectMatch 404 "/\.(?!well-known/)"
+
+RewriteEngine On
+
+# Dossier demandé sans « / » final : une seule redirection, directement vers
+# https://…/dossier/ (http://exemple.fr/offres mène à https://exemple.fr/offres/).
+# DirectorySlash seul garderait http:// chez les hébergeurs où HTTPS est géré
+# en amont : le visiteur passerait par une adresse non chiffrée. /.well-known/
+# reste à l'écart, comme dans la règle suivante.
+RewriteCond %{REQUEST_URI} !^/\.well-known/
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule [^/]$ https://%{HTTP_HOST}%{REQUEST_URI}/ [R=301,L]
+
+# HTTPS obligatoire : toute autre adresse en http:// est redirigée vers
+# https://. Chez certains hébergeurs, HTTPS est géré en amont et la variable
+# HTTPS reste à « off » : la condition sur X-Forwarded-Proto évite alors une
+# boucle de redirections.
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+
+# ----------------------------------------------------------------------------
+# En-têtes de sécurité (envoyés avec toutes les réponses, erreurs comprises)
+# ----------------------------------------------------------------------------
+
+# Politique de sécurité du contenu (CSP) : le navigateur ne charge et
+# n'exécute que ce qui vient du site lui-même (scripts, styles, images,
+# polices, modèle 3D) ; aucun code écrit dans la page n'est exécuté ; aucun
+# site ne peut afficher le nôtre dans un cadre ; une adresse http:// restée
+# dans une page est chargée en https://.
+# Le modèle 3D produit par npm run model:optimize s'en contente. Un modèle
+# optimisé avec --meshopt demande en plus 'wasm-unsafe-eval' dans script-src,
+# à ajouter aussi ailleurs : voir docs/hebergement.md, « La scène 3D ».
+Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+
+# Fonctions du navigateur que le site n'utilise jamais (capteurs, caméra,
+# micro, position, paiement, périphériques, identifiants, centres d'intérêt
+# publicitaires) : coupées.
+Header always set Permissions-Policy "accelerometer=(), autoplay=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), compute-pressure=(), display-capture=(), encrypted-media=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), storage-access=(), usb=(), window-management=(), xr-spatial-tracking=()"
+
+# Les autres sites ne reçoivent pas l'adresse de la page d'où vient le visiteur.
+Header always set Referrer-Policy "same-origin"
+
+# Le navigateur respecte le type de fichier annoncé, sans le deviner.
+Header always set X-Content-Type-Options "nosniff"
+
+# Pas d'affichage dans un cadre, pour les navigateurs anciens (les récents
+# appliquent frame-ancestors, plus haut).
+Header always set X-Frame-Options "DENY"
+
+# Une page d'un autre site ouverte depuis le nôtre (ou qui ouvre le nôtre) ne
+# peut pas la piloter ; les fichiers du site ne peuvent pas être chargés par
+# un autre site.
+Header always set Cross-Origin-Opener-Policy "same-origin"
+Header always set Cross-Origin-Resource-Policy "same-origin"
+
+# HTTPS strict (HSTS) : à activer seulement une fois HTTPS en place sur toutes
+# les adresses du site (avec et sans www). D'abord cinq minutes pendant
+# quelques jours, puis un an. Voir docs/hebergement.md avant de le faire.
+# Header always set Strict-Transport-Security "max-age=300"
+# Header always set Strict-Transport-Security "max-age=31536000"
+
+
+# ----------------------------------------------------------------------------
+# Types de fichiers
+# ----------------------------------------------------------------------------
+
+AddDefaultCharset utf-8
+AddCharset utf-8 .css .js .mjs .json .webmanifest .xml .txt .vtt
+
+AddType text/javascript js mjs
+AddType application/manifest+json webmanifest
+AddType image/svg+xml svg
+AddType image/webp webp
+AddType image/avif avif
+AddType font/woff2 woff2
+AddType font/woff woff
+AddType model/gltf-binary glb
+AddType model/gltf+json gltf
+AddType application/wasm wasm
+
+
+# ----------------------------------------------------------------------------
+# Durée de conservation dans le navigateur (cache)
+# ----------------------------------------------------------------------------
+
+# Les durées sont toutes fixées ici ; mod_expires est coupé pour éviter deux
+# consignes contradictoires.
+<IfModule mod_expires.c>
+    ExpiresActive Off
+</IfModule>
+
+# Pas d'ETag : avec la compression, Apache 2.4 ajoute « -gzip » ou « -br » à
+# l'ETag, ce qui empêche les réponses 304 (« pas modifié »). La date de
+# modification (Last-Modified) suffit au navigateur pour revalider sa copie.
+FileETag None
+
+# Par défaut (images, icônes, modèle 3D) : un jour.
+Header set Cache-Control "public, max-age=86400"
+# Pages : le navigateur garde une copie mais vérifie à chaque visite qu'elle
+# est à jour, pour que chacun voie la dernière version dès sa mise en ligne.
+Header set Cache-Control "no-cache" "expr=%{CONTENT_TYPE} =~ m#^text/html#"
+# Manifeste, robots.txt, plan du site : une heure.
+Header set Cache-Control "public, max-age=3600" "expr=%{CONTENT_TYPE} =~ m#^(application/manifest\+json|application/xml|text/plain)#"
+# Fichiers de /_astro/ (une empreinte dans le nom change à chaque modification)
+# et polices de /fonts/ (noms versionnés) : un an, sans revalidation.
+Header set Cache-Control "public, max-age=31536000, immutable" "expr=%{REQUEST_URI} =~ m#^/(_astro|fonts)/#"
+
+
+# ----------------------------------------------------------------------------
+# Compression
+# ----------------------------------------------------------------------------
+
+# Brotli (si l'hébergeur l'a installé) est déclaré avant gzip : si le
+# navigateur accepte brotli, la réponse est compressée en brotli et gzip la
+# laisse telle quelle ; sinon gzip prend le relais. Les images et les polices
+# WOFF2 sont déjà compressées et ne figurent pas dans la liste.
+<IfModule mod_filter.c>
+    <IfModule mod_brotli.c>
+        AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/javascript application/javascript text/plain text/vtt application/json application/manifest+json application/xml image/svg+xml image/x-icon image/vnd.microsoft.icon application/wasm model/gltf+json model/gltf-binary font/ttf font/otf
+    </IfModule>
+    <IfModule mod_deflate.c>
+        AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript text/plain text/vtt application/json application/manifest+json application/xml image/svg+xml image/x-icon image/vnd.microsoft.icon application/wasm model/gltf+json model/gltf-binary font/ttf font/otf
+    </IfModule>
+</IfModule>
