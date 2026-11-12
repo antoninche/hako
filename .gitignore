@@ -1,0 +1,24 @@
+# pi-gen, récupéré à la révision figée dans versions.env, avec ses dossiers de travail
+/pi-gen/
+work/
+
+# Images et archives produites par la construction
+/deploy/
+*.img
+*.img.*
+*.zip
+*.tar
+*.tar.*
+
+# Secrets et fichiers locaux : clés SSH, mots de passe, fichiers d'environnement
+/local/
+*.env
+!/versions.env
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+id_ecdsa*
+
+# Système
+.DS_Store
