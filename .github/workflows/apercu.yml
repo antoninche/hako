@@ -1,0 +1,49 @@
+# Aperçu du site sur GitHub Pages : https://antoninche.github.io/hako/
+# À chaque envoi sur main, le site est construit puis publié. Il est servi
+# dans le sous-dossier /hako/ : l'étape « sous-dossier » réécrit les adresses
+# (voir scripts/deploy/sous-dossier.mjs).
+name: Aperçu en ligne
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  construire:
+    runs-on: ubuntu-latest
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+      SITE_URL: https://antoninche.github.io
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run check:dist
+      - run: node scripts/deploy/sous-dossier.mjs dist /hako/ --site "$SITE_URL"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  publier:
+    needs: construire
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.publication.outputs.page_url }}
+    steps:
+      - id: publication
+        uses: actions/deploy-pages@v4

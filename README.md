@@ -2,6 +2,8 @@
 
 HAKO est une jeune entreprise de Provence. Elle installe chez ses clients, familles et petites entreprises, une petite box qui garde leurs photos et leurs fichiers chez eux, puis les forme et les accompagne. Ce dépôt contient son site web, construit avec Astro en pages statiques. Le site ne dépose aucun cookie et ne charge rien depuis un autre site : polices, logo et icônes sont servis par le site lui-même, et les tests le vérifient à chaque lancement.
 
+Aperçu en ligne : https://antoninche.github.io/hako/. Il est reconstruit et publié à chaque envoi sur la branche `main` (`.github/workflows/apercu.yml`). Comme il est servi dans le sous-dossier `/hako/`, l'étape `scripts/deploy/sous-dossier.mjs` réécrit les adresses du site construit ; avec un nom de domaine propre, on publie `dist/` tel quel.
+
 ## Prérequis
 
 - Node.js 22.23.4 ou plus récent, avec npm. Le projet est testé avec Node 26.8.2 (le fichier `.nvmrc` indique la version 26).
