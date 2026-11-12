@@ -9,6 +9,8 @@
  *   dès qu'il est renseigné, le repère disparaît.
  * - Le déménageur et la phrase sur le nom viennent de src/data/faits.ts et
  *   de src/data/entreprise.ts, comme sur les autres pages.
+ * - L'ouverture montre la box du prototype (image de synthèse), seule image
+ *   chargée en priorité.
  * - Les boutons de commande choisissent l'offre (?offre=home ou ?offre=pro).
  * - Le fait d'actualité garde sa source : un seul lien, vers l'article en anglais.
  * - Une seule h1, aucune accolade visible, la zone d'intervention dite une fois.
@@ -115,10 +117,25 @@ test('le déménageur et la phrase sur le nom viennent des fichiers de données'
   await expect(page.locator('.mover__included')).toHaveText(`Compris dans ${moverOffers.names}`, {
     useInnerText: true,
   });
-  // Une seule phrase pour le nom, la même que sur la page Notre engagement.
-  const caption = page.locator('.hero-mark__caption');
-  expect(normalize(await caption.textContent())).toBe(normalize(company.nameMeaning));
-  await expect(caption.locator('[lang="ja"]')).toHaveText(company.kanji);
+  // Sous l'image de l'ouverture : « image de synthèse », puis la phrase sur le
+  // nom, la même que sur la page Notre engagement.
+  const caption = normalize(await page.locator('.hero-visual figcaption').textContent());
+  expect(caption).toContain('image de synthèse');
+  expect(caption.endsWith(normalize(company.nameMeaning))).toBe(true);
+  await expect(page.locator('.hero-visual figcaption [lang="ja"]')).toHaveText(company.kanji);
+});
+
+test('l’image de l’ouverture est la box du prototype, chargée en premier', async ({ page }) => {
+  const image = page.locator('.hero-visual img');
+  await expect(image).toHaveCount(1);
+  await expect(image).toHaveAttribute('fetchpriority', 'high');
+  await expect(image).not.toHaveAttribute('loading', 'lazy');
+  await expect(image).toHaveAttribute('alt', /kanji/);
+  await expect(page.locator('.hero-visual source[type="image/avif"]')).toHaveCount(1);
+  // Seule image demandée en priorité dans la page.
+  await expect(page.locator('main img[fetchpriority="high"]')).toHaveCount(1);
+  // Elle est bien arrivée (largeur réelle non nulle).
+  expect(await image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
 });
 
 test('le fait d’actualité garde sa source, en anglais', async ({ page }) => {

@@ -29,7 +29,8 @@
     "model:optimize": "node scripts/model/optimize.mjs",
     "model:test-glb": "node scripts/model/make-test-glb.mjs",
     "model:fallback": "node scripts/model/capture-fallback.mjs",
-    "map:build": "node scripts/map/build.mjs"
+    "map:build": "node scripts/map/build.mjs",
+    "prototype:images": "node scripts/prototype/prepare.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "8.1.5",

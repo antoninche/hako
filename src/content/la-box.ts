@@ -162,9 +162,9 @@ export const laBox = {
         name: 'Un boîtier imprimé en 3D',
         text: [
           [
-            'Un boîtier sobre, imprimé en 3D. Sur un côté, le logo : le kanji ',
+            'Un boîtier sobre, imprimé en 3D et posé sur un socle brun foncé. Sur le couvercle, le logo en relief : le kanji ',
             { ja: company.kanji },
-            ', un caractère japonais, et le mot HAKO.',
+            ', un caractère japonais.',
           ],
         ],
       },

@@ -300,9 +300,11 @@ test.describe('Serveur de production local (serve-prod.mjs)', () => {
   }) => {
     const html = await homeHtml(request);
     const svg = firstMatch(html, /<link\b[^>]*\bhref="(\/[^"]+\.svg)"/);
-    const webp = firstMatch(html, /<img\b[^>]*\bsrc="(\/[^"]+\.webp)"/);
+    // Une image WebP de public/ (nom fixe), pas une de /_astro/ (nom haché,
+    // gardée un an : vérifié plus haut).
+    const webp = firstMatch(html, /<img\b[^>]*\bsrc="(\/(?!_astro\/)[^"]+\.webp)"/);
     expect(svg, 'icône SVG déclarée par les pages').toBeTruthy();
-    expect(webp, 'image WebP sur l’accueil').toBeTruthy();
+    expect(webp, 'image WebP de public/ sur l’accueil').toBeTruthy();
     // Le modèle d'essai des tests, servi comme le serait public/models/hako.glb.
     const fixtures = await startProdServer({ root: repoPath('tests/fixtures') });
     try {

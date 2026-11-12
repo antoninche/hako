@@ -89,8 +89,6 @@ export interface HeroCopy {
   /** Nom de la liste de repères, lu par les lecteurs d’écran. */
   readonly highlightsLabel: string;
   readonly highlights: readonly string[];
-  /** Nom du kanji du logo, lu par les lecteurs d’écran. */
-  readonly kanjiLabel: string;
 }
 
 /** L’accroche et la promesse viennent de src/data/entreprise.ts. */
@@ -105,7 +103,6 @@ export const hero: HeroCopy = {
     'Logiciels libres pour vos photos et fichiers',
     'Zéro accès à vos données',
   ],
-  kanjiLabel: 'Le kanji « hako », logo de HAKO',
 };
 
 /* ------------------------------------------------------------------ */

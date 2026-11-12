@@ -1,8 +1,9 @@
 ---
 /**
- * Page « La box » : ce qu'il y a dedans, ce qui tourne dedans, pourquoi des
- * logiciels libres, et les limites dites franchement.
- * Tous les textes sont dans src/content/la-box.ts.
+ * Page « La box » : le prototype en images, ce qu'il y a dedans, ce qui tourne
+ * dedans, pourquoi des logiciels libres, et les limites dites franchement.
+ * Les textes sont dans src/content/la-box.ts, et ceux des images du
+ * prototype dans src/content/prototype.ts.
  */
 import Illustration from '../../components/Illustration.astro';
 import PageIntro from '../../components/PageIntro.astro';
@@ -10,10 +11,12 @@ import Section from '../../components/Section.astro';
 import Todo from '../../components/Todo.astro';
 import PartList from '../../components/la-box/PartList.astro';
 import SoftwareCard from '../../components/la-box/SoftwareCard.astro';
+import PrototypeGallery from '../../components/prototype/PrototypeGallery.astro';
 import Prose from '../../components/texte/Prose.astro';
 import Text from '../../components/texte/Text.astro';
 import TextLink from '../../components/texte/TextLink.astro';
 import { laBox } from '../../content/la-box';
+import { prototype } from '../../content/prototype';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { isTodo } from '../../lib/todo';
 
@@ -32,6 +35,16 @@ const { recipe } = openSource;
       ))}
     </ul>
   </PageIntro>
+
+  <Section surface="sable" id={prototype.gallery.id} labelledby="titre-prototype">
+    <div class="section-head">
+      <h2 id="titre-prototype">{prototype.gallery.title}</h2>
+      <p class="text-muted">
+        <Text text={prototype.gallery.intro} />
+      </p>
+    </div>
+    <PrototypeGallery views={prototype.gallery.views} details={prototype.gallery.details} />
+  </Section>
 
   <section class="hardware-section" id={hardware.id} aria-labelledby="titre-materiel">
     <div class="container hardware">
@@ -225,10 +238,10 @@ const { recipe } = openSource;
   }
 
   /* ---------- Ce qu'il y a dedans ----------
-   * Première section après l'ouverture : l'espace au-dessus vient déjà de
-   * l'ouverture (PageIntro), seul l'espace au-dessous est ajouté. */
+   * Après la galerie du prototype (fond sable) : l'espace au-dessus et
+   * au-dessous d'une section, comme les autres sections de la page. */
   .hardware-section {
-    padding-block-end: var(--space-section);
+    padding-block: var(--space-section);
   }
 
   .hardware {

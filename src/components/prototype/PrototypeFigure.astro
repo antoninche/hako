@@ -1,0 +1,161 @@
+---
+/**
+ * Une image du prototype, posée sur un panneau couleur « pierre » (le fond de
+ * studio des images de synthèse), avec sa légende dessous.
+ *
+ *   <PrototypeFigure view={prototypeViews.dessus} sizes="(min-width: 40rem) 50vw, 100vw" />
+ *   <PrototypeFigure view={…} sizes="…" priority float alt={…} caption={…} class="hero-visual" />
+ *
+ * - L'image est servie en AVIF, ou en WebP pour les navigateurs qui ne lisent
+ *   pas l'AVIF, en plusieurs largeurs jusqu'à celle de la source : le
+ *   navigateur prend la plus petite qui suffit, d'après `sizes` (la largeur
+ *   affichée de l'image selon l'écran). Qualité « high » (80 sur 100) : en
+ *   dessous, le relief du kanji s'empâte ; les fichiers restent très légers.
+ * - Ses dimensions sont écrites dans la page : rien ne bouge quand elle arrive.
+ * - Par défaut, elle ne se charge qu'à l'approche de l'écran. `priority` la
+ *   demande tout de suite, en premier : une seule image par page, en haut.
+ * - Le panneau a les proportions de l'image. Avec `float`, le composant
+ *   parent peut le rendre plus haut avec la variable CSS
+ *   --prototype-panel-ratio (1 pour un carré) : l'image reste entière, au
+ *   milieu, et ses bords haut et bas se fondent dans le panneau, sans raccord
+ *   visible. Réservé aux vues dont le haut et le bas ne montrent que le fond
+ *   (backdropAtTopAndBottom dans src/content/prototype.ts).
+ * - `caption` remplace la légende de la vue (sans le nom de la vue) ; si
+ *   elle ne décrit plus l'image, passez aussi un `alt` complet.
+ */
+import { Picture } from 'astro:assets';
+
+import Todo from '../Todo.astro';
+import Text from '../texte/Text.astro';
+import type { Paragraph } from '../../content/la-box';
+import type { PrototypeView } from '../../content/prototype';
+import { isTodo } from '../../lib/todo';
+
+interface Props {
+  view: PrototypeView;
+  /** Largeur affichée de l'image selon l'écran (attribut sizes). */
+  sizes: string;
+  /** Image du haut de la page : chargée tout de suite, en priorité. */
+  priority?: boolean;
+  /** Panneau qui peut être plus haut que l'image (voir plus haut). */
+  float?: boolean;
+  /** Texte de remplacement à la place de celui de la vue. */
+  alt?: string;
+  /** Légende à la place de celle de la vue (sans le nom de la vue). */
+  caption?: Paragraph;
+  class?: string;
+}
+
+const {
+  view,
+  sizes,
+  priority = false,
+  float = false,
+  alt = view.alt,
+  caption,
+  class: className,
+} = Astro.props;
+
+if (float && !view.backdropAtTopAndBottom) {
+  throw new Error(
+    `PrototypeFigure : la vue « ${view.title} » ne peut pas se poser dans un panneau plus haut qu'elle (son ombre touche le bord haut ou bas de l'image). Retirez l'option float.`,
+  );
+}
+
+/** Largeurs proposées au navigateur, en pixels, jusqu'à celle de la source. */
+const STEPS = [480, 640, 800, 960];
+const widths = [...STEPS.filter((width) => width < view.image.width), view.image.width];
+
+/**
+ * Le nom de la vue ouvre la légende. Il est suivi d'un point invisible à
+ * l'écran : les lecteurs d'écran marquent ainsi une pause avant la suite. Le
+ * nom et le point tiennent en une seule expression, pour qu'aucune espace ne
+ * s'invite avant le point.
+ */
+const title = caption ? undefined : view.title;
+const text = caption ?? view.caption;
+---
+
+<figure class:list={['prototype-figure', { 'prototype-figure--float': float }, className]}>
+  <div class="prototype-figure__panel surface-pierre">
+    <Picture
+      src={view.image}
+      alt={alt}
+      formats={['avif']}
+      fallbackFormat="webp"
+      quality="high"
+      widths={widths}
+      sizes={sizes}
+      priority={priority}
+      class="prototype-figure__image"
+    />
+  </div>
+  <figcaption class="prototype-figure__caption">
+    {title && (
+      <span class="prototype-figure__title">{[title, <span class="visually-hidden">.</span>]}</span>
+    )}
+    <span>
+      {text.map((part) =>
+        typeof part === 'string' ? (
+          <Text text={part} />
+        ) : isTodo(part) ? (
+          <Todo what={part.todo}>{part.placeholder}</Todo>
+        ) : (
+          <span lang="ja">{part.ja}</span>
+        ),
+      )}
+    </span>
+  </figcaption>
+</figure>
+
+<style>
+  .prototype-figure {
+    display: grid;
+    align-content: start;
+    gap: var(--space-s);
+    margin: 0;
+  }
+
+  /* Le panneau prend la surface « pierre » (classe .surface-pierre de
+     tokens.css) : le fond de studio des images, qui a exactement cette
+     couleur, avec ses rôles de texte. */
+  .prototype-figure__panel {
+    display: grid;
+    align-items: center;
+    overflow: hidden;
+    border-radius: var(--radius);
+  }
+
+  .prototype-figure__image {
+    inline-size: 100%;
+    block-size: auto;
+  }
+
+  .prototype-figure--float .prototype-figure__panel {
+    aspect-ratio: var(--prototype-panel-ratio, auto);
+  }
+
+  /* Les 6 % du haut et du bas de l'image (du fond seulement : la box et son
+     ombre commencent plus loin) se fondent dans le panneau. Les formats
+     compressés peuvent décaler la couleur du fond d'un cheveu : ainsi, aucun
+     raccord ne se voit. */
+  .prototype-figure--float .prototype-figure__image {
+    mask-image: linear-gradient(to bottom, transparent, black 6%, black 94%, transparent);
+  }
+
+  .prototype-figure__caption {
+    display: grid;
+    gap: var(--space-3xs);
+    max-inline-size: var(--measure);
+    font-size: var(--step--1);
+    line-height: 1.45;
+    color: var(--text-muted);
+  }
+
+  .prototype-figure__title {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text);
+  }
+</style>

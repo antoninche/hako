@@ -1,0 +1,116 @@
+---
+/**
+ * Galerie des images du prototype : une colonne sur téléphone, deux à partir
+ * de 40rem (avec un nombre impair d'images, la dernière se centre sous les
+ * autres). Chaque image est une <PrototypeFigure> (panneau « pierre » et
+ * légende). Sous la grille, les finitions de la box.
+ *
+ *   <PrototypeGallery views={prototype.gallery.views} details={prototype.gallery.details} />
+ *
+ * Les images se chargent à l'approche de l'écran. La valeur par défaut de
+ * `sizes` suppose une galerie de la largeur d'un .container ; ailleurs,
+ * passez la vôtre.
+ */
+import Fact from '../Fact.astro';
+import PrototypeFigure from './PrototypeFigure.astro';
+import type { PrototypeDetail, PrototypeView } from '../../content/prototype';
+
+interface Props {
+  views: readonly PrototypeView[];
+  details?: readonly PrototypeDetail[];
+  sizes?: string;
+}
+
+/**
+ * Largeur d'une image dans un .container : deux colonnes séparées de 2rem
+ * dès 40rem. Le contenu du .container fait la largeur de l'écran moins deux
+ * marges --gutter (0,6rem + 2,4vw chacune), sans dépasser 72rem : il atteint
+ * 72rem vers 77rem de large, et chaque image fait alors 35rem.
+ */
+const CONTAINER_SIZES =
+  '(min-width: 77rem) 35rem, (min-width: 40rem) calc(47.6vw - 1.6rem), calc(95.2vw - 1.2rem)';
+
+const { views, details = [], sizes = CONTAINER_SIZES } = Astro.props;
+---
+
+<div class="prototype-gallery">
+  <ul class="prototype-gallery__grid">
+    {views.map((view) => (
+      <li class="prototype-gallery__item">
+        <PrototypeFigure view={view} sizes={sizes} />
+      </li>
+    ))}
+  </ul>
+  {details.length > 0 && (
+    <dl class="prototype-gallery__details">
+      {details.map((detail) => (
+        <div class="prototype-gallery__detail">
+          <dt>{detail.label}</dt>
+          <dd>
+            <Fact value={detail.value} />
+          </dd>
+        </div>
+      ))}
+    </dl>
+  )}
+</div>
+
+<style>
+  .prototype-gallery__grid {
+    display: grid;
+    gap: var(--space-xl) var(--space-l);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Deux colonnes, faites de quatre demi-colonnes : chaque image en prend
+     deux. Une dernière image seule sur sa ligne prend les deux du milieu,
+     et se retrouve centrée. */
+  @media (min-width: 40rem) {
+    .prototype-gallery__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .prototype-gallery__item {
+      grid-column: span 2;
+    }
+
+    .prototype-gallery__item:last-child:nth-child(odd) {
+      grid-column: 2 / span 2;
+    }
+  }
+
+  /* Fiche courte, sous la grille : le nom de la finition, puis sa valeur. */
+  .prototype-gallery__details {
+    display: grid;
+    gap: var(--space-2xs);
+    max-inline-size: 42rem;
+    margin: var(--space-xl) 0 0;
+    padding-block-start: var(--space-m);
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  .prototype-gallery__detail {
+    display: grid;
+    gap: 0 var(--space-m);
+  }
+
+  .prototype-gallery__detail dt {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .prototype-gallery__detail dd {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  @media (min-width: 30rem) {
+    .prototype-gallery__detail {
+      grid-template-columns: 11rem minmax(0, 1fr);
+      align-items: baseline;
+    }
+  }
+</style>

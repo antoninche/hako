@@ -22,21 +22,22 @@ npm run dev
 
 ## Commandes
 
-| Commande              | Rôle                                                                                                             |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `npm run dev`         | serveur de développement sur http://localhost:4321, mis à jour à chaque modification                             |
-| `npm run build`       | construit le site statique dans `dist/`                                                                          |
-| `npm run preview`     | sert `dist/` sur http://localhost:4321, comme en production                                                      |
-| `npm run check`       | vérifie les types TypeScript et les composants Astro (`astro check`)                                             |
-| `npm run lint`        | enchaîne `astro check`, ESLint (règles d’accessibilité comprises) et la vérification de mise en forme (Prettier) |
-| `npm run format`      | remet en forme tous les fichiers avec Prettier                                                                   |
-| `npm run todos`       | écrit la liste des informations manquantes dans `TODO.md`                                                        |
-| `npm run contrast`    | recalcule le contraste de chaque couple texte/fond du CSS et échoue sous 4,5:1                                   |
-| `npm run check:dist`  | contrôle `dist/` : aucune ressource d’un autre site, aucun script ni style en ligne, ni cookie ni stockage local |
-| `npm test`            | construit le site, le sert sur le port 4321 et lance tous les tests dans Chromium                                |
-| `npm run screenshots` | prend seulement les captures d’écran de chaque page, dans `qa/screenshots/`                                      |
-| `npm run fonts:build` | reconstruit les polices à partir de leurs sources officielles (demande uv)                                       |
-| `npm run logo:build`  | revectorise le logo et refait le favicon, les icônes, le manifeste et l’image de partage (demande potrace)       |
+| Commande                   | Rôle                                                                                                             |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`              | serveur de développement sur http://localhost:4321, mis à jour à chaque modification                             |
+| `npm run build`            | construit le site statique dans `dist/`                                                                          |
+| `npm run preview`          | sert `dist/` sur http://localhost:4321, comme en production                                                      |
+| `npm run check`            | vérifie les types TypeScript et les composants Astro (`astro check`)                                             |
+| `npm run lint`             | enchaîne `astro check`, ESLint (règles d’accessibilité comprises) et la vérification de mise en forme (Prettier) |
+| `npm run format`           | remet en forme tous les fichiers avec Prettier                                                                   |
+| `npm run todos`            | écrit la liste des informations manquantes dans `TODO.md`                                                        |
+| `npm run contrast`         | recalcule le contraste de chaque couple texte/fond du CSS et échoue sous 4,5:1                                   |
+| `npm run check:dist`       | contrôle `dist/` : aucune ressource d’un autre site, aucun script ni style en ligne, ni cookie ni stockage local |
+| `npm test`                 | construit le site, le sert sur le port 4321 et lance tous les tests dans Chromium                                |
+| `npm run screenshots`      | prend seulement les captures d’écran de chaque page, dans `qa/screenshots/`                                      |
+| `npm run fonts:build`      | reconstruit les polices à partir de leurs sources officielles (demande uv)                                       |
+| `npm run logo:build`       | revectorise le logo et refait le favicon, les icônes, le manifeste et l’image de partage (demande potrace)       |
+| `npm run prototype:images` | refait les images du prototype de `src/assets/prototype/` à partir des captures de `design/prototype/`           |
 
 Les tests vérifient que chaque page s’affiche sans erreur, que la page 404 répond, que chaque lien interne mène à une page ou un fichier qui existe, qu’aucune requête ne quitte la machine et qu’aucun cookie n’est déposé (à 390 et 1440 px de large), l’accessibilité avec axe (WCAG 2.2 AA), le lien d’évitement, le menu au clavier, des cibles tactiles de 44 × 44 px dans l’en-tête et le pied de page, le surlignage des informations manquantes, l’affichage avec moins d’animations, et deux constructions à part (dans `.tmp/tests/`) : la démonstration avec `PUBLIC_SHOW_TODOS=false` et l’adresse canonique avec `SITE_URL`. Les captures sont faites à 390 et 1440 px ; `CAPTURE_WIDTHS=360,768,1024 npm run screenshots` en ajoute d’autres. Si un serveur tourne déjà sur le port 4321, Playwright le réutilise sans reconstruire le site : arrêtez-le avant de lancer les tests. Pour construire ailleurs que dans `dist/` : `PW_OUT_DIR=.tmp/dist-essai PW_PORT=4410 npm test`.
 
@@ -85,6 +86,8 @@ Le même fichier `.env` accepte `SITE_URL`, l’adresse publique du site, à ren
 Les trois polices, Fraunces pour les titres, Atkinson Hyperlegible Next pour le texte et D-DIN pour l’interface, sont servies depuis `public/fonts/`, chacune avec sa licence. `npm run fonts:build` les produit à partir des sources officielles de leurs créateurs : voir [docs/fonts.md](docs/fonts.md).
 
 Le logo vient des trois PNG fournis dans `brand/`. `npm run logo:build` les vectorise et en tire les SVG de `src/assets/brand/` et `public/brand/`, le favicon, les icônes d’application, le manifeste et l’image de partage : voir [docs/logo.md](docs/logo.md). Les icônes des réseaux sociaux viennent de Simple Icons et de Bootstrap Icons : voir [docs/icons.md](docs/icons.md). Tous ces fichiers sont produits par les deux commandes : une retouche à la main serait perdue à la construction suivante.
+
+Les images du prototype (l’ouverture de l’accueil et la galerie de la page « La box ») sont des captures du modèle 3D de la box, faites par l’équipe et rangées dans `design/prototype/`. `npm run prototype:images` les nettoie (pointeur de la souris, trace de l’interface), les convertit en sRGB et les cadre ; Astro en tire les versions AVIF et WebP. Leurs textes sont dans `src/content/prototype.ts` ; chaque légende dit que ce sont des images de synthèse.
 
 Les licences de tous les éléments tiers sont réunies dans [docs/licences.md](docs/licences.md). Sur le site, la rubrique « Crédits » de la page des mentions légales cite les auteurs des polices et des icônes, avec un lien vers chaque licence (`src/data/credits.ts`).
 
