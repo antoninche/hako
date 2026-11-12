@@ -1,0 +1,1111 @@
+{
+  "notes": [
+    "Rapport produit par npm run logo:build (scripts/logo/build.mjs). Toutes les mesures sont en pixels du PNG d’origine.",
+    "alpha50 : SVG rendu par resvg (à 4 fois la taille, puis moyenné) à la taille du PNG, seuil 50 %, comparé à la couche alpha du PNG (seuil 50 %).",
+    "coverage50 : même rendu, comparé à la couverture des pixels estimée d’après leur couleur (seuil 50 %).",
+    "subpixelX4 : rendu ×4 comparé à la couverture du PNG suréchantillonnée ×4 ; les écarts sont exprimés en pixels du PNG.",
+    "iou : intersection sur union des deux masques (1 = identiques). mismatchPercentOfInk : pixels en désaccord, en % des pixels d’encre du PNG.",
+    "maxBoundaryDeviationPx : distance de Hausdorff entre les bords des deux masques (plus grand écart local) ; mean, p95, p99 : moyenne et centiles des écarts de bord.",
+    "largestDeviations : les cinq plus grands écarts, chacun avec sa position (x, y) dans le PNG."
+  ],
+  "tools": {
+    "potrace": "1.16",
+    "resvgJs": "2.6.2",
+    "sharp": "0.35.5",
+    "svgo": "4.1.0"
+  },
+  "parameters": {
+    "scale": 8,
+    "kanji": {
+      "potrace": {
+        "alphamax": 1,
+        "opttolerance": 0.2,
+        "turdsize": 2
+      },
+      "refit": {
+        "cornerWindow": 1.5,
+        "cornerAngle": 38,
+        "tolerance": 0.3,
+        "axisAngle": 0.75,
+        "maxExtend": 1.5,
+        "maxExtendAcute": 0.5
+      }
+    },
+    "wordmark": {
+      "potrace": {
+        "alphamax": 0,
+        "turdsize": 2
+      },
+      "straighten": {
+        "cornerTol": 0.8,
+        "trim": 2,
+        "axisAngle": 0.75,
+        "alignTol": 0.05,
+        "shortEdge": 3,
+        "mergeAngle": 4,
+        "mergeShort": 8
+      }
+    },
+    "precision": 2
+  },
+  "blend": {
+    "gamma": 1.37,
+    "channelSpreadRms": 0.0127,
+    "channelSpreadMax": 0.0198,
+    "lightestEdgeColour": "#B2ABA4",
+    "transparencyCutCoverage": 0.468
+  },
+  "sources": {
+    "paysage": {
+      "file": "brand/HAKO_Landscape_Transparent.png",
+      "sha256": "f6f13ec48a53612e18108ed64ecbbf10fd2c39167c6d409533d59a5392c662c8",
+      "size": [
+        2160,
+        530
+      ],
+      "ink": "#412D1E",
+      "opaqueColours": 105,
+      "semiTransparentPixels": 0,
+      "edgePixels": 3986,
+      "layout": "row",
+      "kanjiRect": [
+        54,
+        78,
+        470,
+        442
+      ],
+      "wordmarkRect": [
+        470,
+        78,
+        2109,
+        442
+      ],
+      "kanjiRefit": {
+        "contours": 7,
+        "corners": 64,
+        "lines": 44,
+        "axisAlignedLines": 35,
+        "curves": 58,
+        "cappedCorners": 9
+      },
+      "wordmarkStraightening": {
+        "contours": 6,
+        "edges": 47,
+        "axisAligned": 41,
+        "alignments": [
+          {
+            "axis": "horizontal",
+            "value": 148.001,
+            "spread": 0.002
+          },
+          {
+            "axis": "horizontal",
+            "value": 423.995,
+            "spread": 0.031
+          }
+        ],
+        "roundedCornersRemoved": 5,
+        "edgesMerged": 0,
+        "maxVertexShift": 1.028
+      }
+    },
+    "carre": {
+      "file": "brand/HAKO_Square_Transparent.png",
+      "sha256": "0638c9942a0c1f02459c840ee3e2770ee53c777e67a473adf8a513351ca54bb4",
+      "size": [
+        1080,
+        1080
+      ],
+      "ink": "#412D1E",
+      "opaqueColours": 105,
+      "semiTransparentPixels": 0,
+      "edgePixels": 3874,
+      "layout": "column",
+      "kanjiRect": [
+        31,
+        134,
+        1048,
+        773
+      ],
+      "wordmarkRect": [
+        31,
+        773,
+        1048,
+        1049
+      ],
+      "kanjiRefit": {
+        "contours": 7,
+        "corners": 64,
+        "lines": 47,
+        "axisAlignedLines": 38,
+        "curves": 57,
+        "cappedCorners": 8
+      },
+      "wordmarkStraightening": {
+        "contours": 6,
+        "edges": 48,
+        "axisAligned": 41,
+        "alignments": [
+          {
+            "axis": "horizontal",
+            "value": 1048.997,
+            "spread": 0.03
+          }
+        ],
+        "roundedCornersRemoved": 4,
+        "edgesMerged": 0,
+        "maxVertexShift": 1.558
+      }
+    },
+    "reseaux": {
+      "file": "brand/HAKO_SocialMedia_Transparent.png",
+      "sha256": "8b21e2703c571e6d5ab3668438f9722b7484942a4c5598d7d3f37776727af70a",
+      "size": [
+        1080,
+        1080
+      ],
+      "ink": "#412D1E",
+      "opaqueColours": 105,
+      "semiTransparentPixels": 0,
+      "edgePixels": 3870,
+      "layout": "column",
+      "kanjiRect": [
+        207,
+        160,
+        886,
+        691
+      ],
+      "wordmarkRect": [
+        207,
+        691,
+        886,
+        862
+      ],
+      "kanjiRefit": {
+        "contours": 7,
+        "corners": 65,
+        "lines": 48,
+        "axisAlignedLines": 39,
+        "curves": 54,
+        "cappedCorners": 10
+      },
+      "wordmarkStraightening": {
+        "contours": 6,
+        "edges": 48,
+        "axisAligned": 42,
+        "alignments": [
+          {
+            "axis": "horizontal",
+            "value": 861.991,
+            "spread": 0.031
+          },
+          {
+            "axis": "horizontal",
+            "value": 722.011,
+            "spread": 0.03
+          },
+          {
+            "axis": "vertical",
+            "value": 595.516,
+            "spread": 0.029
+          }
+        ],
+        "roundedCornersRemoved": 6,
+        "edgesMerged": 1,
+        "maxVertexShift": 1.371
+      }
+    }
+  },
+  "files": {
+    "src/assets/brand/hako-paysage.svg": {
+      "source": "brand/HAKO_Landscape_Transparent.png",
+      "viewBox": "0 0 2054.78 364.07",
+      "offsetInSource": [
+        54.22,
+        77.8
+      ],
+      "bytes": 2437,
+      "whole": {
+        "alpha50": {
+          "iou": 0.99949,
+          "inkPixels": 350135,
+          "pngOnlyPixels": 132,
+          "svgOnlyPixels": 48,
+          "mismatchPercentOfInk": 0.051,
+          "maxBoundaryDeviationPx": 1
+        },
+        "coverage50": {
+          "iou": 0.99718,
+          "pngOnlyPixels": 72,
+          "svgOnlyPixels": 914,
+          "mismatchPercentOfInk": 0.282,
+          "maxBoundaryDeviationPx": 1
+        },
+        "subpixelX4": {
+          "iou": 0.99839,
+          "mismatchPercentOfInk": 0.161,
+          "meanBoundaryDeviationPx": 0.047,
+          "p95BoundaryDeviationPx": 0.25,
+          "p99BoundaryDeviationPx": 0.354,
+          "maxBoundaryDeviationPx": 0.901,
+          "largestDeviations": [
+            {
+              "px": 0.901,
+              "at": [
+                1438.75,
+                236.75
+              ]
+            },
+            {
+              "px": 0.707,
+              "at": [
+                130.5,
+                81.25
+              ]
+            },
+            {
+              "px": 0.707,
+              "at": [
+                109.25,
+                85.25
+              ]
+            },
+            {
+              "px": 0.707,
+              "at": [
+                228.75,
+                146.25
+              ]
+            },
+            {
+              "px": 0.707,
+              "at": [
+                162,
+                202
+              ]
+            }
+          ]
+        }
+      },
+      "kanji": {
+        "alpha50": {
+          "iou": 0.99768,
+          "inkPixels": 55643,
+          "pngOnlyPixels": 81,
+          "svgOnlyPixels": 48,
+          "mismatchPercentOfInk": 0.232,
+          "maxBoundaryDeviationPx": 1
+        },
+        "coverage50": {
+          "iou": 0.99786,
+          "pngOnlyPixels": 54,
+          "svgOnlyPixels": 65,
+          "mismatchPercentOfInk": 0.214,
+          "maxBoundaryDeviationPx": 1
+        },
+        "subpixelX4": {
+          "iou": 0.99374,
+          "mismatchPercentOfInk": 0.629,
+          "meanBoundaryDeviationPx": 0.088,
+          "p95BoundaryDeviationPx": 0.25,
+          "p99BoundaryDeviationPx": 0.5,
+          "maxBoundaryDeviationPx": 0.707,
+          "largestDeviations": [
+            {
+              "px": 0.707,
+              "at": [
+                130.5,
+                81.25
+              ]
+            },
+            {
+              "px": 0.707,
+              "at": [
+                109.25,
+                85.25
+              ]
+            },
+            {
+              "px": 0.707,
+              "at": [
+                228.75,
+                146.25
+              ]
+            },
+            {
+              "px": 0.707,
+              "at": [
+                162,
+                202
+              ]
+            },
+            {
+              "px": 0.707,
+              "at": [
+                202.5,
+                312.25
+              ]
+            }
+          ]
+        }
+      },
+      "wordmark": {
+        "alpha50": {
+          "iou": 0.99983,
+          "inkPixels": 294492,
+          "pngOnlyPixels": 51,
+          "svgOnlyPixels": 0,
+          "mismatchPercentOfInk": 0.017,
+          "maxBoundaryDeviationPx": 1
+        },
+        "coverage50": {
+          "iou": 0.99706,
+          "pngOnlyPixels": 18,
+          "svgOnlyPixels": 849,
+          "mismatchPercentOfInk": 0.295,
+          "maxBoundaryDeviationPx": 1
+        },
+        "subpixelX4": {
+          "iou": 0.99927,
+          "mismatchPercentOfInk": 0.073,
+          "meanBoundaryDeviationPx": 0.027,
+          "p95BoundaryDeviationPx": 0.25,
+          "p99BoundaryDeviationPx": 0.25,
+          "maxBoundaryDeviationPx": 0.901,
+          "largestDeviations": [
+            {
+              "px": 0.901,
+              "at": [
+                1438.75,
+                236.75
+              ]
+            },
+            {
+              "px": 0.559,
+              "at": [
+                636.75,
+                238.25
+              ]
+            },
+            {
+              "px": 0.559,
+              "at": [
+                1714,
+                423.75
+              ]
+            },
+            {
+              "px": 0.354,
+              "at": [
+                940,
+                100.5
+              ]
+            },
+            {
+              "px": 0.354,
+              "at": [
+                1305.75,
+                100.5
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "src/assets/brand/hako-carre.svg": {
+      "source": "brand/HAKO_Square_Transparent.png",
+      "viewBox": "0 0 1017 914.79",
+      "offsetInSource": [
+        31,
+        134.21
+      ],
+      "bytes": 2493,
+      "whole": {
+        "alpha50": {
+          "iou": 0.99917,
+          "inkPixels": 262440,
+          "pngOnlyPixels": 183,
+          "svgOnlyPixels": 35,
+          "mismatchPercentOfInk": 0.083,
+          "maxBoundaryDeviationPx": 1
+        },
+        "coverage50": {
+          "iou": 0.99741,
+          "pngOnlyPixels": 101,
+          "svgOnlyPixels": 579,
+          "mismatchPercentOfInk": 0.26,
+          "maxBoundaryDeviationPx": 1
+        },
+        "subpixelX4": {
+          "iou": 0.99769,
+          "mismatchPercentOfInk": 0.232,
+          "meanBoundaryDeviationPx": 0.053,
+          "p95BoundaryDeviationPx": 0.25,
+          "p99BoundaryDeviationPx": 0.354,
+          "maxBoundaryDeviationPx": 0.901,
+          "largestDeviations": [
+            {
+              "px": 0.901,
+              "at": [
+                596,
+                134.25
+              ]
+            },
+            {
+              "px": 0.791,
+              "at": [
+                731.5,
+                293.75
+              ]
+            },
+            {
+              "px": 0.791,
+              "at": [
+                791.5,
+                839
+              ]
+            },
+            {
+              "px": 0.791,
+              "at": [
+                791.5,
+                1048.75
+              ]
+            },
+            {
+              "px": 0.707,
+              "at": [
+                564.5,
+                702.5
+              ]
+            }
+          ]
+        }
+      },
+      "kanji": {
+        "alpha50": {
+          "iou": 0.99875,
+          "inkPixels": 138168,
+          "pngOnlyPixels": 138,
+          "svgOnlyPixels": 35,
+          "mismatchPercentOfInk": 0.125,
+          "maxBoundaryDeviationPx": 1
+        },
+        "coverage50": {
+          "iou": 0.99601,
+          "pngOnlyPixels": 80,
+          "svgOnlyPixels": 471,
+          "mismatchPercentOfInk": 0.4,
+          "maxBoundaryDeviationPx": 1
+        },
+        "subpixelX4": {
+          "iou": 0.99682,
+          "mismatchPercentOfInk": 0.319,
+          "meanBoundaryDeviationPx": 0.071,
+          "p95BoundaryDeviationPx": 0.25,
+          "p99BoundaryDeviationPx": 0.354,
+          "maxBoundaryDeviationPx": 0.901,
+          "largestDeviations": [
+            {
+              "px": 0.901,
+              "at": [
+                596,
+                134.25
+              ]
+            },
+            {
+              "px": 0.791,
+              "at": [
+                731.5,
+                293.75
+              ]
+            },
+            {
+              "px": 0.707,
+              "at": [
+                564.5,
+                702.5
+              ]
+            },
+            {
+              "px": 0.559,
+              "at": [
+                419.75,
+                145.5
+              ]
+            },
+            {
+              "px": 0.559,
+              "at": [
+                585.25,
+                176.5
+              ]
+            }
+          ]
+        }
+      },
+      "wordmark": {
+        "alpha50": {
+          "iou": 0.99964,
+          "inkPixels": 124272,
+          "pngOnlyPixels": 45,
+          "svgOnlyPixels": 0,
+          "mismatchPercentOfInk": 0.036,
+          "maxBoundaryDeviationPx": 1
+        },
+        "coverage50": {
+          "iou": 0.99896,
+          "pngOnlyPixels": 21,
+          "svgOnlyPixels": 108,
+          "mismatchPercentOfInk": 0.104,
+          "maxBoundaryDeviationPx": 1
+        },
+        "subpixelX4": {
+          "iou": 0.99865,
+          "mismatchPercentOfInk": 0.135,
+          "meanBoundaryDeviationPx": 0.032,
+          "p95BoundaryDeviationPx": 0.25,
+          "p99BoundaryDeviationPx": 0.25,
+          "maxBoundaryDeviationPx": 0.791,
+          "largestDeviations": [
+            {
+              "px": 0.791,
+              "at": [
+                791.5,
+                839
+              ]
+            },
+            {
+              "px": 0.791,
+              "at": [
+                791.5,
+                1048.75
+              ]
+            },
+            {
+              "px": 0.707,
+              "at": [
+                463,
+                928.75
+              ]
+            },
+            {
+              "px": 0.559,
+              "at": [
+                93,
+                958.75
+              ]
+            },
+            {
+              "px": 0.354,
+              "at": [
+                719.5,
+                840.5
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "src/assets/brand/hako-reseaux.svg": {
+      "source": "brand/HAKO_SocialMedia_Transparent.png",
+      "viewBox": "0 0 1080 1080",
+      "offsetInSource": [
+        0,
+        0
+      ],
+      "bytes": 2370,
+      "whole": {
+        "alpha50": {
+          "iou": 0.99843,
+          "inkPixels": 160618,
+          "pngOnlyPixels": 159,
+          "svgOnlyPixels": 93,
+          "mismatchPercentOfInk": 0.157,
+          "maxBoundaryDeviationPx": 1
+        },
+        "coverage50": {
+          "iou": 0.9943,
+          "pngOnlyPixels": 114,
+          "svgOnlyPixels": 801,
+          "mismatchPercentOfInk": 0.572,
+          "maxBoundaryDeviationPx": 1
+        },
+        "subpixelX4": {
+          "iou": 0.99656,
+          "mismatchPercentOfInk": 0.345,
+          "meanBoundaryDeviationPx": 0.062,
+          "p95BoundaryDeviationPx": 0.25,
+          "p99BoundaryDeviationPx": 0.5,
+          "maxBoundaryDeviationPx": 1,
+          "largestDeviations": [
+            {
+              "px": 1,
+              "at": [
+                463.75,
+                323.25
+              ]
+            },
+            {
+              "px": 0.791,
+              "at": [
+                767.5,
+                649.5
+              ]
+            },
+            {
+              "px": 0.75,
+              "at": [
+                614.5,
+                213.25
+              ]
+            },
+            {
+              "px": 0.75,
+              "at": [
+                626.5,
+                213.25
+              ]
+            },
+            {
+              "px": 0.707,
+              "at": [
+                484.5,
+                267.25
+              ]
+            }
+          ]
+        }
+      },
+      "kanji": {
+        "alpha50": {
+          "iou": 0.9978,
+          "inkPixels": 105095,
+          "pngOnlyPixels": 138,
+          "svgOnlyPixels": 93,
+          "mismatchPercentOfInk": 0.22,
+          "maxBoundaryDeviationPx": 1
+        },
+        "coverage50": {
+          "iou": 0.99631,
+          "pngOnlyPixels": 106,
+          "svgOnlyPixels": 282,
+          "mismatchPercentOfInk": 0.37,
+          "maxBoundaryDeviationPx": 1
+        },
+        "subpixelX4": {
+          "iou": 0.99516,
+          "mismatchPercentOfInk": 0.486,
+          "meanBoundaryDeviationPx": 0.095,
+          "p95BoundaryDeviationPx": 0.25,
+          "p99BoundaryDeviationPx": 0.5,
+          "maxBoundaryDeviationPx": 1,
+          "largestDeviations": [
+            {
+              "px": 1,
+              "at": [
+                463.75,
+                323.25
+              ]
+            },
+            {
+              "px": 0.791,
+              "at": [
+                767.5,
+                649.5
+              ]
+            },
+            {
+              "px": 0.75,
+              "at": [
+                614.5,
+                213.25
+              ]
+            },
+            {
+              "px": 0.75,
+              "at": [
+                626.5,
+                213.25
+              ]
+            },
+            {
+              "px": 0.707,
+              "at": [
+                484.5,
+                267.25
+              ]
+            }
+          ]
+        }
+      },
+      "wordmark": {
+        "alpha50": {
+          "iou": 0.99962,
+          "inkPixels": 55523,
+          "pngOnlyPixels": 21,
+          "svgOnlyPixels": 0,
+          "mismatchPercentOfInk": 0.038,
+          "maxBoundaryDeviationPx": 1
+        },
+        "coverage50": {
+          "iou": 0.99051,
+          "pngOnlyPixels": 8,
+          "svgOnlyPixels": 519,
+          "mismatchPercentOfInk": 0.958,
+          "maxBoundaryDeviationPx": 1
+        },
+        "subpixelX4": {
+          "iou": 0.99923,
+          "mismatchPercentOfInk": 0.077,
+          "meanBoundaryDeviationPx": 0.012,
+          "p95BoundaryDeviationPx": 0,
+          "p99BoundaryDeviationPx": 0.25,
+          "maxBoundaryDeviationPx": 0.707,
+          "largestDeviations": [
+            {
+              "px": 0.707,
+              "at": [
+                537.5,
+                722.5
+              ]
+            },
+            {
+              "px": 0.559,
+              "at": [
+                714,
+                722
+              ]
+            },
+            {
+              "px": 0.354,
+              "at": [
+                248.25,
+                722
+              ]
+            },
+            {
+              "px": 0.354,
+              "at": [
+                595.25,
+                722
+              ]
+            },
+            {
+              "px": 0.354,
+              "at": [
+                379,
+                722.5
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "src/assets/brand/hako-kanji.svg": {
+      "source": "brand/HAKO_Square_Transparent.png",
+      "viewBox": "0 0 543.32 573.28",
+      "offsetInSource": [
+        276.7,
+        134.21
+      ],
+      "bytes": 2181,
+      "whole": {
+        "alpha50": {
+          "iou": 0.99876,
+          "inkPixels": 138168,
+          "pngOnlyPixels": 138,
+          "svgOnlyPixels": 34,
+          "mismatchPercentOfInk": 0.124,
+          "maxBoundaryDeviationPx": 1
+        },
+        "coverage50": {
+          "iou": 0.99602,
+          "pngOnlyPixels": 80,
+          "svgOnlyPixels": 470,
+          "mismatchPercentOfInk": 0.399,
+          "maxBoundaryDeviationPx": 1
+        },
+        "subpixelX4": {
+          "iou": 0.99682,
+          "mismatchPercentOfInk": 0.319,
+          "meanBoundaryDeviationPx": 0.071,
+          "p95BoundaryDeviationPx": 0.25,
+          "p99BoundaryDeviationPx": 0.354,
+          "maxBoundaryDeviationPx": 0.901,
+          "largestDeviations": [
+            {
+              "px": 0.901,
+              "at": [
+                596,
+                134.25
+              ]
+            },
+            {
+              "px": 0.707,
+              "at": [
+                731.25,
+                294
+              ]
+            },
+            {
+              "px": 0.707,
+              "at": [
+                564.5,
+                702.5
+              ]
+            },
+            {
+              "px": 0.559,
+              "at": [
+                419.75,
+                145.5
+              ]
+            },
+            {
+              "px": 0.559,
+              "at": [
+                585.25,
+                176.5
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "src/assets/brand/hako-mot.svg": {
+      "source": "brand/HAKO_Landscape_Transparent.png",
+      "viewBox": "0 0 1567 323.5",
+      "offsetInSource": [
+        542,
+        100.5
+      ],
+      "bytes": 404,
+      "whole": {
+        "alpha50": {
+          "iou": 0.99982,
+          "inkPixels": 294492,
+          "pngOnlyPixels": 54,
+          "svgOnlyPixels": 0,
+          "mismatchPercentOfInk": 0.018,
+          "maxBoundaryDeviationPx": 1
+        },
+        "coverage50": {
+          "iou": 0.99704,
+          "pngOnlyPixels": 22,
+          "svgOnlyPixels": 850,
+          "mismatchPercentOfInk": 0.297,
+          "maxBoundaryDeviationPx": 1
+        },
+        "subpixelX4": {
+          "iou": 0.99927,
+          "mismatchPercentOfInk": 0.073,
+          "meanBoundaryDeviationPx": 0.027,
+          "p95BoundaryDeviationPx": 0.25,
+          "p99BoundaryDeviationPx": 0.25,
+          "maxBoundaryDeviationPx": 0.901,
+          "largestDeviations": [
+            {
+              "px": 0.901,
+              "at": [
+                1438.75,
+                236.75
+              ]
+            },
+            {
+              "px": 0.559,
+              "at": [
+                636.75,
+                238.25
+              ]
+            },
+            {
+              "px": 0.559,
+              "at": [
+                1714,
+                423.75
+              ]
+            },
+            {
+              "px": 0.354,
+              "at": [
+                940,
+                100.5
+              ]
+            },
+            {
+              "px": 0.354,
+              "at": [
+                1305.75,
+                100.5
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  "og": {
+    "size": [
+      1200,
+      630
+    ],
+    "logoHeightPx": 390.6,
+    "scale": 0.5562,
+    "bytes": 4458
+  },
+  "social": {
+    "src/assets/icons/social/youtube.svg": {
+      "bytes": 447,
+      "iouVsOriginalAt96px": 1
+    },
+    "src/assets/icons/social/facebook.svg": {
+      "bytes": 529,
+      "iouVsOriginalAt96px": 1
+    },
+    "src/assets/icons/social/instagram.svg": {
+      "bytes": 2087,
+      "iouVsOriginalAt96px": 1
+    },
+    "src/assets/icons/social/peertube.svg": {
+      "bytes": 166,
+      "iouVsOriginalAt96px": 1
+    },
+    "src/assets/icons/social/linkedin.svg": {
+      "bytes": 666,
+      "iouVsOriginalAt96px": 1
+    }
+  },
+  "icons": {
+    "favicon": {
+      "kanjiHeightRatio": 0.88,
+      "offsetAt16px": [
+        -0.375,
+        -0.375
+      ],
+      "crispnessAt16px": 0.6662,
+      "cornerRadiusRatio": 0.1875,
+      "transform": "translate(30.493 18.72) scale(0.785934)"
+    },
+    "app": {
+      "kanjiHeightRatio": 0.7,
+      "transform": "translate(86.165 76.8) scale(0.625174)"
+    },
+    "apple": {
+      "kanjiHeightRatio": 0.66,
+      "transform": "translate(33.704 30.6) scale(0.207229)"
+    },
+    "maskable": {
+      "kanjiHeightRatio": 0.5632,
+      "kanjiBoxDiagonalRatio": 0.776,
+      "safeZoneDiameterRatio": 0.8,
+      "transform": "translate(119.347 111.812) scale(0.503029)"
+    }
+  },
+  "outputs": {
+    "public/apple-touch-icon.png": {
+      "bytes": 1277,
+      "sha256": "1f98c3e83756ee705302c8697454091150c75f0a216886ab322abbb9c7b90c24"
+    },
+    "public/brand/HAKO_Landscape_Transparent.png": {
+      "bytes": 20333,
+      "sha256": "f6f13ec48a53612e18108ed64ecbbf10fd2c39167c6d409533d59a5392c662c8"
+    },
+    "public/brand/HAKO_SocialMedia_Transparent.png": {
+      "bytes": 16858,
+      "sha256": "8b21e2703c571e6d5ab3668438f9722b7484942a4c5598d7d3f37776727af70a"
+    },
+    "public/brand/HAKO_Square_Transparent.png": {
+      "bytes": 18438,
+      "sha256": "0638c9942a0c1f02459c840ee3e2770ee53c777e67a473adf8a513351ca54bb4"
+    },
+    "public/brand/hako-carre.svg": {
+      "bytes": 2517,
+      "sha256": "af50fa63c1f1c5d81ac9df7c76986aba853ebcd14de0176f336dcc64308a157f"
+    },
+    "public/brand/hako-kanji.svg": {
+      "bytes": 2207,
+      "sha256": "ec813ce15a874d91662bcdb5a0321ee52d94b18a4ca19f700270b02e4d3a3276"
+    },
+    "public/brand/hako-mot.svg": {
+      "bytes": 427,
+      "sha256": "84c9e5d640eca96f42c06bb752bc78bc155a7073ba2d9234ce6642ebe0b20d6a"
+    },
+    "public/brand/hako-paysage.svg": {
+      "bytes": 2464,
+      "sha256": "77d88ea289db7dd357b42ce30becb83c5b31fa0104f59ced86dfe883b0e9da2d"
+    },
+    "public/brand/hako-reseaux.svg": {
+      "bytes": 2392,
+      "sha256": "9117388ee5aca9443e6cb356281712a3c1511fcf7dc8c128421c90d7afa1039e"
+    },
+    "public/favicon.ico": {
+      "bytes": 1694,
+      "sha256": "e43fa485c96ba430d056fb1cb278dfc144a996b52056ee1f524f8f9e7458e052"
+    },
+    "public/favicon.svg": {
+      "bytes": 1602,
+      "sha256": "3ad1de2ae51f190f0b9664e36fb69560028bfcce5113bb367dcbc6bc2f8cb9e6"
+    },
+    "public/icons/icon-192.png": {
+      "bytes": 1891,
+      "sha256": "9b2950505f8102f1c3ec561e586bd54c3c6546c861919943ebdc297a3c7ab2e8"
+    },
+    "public/icons/icon-512.png": {
+      "bytes": 5012,
+      "sha256": "29266bd927791fa8e0a86e18f2d425288cbec594a4a36a8b6fbcfd9201a9a0fe"
+    },
+    "public/icons/icon-maskable-512.png": {
+      "bytes": 2964,
+      "sha256": "33e61d082b9650ff3d074cc6bb53b7816843fa7c496f27f650c4c8e5452b91d0"
+    },
+    "public/manifest.webmanifest": {
+      "bytes": 524,
+      "sha256": "729f0c6d563d81d2eef35ba4fd4c97dba170a77e58438a4e816d41b6ec8dcbdb"
+    },
+    "public/og/hako-og.png": {
+      "bytes": 4458,
+      "sha256": "18d2bbd83ea434fcc6fb20b46ed5f473acf311df0e2d0c8eb201391cfed8010f"
+    },
+    "src/assets/brand/hako-carre.svg": {
+      "bytes": 2493,
+      "sha256": "b77ef00b356184bbcbde749c78182c755f2dfb2a596484d26fabf389c90a6374"
+    },
+    "src/assets/brand/hako-kanji.svg": {
+      "bytes": 2181,
+      "sha256": "455a397018aa147be33829e9870d3fbe29ca8fe53d3a6596810cfeac2c887b37"
+    },
+    "src/assets/brand/hako-mot.svg": {
+      "bytes": 404,
+      "sha256": "bdf230dd822f8e7d807d85419cf7847b6d479b78d8cb025df12fbab1365f095a"
+    },
+    "src/assets/brand/hako-paysage.svg": {
+      "bytes": 2437,
+      "sha256": "733934ab2f938441a986d23b9d11d28cd28e49a3f0f9d15e0589e0bd1875e981"
+    },
+    "src/assets/brand/hako-reseaux.svg": {
+      "bytes": 2370,
+      "sha256": "b3571138d43d6a25f4fdfd2415e3eaf38c47ae0706cc8700f891416c25f7ad0e"
+    },
+    "src/assets/icons/social/facebook.svg": {
+      "bytes": 529,
+      "sha256": "a219c218e7152aa90fe7fd783bf8951c3fb347cb98b226568efebded68722c8b"
+    },
+    "src/assets/icons/social/instagram.svg": {
+      "bytes": 2087,
+      "sha256": "f745eda3accc906690b420bc2bdbab8355cda214df77c88656ff83653d47c141"
+    },
+    "src/assets/icons/social/linkedin.svg": {
+      "bytes": 666,
+      "sha256": "cad7d33aeb2719ab239b6d04585d9f28e667428c8cce6cf0efe4f0cad945f4fe"
+    },
+    "src/assets/icons/social/peertube.svg": {
+      "bytes": 166,
+      "sha256": "8f6e25b2823f5cda9e1af1932ea1dbeb1fb4700b3c5b5fb83a0486481c35220d"
+    },
+    "src/assets/icons/social/youtube.svg": {
+      "bytes": 447,
+      "sha256": "d2889136ab05b0d47fdb4ac2e66a47ce4f678977090707eaad7df5ba9f923303"
+    }
+  }
+}

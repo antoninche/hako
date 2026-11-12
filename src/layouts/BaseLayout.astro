@@ -1,0 +1,69 @@
+---
+/**
+ * Gabarit commun à toutes les pages : <head>, lien d'évitement, en-tête,
+ * contenu principal et pied de page.
+ *
+ * Exemple :
+ *   <BaseLayout title="Nos offres" description="Ce que comprend chaque offre.">
+ *     …contenu de la page…
+ *   </BaseLayout>
+ */
+import '../styles/fonts.css';
+import '../styles/tokens.css';
+import '../styles/global.css';
+
+import { PUBLIC_SHOW_TODOS } from 'astro:env/client';
+import Footer from '../components/Footer.astro';
+import FontPreloads from '../components/FontPreloads.astro';
+import Header from '../components/Header.astro';
+import { company } from '../data/entreprise';
+
+interface Props {
+  /** Titre de la page, sans le nom du site. Sans titre : page d'accueil. */
+  title?: string;
+  /** Résumé affiché par les moteurs de recherche (150 caractères environ). */
+  description: string;
+  /** true : la page ne doit pas être indexée (charte interne, page 404). */
+  noindex?: boolean;
+  /** Fond de la page : crème par défaut. */
+  surface?: 'creme' | 'sable' | 'chocolat';
+}
+
+const { title, description, noindex = false, surface = 'creme' } = Astro.props;
+
+// « Page · HAKO » ; l'accueil reprend l'accroche : « HAKO · Vos souvenirs… ».
+const fullTitle = title
+  ? `${title} · ${company.name}`
+  : `${company.name} · ${company.headline.replace(/\.$/, '')}`;
+
+// Adresse canonique : seulement si SITE_URL est connue (voir astro.config.mjs).
+const canonical = !noindex && Astro.site ? new URL(Astro.url.pathname, Astro.site) : undefined;
+---
+
+<!doctype html>
+<html lang="fr" data-todos={PUBLIC_SHOW_TODOS ? 'visible' : 'discreet'}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {canonical && <link rel="canonical" href={canonical} />}
+    <FontPreloads />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#FDF7EF" />
+  </head>
+  <body class={`surface-${surface}`}>
+    <a class="skip-link" href="#contenu">
+      Aller au contenu
+    </a>
+    <Header />
+    <main id="contenu" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

@@ -1,0 +1,26 @@
+---
+/**
+ * Information manquante, surlignée en jaune (voir src/lib/todo.ts).
+ *
+ * Exemple : <Todo what="Durée des mises à jour de sécurité">[durée]</Todo>
+ * - what : ce qui manque, en clair (repris par `npm run todos`) ;
+ * - contenu : le texte provisoire visible, entre crochets.
+ *
+ * Avec PUBLIC_SHOW_TODOS=false, le texte provisoire reste mais n'est plus
+ * surligné (voir .todo dans global.css) : il est alors écrit dans un simple
+ * <span>, car un <mark> ferait annoncer « surligné » par les lecteurs d'écran
+ * alors que rien ne l'est à l'écran.
+ */
+import { PUBLIC_SHOW_TODOS } from 'astro:env/client';
+
+interface Props {
+  what: string;
+}
+
+const { what } = Astro.props;
+const Element = PUBLIC_SHOW_TODOS ? 'mark' : 'span';
+---
+
+<Element class="todo" data-todo={what} title={PUBLIC_SHOW_TODOS ? what : undefined}>
+  <slot />
+</Element>

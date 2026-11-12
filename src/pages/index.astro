@@ -1,0 +1,77 @@
+---
+/**
+ * Accueil, version provisoire : une ouverture calme avec le logo, l'accroche,
+ * la promesse et deux boutons. La page complète (scène 3D, offres, confiance…)
+ * arrive au lot 1.
+ */
+import Icon from '../components/Icon.astro';
+import Logo from '../components/Logo.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { company } from '../data/entreprise';
+import { orderLink, routes } from '../data/navigation';
+import { homePage } from '../data/pages';
+---
+
+<BaseLayout description={homePage.description}>
+  <section class="hero" aria-labelledby="titre-accueil">
+    <div class="container hero__inner">
+      <Logo variant="carre" decorative class="hero__logo" />
+      <div class="rule hero__rule"></div>
+      <h1 id="titre-accueil" class="display hero__title">
+        {company.headline}
+      </h1>
+      <p class="lead hero__promise">{company.promise}</p>
+      <div class="cluster hero__actions">
+        <a class="btn btn--primary" href={orderLink.href}>
+          {orderLink.label}
+        </a>
+        <a class="btn btn--secondary" href={routes.box}>
+          {homePage.discoverLabel}
+          <Icon name="arrow-right" />
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    display: grid;
+    align-items: center;
+    min-height: min(46rem, calc(100svh - var(--header-height)));
+    padding-block: var(--space-2xl) var(--space-3xl);
+  }
+
+  .hero__inner {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .hero :global(.hero__logo) {
+    width: auto;
+    height: clamp(5.5rem, 4.6rem + 4vw, 8rem);
+    color: var(--text);
+  }
+
+  .hero__rule {
+    width: var(--space-xl);
+    margin-block: var(--space-xl) var(--space-l);
+    border-block-start-color: var(--line-strong);
+  }
+
+  .hero__title {
+    max-width: 14ch;
+  }
+
+  .hero__promise {
+    max-width: 34ch;
+    margin-block-start: var(--space-m);
+    color: var(--text-muted);
+  }
+
+  .hero__actions {
+    justify-content: center;
+    margin-block-start: var(--space-xl);
+  }
+</style>

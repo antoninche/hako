@@ -1,0 +1,386 @@
+---
+/**
+ * En-tête du site, collant en haut de l'écran.
+ *
+ * - Écran large (64rem et plus) : logo, menu principal, bouton « Commander ».
+ * - Écran étroit : logo, « Commander » (toujours visible) et bouton « Menu »
+ *   qui déplie un panneau sous la barre (voir header-menu.ts).
+ * Les liens viennent de src/data/navigation.ts.
+ */
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+import { isCurrentPage, mainNav, orderLink, routes } from '../data/navigation';
+
+const pathname = Astro.url.pathname;
+const current = (href: string) => (isCurrentPage(href, pathname) ? 'page' : undefined);
+---
+
+<header class="site-header">
+  <div class="site-header__bar container">
+    <a class="site-header__home" href={routes.home}>
+      <Logo variant="paysage" label="HAKO, accueil" />
+    </a>
+
+    <nav class="site-header__nav" aria-label="Navigation principale">
+      <ul class="site-header__list">
+        {mainNav.map((link) => (
+          <li>
+            <a class="site-header__link" href={link.href} aria-current={current(link.href)}>
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="site-header__actions">
+      <a
+        class="btn btn--primary btn--compact site-header__cta"
+        href={orderLink.href}
+        data-cta="commander"
+        aria-current={current(orderLink.href)}
+      >
+        {orderLink.label}
+      </a>
+      <button
+        type="button"
+        class="menu-button menu-toggle"
+        aria-expanded="false"
+        aria-controls="menu-mobile"
+        hidden
+      >
+        <Icon name="menu" class="menu-button__icon menu-button__icon--open" />
+        <Icon name="close" class="menu-button__icon menu-button__icon--close" />
+        <span class="menu-button__label">Menu</span>
+      </button>
+      <a class="menu-button menu-fallback" href="#plan-du-site">
+        <Icon name="menu" class="menu-button__icon" />
+        <span class="menu-button__label">Menu</span>
+      </a>
+    </div>
+  </div>
+
+  <div id="menu-mobile" class="menu-panel" hidden>
+    <div class="container menu-panel__inner">
+      <nav aria-label="Menu principal">
+        <ul class="menu-panel__list">
+          {mainNav.map((link) => (
+            <li>
+              <a class="menu-panel__link" href={link.href} aria-current={current(link.href)}>
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <a
+        class="btn btn--primary menu-panel__cta"
+        href={orderLink.href}
+        data-cta="commander"
+        aria-current={current(orderLink.href)}
+      >
+        {orderLink.label}
+      </a>
+    </div>
+  </div>
+</header>
+
+<script>
+  import { initHeaderMenu } from './header-menu';
+
+  initHeaderMenu();
+</script>
+
+<style>
+  .site-header {
+    /* Hauteur du logo : 21 px sous 360 px de large (voir docs/logo.md), puis
+       de 25 px (360 px) à 28 px (400 px et plus), 32 px sur tablette et 36 px
+       sur grand écran. */
+    --logo-height: clamp(1.375rem, 7.5vw - 0.125rem, 1.75rem);
+
+    position: sticky;
+    inset-block-start: 0;
+    z-index: var(--z-header);
+    background-color: var(--surface);
+    border-block-end: var(--rule-width) solid var(--line);
+  }
+
+  /* Si le texte est très agrandi (réglage de taille de police du navigateur),
+     « Commander » et « Menu » passent sous le logo au lieu de déborder de l'écran. */
+  .site-header__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs);
+    min-height: var(--header-height);
+  }
+
+  /* ---------- Logo ---------- */
+
+  .site-header__home {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    min-height: var(--target-min);
+    margin-inline-end: auto;
+    color: var(--text);
+    border-radius: var(--radius-s);
+  }
+
+  .site-header__home :global(.logo) {
+    width: auto;
+    height: var(--logo-height);
+  }
+
+  /* ---------- Menu principal (écran large) ---------- */
+
+  .site-header__nav {
+    display: none;
+  }
+
+  /* Les liens ont une marge intérieure de chaque côté (cible de 44 px de large
+     au moins, même pour « FAQ ») : l'écart visible entre deux mots reste de 32 px. */
+  .site-header__list {
+    display: flex;
+    gap: var(--space-s);
+  }
+
+  .site-header__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: var(--target-min);
+    min-height: var(--target-min);
+    padding-inline: var(--space-2xs);
+    font-family: var(--font-ui);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text);
+    text-decoration-line: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: var(--rule-width);
+    text-underline-offset: 0.5em;
+    transition: text-decoration-color var(--dur-2) var(--ease-out);
+  }
+
+  .site-header__link:hover {
+    color: var(--text);
+    text-decoration-color: var(--line-strong);
+  }
+
+  .site-header__link[aria-current='page'] {
+    text-decoration-color: var(--link);
+    text-decoration-thickness: 2px;
+  }
+
+  /* ---------- Commander et bouton Menu ---------- */
+
+  .site-header__actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-3xs);
+    /* Reste à droite, même quand il passe sous le logo. */
+    margin-inline-start: auto;
+  }
+
+  /* Le bouton (avec JavaScript) et le lien de secours (sans) ont la même allure. */
+  .menu-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    min-width: var(--target-min);
+    min-height: var(--target-min);
+    padding: 0 0.625rem;
+    border: var(--rule-width) solid transparent;
+    border-radius: var(--radius);
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text);
+    background-color: transparent;
+    text-decoration: none;
+    transition: border-color var(--dur-1) var(--ease-out);
+  }
+
+  .menu-button:hover,
+  .menu-toggle[aria-expanded='true'] {
+    color: var(--text);
+    border-color: var(--line-strong);
+  }
+
+  .menu-button :global(.menu-button__icon) {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+
+  .menu-toggle :global(.menu-button__icon--close),
+  .menu-toggle[aria-expanded='true'] :global(.menu-button__icon--open) {
+    display: none;
+  }
+
+  .menu-toggle[aria-expanded='true'] :global(.menu-button__icon--close) {
+    display: inline-block;
+  }
+
+  /* Téléphones : le mot « Menu » passe en petit sous l'icône, pour tenir dans la
+     barre. Avec l'icône et le mot côte à côte, la barre demande environ 420 px
+     (26rem) d'écran : le seuil de 28rem garde de la marge. */
+  @media (width < 28rem) {
+    .site-header__cta {
+      padding-inline: 0.75rem;
+    }
+
+    .menu-button {
+      flex-direction: column;
+      gap: 0.125rem;
+      padding: 0 0.25rem;
+      font-size: 0.8125rem;
+      letter-spacing: 0.04em;
+    }
+
+    .menu-button :global(.menu-button__icon) {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+
+  /* Écrans très étroits (zoom à 200 %) : tout se resserre d'un cran. */
+  @media (width < 22.5rem) {
+    .site-header {
+      --logo-height: 1.3125rem;
+    }
+
+    .site-header__bar {
+      gap: var(--space-2xs);
+    }
+
+    .site-header__cta {
+      padding-inline: 0.625rem;
+      font-size: 0.9375rem;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .site-header {
+      --logo-height: 2rem;
+    }
+  }
+
+  /* 64rem : même seuil que le script du menu et les tests (src/lib/breakpoints.ts). */
+  @media (min-width: 64rem) {
+    .site-header {
+      --logo-height: 2.25rem;
+    }
+
+    .site-header__nav {
+      display: block;
+    }
+
+    /* 24 px ici + 8 px de marge intérieure du dernier lien : 32 px visibles. */
+    .site-header__actions {
+      margin-inline-start: var(--space-m);
+    }
+
+    .menu-button {
+      display: none;
+    }
+  }
+
+  /* ---------- Panneau du menu mobile ---------- */
+
+  /* Le panneau part du bas de l'en-tête (100 % : sa hauteur réelle, même sur
+     deux lignes) et ne descend jamais sous le bas de l'écran. */
+  .menu-panel {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: calc(100% + var(--rule-width));
+    max-height: calc(100dvh - 100% - var(--rule-width));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* Au clavier, le lien qui reçoit le focus n'est pas collé au bord du
+       panneau : son anneau de focus reste entier (zoom à 200 et 400 %). */
+    scroll-padding-block: var(--space-s);
+    background-color: var(--surface);
+    border-block-end: var(--rule-width) solid var(--line);
+    box-shadow: var(--shadow-l);
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity var(--dur-2) var(--ease-out),
+      transform var(--dur-2) var(--ease-out),
+      display var(--dur-2) allow-discrete;
+  }
+
+  /* Fermeture : le panneau remonte et s'efface avant de disparaître. */
+  .menu-panel[hidden] {
+    opacity: 0;
+    transform: translateY(-0.75rem);
+  }
+
+  /* Ouverture : il part de cette même position. */
+  @starting-style {
+    .menu-panel {
+      opacity: 0;
+      transform: translateY(-0.75rem);
+    }
+  }
+
+  /* Moins d'animations demandé : le panneau apparaît et disparaît d'un coup. */
+  @media (prefers-reduced-motion: reduce) {
+    .menu-panel {
+      transition: none;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .menu-panel {
+      display: none;
+    }
+  }
+
+  .menu-panel__inner {
+    padding-block: var(--space-2xs) var(--space-l);
+  }
+
+  .menu-panel__list > li + li {
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  .menu-panel__link {
+    display: flex;
+    align-items: center;
+    min-height: 3.5rem;
+    font-family: var(--font-ui);
+    font-size: var(--step-1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .menu-panel__link:hover {
+    color: var(--text);
+    text-decoration: underline;
+    text-decoration-color: var(--line-strong);
+    text-decoration-thickness: var(--rule-width);
+    text-underline-offset: 0.4em;
+  }
+
+  .menu-panel__link[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-color: var(--link);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.4em;
+  }
+
+  .menu-panel__cta {
+    width: 100%;
+    min-height: 3.25rem;
+    margin-block-start: var(--space-s);
+  }
+</style>

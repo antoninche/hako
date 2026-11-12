@@ -1,0 +1,20 @@
+# Sorties de construction et dépendances
+dist/
+.astro/
+.tmp/
+node_modules/
+package-lock.json
+
+# Fichiers produits par les outils (régénérés, jamais retouchés à la main)
+TODO.md
+qa/
+test-results/
+playwright-report/
+blob-report/
+
+# Fichiers statiques copiés tels quels : licences des polices, décodeurs,
+# modèles 3D, icônes et manifeste
+public/
+
+# Jeux d'essai des scripts : leurs numéros de ligne sont vérifiés
+tests/fixtures/

@@ -1,0 +1,187 @@
+/*
+ * Polices du site, toutes servies depuis /fonts/ : aucune requête vers un autre site.
+ *
+ * Fichier généré par `npm run fonts:build` (scripts/fonts/build.py) : ne pas le
+ * modifier à la main. Sources, licences et réglages : docs/fonts.md.
+ *
+ * Chaque famille a sa face « … Fallback » : une police déjà installée (Georgia,
+ * Arial…) ajustée aux mesures de la police du site. Pendant le chargement, le
+ * texte occupe presque la même place et la page ne bouge pas au remplacement.
+ * Pour une même famille, la règle écrite en dernier est essayée en premier.
+ */
+
+/* ---------- Fraunces : titres ---------- */
+
+/* Fraunces 1.003, Undercase Type, SIL OFL 1.1. Fichier variable : graisse 400 à 700 et taille
+ * optique (opsz) 9 à 144. SOFT figé à 100 et WONK à 0, les valeurs du jeton
+ * --font-display-variation. */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/fraunces/fraunces-1.003-latin-fr-a093887f.woff2') format('woff2');
+  unicode-range:
+    U+0020-007E, U+00A0-00FF, U+0152-0153, U+0178, U+02C6, U+02DA, U+02DC, U+2009-200A, U+2010-2011,
+    U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+202F, U+2039-203A, U+20AC, U+2122,
+    U+2190-2193, U+2212, U+2248;
+}
+
+/* Secours pour Fraunces : Georgia, ou Times New Roman si Georgia manque, ajustées aux mesures de
+ * Fraunces à la taille optique 48 (graisses 400 et 600). */
+@font-face {
+  font-family: 'Fraunces Fallback';
+  font-style: normal;
+  font-weight: 400 500;
+  src: local('Times New Roman'), local('TimesNewRomanPSMT');
+  size-adjust: 111.53%;
+  ascent-override: 87.69%;
+  descent-override: 22.86%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Fraunces Fallback';
+  font-style: normal;
+  font-weight: 400 500;
+  src: local('Georgia');
+  size-adjust: 102.17%;
+  ascent-override: 95.72%;
+  descent-override: 24.96%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Fraunces Fallback';
+  font-style: normal;
+  font-weight: 600 700;
+  src: local('Times New Roman Bold'), local('TimesNewRomanPS-BoldMT');
+  size-adjust: 108.89%;
+  ascent-override: 89.81%;
+  descent-override: 23.42%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Fraunces Fallback';
+  font-style: normal;
+  font-weight: 600 700;
+  src: local('Georgia Bold'), local('Georgia-Bold');
+  size-adjust: 90.59%;
+  ascent-override: 107.96%;
+  descent-override: 28.15%;
+  line-gap-override: 0%;
+}
+
+/* ---------- Atkinson Hyperlegible Next : texte courant ---------- */
+
+/* Atkinson Hyperlegible Next 2.001, Braille Institute, SIL OFL 1.1. Fichier variable : graisse
+ * 400 à 700 (un seul fichier pour le normal et le gras, plus léger que deux fichiers fixes). */
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/atkinson-hyperlegible-next/atkinson-hyperlegible-next-2.001-latin-fr-9c6e8230.woff2')
+    format('woff2');
+  unicode-range:
+    U+0020-007E, U+00A0-00FF, U+0152-0153, U+0178, U+02C6, U+02DA, U+02DC, U+2009-200A, U+2010-2011,
+    U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+202F, U+2039-203A, U+20AC, U+2122,
+    U+2190-2193, U+2212, U+2248;
+}
+
+/* Atkinson Hyperlegible Next 2.001, Braille Institute, SIL OFL 1.1. Italique 400, chargé
+ * seulement si une page en affiche. */
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/atkinson-hyperlegible-next/atkinson-hyperlegible-next-2.001-italic-latin-fr-f8355c87.woff2')
+    format('woff2');
+  unicode-range:
+    U+0020-007E, U+00A0-00FF, U+0152-0153, U+0178, U+02C6, U+02DA, U+02DC, U+2009-200A, U+2010-2011,
+    U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+202F, U+2039-203A, U+20AC, U+2122,
+    U+2190-2193, U+2212, U+2248;
+}
+
+/* Secours pour Atkinson Hyperlegible Next : Arial, ou Helvetica (mêmes chasses), ajustées aux
+ * mesures d'Atkinson Hyperlegible Next 400, 700 et italique. */
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next Fallback';
+  font-style: normal;
+  font-weight: 400 500;
+  src: local('Arial'), local('ArialMT'), local('Helvetica');
+  size-adjust: 98.73%;
+  ascent-override: 99.67%;
+  descent-override: 32.01%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next Fallback';
+  font-style: normal;
+  font-weight: 600 700;
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('Helvetica Bold'), local('Helvetica-Bold');
+  size-adjust: 98.87%;
+  ascent-override: 99.53%;
+  descent-override: 31.96%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next Fallback';
+  font-style: italic;
+  font-weight: 400;
+  src:
+    local('Arial Italic'), local('Arial-ItalicMT'), local('Helvetica Oblique'),
+    local('Helvetica-Oblique');
+  size-adjust: 98.74%;
+  ascent-override: 99.66%;
+  descent-override: 32%;
+  line-gap-override: 0%;
+}
+
+/* ---------- D-DIN : étiquettes, navigation, boutons, prix ---------- */
+
+/* D-DIN 1.00, Datto, SIL OFL 1.1. Fichier officiel de Datto servi tel quel, sans découpage : le
+ * nom « D-DIN » est réservé et une version modifiée devrait en changer. Mesures verticales
+ * fixées pour un rendu identique sur tous les systèmes. */
+@font-face {
+  font-family: 'D-DIN';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/d-din/d-din-1.00-bold-90072887.woff2') format('woff2');
+  unicode-range:
+    U+0020-007E, U+00A0-00FF, U+0152-0153, U+0178, U+02C6, U+02DA, U+02DC, U+2009-200A, U+2010-2011,
+    U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+202F, U+2039-203A, U+20AC, U+2122,
+    U+2190-2193, U+2212, U+2248;
+  ascent-override: 83.1%;
+  descent-override: 16.9%;
+  line-gap-override: 8.6%;
+}
+
+/* Secours pour D-DIN : Arial Narrow Bold, ou Arial Bold si Arial Narrow manque, ajustées aux
+ * mesures de D-DIN Bold. */
+@font-face {
+  font-family: 'D-DIN Fallback';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Arial Bold'), local('Arial-BoldMT');
+  size-adjust: 87.92%;
+  ascent-override: 94.52%;
+  descent-override: 19.22%;
+  line-gap-override: 9.78%;
+}
+
+@font-face {
+  font-family: 'D-DIN Fallback';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Arial Narrow Bold'), local('ArialNarrow-Bold');
+  size-adjust: 107.21%;
+  ascent-override: 77.51%;
+  descent-override: 15.76%;
+  line-gap-override: 8.02%;
+}

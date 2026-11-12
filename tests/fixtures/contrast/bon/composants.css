@@ -1,0 +1,41 @@
+/* Règles correctes : rôles seuls, ou couleur et fond déclarés ensemble. */
+.carte {
+  color: var(--text);
+}
+
+.carte__note {
+  color: var(--text-muted);
+}
+
+.bouton {
+  color: var(--creme);
+  background-color: var(--chocolat);
+}
+
+.bouton:hover,
+.bouton:focus-visible {
+  background-color: var(--terre);
+}
+
+.surface-chocolat .bouton {
+  color: var(--chocolat);
+  background-color: var(--creme);
+}
+
+.marque {
+  color: var(--chocolat);
+  background: var(--todo);
+}
+
+.discret {
+  color: inherit;
+  background-color: transparent;
+}
+
+.invisible {
+  color: transparent;
+}
+
+.ombre {
+  background: rgb(65 45 30 / 0.06);
+}

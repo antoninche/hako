@@ -1,0 +1,236 @@
+---
+/**
+ * Pied de page : logo, zone d'intervention, e-mail, plan du site, réseaux
+ * sociaux, pages légales et les deux phrases sur le site lui-même.
+ * Textes et liens : src/data/entreprise.ts et src/data/navigation.ts.
+ */
+import Fact from './Fact.astro';
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+import SocialLinks from './SocialLinks.astro';
+import { keepHyphenatedWords } from './typo';
+import { company } from '../data/entreprise';
+import { footerNav, isCurrentPage, legalNav, routes } from '../data/navigation';
+
+const pathname = Astro.url.pathname;
+const current = (href: string) => (isCurrentPage(href, pathname) ? 'page' : undefined);
+// « Salon-de-Provence » ou « Aix-en-Provence » ne se coupent pas en fin de ligne.
+const serviceArea = keepHyphenatedWords(company.serviceArea.sentence);
+---
+
+<footer class="site-footer surface-chocolat">
+  <div class="container">
+    <div class="site-footer__grid">
+      <div class="site-footer__brand">
+        <a class="site-footer__home" href={routes.home}>
+          <Logo variant="carre" label="HAKO, accueil" />
+        </a>
+        <ul class="site-footer__facts">
+          <li>
+            <Icon name="map-pin" />
+            <span>
+              {serviceArea.map((part) =>
+                part.keep ? <span class="nowrap">{part.text}</span> : part.text,
+              )}
+            </span>
+          </li>
+          <li>
+            <Icon name="mail" />
+            <span>
+              Nous écrire&nbsp;: <Fact value={company.email} link="email" />
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <nav id="plan-du-site" class="site-footer__column" aria-label="Plan du site">
+        <h2 class="kicker site-footer__title">Plan du site</h2>
+        <ul class="site-footer__links">
+          {footerNav.map((link) => (
+            <li>
+              <a href={link.href} aria-current={current(link.href)}>
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <div class="site-footer__column">
+        <h2 class="kicker site-footer__title">Nous suivre</h2>
+        <SocialLinks />
+      </div>
+    </div>
+
+    <div class="site-footer__bottom">
+      <nav aria-label="Informations légales">
+        <ul class="site-footer__legal">
+          {legalNav.map((link) => (
+            <li>
+              <a href={link.href} aria-current={current(link.href)}>
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <div class="site-footer__notes">
+        <p>{company.siteNotes.privacy}</p>
+        <p>{company.siteNotes.freeSoftware}</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    padding-block: var(--space-2xl) var(--space-xl);
+    font-size: var(--step--1);
+  }
+
+  .site-footer__grid {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  @media (min-width: 48rem) {
+    .site-footer__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-xl) var(--space-l);
+    }
+
+    .site-footer__brand {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .site-footer__grid {
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .site-footer__brand {
+      grid-column: auto;
+    }
+  }
+
+  /* ---------- Marque ---------- */
+
+  .site-footer__home {
+    display: inline-block;
+    color: var(--text);
+    border-radius: var(--radius-s);
+  }
+
+  .site-footer__home :global(.logo) {
+    width: auto;
+    height: 4.5rem;
+  }
+
+  .site-footer__facts {
+    display: grid;
+    gap: var(--space-s);
+    max-width: 30rem;
+    margin-block-start: var(--space-l);
+  }
+
+  .site-footer__facts li {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: baseline;
+  }
+
+  .site-footer__facts :global(.icon) {
+    width: 1.125rem;
+    height: 1.125rem;
+    color: var(--text-muted);
+    transform: translateY(0.2em);
+  }
+
+  /* ---------- Colonnes ---------- */
+
+  .site-footer__title {
+    margin-block-end: var(--space-s);
+    color: var(--text-muted);
+  }
+
+  /* Plan du site sur deux colonnes : plus court à lire sur téléphone. Une seule
+     colonne si chacune ferait moins de 6rem (texte agrandi dans le navigateur) :
+     « Commander » ou « engagement » ne se coupent pas. */
+  .site-footer__links {
+    display: grid;
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(max(6rem, calc((100% - var(--space-m)) / 2)), 1fr)
+    );
+    column-gap: var(--space-m);
+  }
+
+  @media (min-width: 64rem) {
+    .site-footer__links {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* Navigation du pied de page en D-DIN, comme toute la navigation. Chaque lien
+     fait 44 × 44 px au moins (« FAQ » compris), texte calé à gauche. */
+  .site-footer__links a,
+  .site-footer__legal a {
+    display: inline-flex;
+    align-items: center;
+    min-inline-size: var(--target-min);
+    min-height: var(--target-min);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text);
+    text-decoration-color: transparent;
+  }
+
+  .site-footer__links a:hover,
+  .site-footer__legal a:hover,
+  .site-footer__links a[aria-current='page'],
+  .site-footer__legal a[aria-current='page'] {
+    color: var(--text);
+    text-decoration-color: currentColor;
+  }
+
+  .site-footer__links a {
+    font-size: var(--step-0);
+  }
+
+  /* ---------- Bas de page ---------- */
+
+  .site-footer__bottom {
+    display: grid;
+    gap: var(--space-m);
+    margin-block-start: var(--space-2xl);
+    padding-block-start: var(--space-m);
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  .site-footer__legal {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: var(--space-l);
+  }
+
+  /* « Ce site ne vous piste pas… » est une promesse : écrite en couleur pleine. */
+  .site-footer__notes {
+    display: grid;
+    gap: var(--space-3xs);
+    color: var(--text);
+  }
+
+  @media (min-width: 64rem) {
+    .site-footer__bottom {
+      grid-template-columns: auto auto;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .site-footer__notes {
+      text-align: end;
+    }
+  }
+</style>

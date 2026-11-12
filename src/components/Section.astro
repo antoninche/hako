@@ -1,0 +1,66 @@
+---
+/**
+ * Bloc de page : choisit la surface (fond et couleurs de texte) et le rythme
+ * vertical, puis centre le contenu dans un conteneur.
+ *
+ * Exemple :
+ *   <Section surface="sable" labelledby="titre-offres">
+ *     <h2 id="titre-offres">Nos offres</h2>
+ *   </Section>
+ */
+type Surface = 'creme' | 'sable' | 'chocolat';
+
+interface Props {
+  /** Fond de la section ; sans valeur, elle garde celui de la page. */
+  surface?: Surface;
+  /** Espace au-dessus et au-dessous : s (serré), m (normal), l (large, pour une ouverture). */
+  space?: 's' | 'm' | 'l';
+  /** Largeur du contenu : normale, étroite (texte long) ou toute la largeur. */
+  width?: 'normal' | 'narrow' | 'full';
+  as?: 'section' | 'div' | 'aside';
+  id?: string;
+  /** id du titre de la section, pour que les lecteurs d'écran l'annoncent. */
+  labelledby?: string;
+  class?: string;
+}
+
+const {
+  surface,
+  space = 'm',
+  width = 'normal',
+  as: Tag = 'section',
+  id,
+  labelledby,
+  class: className,
+} = Astro.props;
+
+const inner = width === 'narrow' ? 'container-narrow' : width === 'normal' ? 'container' : null;
+---
+
+<Tag
+  class:list={['section', `section--${space}`, surface && `surface-${surface}`, className]}
+  id={id}
+  aria-labelledby={labelledby}
+>
+  {inner ? (
+    <div class={inner}>
+      <slot />
+    </div>
+  ) : (
+    <slot />
+  )}
+</Tag>
+
+<style>
+  .section {
+    padding-block: var(--space-section);
+  }
+
+  .section--s {
+    padding-block: var(--space-xl);
+  }
+
+  .section--l {
+    padding-block: calc(var(--space-section) * 1.25);
+  }
+</style>

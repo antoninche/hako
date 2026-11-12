@@ -1,0 +1,38 @@
+---
+/**
+ * Affiche une information de src/data/ : la valeur si elle est connue,
+ * sinon le texte provisoire surligné (<Todo>).
+ *
+ * Exemples :
+ *   <Fact value={company.phone} />
+ *   <Fact value={company.email} link="email" />  → lien « mailto: » une fois connue
+ */
+import Todo from './Todo.astro';
+import { isTodo, type Maybe } from '../lib/todo';
+
+interface Props {
+  value: Maybe<string | number>;
+  /** Transforme la valeur, une fois connue, en lien (e-mail, téléphone ou adresse web). */
+  link?: 'email' | 'phone' | 'url';
+}
+
+const { value, link } = Astro.props;
+
+let text = '';
+let href: string | undefined;
+
+if (!isTodo(value)) {
+  text = typeof value === 'number' ? new Intl.NumberFormat('fr-FR').format(value) : value;
+  if (link === 'email') href = `mailto:${text}`;
+  else if (link === 'phone') href = `tel:${text.replace(/[^\d+]/g, '')}`;
+  else if (link === 'url') href = text;
+}
+---
+
+{isTodo(value) ? (
+  <Todo what={value.todo}>{value.placeholder}</Todo>
+) : href ? (
+  <a href={href}>{text}</a>
+) : (
+  text
+)}

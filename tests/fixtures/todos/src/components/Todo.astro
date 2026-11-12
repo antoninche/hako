@@ -1,0 +1,10 @@
+---
+// Composant minimal pour que le jeu d'essai passe astro check.
+interface Props {
+  what: string;
+}
+
+const { what } = Astro.props;
+---
+
+<mark class="todo" data-todo={what}><slot /></mark>

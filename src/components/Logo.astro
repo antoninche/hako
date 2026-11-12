@@ -1,0 +1,38 @@
+---
+/**
+ * Logo HAKO, inséré directement dans la page (SVG en currentColor).
+ *
+ * La taille se règle en CSS par le parent, en général par la hauteur : la
+ * largeur suit les proportions du dessin. Le cadre des fichiers est serré
+ * autour du dessin (sauf « reseaux ») : 28 px de haut donnent 28 px de logo visible.
+ * La couleur suit celle du texte.
+ *
+ * Exemple : <Logo variant="paysage" label="HAKO, accueil" />
+ */
+import { logoFile, type LogoVariant } from './logo-files';
+
+interface Props {
+  /** paysage : kanji et HAKO côte à côte ; carre : kanji au-dessus de HAKO ;
+   *  reseaux : version carrée avec marge ; kanji : 箱 seul ; mot : HAKO seul. */
+  variant?: LogoVariant;
+  /** Nom lu par les lecteurs d'écran. */
+  label?: string;
+  /** true quand un texte voisin dit déjà « HAKO » : le logo est alors ignoré. */
+  decorative?: boolean;
+  class?: string;
+}
+
+const { variant = 'paysage', label = 'HAKO', decorative = false, class: className } = Astro.props;
+
+const Svg = logoFile(variant);
+if (!Svg) {
+  throw new Error(`Logo : le fichier src/assets/brand/hako-${variant}.svg est introuvable.`);
+}
+
+const classes = ['logo', `logo--${variant}`, className];
+const a11y = decorative
+  ? { 'aria-hidden': 'true' as const }
+  : { role: 'img' as const, 'aria-label': label };
+---
+
+<Svg class:list={classes} focusable="false" {...a11y} />

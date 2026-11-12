@@ -1,0 +1,54 @@
+/* Règles fautives : chaque bloc doit être refusé par scripts/contrast.mjs. */
+.garde-palette {
+  color: var(--caramel);
+}
+
+.garde-hex {
+  color: #b9773f;
+}
+
+.garde-role-non-texte {
+  color: var(--line-strong);
+}
+
+.paire-faible {
+  color: var(--caramel);
+  background-color: var(--creme);
+}
+
+.bouton {
+  color: var(--creme);
+  background-color: var(--chocolat);
+}
+
+.bouton:hover {
+  background-color: var(--caramel);
+}
+
+.surface-chocolat .lien {
+  color: var(--chocolat);
+  background: var(--surface);
+}
+
+.degrade {
+  color: var(--chocolat);
+  background: linear-gradient(var(--creme), var(--sable));
+}
+
+.alpha {
+  color: rgb(65 45 30 / 0.3);
+  background: var(--creme);
+}
+
+.role-ok {
+  color: var(--text-muted);
+}
+
+/* Fond seul : le texte garde la couleur héritée, --text de la surface. */
+.pastille {
+  background-color: var(--terre);
+}
+
+.etiquette {
+  background: var(--chocolat);
+}

@@ -1,0 +1,33 @@
+---
+/**
+ * Page affichée quand une adresse n'existe pas. L'illustration de la boîte
+ * vide arrive avec les illustrations (lot 4). Textes : src/data/pages.ts.
+ */
+import PageIntro from '../components/PageIntro.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { routes } from '../data/navigation';
+import { notFoundPage } from '../data/pages';
+---
+
+<BaseLayout title={notFoundPage.title} description={notFoundPage.description} noindex>
+  <PageIntro title={notFoundPage.heading}>
+    <p class="lead text-muted">{notFoundPage.lead}</p>
+    <ul class="cluster">
+      <li>
+        <a class="btn btn--primary" href={routes.home}>
+          {notFoundPage.links.home}
+        </a>
+      </li>
+      <li>
+        <a class="btn btn--secondary" href={routes.offers}>
+          {notFoundPage.links.offers}
+        </a>
+      </li>
+      <li>
+        <a class="btn btn--secondary" href={routes.contact}>
+          {notFoundPage.links.contact}
+        </a>
+      </li>
+    </ul>
+  </PageIntro>
+</BaseLayout>

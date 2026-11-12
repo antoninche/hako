@@ -1,0 +1,49 @@
+/* Jeu d'essai pour scripts/contrast.mjs : mêmes valeurs que src/styles/tokens.css. */
+:root {
+  --creme: #fdf7ef;
+  --chocolat: #412d1e;
+  --sable: #f2e6d6;
+  --lin: #e6d5bf;
+  --noyer: #6b4f3a;
+  --terre: #9a4e2b;
+  --caramel: #b9773f;
+  --olive: #5e6b45;
+  --todo: #ffe066;
+}
+
+:root,
+.surface-creme {
+  --surface: var(--creme);
+  --text: var(--chocolat);
+  --text-muted: var(--noyer);
+  --link: var(--terre);
+  --link-hover: var(--chocolat);
+  --success: var(--olive);
+  --line: var(--lin);
+  --line-strong: var(--noyer);
+  --focus: var(--terre);
+}
+
+.surface-sable {
+  --surface: var(--sable);
+  --text: var(--chocolat);
+  --text-muted: var(--noyer);
+  --link: var(--terre);
+  --link-hover: var(--chocolat);
+  --success: var(--olive);
+  --line: var(--lin);
+  --line-strong: var(--noyer);
+  --focus: var(--terre);
+}
+
+.surface-chocolat {
+  --surface: var(--chocolat);
+  --text: var(--creme);
+  --text-muted: var(--lin);
+  --link: var(--creme);
+  --link-hover: var(--sable);
+  --success: var(--lin);
+  --line: rgb(253 247 239 / 0.22);
+  --line-strong: var(--lin);
+  --focus: var(--creme);
+}

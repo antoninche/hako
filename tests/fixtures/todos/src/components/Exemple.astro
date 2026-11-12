@@ -1,0 +1,34 @@
+---
+/**
+ * Exemple dans un commentaire : <Todo what="Exemple de doc">[ignoré]</Todo>
+ * et todo('Exemple de doc', '[ignoré]').
+ */
+import Todo from './Todo.astro';
+import { todo } from '../../../../../src/lib/todo';
+
+const telephone = todo('Numéro de téléphone', '[téléphone]');
+const items = [{ label: 'Adresse', todo: 'Adresse postale', placeholder: '[adresse]' }];
+---
+
+<p>
+  L'équipe vous répond : <Todo what="Adresse e-mail de contact">[adresse e-mail]</Todo>.
+</p>
+<!-- <Todo what="Dans un commentaire HTML">[ignoré]</Todo> -->
+{/* todo('Dans une expression commentée', '[ignoré]') */}
+<p>
+  C'est <Todo
+    what='Durée de la garantie'
+  >
+    [durée]
+  </Todo> au total.
+</p>
+<p>{telephone.placeholder}</p>
+{items.map((item) => <Todo what={item.todo}>{item.placeholder}</Todo>)}
+{true && <span>Aujourd'hui : <Todo what={'Horaires d’ouverture'}>[horaires]</Todo></span>}
+<p>Texte avec todo('du texte', '[pas un appel]') dans une page.</p>
+
+<style>
+  .exemple {
+    color: var(--text);
+  }
+</style>

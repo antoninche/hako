@@ -1,0 +1,13 @@
+---
+import PageIntro from '../components/PageIntro.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { draftNotice, pages } from '../data/pages';
+
+const { title, description } = pages.order;
+---
+
+<BaseLayout title={title} description={description}>
+  <PageIntro title={title}>
+    <p class="lead text-muted">{draftNotice}</p>
+  </PageIntro>
+</BaseLayout>

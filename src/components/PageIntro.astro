@@ -1,0 +1,47 @@
+---
+/**
+ * Ouverture d'une page intérieure : titre principal (h1), filet court,
+ * puis le texte d'introduction passé en contenu.
+ *
+ * Exemple :
+ *   <PageIntro title="Nos offres">
+ *     <p class="lead">Texte d’introduction de la page.</p>
+ *   </PageIntro>
+ */
+import Section from './Section.astro';
+
+interface Props {
+  title: string;
+  /** Petit surtitre au-dessus du titre (facultatif, quelques mots). */
+  kicker?: string;
+}
+
+const { title, kicker } = Astro.props;
+---
+
+<Section space="l" class="page-intro">
+  <div class="page-intro__inner">
+    {kicker && <p class="kicker">{kicker}</p>}
+    <h1>{title}</h1>
+    <div class="rule rule--short page-intro__rule"></div>
+    <div class="stack page-intro__body">
+      <slot />
+    </div>
+  </div>
+</Section>
+
+<style>
+  .page-intro__inner {
+    display: grid;
+    gap: var(--space-m);
+    justify-items: start;
+  }
+
+  .page-intro__rule {
+    border-block-start-color: var(--line-strong);
+  }
+
+  .page-intro__body {
+    width: 100%;
+  }
+</style>

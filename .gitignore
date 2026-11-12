@@ -1,0 +1,31 @@
+# Dépendances et sorties de construction
+node_modules/
+dist/
+.astro/
+
+# Variables d'environnement locales (jamais versionnées)
+.env
+.env.*
+!.env.example
+
+# Résultats de tests et rendus volumineux (régénérables)
+test-results/
+playwright-report/
+blob-report/
+qa/screenshots/
+qa/lighthouse/
+design/illustrations/renders/
+*.blend1
+
+# Dossiers icons/ toujours versionnés (public/icons/, src/assets/icons/) : la
+# règle « Icon? » d'un fichier d'exclusion global courant sous macOS (fichiers
+# d'icône de dossier du Finder) les écarte aussi quand git ignore la casse.
+!icons/
+
+# Fichiers de travail
+.DS_Store
+*.log
+.cache/
+.tmp/
+__pycache__/
+*.pyc

@@ -1,0 +1,74 @@
+---
+/**
+ * Liens vers les réseaux sociaux de HAKO (données : src/data/entreprise.ts).
+ *
+ * Tant que l'adresse d'un réseau est inconnue, on affiche son icône et son
+ * nom suivis du texte provisoire surligné, sans lien (jamais de lien mort).
+ */
+import Icon from './Icon.astro';
+import Todo from './Todo.astro';
+import { company } from '../data/entreprise';
+import { isTodo } from '../lib/todo';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<ul class:list={['social-links', className]}>
+  {company.social.map((network) => (
+    <li>
+      {isTodo(network.url) ? (
+        <span class="social-links__entry">
+          <Icon name={network.id} />
+          <span>{network.name}</span>
+          <Todo what={network.url.todo}>{network.url.placeholder}</Todo>
+        </span>
+      ) : (
+        <a class="social-links__entry social-links__link" href={network.url}>
+          <Icon name={network.id} />
+          <span>{network.name}</span>
+        </a>
+      )}
+    </li>
+  ))}
+</ul>
+
+<style>
+  .social-links {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  /* Mêmes lettres que le plan du site voisin (D-DIN, taille du texte courant). */
+  .social-links__entry {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: var(--space-xs);
+    row-gap: var(--space-3xs);
+    min-height: var(--target-min);
+    font-family: var(--font-ui);
+    font-size: var(--step-0);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .social-links__entry :global(.icon) {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--text-muted);
+  }
+
+  .social-links__link {
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .social-links__link:hover {
+    color: var(--text);
+    text-decoration: underline;
+  }
+</style>

@@ -1,0 +1,863 @@
+---
+/**
+ * Charte graphique interne (/charte/) : non indexée, liée nulle part.
+ *
+ * Les couleurs, les surfaces et l'échelle typographique sont lues dans
+ * src/styles/tokens.css au moment de la construction : cette page montre
+ * toujours les valeurs réellement utilisées, et les contrastes sont recalculés
+ * (formule WCAG 2.x). Les états « survol » et « focus » des boutons et des
+ * liens sont montrés sans interaction grâce aux classes .is-hover et .is-focus.
+ */
+import Icon, { type IconName } from '../components/Icon.astro';
+import Logo from '../components/Logo.astro';
+import Section from '../components/Section.astro';
+import Todo from '../components/Todo.astro';
+import { LOGO_VARIANTS, logoFile } from '../components/logo-files';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import tokensCss from '../styles/tokens.css?raw';
+
+// ---------- Lecture des jetons ----------
+
+interface PaletteColor {
+  name: string;
+  hex: string;
+  note: string;
+}
+
+const palette: PaletteColor[] = [];
+for (const m of tokensCss.matchAll(/--([a-z]+):\s*(#[0-9a-f]{6});\s*(?:\/\*\s*(.*?)\s*\*\/)?/gi)) {
+  if (m[1] && m[2]) palette.push({ name: m[1], hex: m[2].toLowerCase(), note: m[3] ?? '' });
+}
+const hexOf = (name: string) => palette.find((c) => c.name === name)?.hex;
+
+type SurfaceName = 'creme' | 'sable' | 'chocolat';
+const SURFACES: SurfaceName[] = ['creme', 'sable', 'chocolat'];
+const ROLES = [
+  ['text', 'Texte'],
+  ['text-muted', 'Texte secondaire'],
+  ['link', 'Lien'],
+  ['link-hover', 'Lien survolé'],
+  ['success', 'Réussite'],
+  ['line-strong', 'Filet fort, bord de champ'],
+  ['focus', 'Anneau de focus'],
+] as const;
+
+/** Rôles d'une surface : { text: '#412d1e', … } (la première définition fait foi). */
+function surfaceRoles(surface: SurfaceName): Record<string, string> {
+  const block = new RegExp(`\\.surface-${surface}\\s*\\{([^}]*)\\}`).exec(tokensCss)?.[1] ?? '';
+  const roles: Record<string, string> = {};
+  for (const m of block.matchAll(/--([a-z-]+):\s*var\(--([a-z]+)\)/g)) {
+    const hex = m[2] ? hexOf(m[2]) : undefined;
+    if (m[1] && hex) roles[m[1]] = hex;
+  }
+  return roles;
+}
+
+// ---------- Contraste WCAG 2.x ----------
+
+function luminance(hex: string): number {
+  const channel = (i: number) => {
+    const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5);
+}
+
+function contrast(a: string, b: string): number {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x) as [number, number];
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+const fr1 = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const ratioText = (r: number) => `${fr1.format(r)}:1`;
+const verdict = (r: number) =>
+  r >= 7 ? 'AAA' : r >= 4.5 ? 'AA' : r >= 3 ? 'grand texte et non-texte' : 'décor seulement';
+
+const backgrounds = SURFACES.map((s) => ({ name: s, hex: hexOf(s) ?? '#ffffff' }));
+
+// ---------- Échelle typographique ----------
+
+const steps = [...tokensCss.matchAll(/--(step-{1,2}\d):\s*([^;]+);/g)]
+  .map((m) => {
+    const value = m[2] ?? '';
+    const rems = [...value.matchAll(/([\d.]+)rem/g)].map((r) => Number(r[1]) * 16);
+    const min = rems[0] ?? 0;
+    const max = value.startsWith('clamp') ? (rems.at(-1) ?? min) : min;
+    return { token: `--${m[1]}`, value, min, max };
+  })
+  .reverse();
+const px = (n: number) => `${Math.round(n * 10) / 10} px`;
+
+// ---------- Exemples ----------
+
+const price = new Intl.NumberFormat('fr-FR', {
+  style: 'currency',
+  currency: 'EUR',
+  maximumFractionDigits: 0,
+}).format(1000);
+
+// Exemples de texte provisoire. Écrits en variables, ils ne sont pas comptés
+// par `npm run todos` : ce ne sont pas de vraies informations manquantes.
+const todoExamples = {
+  surface: { what: 'Exemple de la charte : texte provisoire', placeholder: '[texte provisoire]' },
+  sentence: { what: 'Exemple de la charte : durée des mises à jour', placeholder: '[durée]' },
+  price: { what: 'Exemple de la charte : prix HT ou TTC', placeholder: '[HT ou TTC]' },
+};
+
+const uiIcons: IconName[] = ['menu', 'close', 'mail', 'map-pin', 'arrow-right', 'external'];
+const socialIcons: IconName[] = ['linkedin', 'youtube', 'facebook', 'instagram', 'peertube'];
+const logos = LOGO_VARIANTS.map((variant) => ({ variant, available: Boolean(logoFile(variant)) }));
+---
+
+<BaseLayout
+  title="Charte graphique"
+  description="Charte graphique interne de HAKO : couleurs, surfaces, typographie et composants."
+  noindex
+>
+  <Section space="m">
+    <div class="stack">
+      <p class="kicker">Page interne</p>
+      <h1>Charte graphique</h1>
+      <p class="lead text-muted">
+        Les couleurs, les textes et les composants du site, tels qu’ils sont dans le code. Les
+        valeurs viennent de <code>src/styles/tokens.css</code>&#8239;; les contrastes sont
+        recalculés à chaque construction du site.
+      </p>
+    </div>
+  </Section>
+
+  <!-- ---------- Palette ---------- -->
+  <Section surface="sable" labelledby="palette">
+    <div class="stack stack--l">
+      <h2 id="palette">Palette</h2>
+      <p>
+        Contraste de chaque couleur sur les trois fonds (WCAG 2.x)&nbsp;: 4,5:1 au moins pour du
+        texte courant, 3:1 pour du grand texte et les éléments d’interface.
+      </p>
+      <ul class="colors">
+        {palette.map((color) => (
+          <li class="color">
+            <svg class="color__swatch" viewBox="0 0 160 64" aria-hidden="true" focusable="false">
+              <rect x="0.5" y="0.5" width="159" height="63" rx="6" fill={color.hex} />
+            </svg>
+            <p class="color__name">
+              <code>--{color.name}</code>
+              <span class="text-muted">{color.hex.toUpperCase()}</span>
+            </p>
+            <p class="small">{color.note}</p>
+            <dl class="color__ratios">
+              {backgrounds.map((bg) => (
+                <div>
+                  <dt class="small text-muted">sur {bg.name}</dt>
+                  <dd>
+                    {bg.hex === color.hex ? (
+                      '—'
+                    ) : (
+                      <>
+                        <span class="ratio">{ratioText(contrast(color.hex, bg.hex))}</span>{' '}
+                        <span class="small text-muted">{verdict(contrast(color.hex, bg.hex))}</span>
+                      </>
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </Section>
+
+  <!-- ---------- Surfaces ---------- -->
+  <Section labelledby="surfaces">
+    <div class="stack stack--l">
+      <h2 id="surfaces">Surfaces et rôles</h2>
+      <p>
+        Une section choisit sa surface&nbsp;: <code>.surface-creme</code>,{' '}
+        <code>.surface-sable</code> ou <code>.surface-chocolat</code>. Les rôles de texte s’adaptent
+        et les composants n’emploient que ces rôles.
+      </p>
+      <div class="surfaces">
+        {SURFACES.map((surface) => {
+          const roles = surfaceRoles(surface);
+          const bg = hexOf(surface) ?? '#ffffff';
+          return (
+            <div class:list={['surface-card', `surface-${surface}`]}>
+              <h3 class="h4">.surface-{surface}</h3>
+              <p>
+                Texte courant, rôle <code>--text</code>.
+              </p>
+              <p class="text-muted">
+                Texte secondaire, rôle <code>--text-muted</code>.
+              </p>
+              <p>
+                Un <a href="#surfaces">lien</a> et un{' '}
+                <a class="is-hover" href="#surfaces">
+                  lien survolé
+                </a>
+                .
+              </p>
+              <p class="role-success">
+                Réussite, rôle <code>--success</code>.
+              </p>
+              <p>
+                Information manquante&nbsp;:{' '}
+                <Todo what={todoExamples.surface.what}>{todoExamples.surface.placeholder}</Todo>
+              </p>
+              <div class="cluster cluster--xs">
+                <span class="btn btn--primary">Principal</span>
+                <span class="btn btn--secondary">Secondaire</span>
+              </div>
+              <div class="rule"></div>
+              <dl class="roles">
+                {ROLES.map(([role, label]) => {
+                  const hex = roles[role];
+                  return (
+                    <div>
+                      <dt>
+                        {label} <code>--{role}</code>
+                      </dt>
+                      <dd>
+                        {hex ? `${hex.toUpperCase()} · ${ratioText(contrast(hex, bg))}` : '—'}
+                      </dd>
+                    </div>
+                  );
+                })}
+              </dl>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </Section>
+
+  <!-- ---------- Typographie ---------- -->
+  <Section surface="sable" labelledby="typographie">
+    <div class="stack stack--xl">
+      <div class="stack">
+        <h2 id="typographie">Typographie</h2>
+        <p>
+          Titres en Fraunces (axe SOFT à 100 pour des courbes douces, taille optique automatique),
+          texte courant en Atkinson Hyperlegible Next, interface en D-DIN.
+        </p>
+      </div>
+
+      <div class="stack stack--m">
+        <h3>Échelle des titres (Fraunces)</h3>
+        <ul class="scale">
+          {steps.map((step) => (
+            <li class="scale__row">
+              <span class="scale__meta">
+                <code>{step.token}</code>
+                <span class="small text-muted">
+                  {step.min === step.max ? px(step.min) : `${px(step.min)} → ${px(step.max)}`}
+                </span>
+              </span>
+              <span class:list={['scale__sample', `scale__sample--${step.token.slice(2)}`]}>
+                Vos souvenirs restent à la maison.
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="stack stack--m">
+        <h3>Axe SOFT de Fraunces</h3>
+        <figure class="soft">
+          <p class="soft__sample">Souvenirs</p>
+          <figcaption class="small text-muted">
+            SOFT 100 et WONK 0&nbsp;: courbes adoucies, retenues pour le site.
+          </figcaption>
+        </figure>
+        <p class="small text-muted">
+          Le fichier de police livré avec le site fige l’axe SOFT à 100 et WONK à 0 (voir{' '}
+          <code>docs/fonts.md</code>). Le dessin d’origine (SOFT 0), plus tranchant, n’est pas dans
+          ce fichier&nbsp;: il ne peut pas être montré ici.
+        </p>
+        <p class="weights">
+          <span class="weights__400">Graisse 400</span>
+          <span class="weights__500">Graisse 500</span>
+          <span class="weights__600">Graisse 600</span>
+        </p>
+      </div>
+
+      <div class="stack stack--m">
+        <h3>Texte courant (Atkinson Hyperlegible Next, 18 px, interligne 1,6, 70 caractères)</h3>
+        <p>
+          Les photos de famille, les papiers importants et les vidéos des vacances restent chez
+          vous, dans une petite box que nous installons à la maison. Nous vous apprenons à vous en
+          servir, puis nous restons joignables si vous avez une question. Les lignes ne dépassent
+          pas soixante-dix caractères environ, pour que l’œil retrouve facilement le début de la
+          suivante.
+        </p>
+        <p class="lead">
+          Texte d’introduction (<code>.lead</code>), un cran au-dessus du texte courant.
+        </p>
+        <p class="small text-muted">
+          Mention ou légende (<code>.small</code>), 16 px.
+        </p>
+      </div>
+
+      <div class="stack stack--m">
+        <h3>Interface (D-DIN)</h3>
+        <p>
+          Navigation, boutons, étiquettes et prix, en casse normale avec un léger interlettrage. Les
+          capitales sont réservées aux surtitres très courts.
+        </p>
+        <div class="ui-samples">
+          <span class="ui">Offres</span>
+          <span class="ui">La box</span>
+          <span class="ui">Notre engagement</span>
+          <span class="kicker">Surtitre</span>
+        </div>
+        <div class="price-samples">
+          <span class="ui product">Hako Pro</span>
+          <span class="price price--large">{price}</span>
+          <Todo what={todoExamples.price.what}>{todoExamples.price.placeholder}</Todo>
+          <span class="small text-muted">
+            Espace insécable fine entre les milliers, insécable avant €.
+          </span>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <!-- ---------- Boutons et liens ---------- -->
+  <Section labelledby="boutons">
+    <div class="stack stack--l">
+      <h2 id="boutons">Boutons et liens</h2>
+      <p>
+        Bouton principal&nbsp;: fond chocolat, texte crème&#8239;; au survol et au focus, fond
+        terre. Bouton secondaire&nbsp;: contour fin. Hauteur minimale 44 px.
+      </p>
+      {SURFACES.map((surface) => (
+        <div class:list={['states', `surface-${surface}`]}>
+          <p class="small text-muted">
+            <code>.surface-{surface}</code>
+          </p>
+          <div class="states__grid">
+            <span class="states__label small">Normal</span>
+            <span class="btn btn--primary">Commander</span>
+            <span class="btn btn--secondary">Découvrir la box</span>
+            <span class="states__label small">Survol</span>
+            <span class="btn btn--primary is-hover">Commander</span>
+            <span class="btn btn--secondary is-hover">Découvrir la box</span>
+            <span class="states__label small">Focus</span>
+            <span class="btn btn--primary is-focus">Commander</span>
+            <span class="btn btn--secondary is-focus">Découvrir la box</span>
+          </div>
+        </div>
+      ))}
+      <div class="stack stack--s">
+        <h3 class="h4">À essayer à la souris et au clavier</h3>
+        <div class="cluster">
+          <button type="button" class="btn btn--primary">
+            Bouton principal
+          </button>
+          <button type="button" class="btn btn--secondary">
+            Bouton secondaire
+            <Icon name="arrow-right" />
+          </button>
+        </div>
+        <p>
+          Un lien dans une phrase&nbsp;: <a href="#boutons">revenir au début de cette partie</a>. Il
+          est toujours souligné&#8239;; le soulignement s’épaissit au survol.
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  <!-- ---------- Informations manquantes ---------- -->
+  <Section surface="sable" labelledby="todo">
+    <div class="stack">
+      <h2 id="todo">Informations manquantes</h2>
+      <p>
+        Tout ce que l’équipe n’a pas encore fourni s’affiche surligné en jaune, avec un texte
+        provisoire entre crochets. Avec <code>PUBLIC_SHOW_TODOS=false</code>, le texte reste mais
+        n’est plus surligné.
+      </p>
+      <p>
+        Dans une phrase&nbsp;: les mises à jour de sécurité sont incluses pendant{' '}
+        <Todo what={todoExamples.sentence.what}>{todoExamples.sentence.placeholder}</Todo>.
+      </p>
+      <p class="price-line">
+        <span class="ui product">Hako Pro</span>
+        <span class="price">{price}</span>
+        <Todo what={todoExamples.price.what}>{todoExamples.price.placeholder}</Todo>
+      </p>
+    </div>
+  </Section>
+
+  <!-- ---------- Logo ---------- -->
+  <Section labelledby="logo">
+    <div class="stack stack--l">
+      <h2 id="logo">Logo</h2>
+      <p>
+        Toujours le fichier vectoriel, jamais «&nbsp;HAKO&nbsp;» retapé dans une police. Il prend la
+        couleur du texte&nbsp;: chocolat sur fond clair, crème sur fond chocolat.
+      </p>
+      <ul class="logos">
+        {logos.map(({ variant, available }) => (
+          <li class="logos__item">
+            <div class="logos__stage">
+              {available ? (
+                <Logo variant={variant} class:list={['logos__logo', `logos__logo--${variant}`]} />
+              ) : (
+                <span class="small text-muted">Fichier absent</span>
+              )}
+            </div>
+            <p class="small">
+              <code>{variant}</code> · hako-{variant}.svg
+            </p>
+          </li>
+        ))}
+        <li class="logos__item">
+          <div class="logos__stage surface-chocolat">
+            <Logo variant="paysage" class="logos__logo logos__logo--paysage" />
+          </div>
+          <p class="small">
+            <code>paysage</code> sur fond chocolat
+          </p>
+        </li>
+      </ul>
+    </div>
+  </Section>
+
+  <!-- ---------- Icônes ---------- -->
+  <Section surface="sable" labelledby="icones">
+    <div class="stack stack--l">
+      <h2 id="icones">Icônes</h2>
+      <p>
+        Icônes d’interface dessinées pour le site (trait de 1,5 sur une grille de 24) et icônes des
+        réseaux. Décoratives par défaut&nbsp;: le texte voisin porte le sens.
+      </p>
+      <ul class="icons">
+        {[...uiIcons, ...socialIcons].map((name) => (
+          <li class="icons__item">
+            <Icon name={name} class="icons__icon" />
+            <code class="small">{name}</code>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </Section>
+
+  <!-- ---------- Filets, ombres, arrondis, focus ---------- -->
+  <Section labelledby="details">
+    <div class="stack stack--l">
+      <h2 id="details">Filets, ombres, arrondis et focus</h2>
+      <div class="stack stack--s">
+        <h3 class="h4">Filets</h3>
+        <div class="rules">
+          <div class="rule"></div>
+          <p class="small text-muted">
+            <code>.rule</code>&nbsp;: 1 px, <code>--line</code>
+          </p>
+          <div class="rule rule--strong"></div>
+          <p class="small text-muted">
+            <code>.rule.rule--strong</code>&nbsp;: 1 px, <code>--line-strong</code>
+          </p>
+          <div class="rule rule--short rule--strong"></div>
+          <p class="small text-muted">
+            <code>.rule.rule--short</code>&nbsp;: filet court sous un titre
+          </p>
+        </div>
+      </div>
+      <div class="stack stack--s">
+        <h3 class="h4">Ombres et arrondis</h3>
+        <ul class="cards">
+          <li class="card card--s">
+            <code>--shadow-s</code>
+          </li>
+          <li class="card card--m">
+            <code>--shadow-m</code>
+          </li>
+          <li class="card card--l">
+            <code>--shadow-l</code>
+          </li>
+          <li class="card card--radius-s">
+            <span>
+              <code>--radius-s</code> (4 px)
+            </span>
+          </li>
+        </ul>
+        <p class="small text-muted">
+          Arrondi courant&nbsp;: <code>--radius</code> (8 px), boutons et cartes.
+        </p>
+      </div>
+      <div class="stack stack--s">
+        <h3 class="h4">Focus</h3>
+        <p>
+          Anneau de 2 px (<code>--focus-width</code>) de la couleur <code>--focus</code>, décalé de
+          3 px (<code>--focus-offset</code>), visible seulement au clavier (
+          <code>:focus-visible</code>).
+        </p>
+        <span class="btn btn--secondary is-focus">Élément qui a le focus</span>
+      </div>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  /* Les noms de jetons et de classes ne se coupent pas, sauf sur un écran
+     très étroit pour la taille du texte (police agrandie dans le navigateur). */
+  code {
+    white-space: nowrap;
+  }
+
+  @media (width < 18rem) {
+    code {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  /* ---------- Palette ---------- */
+
+  .colors {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+    gap: var(--space-m);
+  }
+
+  .color {
+    display: grid;
+    gap: var(--space-2xs);
+    align-content: start;
+    padding: var(--space-s);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+    background-color: var(--surface);
+  }
+
+  .color__swatch {
+    width: 100%;
+    height: auto;
+  }
+
+  .color__swatch rect {
+    stroke: var(--line-strong);
+    stroke-width: 1;
+  }
+
+  .color__name {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    justify-content: space-between;
+  }
+
+  .color__ratios {
+    display: grid;
+    gap: var(--space-3xs);
+    margin-block-start: var(--space-2xs);
+  }
+
+  .color__ratios div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-xs);
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .color__ratios dd {
+    margin: 0;
+    text-align: end;
+  }
+
+  .ratio {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Surfaces ---------- */
+
+  .surfaces {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  @media (min-width: 64rem) {
+    .surfaces {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .surface-card {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+    padding: var(--space-l);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .role-success {
+    color: var(--success);
+  }
+
+  .roles {
+    display: grid;
+    gap: var(--space-2xs);
+    font-size: var(--step--1);
+  }
+
+  .roles dt {
+    color: var(--text);
+  }
+
+  .roles dd {
+    margin: 0;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Typographie ---------- */
+
+  .scale {
+    display: grid;
+  }
+
+  .scale__row {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-block: var(--space-s);
+    border-block-end: var(--rule-width) solid var(--line);
+  }
+
+  @media (min-width: 48rem) {
+    .scale__row {
+      grid-template-columns: 12rem minmax(0, 1fr);
+      align-items: baseline;
+    }
+  }
+
+  .scale__meta {
+    display: grid;
+  }
+
+  .scale__sample {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-variation-settings: var(--font-display-variation);
+    font-weight: 400;
+    line-height: var(--leading-tight);
+    text-wrap: balance;
+  }
+
+  .scale__sample--step-5 {
+    font-size: var(--step-5);
+  }
+
+  .scale__sample--step-4 {
+    font-size: var(--step-4);
+  }
+
+  .scale__sample--step-3 {
+    font-size: var(--step-3);
+  }
+
+  .scale__sample--step-2 {
+    font-size: var(--step-2);
+  }
+
+  .scale__sample--step-1 {
+    font-size: var(--step-1);
+  }
+
+  .scale__sample--step-0 {
+    font-size: var(--step-0);
+  }
+
+  .scale__sample--step--1 {
+    font-size: var(--step--1);
+  }
+
+  .soft {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .soft__sample {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-variation-settings: var(--font-display-variation);
+    font-size: var(--step-5);
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .weights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-l);
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-variation-settings: var(--font-display-variation);
+    font-size: var(--step-2);
+  }
+
+  .weights__400 {
+    font-weight: 400;
+  }
+
+  .weights__500 {
+    font-weight: 500;
+  }
+
+  .weights__600 {
+    font-weight: 600;
+  }
+
+  .ui-samples,
+  .price-samples,
+  .price-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s) var(--space-l);
+    align-items: baseline;
+  }
+
+  .ui-samples .ui {
+    font-size: 1.0625rem;
+  }
+
+  .product {
+    font-size: var(--step-1);
+  }
+
+  .price-line .price {
+    font-size: var(--step-1);
+  }
+
+  .price--large {
+    font-size: var(--step-3);
+  }
+
+  /* ---------- Boutons ---------- */
+
+  .states {
+    padding: var(--space-l);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .states__grid {
+    display: grid;
+    grid-template-columns: max-content;
+    gap: var(--space-s);
+    align-items: center;
+    margin-block-start: var(--space-s);
+  }
+
+  @media (min-width: 40rem) {
+    .states__grid {
+      grid-template-columns: 5rem max-content max-content;
+      gap: var(--space-m);
+    }
+  }
+
+  .states__label {
+    color: var(--text-muted);
+  }
+
+  /* ---------- Logo ---------- */
+
+  .logos {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  @media (min-width: 48rem) {
+    .logos {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .logos__item {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .logos__stage {
+    display: grid;
+    place-items: center;
+    min-height: 10rem;
+    padding: var(--space-l);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .logos__stage :global(.logos__logo) {
+    width: auto;
+    height: 5rem;
+    max-width: 100%;
+  }
+
+  .logos__stage :global(.logos__logo--paysage),
+  .logos__stage :global(.logos__logo--mot) {
+    height: 2.5rem;
+  }
+
+  /* ---------- Icônes ---------- */
+
+  .icons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+    gap: var(--space-s);
+  }
+
+  .icons__item {
+    display: grid;
+    gap: var(--space-2xs);
+    justify-items: center;
+    padding: var(--space-m) var(--space-2xs);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .icons__item :global(.icons__icon) {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  /* ---------- Détails ---------- */
+
+  .rules {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: var(--space-l);
+  }
+
+  .card {
+    display: grid;
+    place-items: center;
+    min-height: 7rem;
+    border-radius: var(--radius);
+    background-color: var(--surface);
+  }
+
+  .card--s {
+    box-shadow: var(--shadow-s);
+  }
+
+  .card--m {
+    box-shadow: var(--shadow-m);
+  }
+
+  .card--l {
+    box-shadow: var(--shadow-l);
+  }
+
+  .card--radius-s {
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: var(--radius-s);
+  }
+</style>

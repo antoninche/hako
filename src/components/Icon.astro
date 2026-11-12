@@ -1,0 +1,82 @@
+---
+/**
+ * Icônes du site, en SVG dans la page, couleur du texte (currentColor).
+ *
+ * - Icônes d'interface dessinées pour HAKO : un trait fin et régulier
+ *   (grille de 24, trait de 1,5, extrémités arrondies).
+ * - Icônes des réseaux sociaux : fichiers de src/assets/icons/social/.
+ *
+ * Par défaut l'icône est décorative (ignorée par les lecteurs d'écran) :
+ * le texte voisin porte le sens. Si l'icône est seule, passez `label`.
+ * La taille suit le texte (1,25 em) ; changez-la en CSS si besoin.
+ */
+import type { SvgComponent } from 'astro/types';
+
+const uiIcons = {
+  menu: ['M4 9h16', 'M4 15h16'],
+  close: ['M6 6l12 12', 'M18 6 6 18'],
+  mail: [
+    'M4.5 5.5h15A1.5 1.5 0 0 1 21 7v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17V7a1.5 1.5 0 0 1 1.5-1.5Z',
+    'M3.5 7l8.5 6 8.5-6',
+  ],
+  'map-pin': [
+    'M12 21s-6.5-5.4-6.5-11a6.5 6.5 0 0 1 13 0c0 5.6-6.5 11-6.5 11Z',
+    'M14.5 10a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z',
+  ],
+  'arrow-right': ['M4 12h16', 'm14 6 6 6-6 6'],
+  external: [
+    'M14 4h6v6',
+    'M20 4l-9 9',
+    'M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10',
+  ],
+} as const;
+
+export type UiIconName = keyof typeof uiIcons;
+export type SocialIconName = 'linkedin' | 'youtube' | 'facebook' | 'instagram' | 'peertube';
+export type IconName = UiIconName | SocialIconName;
+
+interface Props {
+  name: IconName;
+  /** Nom lu par les lecteurs d'écran, seulement si l'icône est seule. */
+  label?: string;
+  class?: string;
+}
+
+const { name, label, class: className } = Astro.props;
+
+const socialFiles = import.meta.glob<{ default: SvgComponent }>('../assets/icons/social/*.svg', {
+  eager: true,
+});
+
+const paths = name in uiIcons ? uiIcons[name as UiIconName] : undefined;
+const Social = paths ? undefined : socialFiles[`../assets/icons/social/${name}.svg`]?.default;
+
+if (!paths && !Social) {
+  throw new Error(`Icon : l'icône « ${name} » est introuvable.`);
+}
+
+const a11y = label
+  ? { role: 'img' as const, 'aria-label': label }
+  : { 'aria-hidden': 'true' as const };
+const classes = ['icon', `icon--${name}`, className];
+---
+
+{paths ? (
+  <svg
+    class:list={classes}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    focusable="false"
+    {...a11y}
+  >
+    {paths.map((d) => (
+      <path d={d} />
+    ))}
+  </svg>
+) : (
+  Social && <Social class:list={classes} focusable="false" {...a11y} />
+)}

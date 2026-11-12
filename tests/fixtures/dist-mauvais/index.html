@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Set-Cookie" content="visite=1" />
+    <title>Jeu d'essai fautif</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet" href="https://cdn.example.com/framework.css" />
+    <link rel="dns-prefetch" href="//traceur.example.com" />
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TEST"></script>
+    <script>
+      window.dataLayer = [];
+    </script>
+    <script type="application/ld+json">{"@type": "Organization"}</script>
+    <script type="application/json">{"permis": true}</script>
+    <style>
+      p { color: red; }
+    </style>
+  </head>
+  <body>
+    <button type="button" onclick="ouvrir()">Ouvrir</button>
+    <p style="color: red">Texte</p>
+    <img src="data:image/png;base64,AAAA" alt="" />
+    <img src="/local.png" srcset="/local.png 1x, https://cdn.example.com/grande.png 2x" alt="" />
+    <iframe src="https://www.youtube.com/embed/exemple" title="Vidéo"></iframe>
+    <a href="javascript:void(0)">Rien</a>
+    <a href="https://example.org/" ping="https://traceur.example.com/clic">Lien</a>
+    <video src="/video.mp4" poster="https://cdn.example.com/affiche.jpg"></video>
+    <form action="https://formulaire.example.com/envoi"><button>Envoyer</button></form>
+    <link rel="modulepreload" href="https://cdn.example.com/module.js" />
+    <audio src="https://cdn.example.com/son.mp3"></audio>
+    <object data="https://cdn.example.com/document.pdf"></object>
+    <!-- <script src="https://commentaire.example.com/ignore.js"></script> -->
+  </body>
+</html>

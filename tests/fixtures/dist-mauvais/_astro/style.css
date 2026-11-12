@@ -1,0 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Exemple");
+.a{background:url(https://cdn.example.com/fond.png)}
+.b{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'/>")}
+@font-face{font-family:Exemple;src:url(//fonts.gstatic.com/exemple.woff2) format("woff2")}
