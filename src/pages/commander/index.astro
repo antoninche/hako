@@ -1,0 +1,76 @@
+---
+/**
+ * Page Commander (/commander/) : formulaire de commande en trois étapes,
+ * en mode démonstration (rien n'est envoyé), puis la notice « Vos données ».
+ * « ?offre=home » ou « ?offre=pro » dans l'adresse choisit l'offre d'avance.
+ * Les textes sont dans src/content/commande.ts, les prix dans src/data/tarifs.ts.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import Glyph from '../../components/commande/Glyph.astro';
+import OrderForm from '../../components/commande/OrderForm.astro';
+import PrivacyNotice from '../../components/commande/PrivacyNotice.astro';
+import RichText from '../../components/commande/RichText.astro';
+import { commandePage } from '../../content/commande.ts';
+
+const { meta, intro, demoNotice } = commandePage;
+---
+
+<BaseLayout title={meta.title} description={meta.description}>
+  <PageIntro title={intro.title} kicker={intro.kicker} width="narrow">
+    <p class="lead text-muted">{intro.lead}</p>
+  </PageIntro>
+
+  <div class="container-narrow order-page">
+    <aside class="demo-notice" aria-labelledby="demo-titre">
+      <Glyph name="info" class="demo-notice__icon" />
+      <div>
+        <h2 class="demo-notice__title" id="demo-titre">
+          {demoNotice.title}
+        </h2>
+        <p class="demo-notice__text">
+          <RichText parts={demoNotice.text} />
+        </p>
+      </div>
+    </aside>
+
+    <OrderForm />
+  </div>
+
+  <PrivacyNotice />
+</BaseLayout>
+
+<style>
+  .order-page {
+    display: grid;
+    gap: var(--space-xl);
+    padding-block-end: var(--space-section);
+  }
+
+  .demo-notice {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: flex-start;
+    padding: var(--space-s) var(--space-m);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .demo-notice :global(.demo-notice__icon) {
+    margin-block-start: 0.2em;
+    color: var(--text-muted);
+  }
+
+  .demo-notice__title {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-0);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .demo-notice__text {
+    margin: var(--space-3xs) 0 0;
+    font-size: var(--step--1);
+  }
+</style>

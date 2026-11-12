@@ -1,0 +1,73 @@
+---
+/**
+ * « Bon à savoir avant de commander » (page Offres) : ce que la box ne fait
+ * pas encore, notre zone d'intervention, le paiement et la garantie, dits
+ * simplement (faits communs : src/data/faits.ts).
+ */
+import RichText from '../commande/RichText.astro';
+import { offresPage } from '../../content/offres.ts';
+
+const copy = offresPage.goodToKnow;
+---
+
+<section class="good-to-know surface-sable" aria-labelledby="bon-a-savoir-titre">
+  <div class="container">
+    <h2 class="good-to-know__title" id="bon-a-savoir-titre">
+      {copy.title}
+    </h2>
+    <ul class="good-to-know__list">
+      {copy.items.map((item) => (
+        <li class="good-to-know__item">
+          <h3 class="good-to-know__heading">{item.title}</h3>
+          <p class="good-to-know__text">
+            <RichText parts={item.text} />
+          </p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .good-to-know {
+    padding-block: var(--space-section);
+  }
+
+  .good-to-know__title {
+    margin: 0 0 var(--space-xl);
+    font-size: var(--step-3);
+    font-weight: 400;
+  }
+
+  .good-to-know__list {
+    display: grid;
+    gap: var(--space-xl) var(--space-2xl);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .good-to-know__item {
+    padding-block-start: var(--space-m);
+    border-block-start: var(--rule-width) solid var(--line-strong);
+  }
+
+  .good-to-know__heading {
+    margin: 0 0 var(--space-2xs);
+    font-family: var(--font-ui);
+    font-size: var(--step-1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    line-height: var(--leading-snug);
+  }
+
+  .good-to-know__text {
+    margin: 0;
+  }
+
+  @media (min-width: 48rem) {
+    .good-to-know__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

@@ -1,0 +1,238 @@
+---
+/**
+ * Carte d'une offre (page Offres) : à qui elle s'adresse, son prix, ce qui
+ * est compris, et le bouton vers le formulaire de commande avec l'offre
+ * déjà choisie (/commander/?offre=home ou ?offre=pro).
+ *
+ *   <OfferCard offer={pricing.offers.home} />
+ */
+import Fact from '../Fact.astro';
+import Glyph from '../commande/Glyph.astro';
+import Price from '../commande/Price.astro';
+import RichText from '../commande/RichText.astro';
+import { offerCopy, offresPage, orderHref } from '../../content/offres.ts';
+import { missingPrice } from '../../data/faits.ts';
+import type { Offer } from '../../data/tarifs.ts';
+import { orMissing } from '../../lib/commande/inline.ts';
+
+interface Props {
+  offer: Offer;
+}
+
+const { offer } = Astro.props;
+const copy = offerCopy[offer.id];
+const titleId = `offre-${offer.id}`;
+const subscription = offer.subscription;
+---
+
+<article class="offer surface-creme" aria-labelledby={titleId}>
+  <header class="offer__header">
+    <p class="offer__audience">{offer.audience}</p>
+    <h2 class="offer__name" id={titleId}>
+      {offer.name}
+    </h2>
+    <p class="offer__summary">{copy.summary}</p>
+  </header>
+
+  <div class="offer__pricing">
+    <p class="offer__price">
+      <span class="visually-hidden">{offresPage.priceLabel}</span>
+      <Price amount={offer.priceEur} missing={missingPrice.offerPrice(offer)} size="l" />
+      <span class="offer__tax">
+        <Fact value={orMissing(offer.taxStatus, missingPrice.taxStatus(offer))} />
+      </span>
+    </p>
+    {subscription && (
+      <p class="offer__monthly">
+        {offresPage.monthlyPrefix}
+        <Price
+          amount={subscription.monthlyEur}
+          missing={missingPrice.subscriptionPrice(offer)}
+          tax={orMissing(subscription.taxStatus, missingPrice.subscriptionTax(offer))}
+          per="month"
+        />
+      </p>
+    )}
+    {subscription && (
+      <p class="offer__terms">
+        {offresPage.commitmentLabel}
+        <Fact value={orMissing(subscription.commitment, missingPrice.commitment(offer))} />
+      </p>
+    )}
+    <p class="offer__terms">{copy.payment}</p>
+  </div>
+
+  <div class="offer__included">
+    <h3 class="offer__included-title">{offresPage.includedTitle}</h3>
+    <ul class="offer__list">
+      {copy.included.map((item) => (
+        <li class="offer__item">
+          <Glyph name="check" class="offer__check" />
+          <span>
+            <RichText parts={item} />
+          </span>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <footer class="offer__footer">
+    {copy.note && (
+      <p class="offer__note">
+        <RichText parts={copy.note} />
+      </p>
+    )}
+    <a class="btn btn--primary offer__cta" href={orderHref(offer.id)}>
+      {copy.cta}
+    </a>
+  </footer>
+</article>
+
+<style>
+  .offer {
+    display: grid;
+    gap: var(--space-m);
+    align-content: start;
+    padding: clamp(var(--space-m), 4vw, var(--space-xl));
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-m);
+  }
+
+  /* Côte à côte, les deux cartes partagent les mêmes rangées : prix, listes
+     et boutons s'alignent d'une carte à l'autre. */
+  @supports (grid-template-rows: subgrid) {
+    .offer {
+      grid-row: span 4;
+      grid-template-rows: subgrid;
+    }
+  }
+
+  /* La rangée partagée prend la hauteur de l'en-tête le plus long : l'espace
+     en trop va sous le résumé, pour que les titres restent alignés. */
+  .offer__header {
+    display: grid;
+    gap: var(--space-2xs);
+    align-content: start;
+  }
+
+  .offer__audience {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .offer__name {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-3);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    line-height: 1.1;
+  }
+
+  .offer__summary {
+    margin: var(--space-2xs) 0 0;
+    color: var(--text-muted);
+  }
+
+  .offer__pricing {
+    display: grid;
+    gap: var(--space-3xs);
+    align-content: start;
+    padding-block: var(--space-m);
+    border-block: var(--rule-width) solid var(--line);
+  }
+
+  .offer__price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2xs);
+    margin: 0;
+  }
+
+  .offer__tax {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .offer__monthly {
+    margin: 0;
+    font-size: var(--step-1);
+  }
+
+  .offer__terms {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  .offer__included {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+  }
+
+  .offer__included-title {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-0);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .offer__list {
+    display: grid;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .offer__item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-xs);
+    align-items: start;
+  }
+
+  .offer__item :global(.offer__check) {
+    margin-block-start: 0.15em;
+    color: var(--success);
+  }
+
+  /* Un repère jaune en fin de ligne passe entier à la ligne suivante
+     (« [à confirmer] » plutôt que « [à » puis « confirmer] »). Seulement
+     là où aucune ponctuation ne le suit, qui resterait seule à la ligne. */
+  .offer__pricing :global(.todo),
+  .offer__item :global(.todo) {
+    display: inline-block;
+    max-inline-size: 100%;
+  }
+
+  .offer__note {
+    margin: 0;
+    padding-inline-start: var(--space-s);
+    border-inline-start: 2px solid var(--line);
+    color: var(--text-muted);
+  }
+
+  /* Le bouton reste en bas de la carte, même si l'autre carte est plus longue. */
+  .offer__footer {
+    display: grid;
+    gap: var(--space-m);
+    align-content: end;
+    justify-items: stretch;
+  }
+
+  @media (min-width: 30rem) {
+    .offer__footer {
+      justify-items: start;
+    }
+  }
+</style>

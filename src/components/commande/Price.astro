@@ -1,0 +1,80 @@
+---
+/**
+ * Le composant qui écrit un prix sur le site (pages Offres et Commander,
+ * réponses de la FAQ).
+ *
+ * Il reçoit un montant de src/data/tarifs.ts : un nombre s'affiche à la
+ * française (« 1 000 € », src/lib/format.ts), un null s'affiche
+ * automatiquement comme une information manquante, surlignée en jaune,
+ * décrite par `missing` (voir missingPrice, dans src/data/faits.ts).
+ *
+ *   <Price amount={offer.priceEur} missing={missingPrice.offerPrice(offer)} size="l" />
+ *   <Price amount={option.extraEur} missing={missingPrice.storageExtra(option)} sign="plus" />
+ *   <Price amount={25} missing={…} tax={…} per="month" />   → « 25 € HT par mois »
+ *
+ * Le statut de TVA (`tax` : « HT », « TTC » ou le repère jaune) suit le
+ * montant, avant « par mois ». Le montant et son statut de TVA ne se
+ * séparent jamais ; « par mois » peut passer à la ligne.
+ */
+import Fact from '../Fact.astro';
+import Todo from '../Todo.astro';
+import { formatEur } from '../../lib/format.ts';
+import type { Maybe, TodoValue } from '../../lib/todo.ts';
+
+interface Props {
+  /** Montant en euros ; null = prix pas encore fixé. */
+  amount: number | null;
+  /** Ce qui s'affiche (en jaune) tant que le montant vaut null. */
+  missing: TodoValue;
+  /** Statut de TVA, écrit juste après le montant : « HT », « TTC » ou le repère jaune. */
+  tax?: Maybe<string>;
+  /** « plus » : supplément, écrit « + 90 € ». */
+  sign?: 'plus';
+  /** « month » : « 25 € par mois ». */
+  per?: 'month';
+  /** Taille du chiffre : « l » pour le prix principal d'une offre. */
+  size?: 'm' | 'l';
+}
+
+const { amount, missing, tax, sign, per, size = 'm' } = Astro.props;
+---
+
+<span class:list={['price', size === 'l' && 'price--l']}>
+  <span class="price__amount">
+    {sign === 'plus' && '+\u00a0'}
+    {amount === null ? <Todo what={missing.todo}>{missing.placeholder}</Todo> : formatEur(amount)}
+  </span>
+  {tax !== undefined && (
+    <>
+      {'\u00a0'}
+      <span class="price__tax">
+        <Fact value={tax} />
+      </span>
+    </>
+  )}
+  {per === 'month' && ' par mois'}
+</span>
+
+<style>
+  /* « par mois » peut passer à la ligne (la classe .price du site l'interdit). */
+  .price {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    font-variant-numeric: lining-nums tabular-nums;
+    white-space: normal;
+  }
+
+  /* Un montant n'est jamais coupé en fin de ligne, ni son statut de TVA, collé
+     au montant par une espace insécable. */
+  .price__amount,
+  .price__tax {
+    white-space: nowrap;
+  }
+
+  .price--l .price__amount {
+    font-size: var(--step-3);
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+</style>

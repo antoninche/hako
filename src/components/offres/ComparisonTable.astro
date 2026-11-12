@@ -1,0 +1,241 @@
+---
+/**
+ * Tableau comparatif Hako Home / Hako Pro (page Offres).
+ *
+ * Un vrai tableau : légende (caption), en-têtes de colonnes et de lignes
+ * (scope). Les « oui » et « non » sont écrits en toutes lettres, l'icône ne
+ * fait que les accompagner.
+ *
+ * Sur un écran étroit (moins de 30rem), chaque ligne devient un bloc : le
+ * point comparé en titre, puis les deux valeurs côte à côte, chacune avec le
+ * nom de son offre. Le tableau reste un tableau pour les lecteurs d'écran :
+ * seule la mise en page change (pas de display: contents, qui lui ferait
+ * perdre son rôle), et les en-têtes de colonnes restent lus avec chaque
+ * valeur. Les noms visibles au-dessus des valeurs sont donc masqués pour
+ * eux (aria-hidden), pour ne pas être lus deux fois.
+ */
+import Glyph from '../commande/Glyph.astro';
+import RichText from '../commande/RichText.astro';
+import { offresPage, type ComparisonCell } from '../../content/offres.ts';
+import { pricing } from '../../data/tarifs.ts';
+
+const copy = offresPage.comparison;
+const offers = [pricing.offers.home, pricing.offers.pro] as const;
+const cellOf = (row: (typeof copy.rows)[number], id: 'home' | 'pro'): ComparisonCell => row[id];
+---
+
+<section class="compare" aria-labelledby="comparer-titre">
+  <div class="container">
+    <h2 class="compare__title" id="comparer-titre">
+      {copy.title}
+    </h2>
+    <table class="compare__table">
+      <caption class="compare__caption">{copy.caption}</caption>
+      <thead>
+        <tr>
+          <th scope="col" class="compare__corner">
+            <span class="visually-hidden">{copy.featureHeader}</span>
+          </th>
+          {offers.map((offer) => (
+            <th scope="col" class="compare__offer">
+              {offer.name}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {copy.rows.map((row) => (
+          <tr>
+            <th scope="row" class="compare__feature">
+              {row.label}
+            </th>
+            {offers.map((offer) => {
+              const cell = cellOf(row, offer.id);
+              return (
+                <td class="compare__value">
+                  <span class="compare__label" aria-hidden="true">
+                    {offer.name}
+                  </span>
+                  {cell === 'yes' ? (
+                    <span class="compare__mark">
+                      <Glyph name="check" class="compare__yes" />
+                      {copy.yes}
+                    </span>
+                  ) : cell === 'no' ? (
+                    <span class="compare__mark compare__mark--no">
+                      <Glyph name="minus" />
+                      {copy.no}
+                    </span>
+                  ) : (
+                    <RichText parts={cell} />
+                  )}
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<style>
+  .compare {
+    padding-block: var(--space-section);
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  .compare__title {
+    margin: 0 0 var(--space-xs);
+    font-size: var(--step-3);
+    font-weight: 400;
+  }
+
+  .compare__table {
+    inline-size: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: var(--step--1);
+    line-height: 1.45;
+    /* Dernier recours : un mot trop long pour sa cellule passe à la ligne
+       plutôt que de déborder (jamais de coupure au milieu d'un mot qui tient). */
+    overflow-wrap: break-word;
+  }
+
+  .compare__caption {
+    margin-block-end: var(--space-l);
+    text-align: start;
+    color: var(--text-muted);
+    font-size: var(--step-0);
+  }
+
+  .compare__table th,
+  .compare__table td {
+    padding: var(--space-xs) var(--space-2xs);
+    text-align: start;
+    vertical-align: top;
+    border-block-end: var(--rule-width) solid var(--line);
+  }
+
+  .compare__corner {
+    inline-size: 34%;
+  }
+
+  .compare__table thead th {
+    border-block-end-color: var(--line-strong);
+  }
+
+  .compare__offer {
+    font-family: var(--font-ui);
+    font-size: var(--step-0);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .compare__feature {
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  /* Nom de l'offre au-dessus de chaque valeur : seulement en blocs (écran étroit). */
+  .compare__label {
+    display: none;
+  }
+
+  /* Un montant ne se coupe jamais, mais « par mois » peut passer à la ligne. */
+  .compare__table :global(.price) {
+    white-space: normal;
+  }
+
+  /* Un repère jaune passe entier à la ligne plutôt que de se couper : coupé,
+     sa marge intérieure (répétée sur chaque morceau) dépasserait de la
+     cellule. Un repère plus long que la cellule se replie dans sa boîte. */
+  .compare__table :global(.todo) {
+    display: inline-block;
+    max-inline-size: 100%;
+  }
+
+  .compare__mark {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3xs);
+    font-weight: 700;
+  }
+
+  .compare__mark :global(.compare__yes) {
+    color: var(--success);
+  }
+
+  .compare__mark--no {
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Écran étroit : une ligne du tableau = un bloc ---------- */
+  @media (width < 30rem) {
+    .compare__table,
+    .compare__table tbody,
+    .compare__caption {
+      display: block;
+    }
+
+    /* En-têtes de colonnes hors de la vue, mais toujours lus avec chaque valeur. */
+    .compare__table thead {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .compare__table tbody tr {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-2xs) var(--space-s);
+      padding-block: var(--space-s);
+      border-block-end: var(--rule-width) solid var(--line);
+    }
+
+    .compare__table tbody tr:first-child {
+      border-block-start: var(--rule-width) solid var(--line-strong);
+    }
+
+    .compare__table tbody th,
+    .compare__table tbody td {
+      padding: 0;
+      border: 0;
+    }
+
+    .compare__feature {
+      grid-column: 1 / -1;
+      font-size: var(--step-0);
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .compare__label {
+      display: block;
+      margin-block-end: var(--space-3xs);
+      font-family: var(--font-ui);
+      font-weight: 700;
+      letter-spacing: var(--tracking-ui);
+      color: var(--text-muted);
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .compare__table {
+      font-size: var(--step-0);
+    }
+
+    .compare__table th,
+    .compare__table td {
+      padding: var(--space-s) var(--space-s);
+    }
+
+    .compare__corner {
+      inline-size: 40%;
+    }
+  }
+</style>

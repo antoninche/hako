@@ -1,0 +1,138 @@
+---
+/**
+ * Case à cocher obligatoire du récapitulatif (conditions générales de vente,
+ * notice sur les données), avec son message d'erreur et un lien pour lire
+ * le texte concerné.
+ *
+ *   <CheckField field="acceptTerms" id="cgv" name="cgv" link={…} newTab />
+ */
+import Glyph from './Glyph.astro';
+import { commandePage } from '../../content/commande.ts';
+import type { LinkValue } from '../../lib/commande/types.ts';
+import type { ConsentField } from '../../lib/commande/validation.ts';
+
+interface Props {
+  field: ConsentField;
+  id: string;
+  name: string;
+  link: LinkValue;
+  /** Le lien s'ouvre dans un nouvel onglet (et le dit), pour ne pas perdre la saisie. */
+  newTab?: boolean;
+}
+
+const { field, id, name, link, newTab = false } = Astro.props;
+const copy = commandePage.fields[field];
+const errorId = `${id}-erreur`;
+---
+
+<div class="check">
+  <p class="check__error" id={errorId} data-error-for={id} hidden>
+    <Glyph name="alert" class="check__error-icon" />
+    <span>
+      <span class="visually-hidden">{commandePage.errors.prefix}</span>
+      <span data-error-text></span>
+    </span>
+  </p>
+  <div class="check__row">
+    <input
+      class="check__input"
+      type="checkbox"
+      id={id}
+      name={name}
+      value="oui"
+      required
+      data-field={field}
+      data-describedby=""
+      data-msg-unchecked={copy.messages.unchecked}
+    />
+    <label class="check__label" for={id}>
+      {copy.label}
+    </label>
+  </div>
+  <p class="check__more">
+    {newTab ? (
+      <a href={link.href} target="_blank" rel="noopener">
+        {link.label} <span class="check__tab">{commandePage.consents.newTab}</span>
+      </a>
+    ) : (
+      <a href={link.href}>{link.label}</a>
+    )}
+  </p>
+</div>
+
+<style>
+  .check {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  /* Toute la rangée coche la case : une cible d'au moins 44 px de haut, sur
+     toute la largeur, même quand l'intitulé tient sur une ligne. */
+  .check__row {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-xs);
+    align-items: start;
+    min-block-size: var(--target-min);
+    padding-block: var(--space-2xs);
+  }
+
+  /* Au-dessus de la zone cliquable de l'intitulé, pour rester cliquable elle-même. */
+  .check__input {
+    position: relative;
+    z-index: 1;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    margin: 0.1rem 0 0;
+    accent-color: var(--text);
+  }
+
+  .check__label {
+    cursor: pointer;
+  }
+
+  .check__label::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .check__more {
+    margin: 0;
+    padding-inline-start: calc(1.5rem + var(--space-xs));
+    font-size: var(--step--1);
+  }
+
+  .check__tab {
+    white-space: nowrap;
+  }
+
+  .check__error {
+    display: flex;
+    gap: var(--space-2xs);
+    align-items: flex-start;
+    margin: 0;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .check__error[hidden] {
+    display: none;
+  }
+
+  .check__error :global(.check__error-icon) {
+    margin-block-start: 0.1em;
+    color: var(--link);
+  }
+
+  .check__input[aria-invalid='true'] {
+    outline: 2px solid var(--link);
+    outline-offset: 2px;
+  }
+
+  .check__input:focus-visible {
+    outline: var(--focus-width) solid var(--focus);
+    outline-offset: var(--focus-offset);
+  }
+</style>

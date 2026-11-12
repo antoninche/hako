@@ -3,7 +3,15 @@
 Ce fichier est produit par `npm run todos` : ne le modifiez pas à la main.
 Chaque ligne donne le numéro de ligne dans le fichier source, ce qui manque, puis le texte provisoire affiché sur le site.
 
-Total : 27 informations manquantes dans 4 fichiers.
+Total : 30 informations manquantes dans 7 fichiers.
+
+## src/content/commande.ts
+
+- L32 - Durée de conservation des informations d’une demande de commande - [durée de conservation]
+
+## src/content/offres.ts
+
+- L35 - Délai sous lequel nous rappelons après une demande de commande - [délai]
 
 ## src/data/entreprise.ts
 
@@ -43,3 +51,7 @@ Total : 27 informations manquantes dans 4 fichiers.
 - L76 - tarif d'une intervention de service après-vente (Hako Home) - `null`
 - L87 - durée d'engagement de l'abonnement Hako Pro - `null`
 - L99 - acompte demandé à la commande, entre 30 et 50 % - `null`
+
+## src/lib/commande/service-area.ts
+
+- L27 - Zone d’intervention du formulaire de commande : confirmer la règle « départements 13 et 83 » (plus large que la zone réelle : Arles, Draguignan, Fréjus…) ou la remplacer par une liste de codes postaux - [à confirmer]

@@ -1,0 +1,179 @@
+---
+/**
+ * Champ de texte du formulaire de commande : intitulé, aide, message
+ * d'erreur et champ, reliés pour les lecteurs d'écran.
+ *
+ * L'intitulé, l'aide et les messages viennent de src/content/commande.ts ;
+ * l'obligation et la longueur maximale de src/lib/commande/validation.ts.
+ * Le message d'erreur est placé au-dessus du champ (il reste visible quand
+ * le clavier du téléphone est ouvert) et n'apparaît qu'après vérification.
+ *
+ *   <TextField field="email" id="email" name="email" type="email" autocomplete="email" />
+ */
+import Glyph from './Glyph.astro';
+import RichText from './RichText.astro';
+import { commandePage } from '../../content/commande.ts';
+import { FIELD_RULES, type TextField } from '../../lib/commande/validation.ts';
+
+interface Props {
+  field: TextField;
+  id: string;
+  name: string;
+  autocomplete: string;
+  type?: 'text' | 'email' | 'tel';
+  inputmode?: 'text' | 'numeric' | 'tel' | 'email';
+  /** Zone de texte sur plusieurs lignes. */
+  multiline?: boolean;
+  /** Largeur : « short » pour un code postal ou un nombre. */
+  width?: 'full' | 'short';
+  spellcheck?: boolean;
+}
+
+const {
+  field,
+  id,
+  name,
+  autocomplete,
+  type = 'text',
+  inputmode,
+  multiline = false,
+  width = 'full',
+  spellcheck,
+} = Astro.props;
+
+const copy: { label: string; hint?: string; messages: Record<string, string | undefined> } =
+  commandePage.fields[field];
+const rule = FIELD_RULES[field];
+const hintId = copy.hint ? `${id}-aide` : undefined;
+const errorId = `${id}-erreur`;
+const tooLong = commandePage.tooLong.replace('{max}', String(rule.maxLength));
+
+/** Attributs communs au champ simple et à la zone de texte. */
+const control = {
+  id,
+  name,
+  autocomplete,
+  required: rule.required,
+  maxlength: rule.maxLength,
+  'aria-describedby': hintId,
+  'data-field': field,
+  'data-describedby': hintId ?? '',
+  'data-msg-required': copy.messages.required,
+  'data-msg-invalid': copy.messages.invalid,
+  'data-msg-too-long': tooLong,
+  ...(inputmode ? { inputmode } : {}),
+  ...(spellcheck === undefined ? {} : { spellcheck }),
+};
+---
+
+<div class:list={['field', `field--${width}`]}>
+  <label class="field__label" for={id}>
+    {copy.label}
+    {!rule.required && <span class="field__optional">{` (${commandePage.optional})`}</span>}
+  </label>
+  {hintId && (
+    <p class="field__hint" id={hintId}>
+      <RichText parts={[copy.hint ?? '']} />
+    </p>
+  )}
+  <p class="field__error" id={errorId} data-error-for={id} hidden>
+    <Glyph name="alert" class="field__error-icon" />
+    <span>
+      <span class="visually-hidden">{commandePage.errors.prefix}</span>
+      <span data-error-text></span>
+    </span>
+  </p>
+  {multiline ? (
+    <textarea class="field__control field__control--multiline" rows="3" {...control} />
+  ) : (
+    <input class="field__control" type={type} {...control} />
+  )}
+</div>
+
+<style>
+  .field {
+    display: grid;
+    gap: var(--space-3xs);
+    align-content: start;
+  }
+
+  .field__label {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    line-height: 1.3;
+  }
+
+  /* « (facultatif) » : plus discret que l'intitulé. D-DIN n'existe qu'en
+     gras sur le site, d'où la police du texte courant. */
+  .field__optional {
+    font-family: var(--font-body);
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--text-muted);
+  }
+
+  .field__hint {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
+  .field__error {
+    display: flex;
+    gap: var(--space-2xs);
+    align-items: flex-start;
+    margin: var(--space-3xs) 0 0;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .field__error[hidden] {
+    display: none;
+  }
+
+  .field__error :global(.field__error-icon) {
+    margin-block-start: 0.1em;
+    color: var(--link);
+  }
+
+  .field__control {
+    inline-size: 100%;
+    min-block-size: 3rem;
+    margin-block-start: var(--space-3xs);
+    padding: 0.625rem 0.875rem;
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: var(--radius-s);
+    font: inherit;
+    color: var(--text);
+    background-color: var(--surface);
+    transition:
+      border-color var(--dur-1) var(--ease-out),
+      box-shadow var(--dur-1) var(--ease-out);
+  }
+
+  .field__control:hover {
+    border-color: var(--text);
+  }
+
+  .field__control:focus-visible {
+    outline: var(--focus-width) solid var(--focus);
+    outline-offset: 1px;
+    border-color: var(--text);
+  }
+
+  /* Champ refusé : bordure épaisse en plus du message (jamais la couleur seule). */
+  .field__control[aria-invalid='true'] {
+    border-color: var(--link);
+    box-shadow: inset 0 0 0 1px var(--link);
+  }
+
+  .field__control--multiline {
+    resize: vertical;
+    min-block-size: 5.5rem;
+  }
+
+  .field--short .field__control {
+    max-inline-size: 10rem;
+  }
+</style>

@@ -1,0 +1,1053 @@
+---
+/**
+ * Formulaire de commande en trois étapes, sur une seule page et sans fenêtre
+ * surgissante : 1. la box (offre et stockage, total en direct),
+ * 2. les coordonnées, 3. le récapitulatif et l'envoi.
+ *
+ * Sans JavaScript, les trois étapes restent lisibles l'une sous l'autre, sans
+ * leurs boutons, et une note explique comment commander autrement. Avec
+ * JavaScript (order-form.ts), une seule étape s'affiche à la fois.
+ *
+ * Les montants affichés en direct sont calculés ici, au moment de la
+ * construction du site, pour chaque combinaison offre + stockage (gabarits
+ * <template>) : le script choisit le bon gabarit et ne calcule aucun prix.
+ */
+import Choice from './Choice.astro';
+import CheckField from './CheckField.astro';
+import Glyph from './Glyph.astro';
+import Price from './Price.astro';
+import QuoteLines from './QuoteLines.astro';
+import RichText from './RichText.astro';
+import TextField from './TextField.astro';
+import Fact from '../Fact.astro';
+import { commandePage } from '../../content/commande.ts';
+import { offerCopy } from '../../content/offres.ts';
+import { missingPrice } from '../../data/faits.ts';
+import { pricing, type OfferId } from '../../data/tarifs.ts';
+import { orMissing } from '../../lib/commande/inline.ts';
+import { computeQuote, listQuotes, quoteKey } from '../../lib/commande/pricing.ts';
+import type { StepNumber } from '../../lib/commande/types.ts';
+
+const copy = commandePage;
+const offers = [pricing.offers.home, pricing.offers.pro];
+const defaultOffer: OfferId = 'home';
+const defaultQuote = computeQuote(pricing, defaultOffer, pricing.includedStorage);
+const quotes = listQuotes(pricing);
+const steps: readonly StepNumber[] = [1, 2, 3];
+const stepLabel = (step: StepNumber) => copy.stepOf.replace('{n}', String(step));
+---
+
+<div class="order" data-order>
+  <noscript>
+    <p class="order__noscript">
+      <Glyph name="info" class="order__noscript-icon" />
+      <span>
+        <RichText parts={copy.noscript} />
+      </span>
+    </p>
+  </noscript>
+
+  <ol class="steps" aria-label={copy.stepsLabel} data-steps data-done-text={copy.stepDone}>
+    {steps.map((step) => (
+      <li
+        class="steps__item"
+        data-step-indicator={step}
+        data-state={step === 1 ? 'current' : 'upcoming'}
+        aria-current={step === 1 ? 'step' : undefined}
+      >
+        <span class="steps__number" aria-hidden="true">
+          <span class="steps__digit">{step}</span>
+          <Glyph name="check" class="steps__check" />
+        </span>
+        <span class="steps__label">
+          {copy.steps[step].title}
+          <span class="visually-hidden" data-step-state />
+        </span>
+      </li>
+    ))}
+  </ol>
+
+  <form class="order__form" id="commande" method="post" novalidate data-order-form>
+    <div
+      class="error-summary"
+      role="group"
+      tabindex="-1"
+      aria-labelledby="erreurs-titre"
+      aria-describedby="erreurs-liste"
+      data-error-summary
+      data-title-one={copy.errors.titleOne}
+      data-title-many={copy.errors.titleMany}
+      hidden
+    >
+      <h2 class="error-summary__title" id="erreurs-titre">
+        <Glyph name="alert" class="error-summary__icon" />
+        <span data-error-summary-title></span>
+      </h2>
+      <ul class="error-summary__list" id="erreurs-liste" data-error-summary-list></ul>
+    </div>
+
+    <p class="visually-hidden" role="status" data-announcer></p>
+
+    {/* Étape 1 : la box */}
+    <section class="step" data-step="1" aria-labelledby="etape-1-titre">
+      <h2 class="step__title" id="etape-1-titre" tabindex="-1">
+        <span class="step__kicker">{stepLabel(1)}</span> {copy.steps[1].title}
+      </h2>
+
+      <fieldset class="group">
+        <legend class="group__legend">{copy.offer.legend}</legend>
+        <div class="choices choices--offers">
+          {offers.map((offer) => (
+            <Choice
+              name="offre"
+              value={offer.id}
+              id={`offre-${offer.id}`}
+              label={offer.name}
+              checked={offer.id === defaultOffer}
+              size="l"
+            >
+              <span class="offer-choice">
+                <span class="offer-choice__audience">{offer.audience}</span>
+                <span class="offer-choice__price">
+                  <Price
+                    amount={offer.priceEur}
+                    missing={missingPrice.offerPrice(offer)}
+                    tax={orMissing(offer.taxStatus, missingPrice.taxStatus(offer))}
+                  />
+                </span>
+                {offer.subscription && (
+                  <span class="offer-choice__price">
+                    {copy.offer.then}
+                    <Price
+                      amount={offer.subscription.monthlyEur}
+                      missing={missingPrice.subscriptionPrice(offer)}
+                      tax={orMissing(
+                        offer.subscription.taxStatus,
+                        missingPrice.subscriptionTax(offer),
+                      )}
+                      per="month"
+                    />
+                  </span>
+                )}
+                <span class="offer-choice__payment">{offerCopy[offer.id].payment}</span>
+              </span>
+            </Choice>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset class="group" aria-describedby="stockage-aide">
+        <legend class="group__legend">{copy.storage.legend}</legend>
+        <p class="group__hint" id="stockage-aide">
+          {copy.storage.hint}
+        </p>
+        <div class="choices choices--storage">
+          {pricing.storage.map((option) => (
+            <Choice
+              name="stockage"
+              value={option.id}
+              id={`stockage-${option.id}`}
+              label={option.label}
+              checked={option.id === pricing.includedStorage}
+            >
+              <span class="storage-choice">
+                {option.extraEur === 0 ? (
+                  copy.storage.included
+                ) : (
+                  <Price
+                    amount={option.extraEur}
+                    missing={missingPrice.storageExtra(option)}
+                    sign="plus"
+                  />
+                )}
+              </span>
+            </Choice>
+          ))}
+        </div>
+      </fieldset>
+
+      <div class="total surface-sable" aria-atomic="true" data-total>
+        <h3 class="total__title">{copy.total.title}</h3>
+        <div data-quote-slot="total">
+          <QuoteLines quote={defaultQuote} />
+        </div>
+        <p class="total__note">{copy.total.note}</p>
+      </div>
+
+      <div class="step__actions">
+        <button type="button" class="btn btn--primary step__next" data-action="next">
+          {copy.next}
+          <Glyph name="next" />
+        </button>
+      </div>
+    </section>
+
+    {/* Étape 2 : les coordonnées */}
+    <section class="step" data-step="2" aria-labelledby="etape-2-titre">
+      <div class="step__header">
+        <h2 class="step__title" id="etape-2-titre" tabindex="-1">
+          <span class="step__kicker">{stepLabel(2)}</span> {copy.steps[2].title}
+        </h2>
+        <p class="step__intro">{copy.requiredNote}</p>
+      </div>
+
+      <fieldset class="group">
+        <legend class="group__legend">{copy.groups.contact}</legend>
+        <div class="fields fields--two">
+          <TextField
+            field="firstName"
+            id="prenom"
+            name="prenom"
+            autocomplete="given-name"
+            spellcheck={false}
+          />
+          <TextField
+            field="lastName"
+            id="nom"
+            name="nom"
+            autocomplete="family-name"
+            spellcheck={false}
+          />
+        </div>
+        <div class="fields">
+          <TextField
+            field="email"
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            inputmode="email"
+            spellcheck={false}
+          />
+          <TextField field="phone" id="telephone" name="telephone" type="tel" autocomplete="tel" />
+        </div>
+      </fieldset>
+
+      <fieldset class="group">
+        <legend class="group__legend">{copy.groups.address}</legend>
+        <div class="fields">
+          <TextField field="address" id="adresse" name="adresse" autocomplete="address-line1" />
+          <div class="fields fields--postal">
+            <TextField
+              field="postalCode"
+              id="code-postal"
+              name="code-postal"
+              autocomplete="postal-code"
+              inputmode="numeric"
+              width="short"
+            />
+            <TextField field="city" id="commune" name="commune" autocomplete="address-level2" />
+          </div>
+          <div class="area-status" aria-live="polite" data-area-status>
+            <div class="area-note" id="zone-hors" data-area-outside hidden>
+              <Glyph name="info" class="area-note__icon" />
+              <p class="area-note__text">
+                <RichText parts={copy.serviceArea.outside} />
+              </p>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="group" aria-describedby="entreprise-aide" data-pro-only>
+        <legend class="group__legend">{copy.groups.company}</legend>
+        <p class="group__hint" id="entreprise-aide">
+          {copy.groups.companyHint}
+        </p>
+        <div class="fields fields--company">
+          <TextField
+            field="companyName"
+            id="entreprise"
+            name="entreprise"
+            autocomplete="organization"
+          />
+          <TextField
+            field="users"
+            id="utilisateurs"
+            name="utilisateurs"
+            autocomplete="off"
+            inputmode="numeric"
+            width="short"
+          />
+        </div>
+      </fieldset>
+
+      <fieldset class="group" aria-describedby="creneaux-aide">
+        <legend class="group__legend">
+          {copy.groups.timeSlots}
+          <span class="group__optional">{` (${copy.optional})`}</span>
+        </legend>
+        <p class="group__hint" id="creneaux-aide">
+          {copy.groups.timeSlotsHint}
+        </p>
+        <div class="slots">
+          {copy.timeSlots.map((slot) => (
+            <div class="slot">
+              <input
+                class="slot__input"
+                type="checkbox"
+                id={`creneau-${slot.id}`}
+                name="creneaux"
+                value={slot.id}
+                data-time-slot
+              />
+              <label class="slot__label" for={`creneau-${slot.id}`}>
+                {slot.label}
+              </label>
+            </div>
+          ))}
+        </div>
+        <TextField
+          field="availabilityNote"
+          id="precisions"
+          name="precisions"
+          autocomplete="off"
+          multiline
+        />
+      </fieldset>
+
+      <div class="step__actions">
+        <button type="button" class="btn btn--secondary step__back" data-action="back">
+          <Glyph name="back" />
+          {copy.back}
+        </button>
+        <button type="button" class="btn btn--primary step__next" data-action="next">
+          {copy.next}
+          <Glyph name="next" />
+        </button>
+      </div>
+    </section>
+
+    {/* Étape 3 : le récapitulatif */}
+    <section class="step" data-step="3" aria-labelledby="etape-3-titre">
+      <h2 class="step__title" id="etape-3-titre" tabindex="-1">
+        <span class="step__kicker">{stepLabel(3)}</span> {copy.steps[3].title}
+      </h2>
+
+      <div class="recap" data-recap>
+        <div class="recap__block">
+          <div class="recap__head">
+            <h3 class="recap__title">{copy.recap.boxTitle}</h3>
+            <button type="button" class="recap__edit" data-action="goto" data-goto="1">
+              <Glyph name="edit" />
+              {copy.recap.editBox}
+              <span class="visually-hidden">{` ${copy.recap.editBoxContext}`}</span>
+            </button>
+          </div>
+          <div data-quote-slot="recap">
+            <QuoteLines quote={defaultQuote} />
+          </div>
+        </div>
+
+        <div class="recap__block">
+          <div class="recap__head">
+            <h3 class="recap__title">{copy.recap.contactTitle}</h3>
+            <button type="button" class="recap__edit" data-action="goto" data-goto="2">
+              <Glyph name="edit" />
+              {copy.recap.editContact}
+              <span class="visually-hidden">{` ${copy.recap.editContactContext}`}</span>
+            </button>
+          </div>
+          <dl class="recap__list" data-no-preference={copy.recap.noPreference}>
+            <div class="recap__row">
+              <dt>{copy.recap.name}</dt>
+              <dd data-recap-field="name"></dd>
+            </div>
+            <div class="recap__row">
+              <dt>{copy.recap.email}</dt>
+              <dd data-recap-field="email"></dd>
+            </div>
+            <div class="recap__row">
+              <dt>{copy.recap.phone}</dt>
+              <dd data-recap-field="phone"></dd>
+            </div>
+            <div class="recap__row">
+              <dt>{copy.recap.address}</dt>
+              <dd data-recap-field="address"></dd>
+            </div>
+            <div class="recap__row">
+              <dt>{copy.recap.installation}</dt>
+              <dd>
+                <span data-recap-installation="home">{copy.recap.installationAtHome}</span>
+                <span data-recap-installation="shipped" hidden>
+                  <Fact value={copy.recap.installationShipped} />
+                </span>
+              </dd>
+            </div>
+            <div class="recap__row" data-recap-row="company">
+              <dt>{copy.recap.company}</dt>
+              <dd data-recap-field="company"></dd>
+            </div>
+            <div class="recap__row" data-recap-row="users">
+              <dt>{copy.recap.users}</dt>
+              <dd data-recap-field="users"></dd>
+            </div>
+            <div class="recap__row">
+              <dt>{copy.recap.timeSlots}</dt>
+              <dd data-recap-field="timeSlots"></dd>
+            </div>
+            <div class="recap__row" data-recap-row="note">
+              <dt>{copy.recap.note}</dt>
+              <dd data-recap-field="note"></dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+
+      <p class="payment-note">
+        <Glyph name="info" class="payment-note__icon" />
+        <span>
+          <RichText parts={copy.payment} />
+        </span>
+      </p>
+
+      <fieldset class="group">
+        <legend class="group__legend">{copy.consents.legend}</legend>
+        <div class="fields">
+          <CheckField
+            field="acceptTerms"
+            id="cgv"
+            name="cgv"
+            link={copy.consents.termsLink}
+            newTab
+          />
+          <CheckField
+            field="acceptPrivacy"
+            id="donnees"
+            name="donnees"
+            link={copy.consents.privacyLink}
+          />
+        </div>
+      </fieldset>
+
+      <p class="send-error" role="alert" data-send-error hidden>
+        <Glyph name="alert" class="send-error__icon" />
+        <span>{copy.sendError}</span>
+      </p>
+
+      <div class="step__actions">
+        <button type="button" class="btn btn--secondary step__back" data-action="back">
+          <Glyph name="back" />
+          {copy.back}
+        </button>
+        <button
+          type="submit"
+          class="btn btn--primary step__submit"
+          data-submit
+          data-sending-text={copy.sending}
+          disabled
+        >
+          {copy.submit}
+        </button>
+      </div>
+    </section>
+  </form>
+
+  <section
+    class="confirmation surface-sable"
+    aria-labelledby="confirmation-titre"
+    data-confirmation
+    hidden
+  >
+    <Glyph name="check" class="confirmation__icon" />
+    <h2 class="confirmation__title" id="confirmation-titre" tabindex="-1">
+      {copy.confirmation.title}
+    </h2>
+    <p>{copy.confirmation.text}</p>
+    <p>
+      <RichText parts={copy.confirmation.contact} />
+    </p>
+    <button type="button" class="btn btn--secondary" data-action="restart">
+      {copy.confirmation.back}
+    </button>
+  </section>
+
+  {quotes.map((quote) => (
+    <template data-quote-template={quoteKey(quote.offer.id, quote.storage.id)}>
+      <QuoteLines quote={quote} />
+    </template>
+  ))}
+</div>
+
+<script>
+  import { initOrderForm } from './order-form.ts';
+  import { DemoSubmitter } from '../../lib/commande/submitter.ts';
+
+  // Pour brancher un vrai service de commande, remplacer DemoSubmitter ici
+  // (voir docs/commande.md). Aucun autre fichier n'est à modifier.
+  for (const root of document.querySelectorAll<HTMLElement>('[data-order]')) {
+    initOrderForm(root, new DemoSubmitter());
+  }
+</script>
+
+<style>
+  .order {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  /* L'attribut hidden l'emporte toujours, même sur un display défini ici. */
+  .order :global([hidden]) {
+    display: none !important;
+  }
+
+  .order__noscript {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: flex-start;
+    margin: 0;
+    padding: var(--space-s) var(--space-m);
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: var(--radius);
+  }
+
+  .order__noscript :global(.order__noscript-icon) {
+    margin-block-start: 0.15em;
+    color: var(--link);
+  }
+
+  /* ---------- Indicateur d'étapes ---------- */
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: none;
+  }
+
+  .steps__item {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2xs);
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  /* Filet qui relie les étapes. */
+  .steps__item + .steps__item::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 1.125rem;
+    inset-inline: calc(-50% + 1.5rem) calc(50% + 1.5rem);
+    border-block-start: var(--rule-width) solid var(--line-strong);
+  }
+
+  .steps__number {
+    display: grid;
+    place-items: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: 50%;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    background-color: var(--surface);
+  }
+
+  .steps__number :global(.steps__check) {
+    display: none;
+  }
+
+  .steps__label {
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    line-height: 1.25;
+  }
+
+  .steps__item[data-state='current'] {
+    color: var(--text);
+  }
+
+  .steps__item[data-state='current'] .steps__number {
+    border: 2px solid var(--text);
+    box-shadow:
+      0 0 0 3px var(--surface),
+      0 0 0 4px var(--line-strong);
+  }
+
+  .steps__item[data-state='done'] {
+    color: var(--text);
+  }
+
+  .steps__item[data-state='done'] .steps__digit {
+    display: none;
+  }
+
+  .steps__item[data-state='done'] .steps__number :global(.steps__check) {
+    display: inline-block;
+    color: var(--success);
+  }
+
+  /* ---------- Résumé des erreurs ---------- */
+
+  .error-summary {
+    padding: var(--space-m);
+    border: 2px solid var(--link);
+    border-radius: var(--radius);
+    background-color: var(--surface);
+  }
+
+  .error-summary:focus-visible {
+    outline: var(--focus-width) solid var(--focus);
+    outline-offset: var(--focus-offset);
+  }
+
+  .error-summary__title {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    margin: 0 0 var(--space-xs);
+    font-family: var(--font-ui);
+    font-size: var(--step-1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .error-summary__title :global(.error-summary__icon) {
+    color: var(--link);
+  }
+
+  .error-summary__list {
+    display: grid;
+    gap: var(--space-2xs);
+    margin: 0;
+    padding-inline-start: var(--space-l);
+    list-style: disc;
+  }
+
+  .error-summary__list :global(a) {
+    font-weight: 700;
+  }
+
+  /* ---------- Étapes ---------- */
+
+  .order__form {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .step {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .step__title {
+    display: grid;
+    gap: var(--space-2xs);
+    margin: 0;
+    font-size: var(--step-3);
+    font-weight: 400;
+    scroll-margin-top: calc(var(--header-height) + var(--space-m));
+  }
+
+  .step__title:focus {
+    outline: none;
+  }
+
+  .step__title:focus-visible {
+    outline: var(--focus-width) solid var(--focus);
+    outline-offset: var(--focus-offset);
+  }
+
+  .step__kicker {
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .step__header {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .step__intro {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  /* Sur téléphone, les boutons prennent toute la largeur, l'un sous l'autre,
+     dans l'ordre de la page (« Retour » puis l'action principale) : l'ordre
+     visuel reste celui du clavier. */
+  .step__actions {
+    display: grid;
+    gap: var(--space-s);
+    padding-block-start: var(--space-m);
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  .step__actions :global(.btn) {
+    inline-size: 100%;
+  }
+
+  /* Bouton désactivé (avant le chargement du script) : visiblement inactif. */
+  .step__submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @media (min-width: 30rem) {
+    .step__actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .step__actions :global(.btn) {
+      inline-size: auto;
+      min-inline-size: 9rem;
+    }
+
+    .step__next,
+    .step__submit {
+      margin-inline-start: auto;
+    }
+  }
+
+  /* ---------- Groupes de champs ---------- */
+
+  .group {
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .group > :global(*) + :global(*) {
+    margin-block-start: var(--space-m);
+  }
+
+  .group > .group__legend + :global(*) {
+    margin-block-start: var(--space-s);
+  }
+
+  .group__legend {
+    padding: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    line-height: var(--leading-snug);
+  }
+
+  /* « (facultatif) » : plus discret que l'intitulé. D-DIN n'existe qu'en
+     gras sur le site, d'où la police du texte courant. */
+  .group__optional {
+    font-family: var(--font-body);
+    font-size: var(--step-0);
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--text-muted);
+  }
+
+  .group > .group__hint {
+    margin-block-start: var(--space-3xs);
+    color: var(--text-muted);
+  }
+
+  .choices {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .offer-choice {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .offer-choice__audience,
+  .offer-choice__payment {
+    color: var(--text-muted);
+  }
+
+  .offer-choice__price {
+    font-size: var(--step-0);
+  }
+
+  .storage-choice {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text-muted);
+  }
+
+  .fields {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .slot {
+    position: relative;
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    min-block-size: var(--target-min);
+    padding: var(--space-2xs) var(--space-m) var(--space-2xs) var(--space-s);
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: var(--radius);
+  }
+
+  .slot:has(.slot__input:checked) {
+    border-color: var(--text);
+    box-shadow: inset 0 0 0 1px var(--text);
+  }
+
+  .slot__input {
+    position: relative;
+    z-index: 1;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    margin: 0;
+    accent-color: var(--text);
+  }
+
+  .slot__label {
+    cursor: pointer;
+  }
+
+  .slot__label::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  @supports selector(:has(*)) {
+    .slot__input:focus-visible {
+      outline: none;
+    }
+
+    .slot:has(.slot__input:focus-visible) {
+      outline: var(--focus-width) solid var(--focus);
+      outline-offset: var(--focus-offset);
+    }
+  }
+
+  /* ---------- Zone d'intervention ---------- */
+
+  .area-note {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: flex-start;
+    padding: var(--space-s) var(--space-m);
+    border-inline-start: 3px solid var(--line-strong);
+    background-color: var(--surface);
+  }
+
+  .area-note :global(.area-note__icon) {
+    margin-block-start: 0.15em;
+    color: var(--link);
+  }
+
+  .area-note__text {
+    margin: 0;
+  }
+
+  /* ---------- Total ---------- */
+
+  .total {
+    padding: var(--space-m);
+    border-radius: var(--radius);
+  }
+
+  .total__title {
+    margin: 0 0 var(--space-2xs);
+    font-family: var(--font-ui);
+    font-size: var(--step-1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .total__note {
+    margin: var(--space-xs) 0 0;
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
+  /* ---------- Récapitulatif ---------- */
+
+  .recap {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  .recap__block {
+    padding: var(--space-m);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .recap__head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    justify-content: space-between;
+    align-items: center;
+    margin-block-end: var(--space-xs);
+  }
+
+  .recap__title {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .recap__edit {
+    display: inline-flex;
+    gap: var(--space-3xs);
+    align-items: center;
+    min-block-size: var(--target-min);
+    padding: 0 var(--space-xs);
+    border: 0;
+    border-radius: var(--radius-s);
+    font-family: var(--font-ui);
+    font-size: var(--step-0);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--link);
+    background: none;
+    text-decoration: underline;
+    text-underline-offset: 0.22em;
+    cursor: pointer;
+  }
+
+  .recap__edit:hover {
+    color: var(--link-hover);
+  }
+
+  .recap__list {
+    display: grid;
+    margin: 0;
+  }
+
+  .recap__row {
+    display: grid;
+    gap: var(--space-3xs);
+    padding-block: var(--space-2xs);
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  .recap__row:first-child {
+    border-block-start: 0;
+  }
+
+  .recap__row dt {
+    color: var(--text-muted);
+  }
+
+  .recap__row dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .payment-note {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: flex-start;
+    margin: 0;
+    padding: var(--space-s) var(--space-m);
+    border-inline-start: 3px solid var(--line-strong);
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  .payment-note :global(.payment-note__icon) {
+    margin-block-start: 0.2em;
+    color: var(--text-muted);
+  }
+
+  .send-error {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: flex-start;
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .send-error :global(.send-error__icon) {
+    color: var(--link);
+  }
+
+  /* ---------- Confirmation ---------- */
+
+  .confirmation {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+    padding: clamp(var(--space-m), 5vw, var(--space-xl));
+    border-radius: var(--radius);
+  }
+
+  .confirmation > p {
+    margin: 0;
+  }
+
+  .confirmation :global(.confirmation__icon) {
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    color: var(--success);
+  }
+
+  .confirmation__title {
+    margin: 0;
+    font-size: var(--step-2);
+    font-weight: 450;
+  }
+
+  .confirmation__title:focus {
+    outline: none;
+  }
+
+  /* ---------- Écrans plus larges ---------- */
+
+  @media (min-width: 36rem) {
+    .fields--two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .fields--postal {
+      grid-template-columns: 10rem minmax(0, 1fr);
+    }
+
+    .choices--offers {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .choices--storage {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .recap__row {
+      grid-template-columns: 12rem 1fr;
+      gap: var(--space-s);
+    }
+  }
+
+  /* ---------- Sans JavaScript ----------
+   * Les trois étapes restent lisibles l'une sous l'autre ; ce qui ne
+   * fonctionne qu'avec JavaScript (indicateur d'étapes, total en direct,
+   * récapitulatif, boutons des étapes, y compris l'envoi) est masqué. La
+   * note du haut dit comment commander sans JavaScript. */
+  @media (scripting: none) {
+    .steps,
+    .total,
+    .recap,
+    .step__actions {
+      display: none;
+    }
+  }
+</style>

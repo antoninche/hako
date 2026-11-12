@@ -1,0 +1,68 @@
+---
+/**
+ * Page Offres (/offres/) : Hako Home et Hako Pro côte à côte, le stockage,
+ * le tableau comparatif, ce qu'il faut savoir et le déroulé de la commande.
+ * Les textes sont dans src/content/offres.ts, les prix dans src/data/tarifs.ts.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import ComparisonTable from '../../components/offres/ComparisonTable.astro';
+import GoodToKnow from '../../components/offres/GoodToKnow.astro';
+import OfferCard from '../../components/offres/OfferCard.astro';
+import OrderingSteps from '../../components/offres/OrderingSteps.astro';
+import StorageOptions from '../../components/offres/StorageOptions.astro';
+import { offresPage } from '../../content/offres.ts';
+import { pricing } from '../../data/tarifs.ts';
+
+const { meta, intro } = offresPage;
+---
+
+<BaseLayout title={meta.title} description={meta.description}>
+  <PageIntro title={intro.title} kicker={intro.kicker}>
+    <p class="lead text-muted">{intro.lead}</p>
+  </PageIntro>
+
+  <section class="offers surface-sable" aria-label={offresPage.offersLabel}>
+    <div class="container offers__grid">
+      <OfferCard offer={pricing.offers.home} />
+      <OfferCard offer={pricing.offers.pro} />
+    </div>
+  </section>
+
+  <StorageOptions />
+  <ComparisonTable />
+  <GoodToKnow />
+  <OrderingSteps />
+</BaseLayout>
+
+<style>
+  .offers {
+    padding-block: var(--space-2xl);
+  }
+
+  .offers__grid {
+    display: grid;
+    column-gap: var(--space-l);
+    row-gap: 0;
+  }
+
+  /* Sur une colonne, de l'espace entre les deux cartes (rangées partagées). */
+  .offers__grid > :global(* + *) {
+    margin-block-start: var(--space-l);
+  }
+
+  @media (min-width: 52rem) {
+    .offers {
+      padding-block: var(--space-section);
+    }
+
+    .offers__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: stretch;
+    }
+
+    .offers__grid > :global(* + *) {
+      margin-block-start: 0;
+    }
+  }
+</style>

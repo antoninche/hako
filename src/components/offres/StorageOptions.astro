@@ -1,0 +1,189 @@
+---
+/**
+ * Le stockage (page Offres) : la capacité comprise et les options plus
+ * grandes, avec leur supplément lu dans src/data/tarifs.ts.
+ * Une petite jauge dessine la capacité de chaque option (décorative).
+ *
+ * Les trois options sont côte à côte quand la place le permet (requête de
+ * conteneur), sinon une ligne chacune : un prix encore à confirmer, plus long
+ * qu'un montant, ne déborde jamais de sa carte.
+ */
+import Price from '../commande/Price.astro';
+import RichText from '../commande/RichText.astro';
+import { offresPage } from '../../content/offres.ts';
+import { missingPrice } from '../../data/faits.ts';
+import { pricing } from '../../data/tarifs.ts';
+
+const copy = offresPage.storage;
+
+/** Capacité en téraoctets, lue dans l'identifiant de l'option (« 2to » → 2). */
+const capacityOf = (id: string) => Number.parseInt(id, 10) || 1;
+const maxCapacity = Math.max(...pricing.storage.map((option) => capacityOf(option.id)));
+---
+
+<section class="storage" aria-labelledby="stockage-titre">
+  <div class="container storage__grid">
+    <div class="storage__text">
+      <h2 class="storage__title" id="stockage-titre">
+        {copy.title}
+      </h2>
+      <p>
+        <RichText parts={copy.text} />
+      </p>
+      <p>{copy.more}</p>
+    </div>
+
+    <div class="storage__options">
+      <ul class="storage__list" aria-label={copy.listLabel}>
+        {pricing.storage.map((option) => (
+          <li class:list={['storage__item', option.extraEur === 0 && 'storage__item--included']}>
+            <span class="storage__meter" aria-hidden="true">
+              {Array.from({ length: maxCapacity }, (_, index) => (
+                <span
+                  class:list={[
+                    'storage__cell',
+                    index < capacityOf(option.id) && 'storage__cell--filled',
+                  ]}
+                />
+              ))}
+            </span>
+            <span class="storage__capacity">{option.label}</span>
+            <span class="storage__price">
+              {option.extraEur === 0 ? (
+                copy.included
+              ) : (
+                <Price
+                  amount={option.extraEur}
+                  missing={missingPrice.storageExtra(option)}
+                  sign="plus"
+                />
+              )}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .storage {
+    padding-block: var(--space-section);
+  }
+
+  .storage__grid {
+    display: grid;
+    gap: var(--space-xl);
+    align-items: center;
+  }
+
+  .storage__text > * {
+    margin: 0;
+  }
+
+  .storage__text > * + * {
+    margin-block-start: var(--space-s);
+  }
+
+  .storage__title {
+    font-size: var(--step-3);
+    font-weight: 400;
+  }
+
+  /* La largeur disponible décide de la mise en page des options. */
+  .storage__options {
+    container-type: inline-size;
+  }
+
+  /* Par défaut, une ligne par capacité : jauge, capacité, puis le prix, qui
+     passe à la ligne s'il manque de place. */
+  .storage__list {
+    display: grid;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .storage__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs) var(--space-s);
+    padding: var(--space-s);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .storage__item--included {
+    border-color: var(--line-strong);
+  }
+
+  .storage__meter {
+    display: flex;
+    gap: 3px;
+  }
+
+  .storage__cell {
+    inline-size: 0.75rem;
+    block-size: 1.25rem;
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: 2px;
+  }
+
+  .storage__cell--filled {
+    /* Forme sans texte : aucune couleur de texte à contrôler (npm run contrast). */
+    color: transparent;
+    background-color: var(--line-strong);
+  }
+
+  .storage__capacity {
+    font-family: var(--font-ui);
+    font-size: var(--step-2);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    line-height: 1.1;
+  }
+
+  .storage__price {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3xs);
+    margin-inline-start: auto;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text-muted);
+  }
+
+  /* Assez de place : trois cartes côte à côte, jauge, capacité et prix
+     l'un sous l'autre. */
+  @container (min-width: 32rem) {
+    .storage__list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-s);
+    }
+
+    .storage__item {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: flex-start;
+      padding: var(--space-m) var(--space-s);
+    }
+
+    .storage__meter {
+      margin-block-end: var(--space-2xs);
+    }
+
+    .storage__price {
+      margin-inline-start: 0;
+    }
+  }
+
+  @media (min-width: 52rem) {
+    .storage__grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+      gap: var(--space-2xl);
+    }
+  }
+</style>

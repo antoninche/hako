@@ -1,0 +1,41 @@
+---
+/**
+ * Affiche une phrase écrite dans src/content/ sous forme de morceaux :
+ * texte, information manquante (repère jaune), lien ou prix.
+ *
+ * Comme dans le pied de page, un nom composé (« Aix-en-Provence ») n'est
+ * jamais coupé en fin de ligne (keepHyphenatedWords, src/components/typo.ts).
+ *
+ *   <RichText parts={commandePage.payment} />
+ */
+import Todo from '../Todo.astro';
+import Price from './Price.astro';
+import { keepHyphenatedWords } from '../typo.ts';
+import { isLink, isPrice } from '../../lib/commande/inline.ts';
+import type { RichText } from '../../lib/commande/types.ts';
+import { isTodo } from '../../lib/todo.ts';
+
+interface Props {
+  parts: RichText;
+}
+
+const { parts } = Astro.props;
+---
+
+{parts.map((part) =>
+  typeof part === 'string' ? (
+    keepHyphenatedWords(part).map((segment) =>
+      segment.keep ? <span class="nowrap">{segment.text}</span> : segment.text,
+    )
+  ) : isTodo(part) ? (
+    <Todo what={part.todo}>{part.placeholder}</Todo>
+  ) : isPrice(part) ? (
+    <Price
+      amount={part.amountEur}
+      missing={part.missing}
+      {...(part.per ? { per: part.per } : {})}
+    />
+  ) : isLink(part) ? (
+    <a href={part.href}>{part.label}</a>
+  ) : null,
+)}

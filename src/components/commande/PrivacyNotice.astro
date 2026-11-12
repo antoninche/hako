@@ -1,0 +1,84 @@
+---
+/**
+ * Notice « Vos données », sous le formulaire de commande : à quoi servent
+ * les informations, combien de temps nous les gardons, et vos droits.
+ * La case « J’ai lu comment mes données sont utilisées » renvoie ici (#vos-donnees).
+ */
+import RichText from './RichText.astro';
+import { commandePage } from '../../content/commande.ts';
+
+const copy = commandePage.privacy;
+---
+
+<section class="privacy surface-sable" id="vos-donnees" aria-labelledby="vos-donnees-titre">
+  <div class="container-narrow">
+    <h2 class="privacy__title" id="vos-donnees-titre">
+      {copy.title}
+    </h2>
+    <p class="privacy__intro">{copy.intro}</p>
+    <dl class="privacy__list">
+      {copy.items.map((item) => (
+        <div class="privacy__item">
+          <dt>{item.term}</dt>
+          <dd>
+            <RichText parts={item.text} />
+          </dd>
+        </div>
+      ))}
+    </dl>
+    <p class="privacy__more">
+      <a href={copy.more.href}>{copy.more.label}</a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .privacy {
+    padding-block: var(--space-2xl);
+  }
+
+  .privacy__title {
+    margin: 0;
+    font-size: var(--step-2);
+    font-weight: 450;
+  }
+
+  .privacy__intro {
+    margin: var(--space-2xs) 0 var(--space-m);
+    color: var(--text-muted);
+  }
+
+  .privacy__list {
+    display: grid;
+    gap: var(--space-s);
+    margin: 0;
+  }
+
+  .privacy__item {
+    display: grid;
+    gap: var(--space-3xs);
+    padding-block-start: var(--space-s);
+    border-block-start: var(--rule-width) solid var(--line-strong);
+  }
+
+  .privacy__item dt {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .privacy__item dd {
+    margin: 0;
+  }
+
+  .privacy__more {
+    margin: var(--space-m) 0 0;
+  }
+
+  @media (min-width: 40rem) {
+    .privacy__item {
+      grid-template-columns: 14rem 1fr;
+      gap: var(--space-m);
+    }
+  }
+</style>

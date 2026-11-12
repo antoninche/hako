@@ -1,0 +1,124 @@
+---
+/**
+ * « Comment se passe la commande » (page Offres) : trois étapes, puis les
+ * boutons vers le formulaire de commande et vers la page Contact.
+ */
+import RichText from '../commande/RichText.astro';
+import { offresPage } from '../../content/offres.ts';
+
+const copy = offresPage.ordering;
+---
+
+<section class="ordering" aria-labelledby="commande-titre">
+  <div class="container">
+    <h2 class="ordering__title" id="commande-titre">
+      {copy.title}
+    </h2>
+    <ol class="ordering__steps">
+      {copy.steps.map((step, index) => (
+        <li class="ordering__step">
+          <span class="ordering__number" aria-hidden="true">
+            {index + 1}
+          </span>
+          <h3 class="ordering__heading">{step.title}</h3>
+          <p class="ordering__text">
+            <RichText parts={step.text} />
+          </p>
+        </li>
+      ))}
+    </ol>
+    <div class="ordering__actions">
+      <a class="btn btn--primary" href={copy.cta.href}>
+        {copy.cta.label}
+      </a>
+      <a class="btn btn--secondary" href={copy.secondary.href}>
+        {copy.secondary.label}
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ordering {
+    padding-block: var(--space-section);
+  }
+
+  .ordering__title {
+    margin: 0 0 var(--space-xl);
+    font-size: var(--step-3);
+    font-weight: 400;
+  }
+
+  .ordering__steps {
+    display: grid;
+    gap: var(--space-xl);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ordering__step {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: var(--space-m);
+    row-gap: var(--space-2xs);
+    align-items: baseline;
+  }
+
+  .ordering__number {
+    grid-row: span 2;
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: 50%;
+    font-family: var(--font-display);
+    font-variation-settings: var(--font-display-variation);
+    font-size: var(--step-1);
+    font-variant-numeric: lining-nums;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .ordering__heading {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .ordering__text {
+    margin: 0;
+    grid-column: 2;
+  }
+
+  .ordering__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    margin-block-start: var(--space-xl);
+  }
+
+  @media (min-width: 52rem) {
+    .ordering__steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-l);
+    }
+
+    .ordering__step {
+      grid-template-columns: 1fr;
+      align-content: start;
+    }
+
+    .ordering__number {
+      grid-row: auto;
+      margin-block-end: var(--space-xs);
+    }
+
+    .ordering__text {
+      grid-column: auto;
+    }
+  }
+</style>
