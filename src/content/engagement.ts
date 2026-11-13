@@ -18,7 +18,7 @@
  *   l'intérieur des guillemets « ».
  */
 import { company } from '../data/entreprise';
-import { homePageLicense, missingPrice, nameSentence, remoteAccess } from '../data/faits';
+import { missingPrice, nameSentence, remoteAccess } from '../data/faits';
 import { routes } from '../data/navigation';
 import { pricing } from '../data/tarifs';
 import { orMissing } from '../lib/commande/inline';
@@ -64,11 +64,11 @@ const homeAfterSalesRate: Maybe<string> =
 const proSubscription: Paragraph = subscription
   ? [
       pro.name,
-      ', pour les entreprises, comprend un abonnement d’assistance de ',
+      ', pour les entreprises, ajoute à l’achat un abonnement de ',
       formatEur(subscription.monthlyEur),
       '\u00a0',
       orMissing(subscription.taxStatus, missingPrice.subscriptionTax(pro)),
-      ' par mois, annoncé dès le départ : support prioritaire, mises à jour et maintenance gérées par nous. Durée d’engagement : ',
+      ' par mois : assistance prioritaire, mises à jour et maintenance gérées par nous. Durée d’engagement : ',
       orMissing(subscription.commitment, missingPrice.commitment(pro)),
       '.',
     ]
@@ -101,7 +101,7 @@ export const engagement = {
           'Vos photos, vos vidéos et vos fichiers sont rangés dans la box, chez vous. ',
           remoteAccess.reason,
         ],
-        [remoteAccess.consequence, ' ', remoteAccess.optionLead, remoteAccess.option, '.'],
+        [remoteAccess.consequence, ' ', remoteAccess.choice],
       ],
     },
     {
@@ -124,9 +124,7 @@ export const engagement = {
           'Immich, qui garde vos photos, Nextcloud, qui garde vos fichiers, et Docker Engine, qui les fait tourner, sont des logiciels libres : leur code est public, et chacun peut le lire et le vérifier. Le système de la box, Raspberry Pi OS, est construit sur Debian, un système libre lui aussi.',
         ],
         [
-          'Tout n’est pas libre pour autant : Raspberry Pi OS contient des micrologiciels fermés, par exemple pour la puce Wi-Fi, et le programme de démarrage de la carte est fourni sans son code source. Licence de la page d’accueil de la box : ',
-          homePageLicense,
-          '. Nous détaillons tout, logiciel par logiciel.',
+          'Tout n’est pas libre pour autant : Raspberry Pi OS contient des micrologiciels fermés (de petits programmes intégrés aux composants), par exemple pour la puce Wi-Fi, et le programme de démarrage de la carte est fourni sans son code source. Nous détaillons tout, logiciel par logiciel.',
         ],
       ],
       link: { label: 'Voir ce qui tourne dans la box', href: `${routes.box}#logiciels` },
@@ -138,7 +136,7 @@ export const engagement = {
         [
           `${home.name} s’achète une fois, sans abonnement. Les mises à jour de sécurité sont incluses pendant `,
           homeUpdates,
-          '. Si vous avez besoin de nous après l’installation, chaque intervention est facturée à part : ',
+          '. Si vous avez besoin de nous après l’installation, hors garantie, chaque intervention est facturée ',
           homeAfterSalesRate,
           '.',
         ],

@@ -60,7 +60,7 @@ const items = [
     title: 'Prise en main et installation',
     text: [
       [
-        'Ce que nous installons chez vous, puis vos premiers pas : ouvrir la page d’accueil de la box, à l’adresse mabox.local, depuis un appareil de la maison.',
+        'Ce que nous installons chez vous, puis vos premiers pas : ouvrir la page d’accueil de la box, à l’adresse http://mabox.local, depuis un appareil de la maison.',
       ],
     ],
     videos: {
@@ -117,7 +117,7 @@ const items = [
   },
   {
     slug: 'verifier-sauvegarde',
-    title: 'Vérifier que ma sauvegarde fonctionne',
+    title: 'Vérifier sa copie de secours',
     // La copie de secours n'existe pas encore : même phrase que sur les autres pages (src/data/faits.ts).
     text: [[...backupCopy.sentence, ' Ce tutoriel arrivera avec elle.']],
     soon: true,

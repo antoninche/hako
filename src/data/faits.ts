@@ -33,23 +33,18 @@ export type FactText = readonly (string | TodoValue)[];
 
 /* ---------- Accès depuis l'extérieur de la maison ---------- */
 
-const remoteAccessOption = todo(
-  'Accès aux données depuis l’extérieur de la maison : option future à décrire (prévue ou non, fonctionnement, date, prix éventuel)',
-  '[à préciser]',
-);
-
 /**
- * Aucun port ouvert, donc pas d'accès depuis l'extérieur pour l'instant.
- * Les pages écrivent ces phrases dans cet ordre : la raison, la
- * contrepartie, puis l'option future (optionLead suivi de option).
+ * Aucun port ouvert, donc pas d'accès depuis l'extérieur de la maison. Ce
+ * n'est pas prévu : c'est un choix de sécurité de l'équipe. Les pages
+ * écrivent ces phrases dans cet ordre : la raison, la contrepartie, puis ce
+ * choix.
  */
 export const remoteAccess = {
   reason:
     'Aucun port n’est ouvert vers internet (un port, c’est une porte d’entrée vers la box) : vos données ne quittent pas la maison.',
   consequence:
-    'La contrepartie : pour l’instant, vous ne pouvez pas accéder à vos données depuis l’extérieur de la maison.',
-  optionLead: 'Option future : ',
-  option: remoteAccessOption,
+    'La contrepartie : vous ne pouvez pas accéder à vos données depuis l’extérieur de la maison.',
+  choice: 'Ce n’est pas prévu : c’est un choix de sécurité.',
 } as const;
 
 /* ---------- Logiciels de la box ---------- */
@@ -74,10 +69,12 @@ const backupCopyStatus = todo(
 export const backupCopy = {
   status: backupCopyStatus,
   sentence: [
-    'Une copie de secours de vos données est prévue, mais elle ne fait pas partie de cette première version : ',
+    'Une copie de secours de vos données est prévue, mais elle ne fait pas partie de cette première version. Date prévue : ',
     backupCopyStatus,
     '.',
   ] satisfies FactText,
+  /** Conseil écrit juste après la phrase, là où l’on décide d’acheter. */
+  advice: 'En attendant, gardez une autre copie de vos photos les plus précieuses.',
 } as const;
 
 /* ---------- Le déménageur ---------- */

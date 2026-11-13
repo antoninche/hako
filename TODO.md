@@ -3,7 +3,7 @@
 Ce fichier est produit par `npm run todos` : ne le modifiez pas à la main.
 Chaque ligne donne le numéro de ligne dans le fichier source, ce qui manque, puis le texte provisoire affiché sur le site.
 
-Total : 68 informations manquantes dans 16 fichiers.
+Total : 54 informations manquantes dans 15 fichiers.
 
 ## src/content/commande.ts
 
@@ -19,7 +19,6 @@ Total : 68 informations manquantes dans 16 fichiers.
 
 ## src/content/faq/google-photos-icloud.mdx
 
-- L11 - Durée habituelle du déménagement des photos selon leur nombre (chez Google, la préparation de l’export peut à elle seule prendre de quelques minutes à plusieurs jours) - [durée habituelle selon le nombre de photos]
 - L13 - Ce que deviennent les copies restées chez Google ou Apple après le déménagement, et ce que nous conseillons au client - [ce que nous conseillons]
 
 ## src/content/faq/si-hako-disparait.mdx
@@ -32,15 +31,15 @@ Total : 68 informations manquantes dans 16 fichiers.
 
 ## src/content/legal/cgv.mdx
 
-- L10 - Conditions générales de vente complètes : à faire rédiger et valider par un professionnel du droit, y compris le droit de rétractation pour la vente à distance - [conditions générales de vente à faire rédiger et valider, y compris le droit de rétractation pour la vente à distance]
+- L10 - Conditions générales de vente complètes : à faire rédiger et valider par un professionnel du droit, y compris le droit de rétractation pour la vente à distance - [texte à venir]
 - L16 - CGV : objet du contrat, et à qui s’appliquent ces conditions (particuliers, professionnels) - [objet du contrat, clients concernés]
 - L20 - CGV : contenu des offres Hako Home et Hako Pro, prix HT ou TTC, options de stockage - [contenu des offres, prix, options]
 - L24 - CGV : étapes de la commande, confirmation, acompte demandé (entre 30 et 50 % du prix, à fixer) - [étapes de la commande, acompte]
 - L28 - CGV : moyens de paiement acceptés et échéance du solde (le paiement en ligne n’existe pas encore) - [moyens de paiement, échéance du solde]
 - L32 - CGV : délais, déroulement de l’installation à domicile et de la formation, zone d’intervention - [délais, installation, formation]
 - L36 - CGV : droit de rétractation pour la vente à distance (délai, conditions, formulaire type, cas d’une installation déjà faite) - [délai, conditions, formulaire de rétractation]
-- L40 - CGV : garanties légales et, s’il y en a une, garantie commerciale de la box - [garanties de la box]
-- L44 - CGV : fonctionnement et tarif du service après-vente (intervention facturée pour Hako Home) - [fonctionnement et tarif]
+- L40 - CGV : garantie légale de conformité (deux ans pour les particuliers) et garantie commerciale d’un an de HAKO, ce qu’elle couvre et comment la faire jouer - [garanties de la box]
+- L44 - CGV : fonctionnement du service après-vente (hors garantie, intervention facturée 100 € pour Hako Home comme pour Hako Pro) - [fonctionnement et tarif]
 - L48 - CGV : abonnement d’assistance de Hako Pro (prix mensuel, durée d’engagement, délai de réponse garanti, résiliation) - [prix, engagement, résiliation]
 - L52 - CGV : responsabilités de HAKO et du client - [responsabilités de chacun]
 - L56 - CGV : renvoi vers la politique de confidentialité pour les données liées aux commandes - [renvoi vers la politique de confidentialité]
@@ -49,21 +48,19 @@ Total : 68 informations manquantes dans 16 fichiers.
 
 ## src/content/legal/confidentialite.mdx
 
-- L25 - Confidentialité : une fois l’hébergeur choisi, indiquer s’il conserve des journaux techniques (adresse IP, date, page demandée) et pendant combien de temps, et vérifier qu’il ne dépose aucun cookie - [ce que l’hébergeur conserve, et combien de temps]
 - L31 - Confidentialité : données collectées lors d’une commande et usage de chacune (traiter la commande, organiser l’installation, facturer, assurer le service après-vente…) - [données collectées et usages]
 - L32 - Confidentialité : base légale de chaque traitement (exécution du contrat, obligation légale…) - [base légale de chaque usage]
 - L33 - Confidentialité : durée de conservation de chaque type de données - [durées de conservation]
 - L34 - Confidentialité : droits des personnes sur leurs données (accès, rectification, effacement, opposition, limitation, portabilité) et façon de les exercer - [vos droits et la façon de les exercer]
 - L35 - Confidentialité : personne ou adresse à contacter pour toute question sur vos données (responsable du traitement) - [contact pour vos données]
-- L36 - Confidentialité : droit d’introduire une réclamation auprès de l’autorité de contrôle (en France, la CNIL), avec ses coordonnées - [autorité de contrôle et coordonnées]
 
 ## src/content/legal/mentions-legales.mdx
 
 - L9 - Mentions légales : nom de l’éditeur du site (entreprise ou personne) et adresse - [nom de l’éditeur et adresse]
 - L13 - Mentions légales : forme juridique de l’entreprise, avec les mentions d’immatriculation propres à cette forme - [forme juridique]
 - L15 - Mentions légales : numéro SIRET de l’entreprise - [numéro SIRET]
-- L19 - Mentions légales : prénom et nom de la personne responsable de la publication du site - [Prénom Nom]
-- L23 - Mentions légales : nom, adresse et téléphone de l’hébergeur du site (hébergement pas encore choisi) - [coordonnées de l’hébergeur]
+- L17 - Mentions légales : numéro de TVA intracommunautaire, ou mention « TVA non applicable, art. 293 B du CGI » en franchise de TVA - [numéro de TVA ou mention de franchise]
+- L21 - Mentions légales : prénom et nom de la personne responsable de la publication du site - [Prénom Nom]
 
 ## src/content/offres.ts
 
@@ -83,28 +80,21 @@ Total : 68 informations manquantes dans 16 fichiers.
 - L32 - Adresse e-mail de contact, sur notre propre nom de domaine ou chez Proton Mail (jamais une adresse Gmail) - [adresse e-mail]
 - L36 - Numéro de téléphone de contact - [numéro de téléphone]
 - L37 - Nom de domaine du site - [nom de domaine]
-- L50 - Adresse de la page LinkedIn de HAKO - [adresse]
-- L55 - Adresse de la chaîne YouTube de HAKO - [adresse]
-- L60 - Adresse de la page Facebook de HAKO - [adresse]
-- L65 - Adresse du compte Instagram de HAKO - [adresse]
-- L70 - Adresse de la chaîne PeerTube de HAKO, et instance qui l’héberge - [adresse]
-- L78 - Portrait d’Antonin Chenavaz (logiciel et système) - [portrait]
-- L79 - Présentation courte d’Antonin Chenavaz (logiciel et système) - [présentation]
-- L80 - Profil LinkedIn d’Antonin Chenavaz - [profil LinkedIn]
-- L85 - Portrait de Maxime Pallaud (commerce et relation client) - [portrait]
-- L86 - Présentation courte de Maxime Pallaud (commerce et relation client) - [présentation]
-- L90 - Profil LinkedIn de Maxime Pallaud - [profil LinkedIn]
-- L95 - Portrait de Martin Dugail (design) - [portrait]
-- L96 - Présentation courte de Martin Dugail (design) - [présentation]
-- L97 - Profil LinkedIn de Martin Dugail - [profil LinkedIn]
+- L50 - Adresse de la page LinkedIn de HAKO - [lien à venir]
+- L55 - Adresse de la chaîne YouTube de HAKO - [lien à venir]
+- L60 - Adresse de la page Facebook de HAKO - [lien à venir]
+- L65 - Adresse du compte Instagram de HAKO - [lien à venir]
+- L70 - Adresse de la chaîne PeerTube de HAKO, et instance qui l’héberge - [lien à venir]
+- L81 - Portrait d’Antonin Chenavaz (logiciel et système) - [portrait]
+- L88 - Portrait de Maxime Pollaud (commerce et relation client) - [portrait]
+- L95 - Portrait de Martin Dugail (design et finance) - [portrait]
 
 ## src/data/faits.ts
 
-- L36 - Accès aux données depuis l’extérieur de la maison : option future à décrire (prévue ou non, fonctionnement, date, prix éventuel) - [à préciser]
-- L61 - Page d’accueil de la box (http://mabox.local) : logiciel utilisé et licence, à préciser - [licence à préciser]
-- L68 - Copie de secours des données : prévue, absente de la première version ; solution, date de disponibilité et fonctionnement à confirmer - [à confirmer]
-- L112 - Garantie d’un an de la box : ce qu’elle couvre (pièces, main-d’œuvre, envoi ou déplacement) et comment la faire jouer - [à confirmer]
-- L136 - Frais d’envoi de la box hors de la zone d’intervention : compris dans le prix ou en supplément, et combien - [à confirmer]
+- L56 - Page d’accueil de la box (http://mabox.local) : logiciel utilisé et licence, à préciser - [licence à préciser]
+- L63 - Copie de secours des données : prévue, absente de la première version ; solution, date de disponibilité et fonctionnement à confirmer - [à confirmer]
+- L109 - Garantie d’un an de la box : ce qu’elle couvre (pièces, main-d’œuvre, envoi ou déplacement) et comment la faire jouer - [à confirmer]
+- L133 - Frais d’envoi de la box hors de la zone d’intervention : compris dans le prix ou en supplément, et combien - [à confirmer]
 
 ## src/data/model.config.json
 
@@ -112,11 +102,4 @@ Total : 68 informations manquantes dans 16 fichiers.
 
 ## src/data/tarifs.ts
 
-- L75 - durée des mises à jour de sécurité incluses dans Hako Home - `null`
-- L76 - tarif d'une intervention de service après-vente (Hako Home) - `null`
-- L87 - durée d'engagement de l'abonnement Hako Pro - `null`
-- L99 - acompte demandé à la commande, entre 30 et 50 % - `null`
-
-## src/lib/commande/service-area.ts
-
-- L27 - Zone d’intervention du formulaire de commande : confirmer la règle « départements 13 et 83 » (plus large que la zone réelle : Arles, Draguignan, Fréjus…) ou la remplacer par une liste de codes postaux - [à confirmer]
+- L100 - acompte demandé à la commande, entre 30 et 50 % - `null`

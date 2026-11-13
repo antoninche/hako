@@ -25,6 +25,6 @@ export const erreur404 = {
     { label: 'Revenir à l’accueil', href: routes.home },
     { label: 'Voir les offres', href: routes.offers },
     { label: 'Lire les questions fréquentes', href: routes.faq },
-    { label: 'Nous contacter', href: routes.contact },
+    { label: 'Nous poser une question', href: routes.contact },
   ] satisfies readonly NavLink[],
 } as const;

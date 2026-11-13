@@ -27,7 +27,7 @@ export const company: Company = withFrenchTypography<Company>({
   kanji: '箱',
   nameMeaning: 'Hako (箱) veut dire « boîte » en japonais.',
   headline: 'Vos souvenirs restent à la maison.',
-  promise: 'Les données de toute la famille, chez vous.',
+  promise: 'Nous installons la box chez vous, de Salon-de-Provence à Toulon.',
 
   email: todo(
     'Adresse e-mail de contact, sur notre propre nom de domaine ou chez Proton Mail (jamais une adresse Gmail)',
@@ -40,34 +40,37 @@ export const company: Company = withFrenchTypography<Company>({
     sentence:
       'Nous intervenons de Salon-de-Provence à Toulon, en passant par Aix-en-Provence et Marseille.',
     outside:
-      'nous vous envoyons la box, puis vous l’installez en suivant notre guide d’installation pas à pas, à venir sur ce site, et nos tutoriels vidéo',
+      'nous vous envoyons la box, et vous l’installez vous-même avec notre guide pas à pas et nos tutoriels vidéo (en préparation)',
   },
 
   social: [
     {
       id: 'linkedin',
       name: 'LinkedIn',
-      url: todo('Adresse de la page LinkedIn de HAKO', '[adresse]'),
+      url: todo('Adresse de la page LinkedIn de HAKO', '[lien à venir]'),
     },
     {
       id: 'youtube',
       name: 'YouTube',
-      url: todo('Adresse de la chaîne YouTube de HAKO', '[adresse]'),
+      url: todo('Adresse de la chaîne YouTube de HAKO', '[lien à venir]'),
     },
     {
       id: 'facebook',
       name: 'Facebook',
-      url: todo('Adresse de la page Facebook de HAKO', '[adresse]'),
+      url: todo('Adresse de la page Facebook de HAKO', '[lien à venir]'),
     },
     {
       id: 'instagram',
       name: 'Instagram',
-      url: todo('Adresse du compte Instagram de HAKO', '[adresse]'),
+      url: todo('Adresse du compte Instagram de HAKO', '[lien à venir]'),
     },
     {
       id: 'peertube',
       name: 'PeerTube',
-      url: todo('Adresse de la chaîne PeerTube de HAKO, et instance qui l’héberge', '[adresse]'),
+      url: todo(
+        'Adresse de la chaîne PeerTube de HAKO, et instance qui l’héberge',
+        '[lien à venir]',
+      ),
     },
   ],
 
@@ -76,25 +79,22 @@ export const company: Company = withFrenchTypography<Company>({
       role: 'Logiciel & système',
       name: 'Antonin Chenavaz',
       portrait: todo('Portrait d’Antonin Chenavaz (logiciel et système)', '[portrait]'),
-      bio: todo('Présentation courte d’Antonin Chenavaz (logiciel et système)', '[présentation]'),
-      linkedin: todo('Profil LinkedIn d’Antonin Chenavaz', '[profil LinkedIn]'),
+      bio: 'Étudiant en licence MPCI (mathématiques, physique, chimie, informatique) à Aix-Marseille Université.',
+      linkedin: 'https://www.linkedin.com/in/antonin-chenavaz-9b9215421/',
     },
     {
       role: 'Commerce & relation client',
-      name: 'Maxime Pallaud',
-      portrait: todo('Portrait de Maxime Pallaud (commerce et relation client)', '[portrait]'),
-      bio: todo(
-        'Présentation courte de Maxime Pallaud (commerce et relation client)',
-        '[présentation]',
-      ),
-      linkedin: todo('Profil LinkedIn de Maxime Pallaud', '[profil LinkedIn]'),
+      name: 'Maxime Pollaud',
+      portrait: todo('Portrait de Maxime Pollaud (commerce et relation client)', '[portrait]'),
+      bio: 'Étudiant en première année de BUT Techniques de commercialisation à l’IUT d’Aix-Marseille.',
+      linkedin: 'https://www.linkedin.com/in/maxime-pollaud-488a77397/',
     },
     {
-      role: 'Design',
+      role: 'Design & finance',
       name: 'Martin Dugail',
-      portrait: todo('Portrait de Martin Dugail (design)', '[portrait]'),
-      bio: todo('Présentation courte de Martin Dugail (design)', '[présentation]'),
-      linkedin: todo('Profil LinkedIn de Martin Dugail', '[profil LinkedIn]'),
+      portrait: todo('Portrait de Martin Dugail (design et finance)', '[portrait]'),
+      bio: 'Étudiant en licence MPCI (mathématiques, physique, chimie, informatique) à Aix-Marseille Université.',
+      linkedin: 'https://www.linkedin.com/in/martin-dugail-15a5a742b/',
     },
   ],
 

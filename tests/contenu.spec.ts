@@ -121,12 +121,12 @@ test.describe('Faits partagés : mêmes mots, même repère jaune', () => {
   };
 
   for (const path of ['/', '/offres/', '/la-box/', '/engagement/']) {
-    test(`${path} : pas d’accès depuis l’extérieur, pour l’instant`, async ({ page }) => {
+    test(`${path} : pas d’accès depuis l’extérieur, par choix de sécurité`, async ({ page }) => {
       await page.goto(path);
       const text = await mainText(page);
       expect(text).toContain(normalize(remoteAccess.reason));
       expect(text).toContain(normalize(remoteAccess.consequence));
-      await sameMark(page, remoteAccess.option);
+      expect(text).toContain(normalize(remoteAccess.choice));
     });
   }
 

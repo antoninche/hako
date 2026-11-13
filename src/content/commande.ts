@@ -53,7 +53,7 @@ export const commandePage = {
   intro: {
     kicker: 'Commander',
     title: 'Votre box en trois étapes',
-    lead: 'Choisissez votre offre, laissez vos coordonnées, puis vérifiez le récapitulatif. Aucun paiement en ligne : nous vous appelons pour confirmer.',
+    lead: 'Aucun paiement en ligne : nous vous appelons pour confirmer.',
   },
   demoNotice: {
     title: 'Formulaire de démonstration',
@@ -97,7 +97,7 @@ export const commandePage = {
   total: {
     title: 'Votre total',
     oneTime: 'À payer une fois',
-    monthly: 'Puis chaque mois',
+    monthly: 'Abonnement',
     commitment: 'Durée d’engagement',
     deposit: 'Acompte à la commande',
     depositOf: 'du total',
@@ -233,7 +233,7 @@ export const commandePage = {
   consents: {
     legend: 'Avant d’envoyer',
     termsLink: {
-      label: 'Lire les conditions générales de vente',
+      label: 'Lire les conditions générales de vente (en cours de rédaction)',
       href: routes.terms,
     } satisfies LinkValue,
     newTab: '(s’ouvre dans un nouvel onglet)',
@@ -249,7 +249,7 @@ export const commandePage = {
 
   confirmation: {
     title: 'Mode démonstration : aucune donnée n’a été envoyée',
-    text: 'Votre demande est prête, mais ce formulaire n’est pas encore relié à notre service de commande. Ce que vous avez saisi est resté dans votre navigateur : rien n’a été transmis ni enregistré.',
+    text: 'Ce formulaire n’est pas encore en service : votre demande ne nous est pas parvenue.',
     contact: [
       'Pour commander dès maintenant, écrivez-nous à ',
       email,

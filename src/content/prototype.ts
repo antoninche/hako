@@ -25,6 +25,7 @@ import type { ImageMetadata } from 'astro';
 
 import arriere from '../assets/prototype/vue-arriere.png';
 import dessus from '../assets/prototype/vue-dessus.png';
+import interieur from '../assets/prototype/vue-interieur.png';
 import troisQuarts from '../assets/prototype/vue-trois-quarts.png';
 import { company } from '../data/entreprise';
 import { nameSentence } from '../data/faits';
@@ -86,23 +87,16 @@ export const prototypeViews = {
       ', qui veut dire « boîte » en japonais.',
     ],
   },
-  /*
-   * La vue en transparence (vue-interieur.png, déjà préparée par le script)
-   * attend que l'équipe confirme l'intérieur de la box : sur ce modèle, aucun
-   * ventilateur n'est dessiné et la carte du disque est sous la carte
-   * Raspberry Pi 5, alors que la vue éclatée de la page « La box » montre un
-   * ventilateur et la carte du disque au-dessus. Elle n'est pas importée d'ici
-   * là : une image importée est publiée avec le site, même si aucune page ne
-   * l'affiche. Une fois l'intérieur confirmé (et la vue éclatée corrigée s'il
-   * le faut), importez-la et ajoutez-la à la fin de gallery.views :
-   *   interieur: {
-   *     image: interieur,
-   *     backdropAtTopAndBottom: true,
-   *     alt: 'Le boîtier en transparence\u00a0: à l’intérieur, deux cartes vertes empilées, avec des blocs gris pour les prises à une extrémité et le long d’un côté.',
-   *     title: 'Vue en transparence',
-   *     caption: [synthesis, ' À l’intérieur, deux cartes empilées\u00a0: la carte Raspberry Pi 5, le petit ordinateur de la box, et la petite carte qui porte le disque de stockage.'],
-   *   },
-   */
+  interieur: {
+    image: interieur,
+    backdropAtTopAndBottom: true,
+    alt: 'Le boîtier en transparence : à l’intérieur, deux cartes vertes empilées, avec des blocs gris pour les prises à une extrémité et le long d’un côté.',
+    title: 'Vue en transparence',
+    caption: [
+      synthesis,
+      ' À l’intérieur, la carte Raspberry Pi 5, le petit ordinateur de la box, posée au-dessus de la petite carte qui porte le disque de stockage.',
+    ],
+  },
 } as const satisfies Record<string, PrototypeView>;
 
 export const prototype = {
@@ -112,7 +106,12 @@ export const prototype = {
     title: 'Le prototype, en images',
     intro:
       'Voici le prototype de la box, tel que nous l’avons dessiné en 3D. Ce sont des images de synthèse, pas des photos, et quelques détails peuvent encore changer.',
-    views: [prototypeViews.troisQuarts, prototypeViews.arriere, prototypeViews.dessus],
+    views: [
+      prototypeViews.troisQuarts,
+      prototypeViews.arriere,
+      prototypeViews.dessus,
+      prototypeViews.interieur,
+    ],
     /** Les finitions choisies par l'équipe. */
     details: [
       { label: 'Teinte du boîtier', value: 'Blanc perlé (référence de couleur RAL 1013)' },

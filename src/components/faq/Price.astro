@@ -7,6 +7,7 @@
  *   <Price of="pro" />           prix de Hako Pro et son statut de TVA
  *   <Price of="pro-monthly" />   abonnement de Hako Pro (« 25 € HT par mois »)
  *   <Price of="after-sales" />   tarif d'une intervention après-vente (Hako Home)
+ *   <Price of="after-sales-pro" />   tarif d'une intervention après-vente (Hako Pro)
  *
  * Le prix s'écrit avec le même composant que sur les pages Offres et
  * Commander (src/components/commande/Price.astro), donc au même format.
@@ -21,7 +22,7 @@ import { pricing } from '../../data/tarifs';
 import { orMissing } from '../../lib/commande/inline';
 import type { Maybe, TodoValue } from '../../lib/todo';
 
-export type PriceId = 'home' | 'pro' | 'pro-monthly' | 'after-sales';
+export type PriceId = 'home' | 'pro' | 'pro-monthly' | 'after-sales' | 'after-sales-pro';
 
 interface Props {
   of: PriceId;
@@ -60,6 +61,10 @@ const lines: Record<PriceId, Line> = {
   'after-sales': {
     amount: home.afterSalesRateEur ?? null,
     missing: missingPrice.afterSalesRate(home),
+  },
+  'after-sales-pro': {
+    amount: pro.afterSalesRateEur ?? null,
+    missing: missingPrice.afterSalesRate(pro),
   },
 };
 

@@ -8,12 +8,16 @@
  * son chemin dans entreprise.ts, par exemple portrait: '/equipe/prenom.jpg'
  * (format portrait 4:5, environ 800 × 1000 pixels).
  *
+ * Présentation : les noms composés (« Aix-Marseille ») ne sont jamais coupés
+ * en fin de ligne (composant Text).
+ *
  * LinkedIn : tant que l'adresse manque, le texte provisoire s'affiche sans
  * lien (jamais de lien mort).
  */
 import Fact from '../Fact.astro';
 import Icon from '../Icon.astro';
 import Todo from '../Todo.astro';
+import Text from '../texte/Text.astro';
 import type { Founder } from '../../data/types';
 import { isTodo } from '../../lib/todo';
 
@@ -54,7 +58,10 @@ const portraitAlt = knownName ? `Portrait de ${knownName}` : `Portrait (${role})
     </h3>
     <p class="kicker founder__role">{role}</p>
     <p class="founder__bio">
-      <Fact value={bio} />
+      {
+        // Text : « Aix-Marseille » ne se coupe jamais en fin de ligne.
+        isTodo(bio) ? <Todo what={bio.todo}>{bio.placeholder}</Todo> : <Text text={bio} />
+      }
     </p>
     <p class="founder__linkedin">
       {isTodo(linkedin) ? (

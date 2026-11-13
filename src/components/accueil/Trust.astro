@@ -10,9 +10,6 @@ import RichText from './RichText.astro';
 import SectionHeader from './SectionHeader.astro';
 import './rules.css';
 import { trust } from '../../content/accueil';
-import { remoteAccess } from '../../data/faits';
-
-const values = { exterieur: remoteAccess.option };
 ---
 
 <section class="trust surface-sable" aria-labelledby="titre-confiance">
@@ -35,7 +32,7 @@ const values = { exterieur: remoteAccess.option };
               <RichText text={item.title} />
             </h3>
             <p class="commitment__text">
-              <RichText text={item.text} values={values} />
+              <RichText text={item.text} />
             </p>
           </div>
         </li>

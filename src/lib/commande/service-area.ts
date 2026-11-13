@@ -6,28 +6,15 @@
  * hors de cette zone, sans jamais bloquer sa demande.
  */
 
-import { todo } from '../todo.ts';
-
 /**
  * Départements considérés comme « dans la zone » : Bouches-du-Rhône (13) et Var (83).
  *
- * Règle provisoire, à confirmer (voir SERVICE_AREA_RULE_PENDING) : ces deux
- * départements débordent de la zone réelle (Arles, Draguignan, Fréjus…). La
- * remplacer, si besoin, par une liste de codes postaux ou de communes. Seule
- * cette constante est à modifier.
+ * Règle choisie par l'équipe : ces deux départements débordent un peu de la
+ * zone annoncée (Arles, Draguignan, Fréjus…), et c'est voulu : le formulaire
+ * ne prévient que pour un code postal hors du 13 et du 83. Pour la changer,
+ * seule cette constante est à modifier.
  */
 export const SERVICE_AREA_DEPARTMENTS: readonly string[] = ['13', '83'];
-
-/**
- * Rappel de la règle provisoire ci-dessus dans TODO.md (`npm run todos`).
- * Rien ne s'affiche sur le site : une fois la règle confirmée ou remplacée,
- * supprimez simplement cette constante. L'annotation __PURE__ permet de la
- * laisser hors du script envoyé au navigateur, qui ne s'en sert pas.
- */
-export const SERVICE_AREA_RULE_PENDING = /* @__PURE__ */ todo(
-  'Zone d’intervention du formulaire de commande : confirmer la règle « départements 13 et 83 » (plus large que la zone réelle : Arles, Draguignan, Fréjus…) ou la remplacer par une liste de codes postaux',
-  '[à confirmer]',
-);
 
 /** Retire les espaces : « 13 100 » devient « 13100 ». */
 export function normalizePostalCode(value: string): string {

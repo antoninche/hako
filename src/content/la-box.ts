@@ -105,7 +105,7 @@ export const laBox = {
   meta: {
     title: 'La box : matériel et logiciels',
     description:
-      'La box HAKO : une Raspberry Pi 5, un disque SSD, Immich pour les photos, Nextcloud pour les fichiers. Leurs licences, leurs sources et leurs limites.',
+      'La box HAKO : un Raspberry Pi 5, un disque SSD, Immich pour les photos, Nextcloud pour les fichiers. Leurs licences, leurs sources et leurs limites.',
   },
 
   intro: {
@@ -135,7 +135,7 @@ export const laBox = {
       'La box en vue éclatée, de haut en bas : la coque blanc perlé avec le logo sur le dessus, le ventilateur, la carte Raspberry Pi 5, le disque SSD sur sa petite carte, puis le socle brun foncé.',
     parts: [
       {
-        name: 'Une Raspberry Pi 5, 8 Go',
+        name: 'Un Raspberry Pi 5, 8 Go',
         text: [
           [
             'Le cerveau de la box : un petit ordinateur complet, sur une seule carte, avec 8 Go de mémoire vive (la mémoire de travail de l’ordinateur).',
@@ -156,15 +156,19 @@ export const laBox = {
       },
       {
         name: 'Un ventilateur',
-        text: [['Il garde la box au frais, même quand elle travaille beaucoup.']],
+        text: [
+          [
+            'Il garde la box au frais, même quand elle travaille beaucoup. Pour qu’il fasse bien son travail, laissez un peu d’air autour de la box.',
+          ],
+        ],
       },
       {
         name: 'Un boîtier imprimé en 3D',
         text: [
           [
-            'Un boîtier sobre, imprimé en 3D et posé sur un socle brun foncé. Sur le couvercle, le logo en relief : le kanji ',
+            'Un boîtier sobre, imprimé en 3D et posé sur un socle brun foncé. Sur le couvercle, le kanji ',
             { ja: company.kanji },
-            ', un caractère japonais.',
+            ' (un caractère japonais) en relief ; sur un côté, le mot HAKO.',
           ],
         ],
       },
@@ -282,7 +286,7 @@ export const laBox = {
   openSource: {
     id: 'logiciels-libres',
     title: 'Pourquoi des logiciels libres ?',
-    lead: 'Un logiciel libre est un logiciel dont le code, c’est-à-dire la recette, est public : chacun peut le lire, le vérifier, le modifier et le partager. Pour vous, cela change trois choses.',
+    lead: 'Un logiciel libre est un logiciel dont le code (le texte qui dit à l’ordinateur quoi faire) est public : chacun peut le lire, le vérifier, le modifier et le partager.',
     reasons: [
       {
         title: 'Tout le monde peut vérifier',
@@ -325,8 +329,8 @@ export const laBox = {
 
   limits: {
     id: 'limites',
-    title: 'Les limites, en toute franchise',
-    lead: 'Nous préférons vous les dire avant que vous ne les découvriez.',
+    title: 'Les limites de la box',
+    lead: 'Trois points à connaître avant de commander.',
     items: [
       {
         id: 'pas-tout-libre',
@@ -349,17 +353,14 @@ export const laBox = {
       },
       {
         id: 'acces-exterieur',
-        title: 'Pas d’accès depuis l’extérieur, pour l’instant',
+        title: 'Pas d’accès depuis l’extérieur',
         // Mêmes phrases que sur l’accueil et les pages Offres et Notre engagement (src/data/faits.ts).
-        text: [
-          [remoteAccess.reason, ' ', remoteAccess.consequence],
-          [remoteAccess.optionLead, remoteAccess.option, '.'],
-        ],
+        text: [[remoteAccess.reason, ' ', remoteAccess.consequence], [remoteAccess.choice]],
       },
       {
         id: 'copie-de-secours',
         title: 'Pas encore de copie de secours',
-        text: [backupCopy.sentence],
+        text: [[...backupCopy.sentence, ' ', backupCopy.advice]],
       },
     ] satisfies readonly Limit[],
   },
@@ -368,6 +369,6 @@ export const laBox = {
     title: 'Envie d’en parler ?',
     text: 'Comparez les deux offres, ou posez-nous vos questions.',
     primary: { label: 'Voir les offres', href: routes.offers } satisfies Link,
-    secondary: { label: 'Nous contacter', href: routes.contact } satisfies Link,
+    secondary: { label: 'Nous poser une question', href: routes.contact } satisfies Link,
   },
 } as const;

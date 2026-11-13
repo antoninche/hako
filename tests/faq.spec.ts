@@ -8,7 +8,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-import { backupCopy, payment, remoteAccess, shippingCost, warranty } from '../src/data/faits';
+import { backupCopy, payment, shippingCost, warranty } from '../src/data/faits';
 import { pricing } from '../src/data/tarifs';
 import { formatEur } from '../src/lib/format';
 import { isTodo } from '../src/lib/todo';
@@ -126,7 +126,7 @@ test('FAQ : les prix s’écrivent comme sur les pages Offres et Commander', asy
 
 test('FAQ : les faits partagés gardent le repère jaune des autres pages', async ({ page }) => {
   await page.goto('/faq/');
-  for (const value of [remoteAccess.option, backupCopy.status, warranty.terms, shippingCost]) {
+  for (const value of [backupCopy.status, warranty.terms, shippingCost]) {
     if (!isTodo(value)) continue;
     const marks = page.locator(`main mark.todo[data-todo="${value.todo}"]`);
     await expect(marks).toHaveCount(1);

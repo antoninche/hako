@@ -11,7 +11,7 @@
  *   <Detail of="included-storage" />   stockage inclus (« 1 To »)
  *   <Detail of="storage-options" />    stockages proposés en option (« 2 To ou 4 To »)
  *   <Detail of="mover-offers" />       offres qui comprennent le déménageur (« Hako Home et Hako Pro »)
- *   <Detail of="remote-access" />      option future pour accéder à ses données hors de la maison
+ *   <Detail of="remote-access" />      accès depuis l’extérieur : pas prévu, choix de sécurité
  *   <Detail of="backup-copy" />        copie de secours : ce qui reste à confirmer
  *   <Detail of="payment" />            paiement : par virement, pas encore en ligne (phrase)
  *   <Detail of="warranty" />           garantie d'un an, en plus de la garantie légale (phrase)
@@ -88,7 +88,7 @@ const values: Record<DetailId, Maybe<string>> = {
   'included-storage': included.label,
   'storage-options': formatList(options, 'or'),
   'mover-offers': moverOffers.names,
-  'remote-access': remoteAccess.option,
+  'remote-access': remoteAccess.choice,
   'backup-copy': backupCopy.status,
   payment,
   warranty: warranty.sentence,

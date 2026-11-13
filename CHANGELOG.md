@@ -6,11 +6,18 @@ Les modifications notables du site sont notées ici, de la plus récente à la p
 
 ### Ajouté
 
-- Images du prototype (images de synthèse du modèle 3D de l’équipe) : la box vue de trois quarts en ouverture de l’accueil, à la place du kanji seul, et une galerie de trois vues avec les finitions (blanc perlé RAL 1013, socle brun foncé) sur la page « La box ». Les captures d’origine sont dans `design/prototype/` ; `npm run prototype:images` les nettoie, les cadre et les convertit en sRGB, et Astro en tire des versions AVIF et WebP.
+- Images du prototype (images de synthèse du modèle 3D de l’équipe) : la box vue de trois quarts en ouverture de l’accueil, à la place du kanji seul, et une galerie de quatre vues avec les finitions (blanc perlé RAL 1013, socle brun foncé) sur la page « La box ». Les captures d’origine sont dans `design/prototype/` ; `npm run prototype:images` les nettoie, les cadre et les convertit en sRGB, et Astro en tire des versions AVIF et WebP.
+- Dessins « papier découpé » sur toutes les pages (21 fichiers), avec leur générateur dans `design/illustrations/` (`npm run illustrations:build`, `illustrations:check`, `illustrations:render`) et `docs/illustrations.md`.
+- Couleur `--perle` (RAL 1013), sans rôle de texte.
+- Crédits de three.js et du décodeur meshoptimizer, avec le texte de leur licence servi par le site.
 
 ### Modifié
 
-- Page « La box » : le logo du boîtier est décrit sur le couvercle, comme sur le prototype.
+- Scène 3D de l’accueil : modèle refait d’après le prototype, sur fond pierre ; la vue éclatée dessinée remplace l’image provisoire.
+- Carte de la zone au style des dessins.
+- Réponses de l’équipe : engagement de deux ans pour Hako Pro, mises à jour de sécurité pendant cinq ans, renouvelables, pour Hako Home, intervention hors garantie à 100 € pour les deux offres, liens LinkedIn et présentations de l’équipe, pas d’accès depuis l’extérieur de la maison (choix de sécurité), hébergement provisoire chez GitHub Pages dans les mentions légales et la politique de confidentialité.
+- Textes relus sur toutes les pages : le prix et la zone dès le premier écran de l’accueil et des offres, « hors garantie » à côté du service après-vente payant, le conseil de garder une autre copie de ses photos tant que la copie de secours n’existe pas, des formules creuses retirées.
+- Page « La box » : le kanji est décrit sur le couvercle et le mot HAKO sur un côté, et le ventilateur avec le conseil de laisser de l’air autour de la box.
 
 ## [0.1.0] - 2026-11-12
 

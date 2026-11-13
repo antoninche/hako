@@ -55,7 +55,7 @@ export const contactPage: ContactPageCopy = {
   description:
     'Écrire ou téléphoner à HAKO, et faire connaissance avec l’équipe : trois étudiants en Provence, qui installent votre box chez vous.',
   intro:
-    'Une question avant de commander, un doute après l’installation ? Écrivez-nous ou appelez-nous. Nous sommes une petite équipe de trois, en Provence.',
+    'Pour toute question sur la box ou sur votre commande, écrivez-nous ou appelez-nous. Nous sommes trois étudiants, en Provence.',
 
   reach: {
     title: 'Nous joindre',

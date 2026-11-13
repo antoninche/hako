@@ -28,11 +28,7 @@ import { z } from 'astro/zod';
  * ainsi. Les rubriques s'affichent dans l'ordre de leur première question.
  * Pour en créer une, ajoutez son nom à cette liste.
  */
-export const faqTopics = [
-  'Vos données',
-  'La box au quotidien',
-  'Commande et accompagnement',
-] as const;
+export const faqTopics = ['Vos données', 'La box au quotidien', 'Avant de commander'] as const;
 
 const faq = defineCollection({
   loader: glob({ pattern: '*.mdx', base: './src/content/faq' }),

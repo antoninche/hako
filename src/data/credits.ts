@@ -1,10 +1,11 @@
 /**
- * Crédits : polices et icônes créées par d'autres, avec leur licence.
+ * Crédits : polices, icônes et code créés par d'autres, avec leur licence.
  * Affichés sur la page des mentions légales, rubrique « Crédits ».
  *
  * Sources, versions et vérifications : docs/licences.md, docs/fonts.md et
- * docs/icons.md. Les textes des licences des polices et celui de Bootstrap
- * Icons sont servis par le site lui-même (public/fonts/ et public/licences/).
+ * docs/icons.md. Les textes des licences des polices, de Bootstrap Icons,
+ * de three.js et de meshoptimizer sont servis par le site lui-même
+ * (public/fonts/ et public/licences/).
  * On écrit des espaces ordinaires : les espaces insécables et l'apostrophe
  * courbe sont ajoutées à l'affichage (src/lib/typography.ts).
  */
@@ -22,7 +23,7 @@ export interface Credit {
 }
 
 export const creditsIntro = withFrenchTypography(
-  'Ce site utilise des polices et des icônes créées par d’autres, sous licence libre.',
+  'Ce site utilise des polices, des icônes et du code créés par d’autres, sous licence libre.',
 );
 
 export const credits: readonly Credit[] = withFrenchTypography([
@@ -61,6 +62,16 @@ export const credits: readonly Credit[] = withFrenchTypography([
     author: 'Bootstrap Icons, © 2019-2024 The Bootstrap Authors',
     license: { name: 'MIT', href: '/licences/bootstrap-icons-LICENSE.txt' },
     changes: 'agrandie, couleur changée',
+  },
+  {
+    work: 'Bibliothèque three.js (scène 3D de l’accueil)',
+    author: 'three.js authors',
+    license: { name: 'MIT', href: '/licences/three-LICENSE.txt' },
+  },
+  {
+    work: 'Décodeur meshoptimizer (modèles 3D compressés)',
+    author: 'Arseny Kapoulkine',
+    license: { name: 'MIT', href: '/licences/meshoptimizer-LICENSE.txt' },
   },
 ]);
 

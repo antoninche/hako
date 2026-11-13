@@ -23,7 +23,8 @@
  */
 import { moverOffers, remoteAccess } from '../data/faits';
 import { orderLink, routes, type NavLink } from '../data/navigation';
-import type { OfferId } from '../data/tarifs';
+import { pricing, type OfferId } from '../data/tarifs';
+import { formatEur } from '../lib/format';
 
 /* ------------------------------------------------------------------ */
 /* Types communs                                                       */
@@ -74,7 +75,7 @@ export interface SectionIntro {
  */
 export const meta = {
   description:
-    'HAKO installe chez vous une petite box qui garde les photos et les fichiers de toute la famille à la maison. Sans abonnement avec Hako Home, en Provence.',
+    'HAKO installe chez vous une petite box qui garde les photos et les fichiers de la famille. Sans abonnement avec Hako Home. De Salon-de-Provence à Toulon.',
 } as const;
 
 /* ------------------------------------------------------------------ */
@@ -91,6 +92,14 @@ export interface HeroCopy {
   readonly highlights: readonly string[];
 }
 
+/**
+ * Repère du prix de Hako Home : montant et statut de TVA tirés de
+ * src/data/tarifs.ts, pour que le prix se lise dès le premier écran.
+ */
+const homePrice = [formatEur(pricing.offers.home.priceEur), pricing.offers.home.taxStatus]
+  .filter(Boolean)
+  .join('\u00a0');
+
 /** L’accroche et la promesse viennent de src/data/entreprise.ts. */
 export const hero: HeroCopy = {
   kicker: 'Une box pour vos photos et vos fichiers',
@@ -98,10 +107,10 @@ export const hero: HeroCopy = {
   secondary: { label: 'Découvrir la box', href: routes.box },
   highlightsLabel: 'En bref',
   highlights: [
-    'Installée chez vous',
-    'Sans abonnement (Hako Home)',
+    'Assemblée à la main en Provence',
+    `${homePrice}, sans abonnement (Hako Home)`,
     'Logiciels libres pour vos photos et fichiers',
-    'Zéro accès à vos données',
+    'Aucun accès de notre part à vos données',
   ],
 };
 
@@ -129,7 +138,6 @@ export const problem: ProblemCopy = {
   illustrationAlt:
     'Une file de photos s’envole d’une maison de Provence vers des nuages lointains. Près des nuages, des cadenas ferment les dernières photos et des étiquettes de prix pendent.',
   points: [
-    'Vos photos et vos documents sont gardés par de grandes entreprises, loin de chez vous.',
     'Les abonnements s’ajoutent les uns aux autres, mois après mois.',
     'Les prix et les conditions peuvent changer, sans que vous ayez votre mot à dire.',
     'Un compte peut être fermé, avec tout ce qu’il contient.',
@@ -137,7 +145,7 @@ export const problem: ProblemCopy = {
   // La phrase s’en tient à ce qu’a publié Associated Press le 15 mai 2025.
   // Ne la changer qu’avec une source.
   example: {
-    text: 'Un exemple loin de votre quotidien, mais réel : en mai 2025, l’agence Associated Press a rapporté que le procureur de la Cour pénale internationale avait perdu l’accès à sa messagerie Microsoft, après des sanctions américaines.',
+    text: 'Un exemple, à une autre échelle : en mai 2025, l’agence Associated Press a rapporté que le procureur de la Cour pénale internationale avait perdu l’accès à sa messagerie Microsoft, après des sanctions américaines.',
     sourceLead: 'Source :',
     source: {
       label: 'Associated Press, 15 mai 2025 (article en anglais)',
@@ -202,7 +210,7 @@ export interface StepsCopy extends SectionIntro {
 export const steps: StepsCopy = {
   kicker: 'En quatre étapes',
   title: 'Comment ça marche',
-  intro: 'De la commande à votre salon, quelqu’un vous accompagne à chaque étape.',
+  intro: 'De la commande à l’installation, c’est nous trois qui nous occupons de votre box.',
   items: [
     {
       illustration: 'etape-commande',
@@ -222,7 +230,7 @@ export const steps: StepsCopy = {
     {
       illustration: 'etape-chez-vous',
       title: 'Au quotidien, chez vous',
-      text: 'Vos photos et vos fichiers restent à la maison. Une question ? Des tutoriels vidéo simples vous guident, et nous restons joignables.',
+      text: 'Vos photos et vos fichiers restent à la maison. Pour une question, écrivez-nous ou appelez-nous. De courts tutoriels vidéo sont en préparation.',
     },
   ],
 };
@@ -274,13 +282,12 @@ const moverFeature = (offer: OfferId): readonly string[] =>
 
 export const offers: OffersCopy = {
   kicker: 'Nos offres',
-  title: 'Une box qui vous appartient',
-  intro:
-    'Vous achetez la box une fois, et elle est à vous. Pour les entreprises, Hako Pro ajoute un abonnement d’assistance.',
+  title: 'Pour la famille ou pour l’entreprise',
+  intro: 'Dans les deux cas, vous achetez la box une fois, et elle est à vous.',
   home: {
     illustration: 'offre-home',
     priceNote: 'Achat unique, sans abonnement',
-    details: ['Service après-vente facturé à l’intervention : {tarifSav}'],
+    details: ['Hors garantie, le service après-vente est facturé {tarifSav} par intervention'],
     features: [
       'La box, avec {stockage} de stockage',
       'L’installation et la formation chez vous',
@@ -291,9 +298,12 @@ export const offers: OffersCopy = {
   },
   pro: {
     illustration: 'offre-pro',
-    priceNote: 'Achat de la box, puis un abonnement d’assistance',
+    priceNote: 'Achat de la box et abonnement d’assistance',
     monthly: '+ {mensuel} {taxeAbonnement} par mois',
-    details: ['Engagement : {engagement}'],
+    details: [
+      'Engagement : {engagement}',
+      'Hors garantie, le service après-vente est facturé {tarifSav} par intervention',
+    ],
     features: [
       'La box, avec {stockage} de stockage',
       'L’installation et la formation chez vous',
@@ -318,10 +328,6 @@ export const offers: OffersCopy = {
 export interface Commitment {
   readonly icon: CommitmentIcon;
   readonly title: string;
-  /**
-   * {exterieur} : option future pour accéder à ses données hors de la maison
-   * (src/data/faits.ts).
-   */
   readonly text: string;
 }
 
@@ -334,13 +340,13 @@ export interface TrustCopy extends SectionIntro {
 export const trust: TrustCopy = {
   kicker: 'Nos engagements',
   title: 'Pourquoi nous faire confiance',
-  intro: 'Des promesses simples, écrites noir sur blanc.',
+  intro: 'Sept engagements, avec leurs limites quand il y en a.',
   items: [
     {
       icon: 'icones/engagement-donnees-chez-vous',
       title: 'Vos données restent chez vous',
       // Mêmes phrases que sur les pages Offres, La box et Notre engagement (src/data/faits.ts).
-      text: `${remoteAccess.reason} ${remoteAccess.consequence} ${remoteAccess.optionLead}{exterieur}.`,
+      text: `${remoteAccess.reason} ${remoteAccess.consequence} ${remoteAccess.choice}`,
     },
     {
       icon: 'icones/engagement-zero-acces',
@@ -360,7 +366,7 @@ export const trust: TrustCopy = {
     {
       icon: 'icones/engagement-humain-proche',
       title: 'Un humain près de chez vous',
-      text: 'Nous installons la box chez vous et vous formons sur place. Ensuite, des tutoriels vidéo simples, et la visio si vous êtes loin.',
+      text: 'Nous venons chez vous pour l’installation et la formation. Ensuite, nous restons joignables par téléphone et par e-mail, ou en appel vidéo si vous êtes loin.',
     },
     {
       icon: 'icones/engagement-sans-pistage',
@@ -398,11 +404,10 @@ export interface NearbyCopy {
 export const nearby: NearbyCopy = {
   kicker: 'Près de chez vous',
   title: 'Une équipe qui vient jusqu’à vous',
-  text: 'Nous installons la box chez vous et vous formons sur place, dans la zone indiquée sur la carte.',
+  text: 'Nous nous déplaçons dans la zone indiquée sur la carte.',
   outsideLead: 'Hors de cette zone :',
   teamTitle: 'Trois étudiants de Provence',
-  teamText:
-    'HAKO, c’est une petite équipe de trois étudiants, qui se partagent le logiciel, la relation avec vous et le design.',
+  teamText: 'C’est nous qui assemblons votre box, et nous qui répondons à vos questions.',
   teamListLabel: 'L’équipe',
   more: { label: 'Faire connaissance', href: routes.contact },
 };
@@ -421,7 +426,7 @@ export interface FinalCallCopy {
 
 export const finalCall: FinalCallCopy = {
   title: 'Ramenez vos souvenirs à la maison',
-  text: 'Commandez votre box, ou posez-nous d’abord vos questions : nous vous répondons simplement, sans jargon.',
+  text: 'Commandez votre box, ou posez-nous d’abord vos questions par e-mail ou par téléphone.',
   primary: orderLink,
   secondary: { label: 'Nous poser une question', href: routes.contact },
   faq: { label: 'Lire les questions fréquentes', href: routes.faq },

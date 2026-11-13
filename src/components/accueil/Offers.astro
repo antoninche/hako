@@ -46,6 +46,10 @@ const proValues = {
   taxeAbonnement: orMissing(subscription.taxStatus, missingPrice.subscriptionTax(pro)),
   engagement: orMissing(subscription.commitment, missingPrice.commitment(pro)),
   delai: orMissing(subscription.responseTime, missingPrice.responseTime(pro)),
+  tarifSav:
+    pro.afterSalesRateEur == null
+      ? missingPrice.afterSalesRate(pro)
+      : formatEur(pro.afterSalesRateEur),
 };
 ---
 

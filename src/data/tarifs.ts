@@ -72,8 +72,8 @@ export const pricing: Pricing = {
       audience: 'Pour les familles',
       priceEur: 600,
       taxStatus: 'TTC',
-      securityUpdates: null, // TODO: durée des mises à jour de sécurité incluses dans Hako Home
-      afterSalesRateEur: null, // TODO: tarif d'une intervention de service après-vente (Hako Home)
+      securityUpdates: '5 ans, renouvelables',
+      afterSalesRateEur: 100,
     },
     pro: {
       id: 'pro',
@@ -81,10 +81,11 @@ export const pricing: Pricing = {
       audience: 'Pour les petites entreprises',
       priceEur: 1000,
       taxStatus: 'TTC',
+      afterSalesRateEur: 100,
       subscription: {
         monthlyEur: 25,
         taxStatus: 'TTC',
-        commitment: null, // TODO: durée d'engagement de l'abonnement Hako Pro
+        commitment: '2 ans',
         // Affiché après « réponse garantie sous » : « sous 48 h ».
         responseTime: '48 h',
       },

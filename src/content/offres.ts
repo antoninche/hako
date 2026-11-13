@@ -28,7 +28,7 @@ import { pricing, type OfferId } from '../data/tarifs.ts';
 import { orMissing, price } from '../lib/commande/inline.ts';
 import { findStorage } from '../lib/commande/pricing.ts';
 import type { LinkValue, RichText } from '../lib/commande/types.ts';
-import { formatList } from '../lib/format.ts';
+import { formatEur, formatList } from '../lib/format.ts';
 import { todo } from '../lib/todo.ts';
 
 /** Délai sous lequel nous rappelons après une demande (repris par la page Commander). */
@@ -38,6 +38,10 @@ export const callbackDelay = todo(
 );
 
 const home = pricing.offers.home;
+
+/** Montant et statut de TVA, par exemple « 600 € TTC » (statut omis s'il manque). */
+const withTax = (amountEur: number, tax: string | null | undefined): string =>
+  [formatEur(amountEur), tax].filter(Boolean).join('\u00a0');
 const pro = pricing.offers.pro;
 const includedStorage = findStorage(pricing, pricing.includedStorage);
 const extraStorage = pricing.storage.filter((option) => option.id !== pricing.includedStorage);
@@ -78,7 +82,7 @@ export const offerCopy: Readonly<Record<OfferId, OfferCopy>> = {
     payment: 'Achat unique, sans abonnement.',
     included: [
       ['La box, assemblée et vérifiée à la main en Provence'],
-      ['L’installation chez vous et une formation sur place'],
+      ['Dans notre zone, l’installation chez vous et une formation sur place'],
       ...moverItem('home'),
       [`${includedStorage.label} de stockage`],
       [
@@ -87,18 +91,18 @@ export const offerCopy: Readonly<Record<OfferId, OfferCopy>> = {
       ],
     ],
     note: [
-      'Le service après-vente est facturé à l’intervention : ',
+      'Hors garantie, le service après-vente est facturé ',
       price(home.afterSalesRateEur ?? null, missingPrice.afterSalesRate(home)),
-      '.',
+      ' par intervention.',
     ],
     cta: 'Commander Hako Home',
   },
   pro: {
     summary:
       'Pour partager les fichiers, l’agenda et les contacts de votre équipe, avec un bilan de santé de la box chaque mois.',
-    payment: 'Achat de la box, puis un abonnement d’assistance.',
+    payment: 'Achat de la box et abonnement d’assistance.',
     included: [
-      ['La box, son installation et une formation sur place'],
+      ['La box et, dans notre zone, son installation et une formation sur place'],
       ...moverItem('pro'),
       [`${includedStorage.label} de stockage`],
       [
@@ -111,6 +115,11 @@ export const offerCopy: Readonly<Record<OfferId, OfferCopy>> = {
         orMissing(pro.subscription?.responseTime, missingPrice.responseTime(pro)),
       ],
       ['Les mises à jour et la maintenance, gérées par nous'],
+    ],
+    note: [
+      'Hors garantie, le service après-vente est facturé ',
+      price(pro.afterSalesRateEur ?? null, missingPrice.afterSalesRate(pro)),
+      ' par intervention.',
     ],
     cta: 'Commander Hako Pro',
   },
@@ -136,7 +145,7 @@ export const offresPage = {
   intro: {
     kicker: 'Nos offres',
     title: 'Pour la famille ou pour l’entreprise',
-    lead: 'Les deux offres comprennent la box, son installation chez vous et une formation sur place. Hako Home s’achète une fois, sans abonnement. Hako Pro ajoute un abonnement d’assistance et des outils pour travailler en équipe.',
+    lead: `${home.name}\u00a0: ${withTax(home.priceEur, home.taxStatus)}, une fois, sans abonnement. ${pro.name}\u00a0: ${withTax(pro.priceEur, pro.taxStatus)}, puis ${withTax(subscription?.monthlyEur ?? 0, subscription?.taxStatus)} par mois pour l’assistance et des outils pour travailler en équipe. Dans notre zone d’intervention, les deux comprennent l’installation chez vous et une formation sur place.`,
   },
   offersLabel: 'Les deux offres',
   includedTitle: 'Ce qui est compris',
@@ -194,7 +203,11 @@ export const offresPage = {
         home: ['Aucune'],
         pro: [orMissing(subscription?.commitment, missingPrice.commitment(pro))],
       },
-      { label: 'Installation chez vous et formation sur place', home: 'yes', pro: 'yes' },
+      {
+        label: 'Installation chez vous et formation sur place, dans notre zone',
+        home: 'yes',
+        pro: 'yes',
+      },
       {
         label: 'Le déménageur, pour rapatrier vos fichiers',
         home: moverOffers.includes('home') ? 'yes' : 'no',
@@ -217,15 +230,16 @@ export const offresPage = {
       },
       {
         label: 'Assistance',
-        home: [
-          'Facturée ',
-          price(home.afterSalesRateEur ?? null, missingPrice.afterSalesRate(home)),
-          ' par intervention',
-        ],
+        home: ['Sur demande'],
         pro: [
           'Prioritaire, réponse garantie sous ',
           orMissing(subscription?.responseTime, missingPrice.responseTime(pro)),
         ],
+      },
+      {
+        label: 'Intervention hors garantie',
+        home: [price(home.afterSalesRateEur ?? null, missingPrice.afterSalesRate(home))],
+        pro: [price(pro.afterSalesRateEur ?? null, missingPrice.afterSalesRate(pro))],
       },
       { label: 'Comptes pour toute l’équipe, droits par dossier', home: 'no', pro: 'yes' },
       { label: 'Agenda et contacts partagés', home: 'no', pro: 'yes' },
@@ -238,19 +252,11 @@ export const offresPage = {
     items: [
       {
         title: 'Depuis l’extérieur de la maison',
-        text: [
-          remoteAccess.reason,
-          ' ',
-          remoteAccess.consequence,
-          ' ',
-          remoteAccess.optionLead,
-          remoteAccess.option,
-          '.',
-        ],
+        text: [remoteAccess.reason, ' ', remoteAccess.consequence, ' ', remoteAccess.choice],
       },
       {
         title: 'La copie de secours',
-        text: backupCopy.sentence,
+        text: [...backupCopy.sentence, ' ', backupCopy.advice],
       },
       {
         title: 'Notre zone d’intervention',
@@ -280,7 +286,7 @@ export const offresPage = {
       {
         title: 'Vous choisissez',
         text: [
-          'Sur la page Commander, choisissez votre offre et votre stockage, puis laissez vos coordonnées. Vous ne payez rien à cette étape.',
+          'Choisissez votre offre et votre stockage, puis laissez-nous vos coordonnées. Vous ne payez rien à cette étape.',
         ],
       },
       {
@@ -297,7 +303,7 @@ export const offresPage = {
       },
     ] satisfies readonly { title: string; text: RichText }[],
     cta: { label: 'Commander', href: routes.order } satisfies LinkValue,
-    secondary: { label: 'Poser une question', href: routes.contact } satisfies LinkValue,
+    secondary: { label: 'Nous poser une question', href: routes.contact } satisfies LinkValue,
   },
 } as const;
 
