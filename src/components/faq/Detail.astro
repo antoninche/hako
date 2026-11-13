@@ -12,6 +12,7 @@
  *   <Detail of="storage-options" />    stockages proposés en option (« 2 To ou 4 To »)
  *   <Detail of="mover-offers" />       offres qui comprennent le déménageur (« Hako Home et Hako Pro »)
  *   <Detail of="remote-access" />      accès depuis l’extérieur : pas prévu, choix de sécurité
+ *   <Detail of="pro-maintenance" />    maintenance à distance de Hako Pro : tunnel WireGuard, sur demande
  *   <Detail of="backup-copy" />        copie de secours : ce qui reste à confirmer
  *   <Detail of="payment" />            paiement : par virement, pas encore en ligne (phrase)
  *   <Detail of="warranty" />           garantie d'un an, en plus de la garantie légale (phrase)
@@ -37,6 +38,7 @@ import {
   missingPrice,
   moverOffers,
   payment,
+  proMaintenance,
   remoteAccess,
   shippingCost,
   warranty,
@@ -55,6 +57,7 @@ export type DetailId =
   | 'storage-options'
   | 'mover-offers'
   | 'remote-access'
+  | 'pro-maintenance'
   | 'backup-copy'
   | 'payment'
   | 'warranty'
@@ -89,6 +92,7 @@ const values: Record<DetailId, Maybe<string>> = {
   'storage-options': formatList(options, 'or'),
   'mover-offers': moverOffers.names,
   'remote-access': remoteAccess.choice,
+  'pro-maintenance': proMaintenance,
   'backup-copy': backupCopy.status,
   payment,
   warranty: warranty.sentence,

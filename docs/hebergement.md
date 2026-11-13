@@ -89,6 +89,16 @@ Si l’équipe choisit `--meshopt`, l’ajout se fait à l’identique à trois 
 
 Le site n’utilise pas les autres décodeurs de Three.js. Draco (`DRACOLoader`) et les textures KTX2 (`KTX2Loader`) demanderaient aussi `'wasm-unsafe-eval'`, plus `worker-src 'self' blob:` pour leurs workers ; `npm run model:check` refuse un fichier qui les exige. Laissé à ses réglages par défaut, le chargeur de Three.js lirait les images intégrées par des adresses `blob:` (il faudrait `blob:` dans `connect-src` et `img-src`) : c’est pourquoi `glb.ts` les décode autrement. Un décodeur éventuel est servi par le site, jamais depuis l’adresse d’un CDN comme dans beaucoup d’exemples.
 
+## Passer à notre nom de domaine
+
+Pour l’instant, le site est publié sur GitHub Pages, dans le sous-dossier `/hako/` (https://antoninche.github.io/hako/). Une fois le nom de domaine acheté :
+
+1. Dans les réglages Pages du dépôt sur GitHub, indiquer le nom de domaine, puis créer chez le registraire les enregistrements DNS donnés par la documentation de GitHub ; activer HTTPS dès que le certificat est prêt.
+2. Dans `.github/workflows/apercu.yml`, mettre `SITE_URL` à l’adresse du domaine (par exemple `https://exemple.fr`) et retirer l’étape `scripts/deploy/sous-dossier.mjs` : le site est alors servi à la racine, tel qu’il est construit, et `robots.txt` devient utile.
+3. Dans `src/data/entreprise.ts`, renseigner le nom de domaine et l’adresse e-mail sur ce domaine.
+4. Si l’hébergeur change, mettre à jour les mentions légales et la politique de confidentialité (`src/content/legal/`).
+5. Refaire les contrôles de la partie suivante.
+
 ## Après la mise en ligne
 
 Avec le vrai domaine à la place de `exemple.fr` :

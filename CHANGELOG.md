@@ -10,6 +10,7 @@ Les modifications notables du site sont notées ici, de la plus récente à la p
 - Dessins « papier découpé » sur toutes les pages (21 fichiers), avec leur générateur dans `design/illustrations/` (`npm run illustrations:build`, `illustrations:check`, `illustrations:render`) et `docs/illustrations.md`.
 - Couleur `--perle` (RAL 1013), sans rôle de texte.
 - Crédits de three.js et du décodeur meshoptimizer, avec le texte de leur licence servi par le site.
+- Maintenance de Hako Pro expliquée (tunnel sécurisé WireGuard, seulement à la demande du client) sur Notre engagement, la page Offres et dans une nouvelle question de la FAQ.
 - Balises de partage (Open Graph) sur chaque page, `robots.txt` et plan du site `sitemap.xml` (quand l’adresse publique est connue).
 
 ### Modifié

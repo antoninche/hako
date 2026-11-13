@@ -47,6 +47,16 @@ export const remoteAccess = {
   choice: 'Ce n’est pas prévu : c’est un choix de sécurité.',
 } as const;
 
+/* ---------- Maintenance de Hako Pro ---------- */
+
+/**
+ * La maintenance à distance de Hako Pro : un tunnel WireGuard, mis en place
+ * seulement à la demande du client (réponse de l'équipe, 13 novembre 2026).
+ * Repris par Notre engagement (« Zéro accès »), la page Offres et la FAQ.
+ */
+export const proMaintenance =
+  'Pour Hako Pro, la maintenance à distance passe par un tunnel sécurisé entre votre box et nous : un VPN, c’est-à-dire un passage chiffré à travers internet, avec le logiciel libre WireGuard. Il n’est mis en place que si vous demandez la maintenance : sans votre demande, nous n’avons aucun accès à votre box.';
+
 /* ---------- Logiciels de la box ---------- */
 
 /**

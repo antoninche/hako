@@ -19,6 +19,7 @@ import {
   missingPrice,
   moverOffers,
   payment,
+  proMaintenance,
   remoteAccess,
   shippingCost,
   warranty,
@@ -253,6 +254,10 @@ export const offresPage = {
       {
         title: 'Depuis l’extérieur de la maison',
         text: [remoteAccess.reason, ' ', remoteAccess.consequence, ' ', remoteAccess.choice],
+      },
+      {
+        title: 'La maintenance de Hako Pro',
+        text: [proMaintenance],
       },
       {
         title: 'La copie de secours',

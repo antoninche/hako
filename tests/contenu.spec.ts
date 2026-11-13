@@ -17,7 +17,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 import { tutoriels } from '../src/content/tutoriels';
 import { company } from '../src/data/entreprise';
-import { backupCopy, moverOffers, remoteAccess } from '../src/data/faits';
+import { backupCopy, moverOffers, proMaintenance, remoteAccess } from '../src/data/faits';
 import { isTodo, type Maybe } from '../src/lib/todo';
 import { MOBILE } from './routes';
 
@@ -208,6 +208,15 @@ test.describe('Faits partagés : mêmes mots, même repère jaune', () => {
       expect(text).toContain(normalize(remoteAccess.reason));
       expect(text).toContain(normalize(remoteAccess.consequence));
       expect(text).toContain(normalize(remoteAccess.choice));
+    });
+  }
+
+  for (const path of ['/offres/', '/engagement/', '/faq/']) {
+    test(`${path} : la maintenance de Hako Pro, par tunnel sécurisé et sur demande`, async ({
+      page,
+    }) => {
+      await page.goto(path);
+      expect(await mainText(page)).toContain(normalize(proMaintenance));
     });
   }
 

@@ -18,7 +18,7 @@
  *   l'intérieur des guillemets « ».
  */
 import { company } from '../data/entreprise';
-import { missingPrice, nameSentence, remoteAccess } from '../data/faits';
+import { missingPrice, nameSentence, proMaintenance, remoteAccess } from '../data/faits';
 import { routes } from '../data/navigation';
 import { pricing } from '../data/tarifs';
 import { orMissing } from '../lib/commande/inline';
@@ -114,6 +114,7 @@ export const engagement = {
         [
           'Quand nous vous aidons à rapatrier vos photos depuis Google Photos ou iCloud, c’est vous qui vous connectez à votre compte : nous ne voyons jamais vos identifiants.',
         ],
+        [proMaintenance],
       ],
     },
     {

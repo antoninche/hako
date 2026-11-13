@@ -68,7 +68,7 @@ Total : 55 informations manquantes dans 16 fichiers.
 
 ## src/content/offres.ts
 
-- L35 - Délai sous lequel nous rappelons après une demande de commande - [délai]
+- L36 - Délai sous lequel nous rappelons après une demande de commande - [délai]
 
 ## src/content/tutoriels.ts
 
@@ -95,10 +95,10 @@ Total : 55 informations manquantes dans 16 fichiers.
 
 ## src/data/faits.ts
 
-- L56 - Page d’accueil de la box (http://mabox.local) : logiciel utilisé et licence, à préciser - [licence à préciser]
-- L63 - Copie de secours des données : prévue, absente de la première version ; solution, date de disponibilité et fonctionnement à confirmer - [à confirmer]
-- L109 - Garantie d’un an de la box : ce qu’elle couvre (pièces, main-d’œuvre, envoi ou déplacement) et comment la faire jouer - [à confirmer]
-- L133 - Frais d’envoi de la box hors de la zone d’intervention : compris dans le prix ou en supplément, et combien - [à confirmer]
+- L66 - Page d’accueil de la box (http://mabox.local) : logiciel utilisé et licence, à préciser - [licence à préciser]
+- L73 - Copie de secours des données : prévue, absente de la première version ; solution, date de disponibilité et fonctionnement à confirmer - [à confirmer]
+- L119 - Garantie d’un an de la box : ce qu’elle couvre (pièces, main-d’œuvre, envoi ou déplacement) et comment la faire jouer - [à confirmer]
+- L143 - Frais d’envoi de la box hors de la zone d’intervention : compris dans le prix ou en supplément, et combien - [à confirmer]
 
 ## src/data/model.config.json
 
