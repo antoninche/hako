@@ -171,6 +171,13 @@ const Page = demo ? 'section' : 'div';
     border-start-end-radius: 0;
   }
 
+  /* « (s’ouvre dans un nouvel onglet) », que le script ajoute après chaque
+     lien vers le site : d'un seul tenant, comme dans le formulaire de
+     commande. La ligne se coupe avant la parenthèse, jamais dedans. */
+  .hako-page :global(.hako-page__new-tab) {
+    white-space: nowrap;
+  }
+
   .hako-page__head {
     display: grid;
     gap: var(--space-m);

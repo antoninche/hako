@@ -234,11 +234,16 @@ export function stepNumber(view: ViewId): number | null {
   return index === -1 ? null : index + 1;
 }
 
-/** Étapes faites, pour l'indicateur : celles qui précèdent l'écran en cours (toutes, une fois installée). */
+/**
+ * Étapes faites, pour l'indicateur : celles qui précèdent l'écran en cours
+ * (toutes, une fois installée). « La création des comptes s'est arrêtée »
+ * laisse toujours l'écran des comptes en cours, même quand la démonstration
+ * le montre après « C'est prêt » (« Voir un autre écran »).
+ */
 export function stepsDone(state: AssistantState): number {
+  if (state.view === 'stopped') return NUMBERED_SCREENS.length - 1;
   if (state.created) return NUMBERED_SCREENS.length;
   const screen = isScreen(state.view) ? state.view : state.resume;
-  if (state.view === 'stopped') return NUMBERED_SCREENS.length - 1;
   const number = stepNumber(screen);
   return number === null ? 0 : number - 1;
 }

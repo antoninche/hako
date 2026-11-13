@@ -138,7 +138,15 @@ const printCalls = (page: Page): Promise<number> =>
 const AXE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
 async function expectNoSeriousViolations(page: Page, context: string): Promise<void> {
-  const results = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
+  // Le filigrane « EXEMPLE » de la fiche est une pure décoration, cachée aux
+  // lecteurs d'écran (le titre dit déjà « exemple ») et pâle exprès, pour ne
+  // pas gêner la lecture des mots de passe : les WCAG (1.4.3) ne demandent
+  // aucun contraste pour un tel texte. axe ne le mesure que si rien ne le
+  // recouvre en son centre, selon la hauteur de la fiche : il est laissé de côté.
+  const results = await new AxeBuilder({ page })
+    .withTags(AXE_TAGS)
+    .exclude('.printout__watermark')
+    .analyze();
   const serious = results.violations
     .filter((violation) => violation.impact === 'serious' || violation.impact === 'critical')
     .map(
@@ -452,11 +460,30 @@ test.describe('Démonstration, gestes et retours', () => {
     await button(page, demo.banner.restart).click();
     await expectScreen(page, 'welcome');
     await expect(announcer(page)).toHaveText(demo.restarted);
-    expect(page.url()).not.toContain('#');
+    await expect(page).not.toHaveURL(/#/);
     await button(page, screens.welcome.start).click();
     await expect(page.locator('[data-person]')).toHaveCount(1);
     await expect(ownerField(page)).toHaveValue('');
     await expect(page.locator('[data-accounts] .account')).toHaveCount(0);
+  });
+
+  test('« Recommencer », puis « Retour » du navigateur : un seul appui ramène au guide', async ({
+    page,
+  }) => {
+    await page.goto('/installer/');
+    await openDemo(page);
+    await toPasswords(page, ['Hélène', 'Marc']);
+    await button(page, screens.passwords.next).click();
+    await expectScreen(page, 'sheet');
+    await button(page, screens.sheet.next).click();
+    await expectScreen(page, 'check');
+    await button(page, demo.banner.restart).click();
+    await expectScreen(page, 'welcome');
+    await expect(page).toHaveURL(new RegExp(`${literal(PATH)}$`));
+    // Les écrans de l'essai d'avant ne sont plus derrière l'accueil.
+    await page.goBack();
+    await expect(page).toHaveURL(/\/installer\/$/);
+    await expect(page.locator('[data-assistant]')).toHaveCount(0);
   });
 });
 
@@ -643,6 +670,72 @@ test.describe('Impression', () => {
   });
 });
 
+test.describe('Fiche de secours : un mot de passe sur une seule ligne', () => {
+  /** Huit personnes, le plus possible, avec des prénoms longs et un doublon. */
+  const EIGHT = [
+    'Hélène',
+    'Marc',
+    'Léa',
+    'Monique',
+    'Jean-Baptiste',
+    'Camille',
+    'Camille',
+    'Maximilien',
+  ];
+  /** Papier A4 moins les marges de la fiche (186 × 277 mm), en pixels CSS. */
+  const A4_CONTENT = { width: 703, height: 1047 } as const;
+
+  /** Mots de passe coupés sur plusieurs lignes, ou plus larges que leur colonne. */
+  const brokenPasswords = (page: Page): Promise<string[]> =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('[data-printout-rows] .printout__cell--password')].flatMap(
+        (cell) => {
+          const value = cell.lastElementChild;
+          if (value === null) return ['mot de passe absent'];
+          const lines = new Set(
+            [...value.querySelectorAll('span')].map((chunk) =>
+              Math.round(chunk.getBoundingClientRect().top),
+            ),
+          );
+          const range = document.createRange();
+          range.selectNodeContents(value);
+          const overflow = range.getBoundingClientRect().right - cell.getBoundingClientRect().right;
+          return lines.size === 1 && overflow <= 0.5
+            ? []
+            : [`${value.textContent} : ${lines.size} lignes, ${overflow.toFixed(1)} px de trop`];
+        },
+      ),
+    );
+
+  async function toSheet(page: Page, names: readonly string[]): Promise<void> {
+    await openDemo(page);
+    await toPasswords(page, names);
+    await button(page, screens.passwords.next).click();
+    await expectScreen(page, 'sheet');
+    await expect(page.locator('[data-printout-rows] .printout__row')).toHaveCount(names.length);
+  }
+
+  for (const width of [360, MOBILE.width, 768, 1024, DESKTOP.width]) {
+    test(`à l’écran, ${width} px, huit personnes`, async ({ page }) => {
+      await page.setViewportSize({ width, height: DESKTOP.height });
+      await toSheet(page, EIGHT);
+      expect(await brokenPasswords(page)).toEqual([]);
+    });
+  }
+
+  for (const count of [2, MAX_PEOPLE]) {
+    test(`sur papier A4, ${count} personnes, et la fiche tient sur une page`, async ({ page }) => {
+      await page.setViewportSize(A4_CONTENT);
+      await toSheet(page, EIGHT.slice(0, count));
+      await page.emulateMedia({ media: 'print' });
+      expect(await brokenPasswords(page)).toEqual([]);
+      // Le PDF que donnerait « Enregistrer au format PDF » : une seule page.
+      const pdf = (await page.pdf({ preferCSSPageSize: true })).toString('latin1');
+      expect(pdf.match(/\/Type\s*\/Page\b(?!s)/g) ?? []).toHaveLength(1);
+    });
+  }
+});
+
 test.describe('Erreurs simulées', () => {
   const openScenarios = async (page: Page): Promise<Locator> => {
     const panel = page.locator('#demonstration-autres-ecrans');
@@ -670,6 +763,28 @@ test.describe('Erreurs simulées', () => {
     await button(page, states.stopped.action ?? '').click();
     await expectScreen(page, 'accounts');
     await expect(title(page, 'ready')).toBeFocused({ timeout: 10_000 });
+  });
+
+  test('« La création s’est arrêtée » montrée après « C’est prêt » : les comptes restent en cours', async ({
+    page,
+  }) => {
+    await openDemo(page);
+    await toPasswords(page, ['Hélène']);
+    await toChecked(page);
+    await button(page, check.create).click();
+    await expect(title(page, 'ready')).toBeFocused({ timeout: 10_000 });
+    const panel = await openScenarios(page);
+    await panel.getByRole('button', { name: demo.scenarios.items.stopped }).click();
+    await expectScreen(page, 'stopped');
+    // Quatre écrans faits, et celui des comptes en cours : pas cinq coches
+    // au-dessus de « La création des comptes s’est arrêtée ».
+    const items = page.locator('[data-steps] [data-step-indicator]');
+    await expect(items).toHaveCount(5);
+    for (const index of [0, 1, 2, 3]) {
+      await expect(items.nth(index)).toHaveAttribute('data-state', 'done');
+    }
+    await expect(items.nth(4)).toHaveAttribute('data-state', 'current');
+    await expect(items.nth(4)).toHaveAttribute('aria-current', 'step');
   });
 
   test('la HAKO ne répond plus, puis répond : retour là où l’on était', async ({ page }) => {

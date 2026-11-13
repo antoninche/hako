@@ -159,6 +159,12 @@ const { sheet } = assistant.screens;
     border-radius: var(--radius);
   }
 
+  /* Sur téléphone, le libellé passe sur deux lignes de même longueur
+     (« Imprimer ou enregistrer / la fiche »), jamais un mot seul. */
+  .ways__print .btn > span {
+    text-wrap: balance;
+  }
+
   .ways__printed {
     margin: 0;
     font-size: var(--step--1);

@@ -13,8 +13,12 @@
  *   avec JavaScript, le script les remplace par les comptes que la HAKO
  *   remet (gabarit <template>), et les efface une fois les comptes créés.
  * - Le logo HAKO en tête : c'est le papier que la famille garde.
- * - Un mot de passe passe à la ligne devant un tiret, jamais après ; un
- *   identifiant, devant « @ ».
+ * - Un mot de passe se recopie caractère par caractère : il tient sur une
+ *   seule ligne, à l'écran dès 360 px de large et sur papier, même avec huit
+ *   personnes (tests/assistant.spec.ts, « Fiche de secours »). Sa colonne
+ *   est la plus large, et sa taille suit la place. En dernier recours (mot
+ *   de passe plus long, écran plus étroit), il passe à la ligne devant un
+ *   tiret, jamais après ; un identifiant, devant « @ ».
  * - Sur papier, jusqu'à quatre personnes, le texte est plus grand
  *   (data-people, écrit par le script) : la fiche tient toujours sur une page.
  * - Pendant l'impression, le titre de la page devient `fileName` : c'est le
@@ -391,8 +395,13 @@ const footer = demo
     white-space: nowrap;
   }
 
+  /* Écran étroit : le mot de passe a toute la largeur de la fiche, et sa
+     taille suit cette largeur (cqi : centième de la largeur de la fiche),
+     pour tenir sur une ligne. Les plus longs mots de passe d'exemple
+     occupent environ 17,4 fois la taille du texte : à 5,4cqi, il reste plus
+     de 6 % de marge. */
   .printout :global(.printout__cell--password) {
-    font-size: var(--step-1);
+    font-size: clamp(0.875rem, 5.4cqi, var(--step-1));
     font-weight: 700;
     letter-spacing: 0.03em;
     overflow-wrap: normal;
@@ -405,12 +414,20 @@ const footer = demo
     font-size: var(--step--1);
   }
 
-  /* Écran large (et papier) : un tableau à trois colonnes, avec une ligne d'en-tête. */
-  @container fiche (min-width: 36rem) {
+  /* Écran large (et papier) : un tableau à trois colonnes, avec une ligne
+     d'en-tête. La colonne du mot de passe est la plus large : la moitié de
+     la ligne. Le tableau n'apparaît que si elle peut garder le mot de passe
+     sur une ligne, au texte courant (43rem) ; sur papier A4, la fiche fait
+     186 mm de large (703 px) : c'est toujours le tableau. */
+  @container fiche (min-width: 43rem) {
     .printout :global(.printout__row) {
-      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1.4fr);
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 0.9fr) minmax(0, 1.7fr);
       gap: var(--space-s);
       align-items: baseline;
+    }
+
+    .printout :global(.printout__cell--password) {
+      font-size: var(--step-0);
     }
 
     .printout__row--head {
@@ -548,14 +565,11 @@ const footer = demo
       font-size: 11pt;
     }
 
+    /* Le mot de passe, lui, reste en 12 pt : plus grand, il passerait à la
+       ligne. */
     .printout:is([data-people='1'], [data-people='2'], [data-people='3'], [data-people='4'])
       :global(.printout__cell) {
       font-size: 12pt;
-    }
-
-    .printout:is([data-people='1'], [data-people='2'], [data-people='3'], [data-people='4'])
-      :global(.printout__cell--password) {
-      font-size: 14pt;
     }
 
     .printout:is([data-people='1'], [data-people='2'], [data-people='3'], [data-people='4'])

@@ -301,18 +301,21 @@ const current = (href: string) =>
     }
   }
 
-  /* De 64 à 72rem, les six liens du menu et « Commander » tiennent à peine
-     sur une ligne : l'écart visible entre deux liens passe de 32 à 16 px
-     (8 px ici + 4 px de marge intérieure de chaque côté), et de 32 à 20 px
-     avant « Commander ». Chaque lien garde sa cible de 44 px. */
-  @media (min-width: 64rem) and (max-width: 71.99rem) {
-    /* Le logo passe de 36 à 32 px de haut : le menu ne colle plus au logo. */
+  /* De 64 à 73rem, les six liens du menu et « Commander » ne tiennent sur une
+     ligne qu'en se serrant : l'écart visible entre deux liens passe de 32 à
+     20 px (12 px ici + 4 px de marge intérieure de chaque côté), « Commander »
+     se rapproche du menu, et le logo passe de 36 à 32 px de haut. Chaque lien
+     garde sa cible de 44 px. Il reste au moins 32 px libres entre le logo et
+     le menu, à toutes les largeurs : assez pour une barre de défilement
+     classique (15 à 17 px, Windows ou souris branchée), que Chromium sans
+     tête n'affiche pas : tests/navigation.spec.ts l'imite. */
+  @media (min-width: 64rem) and (max-width: 72.99rem) {
     .site-header {
       --logo-height: 2rem;
     }
 
     .site-header__list {
-      gap: var(--space-2xs);
+      gap: var(--space-xs);
     }
 
     .site-header__link {
@@ -320,7 +323,18 @@ const current = (href: string) =>
     }
 
     .site-header__actions {
-      margin-inline-start: var(--space-s);
+      margin-inline-start: var(--space-xs);
+    }
+  }
+
+  /* De 64 à 68rem, un cran de plus : 16 px entre deux liens, logo de 28 px. */
+  @media (min-width: 64rem) and (max-width: 67.99rem) {
+    .site-header {
+      --logo-height: 1.75rem;
+    }
+
+    .site-header__list {
+      gap: var(--space-2xs);
     }
   }
 

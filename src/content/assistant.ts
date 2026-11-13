@@ -63,8 +63,9 @@
  * - « box » seul : notre produit est « la HAKO » ou « votre HAKO »,
  *   l’appareil de l’opérateur « votre box internet » ;
  * - que les échanges ou le disque sont chiffrés : ils ne le sont pas ;
- * - « nous ne pourrions pas » : nous disons ce que nous faisons, « nous ne
- *   gardons aucun moyen d’accès », et rien de plus ;
+ * - « nous ne pourrions pas » : nous disons ce que nous faisons, « sans
+ *   votre demande, nous n’avons aucun accès à vos données » (les mots de
+ *   proMaintenance, src/data/faits.ts), et rien de plus ;
  * - une durée, une adresse ou une procédure que l’équipe n’a pas
  *   confirmée : elle s’écrit todo(…).
  *
@@ -406,7 +407,7 @@ export const assistant = {
               'La vraie première installation se fait sur la page de votre HAKO, jamais sur ce site.',
             ],
             [
-              'C’est votre HAKO qui crée vos mots de passe, chez vous. Ils ne passent pas par internet. Nous ne gardons aucun moyen d’accès à vos données.',
+              'C’est votre HAKO qui crée vos mots de passe, chez vous. Ils ne passent pas par internet. Sans votre demande, nous n’avons aucun accès à vos données.',
             ],
             [
               'Pour installer votre HAKO, suivez ',
@@ -559,7 +560,7 @@ export const assistant = {
     /** « {de_prenom} » des libellés : « de Marc », mais « d’Hélène » devant une voyelle ou un h. */
     of: { consonant: 'de {prenom}', vowel: 'd’{prenom}' },
     /** Après un écran fait, dans l’indicateur (lu par les lecteurs d’écran). */
-    stepDone: '(faite)',
+    stepDone: '(écran terminé)',
     /** Écrans numérotés, dans l’ordre, avec leur nom court dans l’indicateur. */
     steps: [
       { id: 'people', name: 'Les personnes' },
@@ -588,8 +589,8 @@ export const assistant = {
     newTab: '(s’ouvre dans un nouvel onglet)',
     /** Résumé des erreurs ; « {n} » : nombre d’erreurs. */
     errors: {
-      titleOne: 'Il y a 1 point à corriger',
-      titleMany: 'Il y a {n} points à corriger',
+      titleOne: 'Il y a 1 point à corriger',
+      titleMany: 'Il y a {n} points à corriger',
       /** Avant chaque message, pour les lecteurs d’écran. */
       prefix: 'Erreur : ',
     },
@@ -673,7 +674,7 @@ export const assistant = {
           'Chaque personne aura son espace à elle, pour ses photos et ses fichiers, protégé par son propre mot de passe.',
         ],
         [
-          'Votre HAKO crée ces mots de passe elle-même, chez vous. Nous ne gardons aucun moyen d’accès à vos données : c’est notre engagement ',
+          'Votre HAKO crée ces mots de passe elle-même, chez vous. Sans votre demande, nous n’avons aucun accès à vos données : c’est notre engagement ',
           { label: '« Zéro accès »', href: routes.commitment },
           '.',
         ],
@@ -745,7 +746,7 @@ export const assistant = {
         numbered: 'Retirer la personne {n}',
       },
       add: 'Ajouter une personne',
-      limit: `Jusqu’à ${MAX_PEOPLE} personnes.`,
+      limit: `Jusqu’à ${MAX_PEOPLE}\u00a0personnes.`,
       login: {
         preview: 'Identifiant : {identifiant}',
         taken:
@@ -782,10 +783,10 @@ export const assistant = {
         ownerMissing: 'Tapez le prénom de la personne responsable.',
         missing: 'Tapez un prénom, ou retirez cette ligne.',
         tooLong:
-          'Ce prénom est trop long : ' + String(FIRST_NAME_MAX_LENGTH) + ' caractères au maximum.',
+          'Ce prénom est trop long : ' + String(FIRST_NAME_MAX_LENGTH) + ' caractères au maximum.',
         characters:
           'Tapez le prénom en lettres de l’alphabet latin, de a à z, accents compris. Les espaces, les traits d’union (-) et les apostrophes sont acceptés.',
-        full: `Vous avez atteint ${MAX_PEOPLE} personnes, le maximum pour cette installation.`,
+        full: `Vous avez atteint ${MAX_PEOPLE}\u00a0personnes, le maximum pour cette installation.`,
       },
       problems: [
         {
@@ -824,9 +825,9 @@ export const assistant = {
         {
           id: 'trop-de-personnes',
           title: `Vous êtes plus de ${MAX_PEOPLE} dans la maison.`,
-          why: [[`La première installation crée ${MAX_PEOPLE} comptes au plus.`]],
+          why: [[`La première installation crée ${MAX_PEOPLE}\u00a0comptes au plus.`]],
           fix: [
-            [`Créez d’abord les comptes de ${MAX_PEOPLE} personnes.`],
+            [`Créez d’abord les comptes de ${MAX_PEOPLE}\u00a0personnes.`],
             ['Pour ajouter les autres ensuite : ', toConfirm.addPerson, '.'],
           ],
         },
@@ -884,7 +885,7 @@ export const assistant = {
           title: 'Visibles pendant l’installation seulement',
           text: [
             [
-              'Votre HAKO ne montre ces mots de passe que pendant cette installation. Une fois les comptes créés, elle ne pourra plus les afficher : à l’étape suivante, vous les gardez sur une fiche de secours.',
+              'Votre HAKO ne montre ces mots de passe que pendant cette installation. Une fois les comptes créés, elle ne pourra plus les afficher : à l’écran suivant, vous les gardez sur une fiche de secours.',
             ],
           ],
         },
@@ -1241,7 +1242,7 @@ export const assistant = {
         {
           id: 'page-fermee',
           title: 'Vous avez fermé cette page pendant la création.',
-          why: [['Un geste de travers, un appareil qui se met en veille : cela arrive.']],
+          why: [['Un geste a pu fermer la page, ou l’appareil s’est mis en veille.']],
           fix: [
             ['Rouvrez ', boxAddress.display, ' depuis le même appareil.'],
             ['Ce qui se passe ensuite : ', pending.closedDuringCreation, '.'],
@@ -1418,7 +1419,7 @@ export const assistant = {
     /** Réponse que la page ne sait pas lire. */
     unexpected: {
       title: 'Quelque chose s’est mal passé',
-      text: [['Votre HAKO a répondu de façon inattendue. Cela peut arriver.']],
+      text: [['Votre HAKO a répondu de façon inattendue.']],
       fix: [
         ['Appuyez sur « Réessayer ».'],
         [

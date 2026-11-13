@@ -80,7 +80,7 @@ export const engagement = {
   meta: {
     title: 'Notre engagement : vos données restent chez vous',
     description:
-      'Nos sept engagements : vos données restent chez vous, nous n’y avons pas accès, des logiciels libres, pas d’abonnement caché, un humain près de chez vous.',
+      'Nos sept engagements : vos données restent chez vous, nous n’y avons pas accès sans votre demande, des logiciels libres, pas d’abonnement caché, un humain près de chez vous.',
   },
 
   intro: {
@@ -109,7 +109,7 @@ export const engagement = {
       title: 'Zéro accès',
       text: [
         [
-          'Nous n’avons pas accès à vos données. Chaque box crée ses propres codes secrets, uniques, à son premier démarrage, et c’est vous qui créez vos comptes pendant l’installation.',
+          'Sans votre demande, nous n’avons pas accès à vos données. Chaque box crée ses propres codes secrets, uniques, à son premier démarrage. À l’installation, c’est elle qui crée les comptes et invente les mots de passe, chez vous.',
         ],
         [
           'Quand nous vous aidons à rapatrier vos photos depuis Google Photos ou iCloud, c’est vous qui vous connectez à votre compte : nous ne voyons jamais vos identifiants.',

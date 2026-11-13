@@ -315,15 +315,17 @@ const tutorialsLink: Link = { label: 'nos tutoriels vidéo', href: routes.tutori
 /**
  * Renvoi vers les tutoriels : au futur tant qu’aucune vidéo n’est en ligne
  * (même règle que la page Tutoriels, src/content/tutoriels.ts), avec un moyen
- * de nous joindre en attendant.
+ * de nous joindre en attendant. Même forme que la démonstration
+ * (src/content/assistant.ts) : « … à votre rythme : nos tutoriels vidéo,
+ * bientôt en ligne. »
  */
 const tutorialsSentence = (lead: string): Sentence =>
   videosOnline
     ? [lead + ', voyez ', tutorialsLink, '.']
     : [
-        lead + ', ',
+        lead + ' : ',
         tutorialsLink,
-        ' arrivent bientôt. En attendant, ',
+        ', bientôt en ligne. En attendant, ',
         contactLink('écrivez-nous ou appelez-nous'),
         '.',
       ];
@@ -570,7 +572,9 @@ const steps = [
     ],
     why: [
       [
-        'La HAKO a besoin de courant pour fonctionner. Elle démarre toute seule dès qu’elle est branchée : vous n’avez aucun bouton à presser. Son petit bouton rond sert à l’éteindre : n’y touchez pas.',
+        'La HAKO a besoin de courant pour fonctionner. Elle démarre toute seule dès qu’elle est branchée : vous n’avez aucun bouton à presser. Son petit bouton rond sert à l’éteindre ',
+        toConfirm.powerButton,
+        ' : n’y touchez pas.',
       ],
       [
         'Le bloc fourni lui donne tout le courant dont elle a besoin : un autre chargeur pourrait être trop faible.',
@@ -589,7 +593,7 @@ const steps = [
       ],
     ],
     nextHint: [
-      'Juste après avoir branché, passez à ',
+      'Juste après avoir branché la HAKO, passez à ',
       toStep('preparation'),
       ' : notez l’heure sur un papier, puis lancez le chronomètre.',
     ],
@@ -630,38 +634,21 @@ const steps = [
         ],
       },
       {
-        id: 'voyant-clignote',
-        title: 'Le voyant de la HAKO clignote.',
-        why: [
-          [
-            'Un voyant qui clignote par séries signale un problème. 4 clignotements longs puis 6 ou 7 courts : un problème d’alimentation.',
-          ],
-        ],
+        id: 'voyant',
+        title: 'Le voyant de la HAKO clignote, ou reste rouge.',
+        why: [['Le voyant de la HAKO : ', toConfirm.led, '.']],
         fix: [
           [
             'Vérifiez que vous utilisez le bloc d’alimentation fourni, bien enfoncé des deux côtés.',
           ],
-          ['Débranchez le bloc de la prise électrique, attendez dix secondes, puis rebranchez-le.'],
           [
-            'Le voyant clignote encore ? ',
+            'Débranchez le bloc de la prise électrique, attendez 10 secondes, puis rebranchez-le : la HAKO redémarre.',
+          ],
+          [
+            'Le voyant clignote encore, ou reste rouge ? ',
             contactLink('Écrivez-nous'),
-            ' en nous décrivant les clignotements.',
+            ' en nous décrivant ce qu’il fait.',
           ],
-        ],
-      },
-      {
-        id: 'voyant-rouge',
-        title: 'Le voyant de la HAKO reste rouge.',
-        why: [
-          [
-            'Juste après le branchement, un voyant rouge est normal : il passe ensuite au vert. S’il reste rouge, la HAKO est éteinte, même si elle reçoit du courant.',
-          ],
-        ],
-        fix: [
-          [
-            'Débranchez le bloc de la prise électrique, attendez dix secondes, puis rebranchez-le : la HAKO redémarre.',
-          ],
-          ['Le voyant reste rouge ? ', contactLink('Écrivez-nous'), '.'],
         ],
       },
       {
@@ -675,9 +662,9 @@ const steps = [
           ],
         ],
         fix: [
-          ['Appuyez une fois sur ce bouton : la HAKO redémarre.'],
+          ['Appuyez une fois sur ce bouton : la HAKO redémarre ', toConfirm.powerButton, '.'],
           [
-            'Si rien ne change, débranchez le bloc d’alimentation de la prise électrique, attendez dix secondes, puis rebranchez-le.',
+            'Si rien ne change, débranchez le bloc d’alimentation de la prise électrique, attendez 10 secondes, puis rebranchez-le.',
           ],
         ],
       },
@@ -707,14 +694,14 @@ const steps = [
     success: [
       ['Pour le savoir, passez à ', toStep('page'), ' et appuyez sur « ' + openLabel + ' ».'],
       [
-        'Si la HAKO n’est pas encore prête, votre navigateur (Safari, Chrome, Firefox ou Edge) affiche un message d’erreur, par exemple « Safari ne peut pas ouvrir la page » ou « Ce site est inaccessible ». Rien n’est cassé : revenez à ce guide avec la flèche « Retour » du navigateur, attendez 5 minutes, puis réessayez.',
+        'Si la HAKO n’est pas encore prête, votre navigateur (Safari, Chrome, Firefox ou Edge) affiche un message d’erreur, par exemple « Safari ne peut pas ouvrir la page » ou « Ce site est inaccessible ». Rien n’est cassé : revenez à ce guide avec la flèche de retour du navigateur, attendez 5 minutes, puis réessayez.',
       ],
       [
         'Ou la page de votre HAKO s’ouvre sur ' +
           quote(boxPage.preparing) +
           ' : restez-y, et appuyez sur ' +
           quote(boxPage.reload) +
-          ' 5 minutes plus tard.',
+          ' 5 minutes plus tard.',
       ],
       ['Le chronomètre compte seulement le temps écoulé : il ne sait pas quand la HAKO aura fini.'],
     ],
@@ -731,19 +718,20 @@ const steps = [
           [
             'Vous pouvez déjà installer sur vos téléphones les applications Immich (photos) et Nextcloud (fichiers), sans les ouvrir : voyez ',
             toStep('applications'),
-            ', puis revenez ici avec la flèche « Retour » du navigateur.',
+            ', puis revenez ici avec la flèche de retour du navigateur.',
           ],
         ],
       },
     ],
     chronometer: {
       title: 'Chronomètre',
-      intro: 'Il compte le temps écoulé depuis le branchement de la HAKO.',
+      intro:
+        'Lancez-le juste après avoir branché la HAKO : il compte alors le temps écoulé depuis le branchement.',
       start: 'Lancer le chronomètre',
       reset: 'Remettre à zéro',
       label: 'Temps écoulé depuis le branchement',
       idle: 'Pas encore lancé',
-      display: '{m} min {s} s',
+      display: '{m} min {s} s',
       spoken: { zero: 'Moins d’une minute', one: '1 minute', many: '{n} minutes' },
       memory:
         'Ce chronomètre ne garde rien en mémoire : si vous rechargez ou fermez cette page, il repart de zéro. Votre HAKO, elle, continue sa préparation.',
@@ -828,7 +816,7 @@ const steps = [
       [
         'Elle affiche ' +
           quote(boxPage.preparing) +
-          ' ? Attendez 5 minutes, puis appuyez sur ' +
+          ' ? Attendez 5 minutes, puis appuyez sur ' +
           quote(boxPage.reload) +
           '.',
       ],
@@ -889,7 +877,7 @@ const steps = [
       title: backTitle,
       text: [
         [
-          'Pendant la première installation, n’utilisez ni la flèche « Retour » du navigateur, ni le geste « Retour » du téléphone : vous pourriez quitter la page de votre HAKO avant la fin. Pour revenir à l’écran d’avant, utilisez les boutons de la page de votre HAKO.',
+          'Pendant la première installation, n’utilisez ni la flèche de retour du navigateur, ni le geste de retour du téléphone : vous pourriez quitter la page de votre HAKO avant la fin. Pour revenir à l’écran d’avant, utilisez les boutons de la page de votre HAKO.',
         ],
         [
           'À la fin, sur l’écran ' +
@@ -1005,7 +993,7 @@ const steps = [
                   'Pour vérifier le Wi-Fi, cliquez sur l’icône du réseau, en bas à droite de l’écran, près de l’heure : le Wi-Fi marqué « Connecté » doit porter le nom écrit sur l’étiquette de votre box internet.',
                 ],
                 [
-                  `Avec Windows ${requirements.windows} ou Windows 11, ouvrez Edge, Chrome ou Firefox. Si la page ne s’ouvre pas, voyez `,
+                  `Avec Windows\u00a0${requirements.windows} ou Windows\u00a011, ouvrez Edge, Chrome ou Firefox. Si la page ne s’ouvre pas, voyez `,
                   toProblem(
                     'page',
                     'windows',
@@ -1138,7 +1126,7 @@ const steps = [
               quote(boxPage.preparing) +
               ', restez-y : appuyez sur ' +
               quote(boxPage.reload) +
-              ' 5 minutes plus tard.',
+              ' 5 minutes plus tard.',
           ],
         ],
       },
@@ -1161,14 +1149,14 @@ const steps = [
               requirements.android +
               ' ne savent pas ouvrir les adresses qui finissent par « .local », comme celle de votre HAKO.',
           ],
+          [
+            'Votre appareil ne pourra pas non plus utiliser les applications Immich et Nextcloud avec cette adresse.',
+          ],
         ],
         fix: [
           ['Pour connaître la version : dans les Paramètres, cherchez « Version d’Android ».'],
           [
             'Faites l’installation avec un autre appareil, même emprunté : un ordinateur, un iPhone, un iPad, ou un appareil Android plus récent.',
-          ],
-          [
-            'Votre appareil ne pourra pas non plus utiliser les applications Immich et Nextcloud avec cette adresse.',
           ],
           [
             'Solution de secours, pour l’installation comme pour les applications : ',
@@ -1262,18 +1250,18 @@ const steps = [
               boxAddress.secondHost +
               ' ».',
           ],
+          ['L’adresse ', boxAddress.display, ' ouvre alors la page de l’autre HAKO.'],
+          [
+            'Après une coupure de courant, les deux HAKO peuvent échanger leurs noms ',
+            toConfirm.namesAfterOutage,
+            '.',
+          ],
         ],
         fix: [
           [
             'Ouvrez ',
             { label: boxAddress.secondDisplay, href: boxAddress.secondUrl },
             ' pour atteindre la deuxième HAKO.',
-          ],
-          [`La page qui s’ouvre à l’adresse ${boxAddress.host} est alors celle de l’autre HAKO.`],
-          [
-            'Après une coupure de courant, les deux HAKO peuvent échanger leurs noms ',
-            toConfirm.namesAfterOutage,
-            '.',
           ],
         ],
       },
@@ -1293,7 +1281,7 @@ const steps = [
             ' avant d’aller plus loin.',
           ],
           [
-            'Votre navigateur vous demande de confirmer ? Chrome ne le fait pas pour cette adresse, sauf avec son réglage le plus strict : ',
+            'Chrome vous demande de confirmer avant d’ouvrir la page ? Cela n’arrive que s’il est réglé au plus strict. Appuyez sur ',
             toConfirm.browserWarnings,
             '.',
           ],
@@ -1309,7 +1297,7 @@ const steps = [
       [
         'La page de votre HAKO vous guide, écran par écran. Voici ce qu’elle va vous demander et ce qu’elle va faire.',
       ],
-      ['Elle numérote ses propres écrans : ils font tous partie de cette étape 7 du guide.'],
+      ['Elle numérote ses propres écrans : ils font tous partie de cette étape 7 du guide.'],
       [
         'Vous avez déjà fait la première installation sur la page de votre HAKO, et pas seulement dans la démonstration ? Vérifiez seulement que vous avez votre fiche de secours, puis passez à l’étape suivante.',
       ],
@@ -1348,7 +1336,7 @@ const steps = [
     },
     actions: [
       [
-        'Sur la page de votre HAKO, suivez les écrans dans l’ordre. Pour revenir à l’écran d’avant, utilisez ses boutons, jamais la flèche « Retour » du navigateur.',
+        'Sur la page de votre HAKO, suivez les écrans dans l’ordre. Pour revenir à l’écran d’avant, utilisez ses boutons, jamais la flèche de retour du navigateur.',
       ],
       ['Sur l’écran ' + quote(boxPage.welcome) + ', appuyez sur ' + quote(boxPage.start) + '.'],
       [
@@ -1516,7 +1504,7 @@ const steps = [
         id: 'immich',
         name: apps.immich.name,
         role: 'Photos et vidéos',
-        text: 'Comme Google Photos, mais vos photos restent chez vous. Dans les boutiques, c’est celle de l’éditeur FUTO.',
+        text: 'Comme Google Photos, mais vos photos restent chez vous. Sur l’App Store et Google Play, choisissez l’application Immich publiée par FUTO.',
         links: [
           { label: 'Immich sur l’App Store (iPhone, iPad)', href: apps.immich.appStore },
           { label: 'Immich sur Google Play (Android)', href: apps.immich.googlePlay },
@@ -1526,7 +1514,7 @@ const steps = [
         id: 'nextcloud',
         name: apps.nextcloud.name,
         role: 'Fichiers',
-        text: 'Comme Google Drive ou Dropbox, mais vos fichiers restent chez vous. Dans les boutiques, c’est celle de l’éditeur Nextcloud.',
+        text: 'Comme Google Drive ou Dropbox, mais vos fichiers restent chez vous. Sur l’App Store et Google Play, choisissez l’application Nextcloud publiée par Nextcloud.',
         links: [
           { label: 'Nextcloud sur l’App Store (iPhone, iPad)', href: apps.nextcloud.appStore },
           { label: 'Nextcloud sur Google Play (Android)', href: apps.nextcloud.googlePlay },
@@ -1538,7 +1526,7 @@ const steps = [
         'Installez Immich et Nextcloud sur chaque téléphone, avec les liens plus bas : l’App Store pour un iPhone ou un iPad, Google Play pour un appareil Android.',
       ],
       [
-        'L’App Store peut demander Face ID, Touch ID (le doigt sur le bouton rond) ou le mot de passe de votre compte Apple. C’est celui de votre iPhone ou de votre iPad, pas celui de la fiche de secours.',
+        'L’App Store peut demander Face ID, Touch ID (le doigt sur le bouton rond) ou le mot de passe de votre compte Apple. Ce n’est ni le code qui déverrouille l’écran, ni un mot de passe de la fiche de secours.',
       ],
       [
         'Ouvrez l’application. Elle demande d’abord une adresse, propre à chaque application. Dans Immich : ',
@@ -1668,7 +1656,9 @@ const steps = [
         title: 'Vous n’avez plus l’adresse à taper dans l’application.',
         why: [
           [
-            'Chaque application a sa propre adresse sur votre HAKO, différente de celle de ce guide.',
+            'Chaque application a sa propre adresse sur votre HAKO. Ce n’est pas ',
+            boxAddress.display,
+            ', l’adresse de la page de votre HAKO.',
           ],
         ],
         fix: [
@@ -1714,7 +1704,7 @@ const steps = [
         devices: ['iphone'],
         why: [
           [
-            'C’est le mot de passe de votre compte Apple, celui de votre iPhone ou de votre iPad. Il a souvent été créé par un proche.',
+            'C’est le mot de passe de votre compte Apple. Il a souvent été créé par un proche. Ce n’est pas le code qui déverrouille l’écran.',
           ],
         ],
         fix: [
@@ -1744,7 +1734,7 @@ const steps = [
         title: 'L’application dit que la version de votre HAKO ne convient pas.',
         why: [
           [
-            'Les applications des boutiques se mettent à jour sans attendre votre HAKO ',
+            'Votre téléphone met souvent ses applications à jour tout seul : l’application peut alors être plus récente que la version installée sur votre HAKO ',
             toConfirm.appTooNew,
             '.',
           ],
@@ -1833,11 +1823,9 @@ export const installation = {
     shipped: [
       'Ce guide servira quand nous enverrons la HAKO hors de ',
       { label: 'notre zone d’intervention', href: `${routes.faq}#zone-intervention` },
-      ', ce qui n’est pas encore possible : ',
+      ', ce qui n’est pas encore possible. Dans la zone, ',
       zoneEnds(company.serviceArea.sentence),
-      ', nous venons l’installer chez vous. Vous avez choisi Hako Pro ? ',
-      toConfirm.hakoPro,
-      '.',
+      ', nous venons l’installer chez vous.',
     ] satisfies Sentence,
   },
 
@@ -1890,7 +1878,7 @@ export const installation = {
               ' ou plus récent : dans les Paramètres, cherchez « Version d’Android ». Plus ancien, il ne pourra ni ouvrir la page de votre HAKO, ni utiliser les applications des photos et des fichiers. Pour l’installation, prévoyez un ordinateur, un iPhone ou un iPad, même emprunté.',
           ],
           [
-            'Pour les applications de l’étape 8, un iPhone ou un iPad doit avoir ' +
+            'Pour les applications de l’étape 8, un iPhone ou un iPad doit avoir ' +
               appsMinVersion +
               ' : pour le voir, ouvrez Réglages, puis Général, puis Informations.',
           ],
@@ -1904,7 +1892,7 @@ export const installation = {
         text: ['Une imprimante allumée, avec du papier, ou une feuille et un stylo'],
         detail: [
           [
-            'Pour garder sur une fiche de secours les mots de passe que votre HAKO va créer, à l’étape 7.',
+            'Pour garder sur une fiche de secours les mots de passe que votre HAKO va créer, à l’étape 7.',
           ],
           [
             'De préférence, ouvrez la page de votre HAKO avec un appareil qui imprime déjà sur cette imprimante. Vous pourrez aussi enregistrer la fiche en PDF, un document à imprimer plus tard.',
@@ -2044,7 +2032,7 @@ export const installation = {
     showOne: 'Revenir à une étape à la fois',
     restart: 'Revenir à la première étape',
     print: 'Imprimer ce guide',
-    printHint: 'Toutes les étapes s’impriment, avec leurs aides : environ 45 pages.',
+    printHint: 'Toutes les étapes s’impriment, avec leurs aides : environ 45 pages.',
     actions: 'Ce qu’il faut faire',
     why: 'Pourquoi cette étape ?',
     success: 'Comment savoir que c’est bon ?',

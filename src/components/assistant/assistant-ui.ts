@@ -318,13 +318,16 @@ export function initAssistant(
 
   function renderIndicator(current: AssistantState): void {
     const doneText = indicator.dataset['doneText'] ?? '';
-    const shown: ViewId | null = current.created
-      ? null
-      : current.view === 'stopped'
+    // « La création s'est arrêtée » : l'écran des comptes en cours, même
+    // après « C'est prêt » en démonstration (stepsDone, machine.ts).
+    const shown: ViewId | null =
+      current.view === 'stopped'
         ? 'accounts'
-        : isScreen(current.view)
-          ? current.view
-          : current.resume;
+        : current.created
+          ? null
+          : isScreen(current.view)
+            ? current.view
+            : current.resume;
     const currentNumber = shown === null ? null : stepNumber(shown);
     const done = stepsDone(current);
     indicatorItems.forEach((item, index) => {
@@ -776,10 +779,16 @@ export function initAssistant(
     renderCheck(before, state);
     renderRenewal(state);
     showView('welcome');
-    if (window.location.hash !== '') {
-      rank += 1;
-      window.history.pushState(
-        { hakoRang: rank },
+    // Retour à l'entrée de l'ouverture (rang 0, sans ancre) : les écrans de
+    // l'essai d'avant ne restent pas derrière l'accueil, et un seul appui sur
+    // « Retour » quitte la page, vers celle d'où l'on venait. Le rang repart
+    // de 0 tout de suite : un deuxième « Recommencer » ne recule pas plus loin.
+    if (rank > 0) {
+      window.history.go(-rank);
+      rank = 0;
+    } else if (window.location.hash !== '') {
+      window.history.replaceState(
+        { hakoRang: 0 },
         '',
         `${window.location.pathname}${window.location.search}`,
       );
@@ -896,8 +905,13 @@ export function initAssistant(
     if (siteUrl) link.href = `${siteUrl}${link.getAttribute('href') ?? ''}`;
     link.target = '_blank';
     link.rel = 'noopener';
+    // La mention reste d'un seul tenant (white-space: nowrap, Assistant.astro) :
+    // la ligne se coupe avant la parenthèse, jamais dedans.
     if (newTab) {
-      link.append(` ${newTab}`);
+      const mention = document.createElement('span');
+      mention.className = 'hako-page__new-tab';
+      mention.textContent = newTab;
+      link.append(' ', mention);
     }
   }
   if (siteUrl) {

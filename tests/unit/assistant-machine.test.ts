@@ -333,7 +333,15 @@ describe('indicateur d’étapes et ancres', () => {
     assert.equal(stepNumber('people'), 1);
     assert.equal(stepNumber('accounts'), 5);
     assert.equal(stepsDone(play(toPasswords).state), 1);
-    assert.equal(stepsDone(play([...toChecked, { type: 'create' }, { type: 'created' }]).state), 5);
+    const created: AssistantEvent[] = [...toChecked, { type: 'create' }, { type: 'created' }];
+    assert.equal(stepsDone(play(created).state), 5);
+    // « La création des comptes s’est arrêtée » : l’écran des comptes reste en
+    // cours, même montré après « C’est prêt » (« Voir un autre écran »).
+    const stopped: AssistantEvent = { type: 'show-state', state: 'stopped' };
+    assert.equal(stepsDone(play([...toChecked, stopped]).state), 4);
+    const shownAfterReady = play([...created, stopped]).state;
+    assert.equal(shownAfterReady.view, 'stopped');
+    assert.equal(stepsDone(shownAfterReady), 4);
   });
 
   it('#ecran-… : écrire et relire', () => {

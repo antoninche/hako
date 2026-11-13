@@ -2,26 +2,35 @@
 
 Les modifications notables du site sont notées ici, de la plus récente à la plus ancienne. Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et les numéros de version suivent la [gestion sémantique de version](https://semver.org/lang/fr/).
 
-## [Non publié]
+## [0.3.0] - 2026-11-13
 
 ### Ajouté
 
 - Guide d’installation pas à pas (`/installer/`), pour la personne qui installe sa HAKO elle-même : « Avant de commencer », puis huit étapes, du carton aux applications des téléphones. Chaque étape dit quoi faire, pourquoi, comment savoir que c’est bon, et quoi faire quand ça ne marche pas. Consignes selon l’appareil (iPhone ou iPad, Android, ordinateur), chronomètre pendant la préparation, lexique et version imprimable. L’étape en cours est gardée dans l’adresse (`#etape-…`) : rien n’est enregistré dans le navigateur. Textes dans `src/content/installation.ts`, faits dans `src/data/installation.ts`.
 - Démonstration de la première installation (`/installer/demonstration/`) : la page que la HAKO affichera chez la personne, à `http://hako.local`, essayée avec une HAKO simulée. On y tape les prénoms de la maison ; la HAKO invente les mots de passe ; on garde la fiche de secours, on la vérifie, puis la HAKO crée les comptes. Bandeau « Démonstration », mots de passe d’exemple et fiche marquée EXEMPLE. Rien n’est envoyé ni gardé, et la page interdit toute connexion par sa propre règle de sécurité. Le composant (`src/components/assistant/`, logique dans `src/lib/assistant/`) servira sur la HAKO.
 - « Installer votre HAKO » dans le menu et le plan du site, et des liens vers le guide depuis l’accueil, les tutoriels et la FAQ.
+- Étiquette « Bientôt » sur Hako Pro (accueil, Offres, formulaire de commande), avec la phrase « Hako Pro ouvrira après le lancement de Hako Home. » (`proOpening` dans `src/data/faits.ts`, composant `SoonBadge`, partagé avec les tutoriels).
 - Huit dessins « papier découpé » pour le guide, avec leur générateur (`design/illustrations/_source/installation.mjs`), et de nouvelles icônes d’interface, réunies dans `src/components/icons.ts`.
 
 ### Modifié
 
 - Adresse de la box : `hako.local` partout.
-- Installation : dans la zone, l’équipe installe la box ; ailleurs, elle est envoyée et le client l’installe avec le guide (accueil, offres, FAQ, contact, tutoriels). La box crée les comptes et invente les mots de passe.
-- « Sans votre demande, nous n’avons pas accès à vos données », en accord avec la maintenance à distance de Hako Pro.
-- Branchement par câble réseau seulement pour l’instant, sans Wi-Fi ; le câble n’est pas fourni. Nouvelle limite sur la page de la box : pas sur un réseau partagé avec d’autres logements.
-- Menu et titre de la page `/la-box/` : « La HAKO ».
+- Installation : dans la zone, l’équipe installe la box. Hors de la zone, l’envoi et l’installation par le client avec le guide ouvriront bientôt (accueil, Offres, FAQ, contact, tutoriels, guide). La box crée les comptes et invente les mots de passe.
+- « Sans votre demande, nous n’avons pas accès à vos données », en accord avec la maintenance à distance de Hako Pro (accueil, FAQ, confidentialité, Notre engagement, démonstration).
+- Branchement : un câble réseau (Ethernet) relie la box à la box internet, et le Wi-Fi est aussi possible ; le câble réseau n’est pas fourni quand la box est envoyée. Nouvelle limite sur la page de la box : pas sur un réseau partagé avec d’autres logements.
+- Menu et titre de la page `/la-box/` : « Votre HAKO ».
 - FAQ : les réponses s’impriment ouvertes, sans animation.
-- En-tête : le lien de la rubrique est souligné sur les pages rangées dessous, et le logo est un peu plus petit entre 64 et 70rem pour que les six liens tiennent sur une ligne.
+- En-tête : le lien de la rubrique est souligné sur les pages rangées dessous ; de 64 à 73rem, les liens se rapprochent et le logo rapetisse un peu, pour que les six liens et « Commander » tiennent sur une ligne, même avec une barre de défilement.
 - `BaseLayout` : emplacement `head` pour les balises propres à une page.
-- Aperçu en ligne : le script construit de la démonstration est contrôlé à chaque publication.
+- Aperçu en ligne : le script construit de la démonstration est contrôlé à chaque publication, et les informations manquantes s’affichent en texte simple, sans surlignage jaune (`PUBLIC_SHOW_TODOS=false`).
+- Hako Home à 750 € TTC.
+- Paiement : la box se règle en une seule fois, par virement bancaire, avant l’installation ; l’abonnement de Hako Pro se paie chaque mois. Section « Commande et paiement » dans les conditions générales de vente.
+- Copie de secours : prévue pour une prochaine version, sans date annoncée.
+- Guide et démonstration, après relecture : voyant et bouton de la box marqués « à confirmer », mot de passe du compte Apple distingué du code de l’iPhone, fiche de secours avec chaque mot de passe sur une ligne, retour du navigateur après « Recommencer », mentions « nouvel onglet » qui ne se coupent plus, espaces insécables.
+
+### Supprimé
+
+- L’acompte (données, calcul, formulaire, textes et tests) et les frais d’envoi hors de la zone.
 
 ## [0.2.0] - 2026-11-13
 
@@ -43,7 +52,7 @@ Les modifications notables du site sont notées ici, de la plus récente à la p
 - Carte de la zone au style des dessins.
 - Le mot HAKO sur la grande face de la box, en plus du kanji du couvercle : dans la scène 3D (images d’attente refaites) et dans les dessins où il reste lisible. Dans les dessins des offres, la box a de l’air autour d’elle, pour son ventilateur.
 - Corrections après une répétition complète du site : champs Code postal et Commune alignés dans le formulaire, mêmes mots pour un même fait sur toutes les pages (service après-vente hors garantie, « engagements », rôles de l’équipe, Google Photos), le kanji du logo dans le dernier appel de l’accueil.
-- Réponses de l’équipe : engagement de deux ans pour Hako Pro, mises à jour de sécurité pendant cinq ans, renouvelables, pour Hako Home, intervention hors garantie à 100 € TTC pour les deux offres, liens LinkedIn et présentations de l’équipe, pas d’accès depuis l’extérieur de la maison (choix de sécurité), hébergement provisoire chez GitHub Pages dans les mentions légales et la politique de confidentialité.
+- Réponses de l’équipe : engagement de deux ans pour Hako Pro, mises à jour de sécurité pendant cinq ans, renouvelables, pour Hako Home, intervention hors garantie à 100 € TTC pour les deux offres, liens LinkedIn et présentations de l’équipe, pas d’accès depuis l’extérieur de la maison (choix de sécurité), hébergement provisoire chez GitHub Pages dans les mentions légales et la politique de confidentialité.
 - Textes relus sur toutes les pages : le prix et la zone dès le premier écran de l’accueil et des offres, « hors garantie » à côté du service après-vente payant, le conseil de garder une autre copie de ses photos tant que la copie de secours n’existe pas, des formules creuses retirées.
 - Finitions : un seul repère jaune pour les réseaux sociaux tant que leurs adresses manquent, tutoriels sans lignes vides avant la mise en ligne des vidéos, formulaire de commande lisible sans JavaScript, confirmation de démonstration avec un symbole d’information, tuiles de stockage qui ne ressemblent plus à des boutons, alignements sur l’accueil, Notre engagement et la page 404.
 - Page « La box » : le kanji est décrit sur le couvercle et le mot HAKO sur un côté, et le ventilateur avec le conseil de laisser de l’air autour de la box.

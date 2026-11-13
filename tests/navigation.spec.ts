@@ -205,6 +205,53 @@ test.describe('Écran large', () => {
   }
 });
 
+test.describe('Écran large : les six liens et « Commander » sur une ligne', () => {
+  // Toutes les largeurs où le menu s'affiche en entier, seuils de Header.astro
+  // compris (64, 68 et 73rem). Chromium sans tête masque les barres de
+  // défilement : une barre classique (Windows, ou macOS avec une souris) est
+  // imitée par 17 px de marge à droite de la page, qui ôtent 17 px à la mise
+  // en page sans changer les requêtes média, comme la vraie.
+  for (const width of [WIDE_SCREEN, 1087, 1088, 1100, 1120, 1167, 1168, 1280, DESKTOP.width]) {
+    test(`${width} px, avec ou sans barre de défilement`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto('/');
+      await page.evaluate(() => document.fonts.ready);
+      for (const scrollbar of [0, 17]) {
+        const bar = await page.evaluate((reserved) => {
+          const root = document.documentElement;
+          root.style.paddingInlineEnd = `${reserved}px`;
+          const box = (selector: string): DOMRect =>
+            document.querySelector(selector)!.getBoundingClientRect();
+          const links = [...document.querySelectorAll('.site-header__link')];
+          const gap = parseFloat(
+            getComputedStyle(document.querySelector('.site-header__bar')!).gap,
+          );
+          return {
+            linkTops: new Set(links.map((link) => Math.round(link.getBoundingClientRect().top)))
+              .size,
+            sameRow: Math.abs(box('.site-header__actions').top - box('.site-header__nav').top) < 1,
+            // La place laissée entre le logo et le menu (marge automatique du logo).
+            free: box('.site-header__nav').left - box('.site-header__home').right - gap,
+            height: box('header.site-header').height,
+            expected:
+              parseFloat(getComputedStyle(root).getPropertyValue('--header-height')) *
+              parseFloat(getComputedStyle(root).fontSize),
+          };
+        }, scrollbar);
+        const where = scrollbar ? 'avec une barre de défilement' : 'sans barre de défilement';
+        expect(bar.linkTops, `liens du menu sur une seule ligne (${where})`).toBe(1);
+        expect(bar.sameRow, `« Commander » sur la ligne du menu (${where})`).toBe(true);
+        expect(Math.round(bar.height), `hauteur de l’en-tête (${where})`).toBe(
+          Math.round(bar.expected),
+        );
+        expect(bar.free, `place libre avant le menu (${where})`).toBeGreaterThanOrEqual(
+          scrollbar ? 16 : 32,
+        );
+      }
+    });
+  }
+});
+
 test.describe('Menu principal : page en cours (aria-current)', () => {
   test.use({ viewport: DESKTOP });
 
