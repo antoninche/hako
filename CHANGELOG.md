@@ -2,10 +2,13 @@
 
 Les modifications notables du site sont notées ici, de la plus récente à la plus ancienne. Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et les numéros de version suivent la [gestion sémantique de version](https://semver.org/lang/fr/).
 
-## [Non publié]
+## [0.2.0] - 2026-11-13
 
 ### Ajouté
 
+- Les pages du site : l’accueil (le constat, le déménageur, la box qui s’ouvre au défilement en 3D, les étapes, les offres, les engagements, la carte de la zone et l’équipe), Offres (cartes, tableau comparatif, stockage, « Bon à savoir »), Commander (formulaire en trois étapes, total calculé à partir de `src/data/tarifs.ts`, mode démonstration), La box, Notre engagement, Tutoriels, FAQ, Contact, les mentions légales, les conditions générales de vente et la politique de confidentialité (encore à compléter), et la page 404.
+- Les faits repris par plusieurs pages, écrits une seule fois dans `src/data/faits.ts`, et un seul outil de mise en forme des prix et des nombres (`src/lib/format.ts`).
+- L’hébergement : en-têtes de sécurité et politique de sécurité du contenu documentés (`docs/hebergement.md`, exemple Apache), serveur local de production (`npm run serve:prod`), mesure Lighthouse (`npm run lighthouse`) et aperçu en ligne sur GitHub Pages, republié à chaque envoi sur `main`.
 - Images du prototype (images de synthèse du modèle 3D de l’équipe) : la box vue de trois quarts en ouverture de l’accueil, à la place du kanji seul, et une galerie de quatre vues avec les finitions (blanc perlé RAL 1013, socle brun foncé) sur la page « La box ». Les captures d’origine sont dans `design/prototype/` ; `npm run prototype:images` les nettoie, les cadre et les convertit en sRGB, et Astro en tire des versions AVIF et WebP.
 - Dessins « papier découpé » sur toutes les pages (21 fichiers), avec leur générateur dans `design/illustrations/` (`npm run illustrations:build`, `illustrations:check`, `illustrations:render`) et `docs/illustrations.md`.
 - Couleur `--perle` (RAL 1013), sans rôle de texte.
