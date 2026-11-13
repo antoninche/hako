@@ -13,6 +13,7 @@
  *   <Detail of="remote-access" />      accès depuis l’extérieur : pas prévu, choix de sécurité
  *   <Detail of="pro-maintenance" />    maintenance à distance de Hako Pro : tunnel WireGuard, sur demande
  *   <Detail of="payment" />            paiement : par virement, pas encore en ligne (phrase)
+ *   <Detail of="pro-subscription-payment" /> abonnement de Hako Pro : chaque mois, par virement (phrase)
  *   <Detail of="warranty" />           garantie d'un an, en plus de la garantie légale (phrase)
  *   <Detail of="warranty-terms" />     ce que couvre la garantie, et comment la faire jouer
  *   <Detail of="service-area" />       phrase sur la zone d'intervention
@@ -37,6 +38,7 @@ import {
   moverOffers,
   payment,
   proMaintenance,
+  proSubscriptionPayment,
   remoteAccess,
   warranty,
 } from '../../data/faits';
@@ -56,6 +58,7 @@ export type DetailId =
   | 'remote-access'
   | 'pro-maintenance'
   | 'payment'
+  | 'pro-subscription-payment'
   | 'warranty'
   | 'warranty-terms'
   | 'service-area'
@@ -90,6 +93,7 @@ const values: Record<DetailId, Maybe<string>> = {
   'remote-access': remoteAccess.choice,
   'pro-maintenance': proMaintenance,
   payment,
+  'pro-subscription-payment': proSubscriptionPayment,
   warranty: warranty.sentence,
   'warranty-terms': warranty.terms,
   'service-area': company.serviceArea.sentence,

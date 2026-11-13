@@ -39,12 +39,12 @@ Total : 82 informations manquantes dans 17 fichiers.
 - L16 - CGV : objet du contrat, et à qui s’appliquent ces conditions (particuliers, professionnels) - [objet du contrat, clients concernés]
 - L20 - CGV : contenu des offres Hako Home et Hako Pro, prix HT ou TTC, options de stockage - [contenu des offres, prix, options]
 - L24 - CGV : étapes de la commande, confirmation, paiement en une seule fois, avant l’installation - [étapes de la commande, paiement]
-- L28 - CGV : moyens de paiement acceptés et échéance du solde (le paiement en ligne n’existe pas encore) - [moyens de paiement, échéance du solde]
+- L28 - CGV : paiement par virement bancaire, la box en une seule fois avant l’installation et l’abonnement de Hako Pro chaque mois (le paiement en ligne n’existe pas encore) - [virement bancaire, date de chaque paiement]
 - L32 - CGV : délais, déroulement de l’installation à domicile et de la formation, zone d’intervention - [délais, installation, formation]
 - L36 - CGV : droit de rétractation pour la vente à distance (délai, conditions, formulaire type, cas d’une installation déjà faite) - [délai, conditions, formulaire de rétractation]
 - L40 - CGV : garantie légale de conformité (deux ans pour les particuliers) et garantie commerciale d’un an de HAKO, ce qu’elle couvre et comment la faire jouer - [garanties de la box]
 - L44 - CGV : fonctionnement du service après-vente (hors garantie, intervention facturée 100 € TTC pour Hako Home comme pour Hako Pro) - [fonctionnement et tarif]
-- L48 - CGV : abonnement d’assistance de Hako Pro (prix mensuel, durée d’engagement, délai de réponse garanti, résiliation) - [prix, engagement, résiliation]
+- L48 - CGV : abonnement d’assistance de Hako Pro (prix mensuel payé par virement, durée d’engagement, délai de réponse garanti, résiliation) - [prix, engagement, résiliation]
 - L52 - CGV : responsabilités de HAKO et du client - [responsabilités de chacun]
 - L56 - CGV : renvoi vers la politique de confidentialité pour les données liées aux commandes - [renvoi vers la politique de confidentialité]
 - L60 - CGV : règlement amiable des litiges et médiateur de la consommation - [règlement des litiges, médiation]
@@ -68,7 +68,7 @@ Total : 82 informations manquantes dans 17 fichiers.
 
 ## src/content/offres.ts
 
-- L34 - Délai sous lequel nous rappelons après une demande de commande - [délai]
+- L35 - Délai sous lequel nous rappelons après une demande de commande - [délai]
 
 ## src/content/tutoriels.ts
 
@@ -105,7 +105,7 @@ Total : 82 informations manquantes dans 17 fichiers.
 ## src/data/faits.ts
 
 - L85 - Page d’accueil de la box (http://hako.local) : logiciel utilisé et licence, à préciser - [licence à préciser]
-- L135 - Garantie d’un an de la box : ce qu’elle couvre (pièces, main-d’œuvre, envoi ou déplacement) et comment la faire jouer - [à confirmer]
+- L142 - Garantie d’un an de la box : ce qu’elle couvre (pièces, main-d’œuvre, envoi ou déplacement) et comment la faire jouer - [à confirmer]
 
 ## src/data/installation.ts
 

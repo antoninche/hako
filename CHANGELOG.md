@@ -2,6 +2,13 @@
 
 Les modifications notables du site sont notées ici, de la plus récente à la plus ancienne. Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et les numéros de version suivent la [gestion sémantique de version](https://semver.org/lang/fr/).
 
+## [0.3.1] - 2026-11-13
+
+### Modifié
+
+- L’abonnement de Hako Pro se paie chaque mois, par virement (phrase commune `proSubscriptionPayment`, pages Offres et FAQ).
+- Conditions générales de vente : la section « Paiement » ne parle plus de solde ; le virement bancaire vaut pour la box et pour l’abonnement.
+
 ## [0.3.0] - 2026-11-13
 
 ### Ajouté

@@ -19,6 +19,7 @@ import {
   moverOffers,
   payment,
   proMaintenance,
+  proSubscriptionPayment,
   remoteAccess,
   warranty,
 } from '../data/faits.ts';
@@ -284,7 +285,7 @@ export const offresPage = {
       },
       {
         title: 'Le paiement',
-        text: [payment, ' L’abonnement de Hako Pro, lui, se paie chaque mois.'],
+        text: [payment, ' ', proSubscriptionPayment],
       },
       {
         title: 'La garantie',

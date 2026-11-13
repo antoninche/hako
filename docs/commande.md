@@ -59,7 +59,7 @@ Côté serveur, quelques règles. Le service recalcule toujours les montants à 
 
 ## Paiement en ligne, plus tard
 
-Le paiement en ligne n’existe pas encore : la page annonce un appel de confirmation, puis un paiement en une seule fois, par virement bancaire, avant l’installation. Le jour où un prestataire de paiement est choisi, la solution la plus simple pour rester fidèle à nos engagements est une page de paiement hébergée par le prestataire, vers laquelle on redirige la personne après la confirmation de la commande, ou un lien de paiement envoyé par e-mail. Le montant à payer est alors calculé par notre serveur.
+Le paiement en ligne n’existe pas encore : la page annonce un appel de confirmation, puis un paiement en une seule fois, par virement bancaire, avant l’installation. L’abonnement de Hako Pro se paie chaque mois, par virement aussi. Le jour où un prestataire de paiement est choisi, la solution la plus simple pour rester fidèle à nos engagements est une page de paiement hébergée par le prestataire, vers laquelle on redirige la personne après la confirmation de la commande, ou un lien de paiement envoyé par e-mail. Le montant à payer est alors calculé par notre serveur.
 
 ## Ce qu’il ne faut pas faire
 

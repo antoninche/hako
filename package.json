@@ -1,6 +1,6 @@
 {
   "name": "hako-site",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "description": "Site de HAKO, la box qui garde les photos et les fichiers de la famille à la maison.",
   "type": "module",

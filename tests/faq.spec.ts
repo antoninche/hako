@@ -8,7 +8,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-import { backupCopy, payment, warranty } from '../src/data/faits';
+import { backupCopy, payment, proSubscriptionPayment, warranty } from '../src/data/faits';
 import { pricing } from '../src/data/tarifs';
 import { formatEur } from '../src/lib/format';
 import { isTodo } from '../src/lib/todo';
@@ -136,6 +136,8 @@ test('FAQ : les prix s’écrivent comme sur les pages Offres et Commander', asy
       ),
     );
   }
+  // L'abonnement de Hako Pro se paie chaque mois, par virement (src/data/faits.ts).
+  expect(answer.replace(/\s+/gu, ' ')).toContain(proSubscriptionPayment);
 });
 
 test('FAQ : les faits partagés gardent le repère jaune des autres pages', async ({ page }) => {

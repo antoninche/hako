@@ -10,7 +10,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
 import { company } from '../src/data/entreprise.ts';
-import { payment } from '../src/data/faits.ts';
+import { payment, proSubscriptionPayment } from '../src/data/faits.ts';
 import { pricing } from '../src/data/tarifs.ts';
 import { formatEur } from '../src/lib/format.ts';
 import { computeQuote, findStorage } from '../src/lib/commande/pricing.ts';
@@ -121,7 +121,7 @@ test.describe('Page Offres', () => {
     // La règle est dite une seule fois, par la phrase payment.
     expect((await item.innerText()).match(/en une seule fois/gu)).toHaveLength(1);
     await expect(item).toContainText(payment);
-    await expect(item).toContainText('L’abonnement de Hako Pro, lui, se paie chaque mois.');
+    await expect(item).toContainText(proSubscriptionPayment);
   });
 
   test('les capacités de stockage ont le même contour : aucune ne semble choisie', async ({

@@ -124,11 +124,18 @@ export const moverOffers = {
 /**
  * Le paiement en ligne n'existe pas encore : la box se paie en une seule
  * fois, par virement, avant l'installation (décision de l'équipe). Seul le
- * prix d'achat se paie ainsi : l'abonnement de Hako Pro reste mensuel.
+ * prix d'achat se paie en une fois : l'abonnement de Hako Pro se paie chaque
+ * mois (proSubscriptionPayment, ci-dessous).
  * Pages Offres et Commander, et FAQ.
  */
 export const payment =
   'Le paiement en ligne n’est pas encore possible : la box se règle en une seule fois, par virement bancaire, avant l’installation.';
+
+/**
+ * L'abonnement de Hako Pro se paie lui aussi par virement, chaque mois
+ * (décision de l'équipe). Pages Offres et FAQ.
+ */
+export const proSubscriptionPayment = 'L’abonnement de Hako Pro se paie chaque mois, par virement.';
 
 /* ---------- Garantie ---------- */
 
