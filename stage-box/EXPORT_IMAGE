@@ -1,0 +1,5 @@
+# shellcheck shell=bash disable=SC2034
+# Lu (source) par build.sh de pi-gen au moment de l'export. Seule l'étape maison exporte une image :
+# scripts/construire.sh pose SKIP_IMAGES dans stage2. Avec IMG_NAME=hakos, le nom final est
+# image_<date>-hakos-dev.img.xz ou image_<date>-hakos-prod.img.xz.
+IMG_SUFFIX="-${HAKOS_PROFIL:?absent : construire avec scripts/construire.sh}"

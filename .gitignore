@@ -2,8 +2,9 @@
 /pi-gen/
 work/
 
-# Images et archives produites par la construction
+# Images et archives produites par la construction ; archives des images Docker (make images)
 /deploy/
+/images/
 *.img
 *.img.*
 *.zip
