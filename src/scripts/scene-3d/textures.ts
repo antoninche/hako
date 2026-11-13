@@ -2,7 +2,7 @@
  * Textures dessinées en code, dans un canevas : aucune image à télécharger,
  * aucune adresse data: ou blob: (compatible avec une politique CSP stricte).
  */
-import { CanvasTexture, NoColorSpace, RepeatWrapping } from 'three';
+import { CanvasTexture, NoColorSpace, RepeatWrapping, SRGBColorSpace } from 'three';
 
 function canvas2d(width: number, height: number) {
   const canvas = document.createElement('canvas');
@@ -23,40 +23,52 @@ function random(seed: number) {
 }
 
 /**
- * Carte de normales des couches d'impression 3D : de fines stries
- * horizontales, légèrement irrégulières, comme sur une vraie pièce en PLA.
- * Une tuile contient `layers` couches.
+ * Veinage discret du socle (bois imprimé, couleur noyer) : de fines veines
+ * à peine plus claires ou plus sombres, légèrement ondulées, dans le sens de
+ * la longueur (u), autour de la couleur `hex` (#RRGGBB). Une tuile couvre
+ * `period` mètres de long et `period / 3` de large ou de haut (coordonnées
+ * de texture en mètres).
  */
-export function createLayerLinesNormalMap(layers = 16): CanvasTexture {
-  const rowsPerLayer = 8;
-  const size = layers * rowsPerLayer;
-  const { canvas, context } = canvas2d(4, size);
-  const image = context.createImageData(4, size);
-  const next = random(7);
-  const amplitude = Array.from({ length: layers }, () => 0.75 + next() * 0.5);
+export function createWoodGrainTexture(hex: string, period = 0.09) {
+  const base = [1, 3, 5].map((start) => parseInt(hex.slice(start, start + 2), 16));
+  const width = 128;
+  const height = 256;
+  const { canvas, context } = canvas2d(width, height);
+  const image = context.createImageData(width, height);
+  const next = random(11);
+  // Veines : position (0 à 1 dans la tuile), épaisseur et intensité au hasard.
+  const veins = Array.from({ length: 18 }, () => ({
+    at: next(),
+    width: 0.004 + next() * 0.012,
+    strength: (next() - 0.45) * 0.14,
+    phase: next() * Math.PI * 2,
+  }));
 
-  for (let row = 0; row < size; row += 1) {
-    const layer = Math.floor(row / rowsPerLayer);
-    // Profil arrondi de chaque cordon de plastique : pente du bord du cordon.
-    const t = (row % rowsPerLayer) / (rowsPerLayer - 1) - 0.5; // -0,5 … 0,5
-    const slope = -t * 2.4 * (amplitude[layer] ?? 1);
-    const length = Math.hypot(slope, 1);
-    const g = Math.round(((slope / length) * 0.5 + 0.5) * 255);
-    const b = Math.round(((1 / length) * 0.5 + 0.5) * 255);
-    for (let col = 0; col < 4; col += 1) {
-      const i = (row * 4 + col) * 4;
-      image.data[i] = 128;
-      image.data[i + 1] = g;
-      image.data[i + 2] = b;
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const u = x / width;
+      let shade = 0;
+      for (const vein of veins) {
+        // Ondulation lente le long de la veine, raccordée d'un bord à l'autre de la tuile.
+        const centre = vein.at + 0.012 * Math.sin(Math.PI * 2 * u + vein.phase);
+        let distance = Math.abs(y / height - centre);
+        distance = Math.min(distance, 1 - distance);
+        shade += vein.strength * Math.exp(-((distance / vein.width) ** 2));
+      }
+      const i = (y * width + x) * 4;
+      for (let c = 0; c < 3; c += 1) {
+        image.data[i + c] = Math.max(0, Math.min(255, Math.round((base[c] ?? 0) * (1 + shade))));
+      }
       image.data[i + 3] = 255;
     }
   }
   context.putImageData(image, 0, 0);
 
   const texture = new CanvasTexture(canvas);
-  texture.colorSpace = NoColorSpace;
+  texture.colorSpace = SRGBColorSpace;
   texture.wrapS = RepeatWrapping;
   texture.wrapT = RepeatWrapping;
+  texture.repeat.set(1 / period, 3 / period);
   return texture;
 }
 

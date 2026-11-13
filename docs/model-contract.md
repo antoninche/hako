@@ -16,16 +16,16 @@ Le contrat ci-dessous garantit que le vrai modèle s’anime exactement comme le
 
 Chaque pièce est un objet Blender qui porte exactement l’un de ces noms, majuscules et tiret bas compris. Un objet peut avoir plusieurs matériaux.
 
-| Nom exact    | Pièce                                                           | Obligatoire |
-| ------------ | --------------------------------------------------------------- | ----------- |
-| `Case_Base`  | Base du boîtier imprimé en 3D : fond et parois                  | oui         |
-| `Case_Lid`   | Couvercle du boîtier, posé au-dessus de la base                 | oui         |
-| `Fan`        | Ventilateur : son cadre, sans les pales                         | oui         |
-| `Fan_Rotor`  | Moyeu et pales du ventilateur, qui tournent pendant l’ouverture | non         |
-| `NVMe_Board` | Carte M.2 qui porte le SSD                                      | oui         |
-| `NVMe_SSD`   | Le SSD NVMe                                                     | oui         |
-| `RPi5_Board` | Raspberry Pi 5 avec ses composants et ses ports                 | oui         |
-| `Logo_Decal` | Marquage 箱 HAKO sur le côté du boîtier                         | non         |
+| Nom exact    | Pièce                                                                   | Obligatoire |
+| ------------ | ----------------------------------------------------------------------- | ----------- |
+| `Case_Base`  | Socle brun foncé (imprimé, matière chargée en bois) et ses quatre pieds | oui         |
+| `Case_Lid`   | Coque blanc perlé qui recouvre les cartes et se soulève                 | oui         |
+| `Fan`        | Ventilateur : son cadre, sans les pales                                 | oui         |
+| `Fan_Rotor`  | Moyeu et pales du ventilateur, qui tournent pendant l’ouverture         | non         |
+| `NVMe_Board` | Carte M.2 qui porte le SSD, sous le Raspberry Pi                        | oui         |
+| `NVMe_SSD`   | Le SSD NVMe                                                             | oui         |
+| `RPi5_Board` | Raspberry Pi 5 avec ses composants et ses ports                         | oui         |
+| `Logo_Decal` | Kanji 箱 en relief sur le dessus de la coque                            | non         |
 
 Blender ajoute « .001 » au nom d’une copie (`Fan.001`) : renommez-la ou supprimez-la, le contrôle la signale. Un nom ne peut servir qu’une fois.
 
@@ -33,7 +33,7 @@ Les petits éléments (vis, entretoises, nappe) doivent appartenir à une pièce
 
 Une pièce peut être rangée sous une autre, comme dans le modèle provisoire : `Fan_Rotor` sous `Fan`, `NVMe_SSD` sous `NVMe_Board`, `Logo_Decal` sous la pièce qui le porte. Un objet vide (Empty) peut regrouper des pièces, ou toute la box : comme elles, il garde une échelle de 1 et aucune rotation. Un objet hors contrat qui a sa propre géométrie ne doit pas porter de pièces, car cette géométrie resterait immobile pendant que les pièces s’écartent.
 
-Le marquage `Logo_Decal` reprend toujours le logo officiel, jamais un objet texte de Blender tapé avec une police. Le plus simple est un plan (Add > Mesh > Plane) aux proportions du logo, texturé avec `brand/HAKO_Landscape_Transparent.png` : dans son matériau, la sortie Color de l’image va sur Base Color et sa sortie Alpha sur l’entrée Alpha du Principled BSDF. Les bords restent ainsi adoucis (mode « Blend » de glTF) ; un nœud Math réglé sur « Round », intercalé entre ces deux prises Alpha, donne des bords nets (mode « Mask »). Pour un logo en relief, importez plutôt la version vectorielle `public/brand/hako-paysage.svg` (File > Import > Scalable Vector Graphics (.svg)), puis convertissez-la en maillage (Object > Convert > Mesh). Décollez le marquage de la paroi d’environ 0,2 mm : collé contre elle, il scintillerait.
+Le marquage `Logo_Decal` reprend toujours le logo officiel, jamais un objet texte de Blender tapé avec une police. Sur le prototype, c’est le kanji 箱 seul, en relief au centre du dessus de la coque, le haut du kanji tourné vers l’arrière (le côté des fentes d’aération). Importez son contour vectoriel `public/brand/hako-kanji.svg` (File > Import > Scalable Vector Graphics (.svg)), convertissez-le en maillage (Object > Convert > Mesh), mettez-le à l’échelle (sur le prototype, sa largeur fait environ le quart de la longueur de la coque), puis donnez-lui son relief, environ 1 mm, avec un modificateur Solidify (Add Modifier > Generate > Solidify). Enfoncez sa base d’environ 0,1 mm dans le dessus de la coque : posé exactement à fleur, il laisserait un jour ou scintillerait. Rangez-le sous `Case_Lid` (Ctrl+P), pour qu’il se soulève avec elle.
 
 ## Préparer la scène
 
@@ -141,11 +141,29 @@ Le marquage ou le rotor se détache pendant l’ouverture : rangez-le sous sa 
 
 Des pièces se chevauchent pendant l’ouverture : augmentez l’écart entre leurs `offset`, en gardant l’ordre de haut en bas.
 
+Des prises traversent la coque quand elle se soulève : la coque monte tout droit, rien ne doit donc dépasser par ses fenêtres. Arrêtez les prises juste derrière la paroi, comme dans le modèle provisoire.
+
 Le contrôle parle de KHR_draco_mesh_compression : décochez Data > Compression à l’export.
 
 Le fichier est trop lourd : réduisez les textures à 1024 px, simplifiez les pièces les plus détaillées et supprimez ce qui ne se voit pas.
 
 Le site affiche toujours le modèle provisoire : le fichier n’était pas là au moment de la construction (reconstruisez), une pièce obligatoire manque (la console du navigateur le dit et `npm run model:check` le détaille), ou le fichier a été produit avec `--meshopt` alors que la CSP du site n’autorise pas WebAssembly (voir « Optimiser et vérifier »).
+
+## Le modèle provisoire et le prototype
+
+Le modèle dessiné en code reprend le prototype de l’équipe (images de son modèle 3D). `Case_Lid` est la coque blanc perlé (RAL 1013) qui recouvre tout et se soulève ; `Case_Base` est le socle brun foncé (couleur noyer, imprimé dans une matière qui contient du bois) et ses quatre pieds d’angle ; `Logo_Decal` est le kanji 箱 en relief au centre du dessus du couvercle, rangé sous `Case_Lid`. Pour le modèle Blender, le contour du kanji seul est `public/brand/hako-kanji.svg`. La carte M.2 est sous le Raspberry Pi, comme sur l’image de l’intérieur.
+
+Orientation : la grande face lisse est à l’avant (+z), le bouton et le voyant à droite (+x), les fentes d’aération et les trois petites fenêtres (USB-C, micro-HDMI) à l’arrière (-z), les trois grandes fenêtres des prises (USB, Ethernet) à gauche (-x). Le haut du kanji est tourné vers l’arrière.
+
+Les proportions viennent des images (dessus 1,53 : 1, rayon des angles verticaux 0,16 fois la profondeur, coque haute de 0,4 fois sa longueur) ; les cotes réelles restent à confirmer (`procedural.todo` dans `model.config.json`).
+
+Les couleurs du prototype (coque, kanji, socle, cartes, prises) sont réglées pour l’écran : ces matières échappent au rendu des tons de la scène, et leur couleur tient compte de la lumière que reçoit chaque face, mesurée avec les lumières de `scene.ts` (constante `LIGHT` de `procedural.ts`). Si ces lumières changent, il faut refaire la mesure : rendre la box avec une matière mate grise (0,5) et diviser la couleur affichée, en valeurs linéaires, par 0,5.
+
+`node scripts/model/kanji-outline.mjs` recalcule le contour du kanji (`src/scripts/scene-3d/kanji-outline.json`) à partir de `src/assets/brand/hako-kanji.svg`, à relancer seulement si le logo change.
+
+La scène est sur le fond pierre, celui des images du prototype. Pendant le téléchargement de three.js, ou si la 3D tombe en panne, elle montre une image d’attente : la box fermée, cadrée comme au début de la piste (`public/images/box-fermee-provisoire.webp` et sa version `@2x`). `npm run model:fallback` la refait après une construction du site, sur le fond de la scène lu dans la page. Relancez cette commande après tout changement du modèle, de `model.config.json` ou du fond de la scène : sinon, la box saute ou un rectangle d’une autre couleur apparaît quand la 3D prend le relais.
+
+Sans 3D (animations réduites, pas de WebGL, appareil modeste), la section montre le dessin de la vue éclatée, `src/assets/illustrations/vue-eclatee.svg`, avec `copy.imageAlt` comme texte de remplacement, et la liste des pièces. Si l’ordre ou l’aspect des pièces change, le dessin et ce texte doivent suivre.
 
 ## Pour les développeurs
 

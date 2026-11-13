@@ -108,7 +108,7 @@ Total : 68 informations manquantes dans 16 fichiers.
 
 ## src/data/model.config.json
 
-- L190 - Cotes provisoires, à confirmer avec le modèle Blender et le matériel réel : dimensions, couleur et ouvertures du boîtier ; modèle de la carte M.2 (ici au format HAT+, 65 × 56,5 mm) ; format du SSD (ici M.2 2230) ; taille du ventilateur (ici 40 mm). Seule la carte Raspberry Pi 5 (85 × 56 mm) a déjà ses cotes officielles. - (valeurs provisoires)
+- L190 - Proportions relevées sur les images du prototype (modèle 3D de l’équipe) ; à confirmer avec le modèle Blender et le matériel : cotes de la coque et de ses ouvertures, du socle et des pieds ; ordre des cartes (ici la carte M.2 sous le Raspberry Pi, comme sur l’image de l’intérieur) et modèle de la carte M.2 (ici à l’empreinte du Raspberry Pi) ; format du SSD (ici M.2 2230) ; taille et place du ventilateur (ici 40 mm, au-dessus du Raspberry Pi, absent des images). Seule la carte Raspberry Pi 5 (85 × 56 mm) a déjà ses cotes officielles. - (valeurs provisoires)
 
 ## src/data/tarifs.ts
 

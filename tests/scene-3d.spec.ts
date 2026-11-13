@@ -1,8 +1,8 @@
 /**
  * Scène 3D de l'accueil (section BoxScene) : rendu WebGL, étiquettes,
- * image d'attente, modèle hako.glb, repli sur l'image fixe (animations
- * réduites, WebGL absent, panne), stabilité de la mise en page et absence
- * d'erreur dans la console.
+ * image d'attente, modèle hako.glb, repli sur le dessin de la vue éclatée
+ * (animations réduites, WebGL absent) ou sur l'image d'attente (panne),
+ * stabilité de la mise en page et absence d'erreur dans la console.
  *
  * Le rendu WebGL utilise SwiftShader (rendu logiciel) : les tests passent
  * sans carte graphique, sur toutes les machines.
@@ -17,13 +17,18 @@ import {
 } from '@playwright/test';
 import sharp from 'sharp';
 
+import { readRepoFile } from './support/node-tools.mjs';
+
 const SWIFTSHADER = [
   '--use-angle=swiftshader',
   '--enable-unsafe-swiftshader',
   '--ignore-gpu-blocklist',
 ];
 const NO_WEBGL = ['--disable-webgl', '--disable-3d-apis'];
-const CREME = [0xfd, 0xf7, 0xef] as const;
+/** Textes de la scène (texte de remplacement du dessin, étiquettes). */
+const MODEL_CONFIG = JSON.parse(readRepoFile('src/data/model.config.json')) as {
+  copy: { imageAlt: string };
+};
 /**
  * Repères du code de three.js, reconnus au contenu des fichiers (leurs noms
  * peuvent changer) : le cœur, puis le chargeur glTF et le décodeur meshopt.
@@ -161,18 +166,45 @@ async function waitForCanvasShown(page: Page): Promise<void> {
     .toBe(1);
 }
 
-/** Part des pixels qui ne sont pas du fond crème. */
-async function inkRatio(png: Parameters<typeof sharp>[0]): Promise<number> {
+type Rgb = readonly [number, number, number];
+
+/** Couleur de fond de la scène (surface « pierre »), en [r, g, b]. */
+async function stageBackground(page: Page): Promise<Rgb> {
+  const color = await page
+    .locator('[data-box-scene-stage]')
+    .evaluate((stage) => getComputedStyle(stage).backgroundColor);
+  const [r = 0, g = 0, b = 0, alpha = 1] = (color.match(/[\d.]+/g) ?? []).map(Number);
+  expect(alpha, `fond de la scène opaque (${color})`).toBe(1);
+  return [r, g, b];
+}
+
+/** Part des pixels qui ne sont pas du fond de la scène. */
+async function inkRatio(png: Parameters<typeof sharp>[0], background: Rgb): Promise<number> {
   const { data, info } = await sharp(png).removeAlpha().raw().toBuffer({ resolveWithObject: true });
   let ink = 0;
   for (let i = 0; i < data.length; i += info.channels) {
     const distance =
-      Math.abs((data[i] ?? 0) - CREME[0]) +
-      Math.abs((data[i + 1] ?? 0) - CREME[1]) +
-      Math.abs((data[i + 2] ?? 0) - CREME[2]);
+      Math.abs((data[i] ?? 0) - background[0]) +
+      Math.abs((data[i + 1] ?? 0) - background[1]) +
+      Math.abs((data[i + 2] ?? 0) - background[2]);
     if (distance > 24) ink += 1;
   }
   return ink / (info.width * info.height);
+}
+
+/** Couleur moyenne d'un coin (10 × 10 px en haut à gauche) d'une capture. */
+async function cornerColor(png: Parameters<typeof sharp>[0]): Promise<Rgb> {
+  const { data, info } = await sharp(png)
+    .removeAlpha()
+    .extract({ left: 0, top: 0, width: 10, height: 10 })
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const sum = [0, 0, 0];
+  for (let i = 0; i < data.length; i += info.channels) {
+    for (let c = 0; c < 3; c += 1) sum[c] = (sum[c] ?? 0) + (data[i + c] ?? 0);
+  }
+  const count = data.length / info.channels;
+  return [(sum[0] ?? 0) / count, (sum[1] ?? 0) / count, (sum[2] ?? 0) / count];
 }
 
 /** Relève les décalages de mise en page (CLS) dès le début de chaque chargement. */
@@ -194,23 +226,26 @@ async function layoutShift(page: Page): Promise<number> {
   return page.evaluate(() => (window as unknown as { __cls: number }).__cls);
 }
 
-/** La section est en mode image fixe : image chargée, liste visible, aucun canevas. */
+/**
+ * La section est en mode image fixe : le dessin de la vue éclatée (SVG dans
+ * la page, avec son texte de remplacement), la liste des pièces, aucun
+ * canevas.
+ */
 async function expectStaticFallback(page: Page): Promise<void> {
   const section = page.locator('[data-box-scene]');
   await expect(section).toHaveAttribute('data-mode', 'fallback');
   await expect(section.locator('[data-box-scene-track]')).toBeHidden();
   await section.locator('.box-scene__figure').scrollIntoViewIfNeeded();
-  const picture = section.locator('.box-scene__figure img, .box-scene__figure svg').first();
-  await expect(picture).toBeVisible();
-  await expect
-    .poll(() =>
-      picture.evaluate((element) =>
-        element instanceof HTMLImageElement ? element.complete && element.naturalWidth > 0 : true,
-      ),
-    )
-    .toBe(true);
+  const drawing = section.locator('.box-scene__figure svg');
+  await expect(drawing).toHaveCount(1);
+  await expect(drawing).toBeVisible();
+  await expect(drawing).toHaveAttribute('role', 'img');
+  await expect(drawing).toHaveAttribute('aria-label', MODEL_CONFIG.copy.imageAlt);
+  await expect(section.locator('.box-scene__figure img')).toHaveCount(0);
   await expect(section.locator('.box-scene__list')).toBeVisible();
   await expect(section.locator('.box-scene__list > li')).toHaveCount(5);
+  // Le kanji du logo est lu en japonais.
+  await expect(section.locator('.box-scene__list [lang="ja"]')).toHaveText([/^箱$/]);
   await expect(section.locator('canvas')).toHaveCount(0);
 }
 
@@ -252,7 +287,9 @@ test.describe('Scène 3D : rendu WebGL', () => {
     const canvas = section.locator('canvas');
     await expect(canvas).toHaveCount(1);
     await expect(canvas).toHaveAttribute('aria-hidden', 'true');
-    expect(await inkRatio(await canvas.screenshot())).toBeGreaterThan(0.04);
+    expect(await inkRatio(await canvas.screenshot(), await stageBackground(page))).toBeGreaterThan(
+      0.04,
+    );
 
     const opacities = await labelOpacities(page);
     expect(opacities).toHaveLength(5);
@@ -300,6 +337,16 @@ test.describe('Scène 3D : rendu WebGL', () => {
     await expect
       .poll(() => poster.evaluate((image: HTMLImageElement) => image.naturalWidth))
       .toBeGreaterThan(0);
+    // L'image est photographiée sur le fond de la scène (npm run model:fallback) :
+    // aucun rectangle d'une autre couleur autour de la box.
+    const background = await stageBackground(page);
+    const corner = await cornerColor(await poster.screenshot());
+    corner.forEach((value, channel) =>
+      expect(
+        Math.abs(value - (background[channel] ?? 0)),
+        'coin de l’image d’attente',
+      ).toBeLessThan(6),
+    );
 
     releaseScene();
     await expect(section).toHaveAttribute('data-state', 'ready', { timeout: 60_000 });
@@ -567,7 +614,9 @@ test.describe('Scène 3D : modèle hako.glb', () => {
     await expect(section).toHaveAttribute('data-model-source', 'glb');
     await waitForSettled(page, EXPLODED);
     await waitForCanvasShown(page);
-    expect(await inkRatio(await section.locator('canvas').screenshot())).toBeGreaterThan(0.02);
+    expect(
+      await inkRatio(await section.locator('canvas').screenshot(), await stageBackground(page)),
+    ).toBeGreaterThan(0.02);
     expect((await labelOpacities(page)).every((opacity) => opacity > 0.95)).toBe(true);
     expect(await scriptsMatching(scripts, GLB_LOADERS)).not.toEqual([]);
     expect(log.warnings.filter((text) => text.includes('hako.glb'))).toEqual([]);

@@ -2,7 +2,7 @@
 
 Ce document décrit les règles visuelles du site et la manière d’utiliser les composants. La page `/charte/` du site (non indexée, liée nulle part) montre tout cela en vrai : couleurs, surfaces, typographie, boutons, logo et icônes. Ses valeurs sont lues dans `src/styles/tokens.css` à chaque construction, elle ne peut donc pas se décaler du code.
 
-Documents voisins : [polices](fonts.md), [logo et favicon](logo.md), [icônes](icons.md), [licences](licences.md).
+Documents voisins : [polices](fonts.md), [logo et favicon](logo.md), [icônes](icons.md), [illustrations](illustrations.md), [carte de la zone](carte.md), [licences](licences.md).
 
 ## Jetons et rôles
 
@@ -19,6 +19,7 @@ Les valeurs communes (couleurs, polices, échelle typographique, espacements, ra
 | `--caramel`  | #B9773F | illustrations et décor (jamais du texte)                           |
 | `--olive`    | #5E6B45 | états de réussite                                                  |
 | `--pierre`   | #BAB1A7 | fond des images du prototype et de la scène 3D                     |
+| `--perle`    | #E3D9C6 | coque de la box, dans les dessins et la scène 3D (jamais du texte) |
 | `--todo`     | #FFE066 | surlignage des informations manquantes, rien d’autre               |
 
 Un composant ne colore jamais du texte avec une couleur de la palette. Il passe par les rôles de la surface où il se trouve : `--text`, `--text-muted`, `--link`, `--link-hover`, `--success`, `--line`, `--line-strong`, `--focus` et `--surface`. Seule exception : une règle qui fixe le texte et le fond ensemble, comme les boutons ou le surlignage jaune. `npm run contrast` vérifie chaque rôle sur chaque surface et chaque couple texte/fond déclaré (4,5:1 pour le texte, 3:1 pour les filets forts et l’anneau de focus) ; il échoue si un texte reçoit une couleur de la palette sans fond associé. Un fond posé seul est vérifié avec le texte hérité (`--text` de chaque surface) ; une forme sans texte (puce, pastille, filet) l’indique avec `color: transparent`, et un bloc qui contient du texte déclare sa couleur avec son fond.
@@ -34,7 +35,7 @@ Quatre surfaces existent, chacune définit son fond et ses rôles de texte.
 
 On choisit la surface d’une section avec le composant `Section` (`<Section surface="sable">`) ou la classe directement. Le bouton principal s’inverse tout seul sur fond chocolat (fond crème, texte chocolat) ; pour que cette inversion reste juste, on ne place pas de bloc crème ou sable à l’intérieur d’une surface chocolat. Le pied de page est en chocolat : il ferme la page nettement et le logo y passe en crème.
 
-Le fond reste uni. Les couleurs suivent le prototype : la coque est crème (#FDF7EF, l’une des deux teintes à l’essai), le kanji chocolat, le socle en noyer, et les rendus sont posés sur la pierre. Un grain de papier a été envisagé, puis écarté : il assombrit le fond par endroits, donc il réduit un peu le contraste, et le lien terre sur sable n’a déjà que 4,9:1 de marge.
+Le fond reste uni. Les couleurs suivent le prototype : la coque est perle (#E3D9C6, le RAL 1013 « blanc perlé » choisi par l’équipe), le kanji chocolat, le socle brun foncé couleur noyer (imprimé en 3D avec un filament chargé de bois), et les rendus sont posés sur la pierre. Le perle ne sert qu’à la coque de la box, dans les dessins et dans la scène 3D. Ce n’est pas une surface et il ne colore jamais de texte : il est trop proche du crème (1,3:1), du sable et du lin. Les dessins du site suivent ces couleurs (voir [illustrations.md](illustrations.md)). Un grain de papier a été envisagé, puis écarté : il assombrit le fond par endroits, donc il réduit un peu le contraste, et le lien terre sur sable n’a déjà que 4,9:1 de marge.
 
 ## Typographie
 

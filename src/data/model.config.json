@@ -1,67 +1,67 @@
 {
   "_notice": "Réglages de la scène 3D de l’accueil (src/components/home/BoxScene.astro). Distances en mètres, angles en radians, progression du défilement de 0 (début de la section) à 1 (fin). Validé au chargement par src/scripts/scene-3d/config.ts : une erreur ici fait échouer la construction du site.",
   "copy": {
-    "imageAlt": "Vue éclatée de la box HAKO, pièce par pièce.",
+    "imageAlt": "Dessin de la box en vue éclatée, de haut en bas : la coque blanc perlé, avec le kanji du logo sur le dessus ; le ventilateur ; la carte Raspberry Pi 5 ; le disque SSD sur sa petite carte ; le socle brun foncé.",
     "partsHeading": "Les pièces de la box, de haut en bas"
   },
-  "order": ["Case_Lid", "Fan", "NVMe_Board", "RPi5_Board", "Case_Base"],
+  "order": ["Case_Lid", "Fan", "RPi5_Board", "NVMe_Board", "Case_Base"],
   "labels": {
     "Case_Lid": {
-      "title": "Couvercle",
-      "detail": "Imprimé en 3D, comme la base."
+      "title": "Coque",
+      "detail": "Imprimée en 3D, en blanc perlé, avec le kanji 箱 en relief sur le dessus."
     },
     "Fan": {
       "title": "Ventilateur",
       "detail": "Il garde l’ordinateur au frais."
     },
-    "NVMe_Board": {
-      "title": "Disque SSD",
-      "detail": "Vos photos et vos fichiers y sont rangés (1 To inclus). Une petite carte le relie au Raspberry Pi."
-    },
     "RPi5_Board": {
       "title": "Raspberry Pi 5",
       "detail": "Le petit ordinateur de la box, avec 8 Go de mémoire."
     },
+    "NVMe_Board": {
+      "title": "Disque SSD",
+      "detail": "Vos photos et vos fichiers y sont rangés (1 To inclus). Une petite carte le relie au Raspberry Pi."
+    },
     "Case_Base": {
-      "title": "Base du boîtier",
-      "detail": "Le boîtier porte le logo 箱 HAKO sur un côté."
+      "title": "Socle",
+      "detail": "Brun foncé, imprimé en 3D dans une matière qui contient du bois."
     }
   },
   "parts": {
     "Case_Lid": {
-      "offset": [0, 0.094, 0],
-      "delay": 0.0,
+      "offset": [0, 0.115, 0],
+      "delay": 0,
       "duration": 0.6,
       "ease": "inOutCubic"
     },
     "Fan": {
-      "offset": [0, 0.075, 0],
+      "offset": [0, 0.056, 0],
       "delay": 0.1,
       "duration": 0.6,
       "ease": "inOutCubic"
     },
     "Fan_Rotor": {
-      "offset": [0, 0.075, 0],
+      "offset": [0, 0.056, 0],
       "delay": 0.1,
       "duration": 0.6,
       "ease": "inOutCubic"
     },
-    "NVMe_Board": {
-      "offset": [0, 0.058, 0],
+    "RPi5_Board": {
+      "offset": [0, 0.03, 0],
       "delay": 0.2,
       "duration": 0.6,
       "ease": "inOutCubic"
     },
-    "NVMe_SSD": {
-      "offset": [0, 0.064, 0],
-      "delay": 0.24,
-      "duration": 0.62,
+    "NVMe_Board": {
+      "offset": [0, 0.012, 0],
+      "delay": 0.3,
+      "duration": 0.6,
       "ease": "inOutCubic"
     },
-    "RPi5_Board": {
-      "offset": [0, 0.043, 0],
-      "delay": 0.3,
-      "duration": 0.7,
+    "NVMe_SSD": {
+      "offset": [0, 0.017, 0],
+      "delay": 0.34,
+      "duration": 0.62,
       "ease": "inOutCubic"
     },
     "Case_Base": {
@@ -79,30 +79,30 @@
     "rotationY": [
       {
         "at": 0,
-        "value": -2.3
+        "value": -0.7
       },
       {
         "at": 0.04,
-        "value": -2.3
+        "value": -0.7
       },
       {
         "at": 0.3,
-        "value": -0.45,
+        "value": 0.6,
         "ease": "inOutCubic"
       },
       {
         "at": 0.72,
-        "value": -0.62,
+        "value": 0.72,
         "ease": "inOutSine"
       },
       {
         "at": 0.96,
-        "value": -0.45,
+        "value": 0.6,
         "ease": "inOutSine"
       },
       {
         "at": 1,
-        "value": -0.45
+        "value": 0.6
       }
     ],
     "explode": [
@@ -148,25 +148,25 @@
     "elevation": [
       {
         "at": 0,
-        "value": 0.42
+        "value": 0.48
       },
       {
         "at": 0.3,
-        "value": 0.4,
+        "value": 0.44,
         "ease": "inOutSine"
       },
       {
         "at": 0.54,
-        "value": 0.3,
+        "value": 0.34,
         "ease": "inOutSine"
       },
       {
         "at": 0.74,
-        "value": 0.3
+        "value": 0.34
       },
       {
         "at": 0.96,
-        "value": 0.4,
+        "value": 0.44,
         "ease": "inOutSine"
       }
     ]
@@ -179,7 +179,7 @@
   "camera": {
     "fov": 26,
     "margin": 1.12,
-    "minFrame": 0.13,
+    "minFrame": 0.12,
     "labelSpace": {
       "narrow": 0.36,
       "wide": 0.24
@@ -187,19 +187,17 @@
   },
   "portraitSpread": 1.4,
   "procedural": {
-    "todo": "Cotes provisoires, à confirmer avec le modèle Blender et le matériel réel : dimensions, couleur et ouvertures du boîtier ; modèle de la carte M.2 (ici au format HAT+, 65 × 56,5 mm) ; format du SSD (ici M.2 2230) ; taille du ventilateur (ici 40 mm). Seule la carte Raspberry Pi 5 (85 × 56 mm) a déjà ses cotes officielles.",
+    "todo": "Proportions relevées sur les images du prototype (modèle 3D de l’équipe) ; à confirmer avec le modèle Blender et le matériel : cotes de la coque et de ses ouvertures, du socle et des pieds ; ordre des cartes (ici la carte M.2 sous le Raspberry Pi, comme sur l’image de l’intérieur) et modèle de la carte M.2 (ici à l’empreinte du Raspberry Pi) ; format du SSD (ici M.2 2230) ; taille et place du ventilateur (ici 40 mm, au-dessus du Raspberry Pi, absent des images). Seule la carte Raspberry Pi 5 (85 × 56 mm) a déjà ses cotes officielles.",
     "case": {
-      "width": 0.102,
-      "depth": 0.068,
-      "baseHeight": 0.034,
-      "lidHeight": 0.02,
+      "width": 0.095,
+      "depth": 0.062,
+      "lidHeight": 0.038,
       "wall": 0.0024,
-      "cornerRadius": 0.009,
-      "color": "#E6CCA6"
+      "cornerRadius": 0.0097,
+      "color": "#E3D9C6"
     },
     "logo": {
-      "width": 0.06,
-      "centerY": 0.0175
+      "width": 0.0247
     }
   }
 }

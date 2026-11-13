@@ -1,17 +1,30 @@
 /**
- * Modèle provisoire de la box, dessiné en code en attendant le fichier
- * Blender (public/models/hako.glb). Il porte exactement les noms d'objets du
- * contrat (contract.ts) : la scène l'anime comme le modèle réel.
+ * Modèle provisoire de la box, dessiné en code d'après les images du
+ * prototype de l'équipe (images de son modèle 3D), en attendant le fichier
+ * Blender (public/models/hako.glb). Il porte exactement les noms
+ * d'objets du contrat (contract.ts) : la scène l'anime comme le modèle réel.
  *
- * Unités : mètres, y vers le haut, origine au centre du dessous de la box,
- * face avant (logo) tournée vers +z.
+ * Unités : mètres, y vers le haut, origine au centre du dessous de la box.
+ * Avant (+z) : la grande face lisse ; droite (+x) : le bouton et le voyant ;
+ * arrière (−z) : les fentes d'aération et trois petites fenêtres ;
+ * gauche (−x) : les trois grandes fenêtres des prises. Le haut du kanji 箱
+ * est tourné vers l'arrière, comme sur les images.
  *
- * Seule la carte Raspberry Pi 5 a ses cotes officielles (85 × 56 mm, trous
- * de fixation à 3,5 mm des bords, entraxe 58 × 49 mm). Le reste est
- * PROVISOIRE, à confirmer avec le matériel réel : carte M.2 dessinée au
- * format HAT+ (65 × 56,5 mm), SSD au format M.2 2230 (22 × 30 mm),
- * ventilateur de 40 mm, et le boîtier, dont les cotes sont dans
- * model.config.json (procedural.case).
+ * Pièces :
+ * - Case_Lid : la coque blanc perlé (RAL 1013), qui recouvre tout et se
+ *   soulève ; elle porte le kanji 箱 en relief (Logo_Decal) ;
+ * - Case_Base : le socle en bois imprimé couleur noyer et ses quatre pieds
+ *   d'angle ;
+ * - RPi5_Board, NVMe_Board et NVMe_SSD (carte M.2 sous le Raspberry Pi, comme
+ *   sur l'image de l'intérieur), Fan et Fan_Rotor.
+ *
+ * Les proportions du boîtier viennent des images ; ses cotes réelles restent
+ * à confirmer (model.config.json, procedural.case). Seule la carte
+ * Raspberry Pi 5 a ses cotes officielles (85 × 56 mm, trous de fixation à
+ * 3,5 mm des bords, entraxe 58 × 49 mm) ; ses prises sont dessinées en blocs
+ * gris, plus grands que nature, comme sur le prototype. Le reste est
+ * PROVISOIRE : carte M.2 (ici à l'empreinte du Raspberry Pi), SSD M.2 2230,
+ * ventilateur de 40 mm.
  */
 import {
   BoxGeometry,
@@ -22,13 +35,11 @@ import {
   InstancedMesh,
   Matrix4,
   Mesh,
-  MeshBasicMaterial,
+  MeshLambertMaterial,
   MeshStandardMaterial,
   Path,
-  PlaneGeometry,
   RingGeometry,
   Shape,
-  SRGBColorSpace,
   type BufferGeometry,
   type Material,
   type Object3D,
@@ -36,16 +47,98 @@ import {
 } from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import type { ModelConfig } from './config';
-import { createLayerLinesNormalMap } from './textures';
+// Imports nommés : seules ces deux clés du JSON entrent dans le code publié.
+import { shapes as kanjiShapes, unit as kanjiUnit } from './kanji-outline.json';
+import {
+  buildCornerFoot,
+  buildShell,
+  buildSlab,
+  insetRect,
+  type RoundedRect,
+  type ShellOpening,
+} from './shell';
+import { createWoodGrainTexture } from './textures';
 
 const mm = (value: number) => value / 1000;
 
-/** Hauteur visible d'une couche d'impression (légèrement exagérée pour rester lisible). */
-const LAYER_HEIGHT = mm(0.4);
-const LAYERS_PER_TILE = 16;
+/**
+ * Relevés sur les images du prototype (proportions) et choix du dessin.
+ * Les cotes principales de la coque sont dans model.config.json.
+ */
+const PROTOTYPE = {
+  /** Rayon de l'arrondi de l'arête du dessus de la coque. */
+  topFillet: mm(5.5),
+  /** Socle : retrait sous la coque, épaisseur de la dalle, pieds d'angle. */
+  plinthInset: mm(1.2),
+  plinthThickness: mm(3.6),
+  feetHeight: mm(2.6),
+  feetAlongX: mm(17),
+  feetAlongZ: mm(12),
+  /** Relief du kanji au-dessus du couvercle. */
+  kanjiRaise: mm(1),
+} as const;
 
-/** Proportions du logo paysage (HAKO_Landscape_Transparent.png : 2160 × 530 px). */
-const LOGO_ASPECT = 2160 / 530;
+type Rgb = readonly [number, number, number];
+
+/**
+ * Couleurs du prototype, telles qu'elles doivent apparaître à l'écran.
+ *
+ * L'éclairage de la scène est doux et son rendu des tons (AgX) comprime les
+ * clairs et éclaircit les foncés : une coque blanche y paraît grise
+ * (#DEDAD6) et le chocolat devient taupe. Les matières du prototype
+ * échappent donc au rendu des tons (toneMapped: false) et leur couleur est
+ * calculée à partir de la couleur voulue à l'écran et de la lumière que
+ * reçoit la face qui la porte (LIGHT).
+ */
+const SCREEN = {
+  /** Dessus du kanji (chocolat de la marque). */
+  kanji: '#412d1e',
+  /** Face éclairée du socle (noyer), au début de la piste. */
+  wood: '#5f3e27',
+  /** Dessus des cartes (vert du prototype). */
+  pcb: '#4e875f',
+  /** Dessus des blocs des prises (gris clair du prototype). */
+  port: '#c9cbcf',
+  /** Intérieur de la coque, vu par les ouvertures (dans l'ombre). */
+  inside: '#6c665f',
+} as const;
+
+/**
+ * Lumière reçue par une face mate selon son orientation (couleur affichée
+ * divisée par la couleur de la matière, en valeurs linéaires), mesurée dans
+ * la scène de scene.ts : dessus, et face verticale éclairée par la lumière
+ * principale (une face à l'ombre reçoit environ 0,8). À mesurer de nouveau si
+ * les lumières de scene.ts changent (voir docs/model-contract.md).
+ */
+const LIGHT = {
+  top: [1.91, 1.776, 1.646],
+  lit: [1.776, 1.662, 1.552],
+} as const satisfies Record<string, Rgb>;
+
+/**
+ * Coque (matière satinée, avec reflets) : la couleur de procedural.case.color
+ * se partage entre la teinte éclairée (SHELL_ALBEDO) et une lueur propre
+ * (SHELL_GLOW), qui tient lieu de lumière d'ambiance et garde des ombres
+ * douces. Avec le RAL 1013 (blanc perlé, #E3D9C6), les faces éclairées
+ * s'affichent entre #DCCFB9 et #E4D6BF et les faces à l'ombre autour de
+ * #B6AD9D, comme sur le rendu RAL 1013 de l'équipe (v2_teintes.png).
+ */
+const SHELL_ALBEDO = 0.345;
+const SHELL_GLOW = 0.325;
+
+/** Couleur de matière qui donne `hex` à l'écran sur une face qui reçoit `light`. */
+function albedoFor(hex: string, light: Rgb): Rgb {
+  const target = new Color(hex);
+  return [target.r / light[0], target.g / light[1], target.b / light[2]];
+}
+
+/** Matière mate (sans reflet), hors rendu des tons. */
+function matte(albedo: Rgb, map?: Texture): MeshLambertMaterial {
+  const material = new MeshLambertMaterial({ toneMapped: false });
+  material.color.setRGB(albedo[0], albedo[1], albedo[2]);
+  if (map) material.map = map;
+  return material;
+}
 
 function roundedRect(target: Path, cx: number, cy: number, w: number, h: number, r: number) {
   const x = cx - w / 2;
@@ -112,34 +205,45 @@ function block(
 }
 
 function materials(config: ModelConfig) {
-  const layerLines = createLayerLinesNormalMap(LAYERS_PER_TILE);
-  layerLines.repeat.set(1, 1 / (LAYERS_PER_TILE * LAYER_HEIGHT));
   const standard = (color: string, roughness: number, metalness = 0) =>
     new MeshStandardMaterial({ color: new Color(color), roughness, metalness });
 
-  const pla = new MeshStandardMaterial({
-    color: new Color(config.procedural.case.color),
-    roughness: 0.78,
-    metalness: 0,
-    normalMap: layerLines,
-  });
-  pla.normalScale.set(0.32, 0.32);
+  const tint = new Color(config.procedural.case.color);
+  const shell = new MeshStandardMaterial({ roughness: 0.5, toneMapped: false });
+  shell.color.copy(tint).multiplyScalar(SHELL_ALBEDO);
+  shell.emissive.copy(tint).multiplyScalar(SHELL_GLOW);
+
+  // Le veinage porte déjà le noyer : la matière ne fait que compenser la lumière.
+  const wood = matte(albedoFor('#ffffff', LIGHT.lit), createWoodGrainTexture(SCREEN.wood));
+
+  // Pièces cachées sous la coque fermée, repoussées en profondeur selon leur
+  // pente : avec l'anticrénelage, le rendu logiciel (celui des images fixes
+  // et des tests) évalue mal la profondeur des facettes très fines vues par la
+  // tranche, et des points isolés des cartes perçaient la coque.
+  const inner = <T extends Material>(material: T, units = 1): T =>
+    Object.assign(material, {
+      polygonOffset: true,
+      polygonOffsetFactor: 1,
+      polygonOffsetUnits: units,
+    });
 
   return {
-    pla,
-    pcb: standard('#1f5b3d', 0.52),
-    pcbDark: standard('#2b2724', 0.5),
-    ssd: standard('#1b1918', 0.45),
-    chip: standard('#1d1b1a', 0.42),
-    metal: standard('#cfccc6', 0.3, 1),
-    socLid: standard('#bdb8b0', 0.38, 1),
-    gold: standard('#d2a64e', 0.32, 1),
-    brass: standard('#c39a52', 0.36, 1),
-    plastic: standard('#2a2521', 0.6),
-    opening: standard('#141110', 0.7),
-    beige: standard('#e7e0d2', 0.6),
-    fan: standard('#3d342d', 0.55),
-    rotor: standard('#4a3f36', 0.5),
+    shell,
+    inside: inner(matte(albedoFor(SCREEN.inside, LIGHT.lit)), 2),
+    kanji: matte(albedoFor(SCREEN.kanji, LIGHT.top)),
+    led: standard('#fffaf2', 0.3),
+    wood,
+    pcb: inner(matte(albedoFor(SCREEN.pcb, LIGHT.top))),
+    port: inner(matte(albedoFor(SCREEN.port, LIGHT.top))),
+    chip: inner(standard('#1d1b1a', 0.42)),
+    ssd: inner(standard('#1b1918', 0.45)),
+    socLid: inner(standard('#bdb8b0', 0.38, 1)),
+    gold: inner(standard('#d2a64e', 0.32, 1)),
+    brass: inner(standard('#c39a52', 0.36, 1)),
+    plastic: inner(standard('#2a2521', 0.6)),
+    beige: inner(standard('#e7e0d2', 0.6)),
+    fan: inner(standard('#3d342d', 0.55)),
+    rotor: inner(standard('#4a3f36', 0.5)),
   };
 }
 
@@ -175,25 +279,39 @@ function board(
   return group;
 }
 
-/** Carte Raspberry Pi 5 : origine au centre de la carte, dessous du circuit à y = 0. */
-function raspberryPi5(m: Palette): Group {
+/** Dimensions des prises dessinées sur la carte (repère de la carte : prises vers +x). */
+const PORTS = {
+  /** Débord des prises au-delà du bord de la carte. */
+  overhang: mm(2.5),
+  /** USB (deux étages) et Ethernet : centre (z), largeur, hauteur, longueur. */
+  usb: [
+    { z: mm(1.5), width: mm(13.6), height: mm(19.5), length: mm(17.5) },
+    { z: -mm(16), width: mm(13.6), height: mm(19.5), length: mm(17.5) },
+  ],
+  ethernet: { z: mm(18.5), width: mm(16.4), height: mm(16.5), length: mm(21) },
+  /** USB-C (alimentation) et micro-HDMI, sur le grand côté +z : abscisses. */
+  side: [-mm(31.3), -mm(16.7), -mm(3.3)],
+  sideSize: { width: mm(8), height: mm(6), depth: mm(7) },
+} as const;
+
+/**
+ * Carte Raspberry Pi 5 : origine au centre de la carte, dessous du circuit à
+ * y = 0. Les blocs des prises ne dépassent pas `portLimit` au-dessus de la carte.
+ */
+function raspberryPi5(m: Palette, portLimit: number): Group {
   // Trous à 3,5 mm du bord gauche : x = -39 et +19 mm (carte centrée).
   const group = board(mm(85), mm(56), mountingHoles(-mm(10)), m.pcb, m.gold);
   group.name = 'RPi5_Board';
   const top = mm(1.6);
 
   // Processeur BCM2712 et son couvercle métallique.
-  group.add(block(mm(17), mm(1.2), mm(17), m.pcbDark, -mm(14), top, -mm(1)));
+  group.add(block(mm(17), mm(1.2), mm(17), m.chip, -mm(14), top, -mm(1)));
   group.add(block(mm(12.5), mm(1.1), mm(12.5), m.socLid, -mm(14), top + mm(1.2), -mm(1)));
   // Mémoire vive et puce RP1 (entrées-sorties).
   group.add(block(mm(14), mm(1), mm(11), m.chip, mm(3), top, -mm(4)));
   group.add(block(mm(10), mm(0.9), mm(10), m.chip, mm(13), top, mm(14)));
-  // Petits composants autour du processeur.
-  for (let i = 0; i < 6; i += 1) {
-    group.add(block(mm(1.6), mm(0.6), mm(0.8), m.chip, -mm(24) + i * mm(2.6), top, mm(11)));
-  }
 
-  // Connecteur GPIO 2 × 20 broches le long du bord arrière.
+  // Connecteur GPIO 2 × 20 broches le long du bord -z.
   const headerX = -mm(10);
   const headerZ = -mm(24.5);
   group.add(block(mm(50.8), mm(2.5), mm(5.08), m.plastic, headerX, top, headerZ, mm(0.3)));
@@ -211,63 +329,66 @@ function raspberryPi5(m: Palette): Group {
   }
   group.add(pins);
 
-  // Prises USB (deux étages) et Ethernet sur le petit côté droit.
-  const portEnd = mm(42.5) + mm(2);
-  const usb = (z: number) => {
-    group.add(block(mm(17.5), mm(15.6), mm(14.6), m.metal, portEnd - mm(8.75), top, z, mm(0.6)));
-    for (const y of [mm(3.2), mm(10.6)]) {
-      group.add(
-        block(mm(0.6), mm(4.6), mm(12), m.opening, portEnd + mm(0.05), top + y, z, mm(0.2)),
-      );
-    }
-  };
-  usb(mm(1.5));
-  usb(-mm(16));
-  group.add(block(mm(21), mm(13.5), mm(16), m.metal, portEnd - mm(10.5), top, mm(18.5), mm(0.6)));
-  group.add(
-    block(mm(0.6), mm(8), mm(12), m.opening, portEnd + mm(0.05), top + mm(3.5), mm(18.5), mm(0.2)),
-  );
+  // Prises USB et Ethernet sur le petit côté +x : blocs gris, comme sur le prototype.
+  const portEnd = mm(42.5) + PORTS.overhang;
+  for (const port of [...PORTS.usb, PORTS.ethernet]) {
+    group.add(
+      block(
+        port.length,
+        Math.min(port.height, portLimit),
+        port.width,
+        m.port,
+        portEnd - port.length / 2,
+        top,
+        port.z,
+        mm(0.5),
+      ),
+    );
+  }
+  // USB-C et micro-HDMI sur le grand côté +z.
+  const { width, height, depth } = PORTS.sideSize;
+  for (const x of PORTS.side) {
+    group.add(block(width, height, depth, m.port, x, top, mm(28) + mm(1) - depth / 2, mm(0.5)));
+  }
 
-  // USB-C (alimentation) et deux micro-HDMI sur le grand côté avant.
-  const frontZ = mm(28) - mm(3.4);
-  group.add(block(mm(8.9), mm(3.2), mm(7.4), m.metal, -mm(31.3), top, frontZ, mm(1.2)));
-  group.add(block(mm(6.6), mm(3), mm(7.4), m.metal, -mm(16.7), top, frontZ, mm(0.5)));
-  group.add(block(mm(6.6), mm(3), mm(7.4), m.metal, -mm(3.3), top, frontZ, mm(0.5)));
-
-  // Connecteur PCIe (nappe) sur le petit côté gauche.
+  // Connecteur PCIe (nappe) sur le petit côté -x.
   group.add(block(mm(3), mm(2.2), mm(17), m.beige, -mm(40.5), top, mm(0), mm(0.3)));
   return group;
 }
 
-/** Carte M.2 (format HAT+, provisoire) et son SSD 2230 : origine au centre, dessous à y = 0. */
-function nvmeBoard(m: Palette): Group {
-  const holes = mountingHoles(0);
-  const group = board(mm(65), mm(56.5), holes, m.pcbDark, m.gold);
+/**
+ * Carte M.2 (provisoire, à l'empreinte du Raspberry Pi) et son SSD 2230 :
+ * origine au centre, dessous à y = 0. Les entretoises montent jusqu'au
+ * Raspberry Pi, `spacer` plus haut.
+ */
+function nvmeBoard(m: Palette, spacer: number): Group {
+  const holes = mountingHoles(mm(10));
+  const group = board(mm(85), mm(56), holes, m.pcb, m.gold);
   group.name = 'NVMe_Board';
   const top = mm(1.6);
 
-  // Entretoises en laiton vissées sous la carte.
   for (const [x, z] of holes) {
-    const spacer = mesh(new CylinderGeometry(mm(2.5), mm(2.5), mm(13), 6), m.brass);
-    spacer.position.set(x, -mm(6.5), z);
-    group.add(spacer);
+    const post = mesh(new CylinderGeometry(mm(2.5), mm(2.5), spacer, 6), m.brass);
+    post.position.set(x, top + spacer / 2, z);
+    group.add(post);
   }
-  // Connecteur M.2 et quelques composants.
-  group.add(block(mm(5.5), mm(3), mm(22), m.plastic, mm(26), top, 0, mm(0.3)));
-  group.add(block(mm(5), mm(1), mm(5), m.chip, -mm(22), top, -mm(16)));
-  group.add(block(mm(3), mm(0.8), mm(2), m.chip, -mm(14), top, -mm(18)));
-  group.add(block(mm(3), mm(2.2), mm(17), m.beige, -mm(29.5), top, mm(2), mm(0.3)));
+  // Connecteur de la nappe (vers le Raspberry Pi) et quelques composants.
+  group.add(block(mm(3), mm(2.2), mm(17), m.beige, mm(39), top, mm(2), mm(0.3)));
+  group.add(block(mm(5), mm(1), mm(5), m.chip, mm(30), top, -mm(14)));
+  group.add(block(mm(3), mm(0.8), mm(2), m.chip, mm(24), top, -mm(18)));
+  // Support M.2.
+  group.add(block(mm(5.5), mm(3), mm(22), m.plastic, -mm(24), top, 0, mm(0.3)));
 
-  // Le SSD, inséré dans le connecteur et tenu par une vis.
+  // Le SSD, inséré dans le support et tenu par une vis.
   const ssd = new Group();
   ssd.name = 'NVMe_SSD';
-  ssd.position.set(mm(9), top + mm(0.9), 0);
+  ssd.position.set(-mm(6), top + mm(0.9), 0);
   ssd.add(block(mm(30), mm(0.8), mm(22), m.ssd, 0, 0, 0, mm(0.2)));
-  ssd.add(block(mm(3), mm(0.82), mm(18), m.gold, mm(13.6), -mm(0.01), 0, mm(0.1)));
-  ssd.add(block(mm(9), mm(1.1), mm(9), m.chip, mm(5), mm(0.8), 0));
-  ssd.add(block(mm(12), mm(1.2), mm(15), m.chip, -mm(7), mm(0.8), 0));
-  const screw = mesh(new CylinderGeometry(mm(2.2), mm(2.2), mm(1.2), 20), m.metal);
-  screw.position.set(-mm(15), mm(1.2), 0);
+  ssd.add(block(mm(3), mm(0.82), mm(18), m.gold, -mm(13.6), -mm(0.01), 0, mm(0.1)));
+  ssd.add(block(mm(9), mm(1.1), mm(9), m.chip, -mm(5), mm(0.8), 0));
+  ssd.add(block(mm(12), mm(1.2), mm(15), m.chip, mm(7), mm(0.8), 0));
+  const screw = mesh(new CylinderGeometry(mm(2.2), mm(2.2), mm(1.2), 20), m.socLid);
+  screw.position.set(mm(15), mm(1.2), 0);
   ssd.add(screw);
   group.add(ssd);
   return group;
@@ -318,120 +439,167 @@ function fan(m: Palette): Group {
   return group;
 }
 
-/** Profil en anneau (parois) : rectangle arrondi extérieur moins intérieur. */
-function wallRing(w: number, d: number, r: number, wall: number) {
-  const shape = roundedRect(new Shape(), 0, 0, w, d, r) as Shape;
-  shape.holes.push(
-    roundedRect(new Path(), 0, 0, w - 2 * wall, d - 2 * wall, Math.max(r - wall, mm(1))),
-  );
-  return shape;
-}
-
-export interface ProceduralOptions {
-  readonly logo: Texture | null;
+/** Kanji 箱 en relief (contour précalculé), centré, le haut vers -z, posé sur y = 0. */
+function kanjiRelief(width: number, raise: number, material: Material): Mesh {
+  const scale = width / kanjiUnit;
+  const shapes = kanjiShapes.map((contours) => {
+    const [outer = [], ...holes] = contours.map((flat) => {
+      const points: Array<[number, number]> = [];
+      for (let i = 0; i + 1 < flat.length; i += 2) {
+        points.push([(flat[i] ?? 0) * scale, (flat[i + 1] ?? 0) * scale]);
+      }
+      return points;
+    });
+    const shape = new Shape();
+    outer.forEach(([x, y], i) => (i === 0 ? shape.moveTo(x, y) : shape.lineTo(x, y)));
+    for (const hole of holes) {
+      const path = new Path();
+      hole.forEach(([x, y], i) => (i === 0 ? path.moveTo(x, y) : path.lineTo(x, y)));
+      shape.holes.push(path);
+    }
+    return shape;
+  });
+  // Un léger enfoncement sous le dessus évite tout jour entre le kanji et la coque.
+  const sink = mm(0.1);
+  const geometry = new ExtrudeGeometry(shapes, {
+    depth: raise + sink,
+    bevelEnabled: false,
+    curveSegments: 1,
+  });
+  geometry.rotateX(-Math.PI / 2);
+  geometry.translate(0, -sink, 0);
+  return mesh(geometry, material, 'Logo_Decal');
 }
 
 /** Construit la box complète. */
-export function buildProceduralModel(config: ModelConfig, options: ProceduralOptions): Group {
+export function buildProceduralModel(config: ModelConfig): Group {
   const m = materials(config);
   const c = config.procedural.case;
   const root = new Group();
   root.name = 'HAKO_Box';
+  // Garde-fous pour des cotes modifiées dans le JSON : l'arrondi du dessus
+  // tient dans celui des angles, la paroi dans l'arrondi du dessus.
+  const radius = Math.max(c.cornerRadius, mm(3));
+  const topFillet = Math.min(PROTOTYPE.topFillet, radius - mm(1));
+  const wall = Math.min(c.wall, topFillet - mm(0.5));
+  const rect: RoundedRect = { halfWidth: c.width / 2, halfDepth: c.depth / 2, radius };
 
-  // Placement des cartes dans la base (repère du modèle).
-  const rpiX = -mm(1);
-  const rpiY = c.wall + mm(3);
-  const hatX = rpiX - mm(10);
-  const hatY = rpiY + mm(1.6) + mm(13);
-  const fanX = rpiX - mm(14);
-  const fanY = hatY + mm(7.6);
-
-  // ----- Base du boîtier -----
+  // ----- Socle (Case_Base) : dalle et quatre pieds d'angle, en retrait sous la coque -----
+  const floor = PROTOTYPE.feetHeight + PROTOTYPE.plinthThickness;
+  const plinth = insetRect(rect, PROTOTYPE.plinthInset);
   const base = new Group();
   base.name = 'Case_Base';
-  base.add(
-    mesh(
-      extrudeUp(wallRing(c.width, c.depth, c.cornerRadius, c.wall), c.baseHeight, mm(0.8)),
-      m.pla,
-    ),
+  base.add(mesh(buildSlab(plinth, PROTOTYPE.feetHeight, floor), m.wood));
+  // Les pieds montent un peu dans la dalle : aucun jour entre les deux.
+  const foot = buildCornerFoot(
+    plinth,
+    Math.max(PROTOTYPE.feetAlongX, plinth.radius + mm(2)),
+    Math.max(PROTOTYPE.feetAlongZ, plinth.radius + mm(2)),
+    0,
+    PROTOTYPE.feetHeight + mm(0.5),
   );
-  const floor = roundedRect(
-    new Shape(),
-    0,
-    0,
-    c.width - 2 * c.wall + mm(0.4),
-    c.depth - 2 * c.wall + mm(0.4),
-    Math.max(c.cornerRadius - c.wall, mm(1)),
-  ) as Shape;
-  base.add(mesh(extrudeUp(floor, c.wall, 0), m.pla));
-  for (const [x, z] of mountingHoles(rpiX - mm(10))) {
-    const standoff = mesh(new CylinderGeometry(mm(2.8), mm(3), mm(3.2), 24), m.pla);
-    standoff.position.set(x, c.wall + mm(1.5), z);
-    base.add(standoff);
-  }
-  if (options.logo) {
-    // Matériau sans éclairage ni rendu des tons : le logo garde exactement le
-    // chocolat de la marque (#412D1E), sous tous les angles.
-    const logoMaterial = new MeshBasicMaterial({
-      map: options.logo,
-      transparent: true,
-      depthWrite: false,
-      toneMapped: false,
-      polygonOffset: true,
-      polygonOffsetFactor: -2,
-      polygonOffsetUnits: -2,
-    });
-    options.logo.colorSpace = SRGBColorSpace;
-    const width = config.procedural.logo.width;
-    const decal = mesh(new PlaneGeometry(width, width / LOGO_ASPECT), logoMaterial, 'Logo_Decal');
-    decal.position.set(0, config.procedural.logo.centerY, c.depth / 2 + mm(0.05));
-    decal.renderOrder = 1;
-    base.add(decal);
+  for (const [sx, sz] of [
+    [1, 1],
+    [-1, 1],
+    [-1, -1],
+    [1, -1],
+  ] as const) {
+    const corner = mesh(foot, m.wood);
+    corner.scale.set(sx, 1, sz);
+    base.add(corner);
   }
   root.add(base);
 
-  // ----- Raspberry Pi 5 -----
-  const rpi = raspberryPi5(m);
-  rpi.position.set(rpiX, rpiY, 0);
-  root.add(rpi);
+  // ----- Cartes : la carte M.2 sur le socle, le Raspberry Pi au-dessus -----
+  // Le Raspberry Pi est tourné d'un demi-tour : l'USB-C et les micro-HDMI
+  // sont à l'arrière (-z), les prises USB et Ethernet du côté gauche (-x).
+  // Celles-ci s'arrêtent juste derrière la paroi, au fond de leurs fenêtres :
+  // la coque se soulève tout droit sans les traverser.
+  const standoff = mm(2);
+  const spacer = mm(7);
+  const portInset = mm(0.2);
+  const boardX = -c.width / 2 + wall + portInset + mm(42.5) + PORTS.overhang;
+  const nvmeY = floor + standoff;
+  const rpiY = nvmeY + mm(1.6) + spacer;
+  // Les fenêtres des prises s'arrêtent sous l'arrondi du dessus de la coque.
+  const wallTop = c.lidHeight - topFillet - mm(0.3);
+  const pcbTop = rpiY + mm(1.6) - floor;
+  const clearance = mm(0.5);
+  const portLimit = wallTop - clearance - pcbTop;
+  for (const [x, z] of mountingHoles(mm(10))) {
+    const post = mesh(new CylinderGeometry(mm(2.5), mm(2.5), standoff, 6), m.brass);
+    post.position.set(boardX + x, floor + standoff / 2, z);
+    base.add(post);
+  }
 
-  // ----- Carte M.2 et SSD -----
-  const nvme = nvmeBoard(m);
-  nvme.position.set(hatX, hatY, 0);
+  const nvme = nvmeBoard(m, spacer);
+  nvme.position.set(boardX, nvmeY, 0);
   root.add(nvme);
 
-  // ----- Ventilateur -----
+  const rpi = raspberryPi5(m, portLimit);
+  rpi.position.set(boardX, rpiY, 0);
+  rpi.rotation.y = Math.PI;
+  root.add(rpi);
+
+  // ----- Ventilateur, au-dessus du processeur -----
   const cooler = fan(m);
-  cooler.position.set(fanX, fanY, 0);
+  cooler.position.set(boardX + mm(14), rpiY + mm(1.6) + mm(2.3) + mm(1.5), mm(1));
   root.add(cooler);
 
-  // ----- Couvercle : parois et dessus ajouré au-dessus du ventilateur -----
+  // ----- Coque (Case_Lid), posée sur le socle -----
   const lid = new Group();
   lid.name = 'Case_Lid';
-  lid.position.y = c.baseHeight;
-  lid.add(
-    mesh(
-      extrudeUp(wallRing(c.width, c.depth, c.cornerRadius, c.wall), c.lidHeight, mm(0.8)),
-      m.pla,
-    ),
-  );
-  const lidTop = roundedRect(new Shape(), 0, 0, c.width, c.depth, c.cornerRadius) as Shape;
-  lidTop.holes.push(circle(fanX, 0, mm(1.4)));
-  for (const [ringRadius, count] of [
-    [mm(4.6), 6],
-    [mm(9.2), 12],
-    [mm(13.8), 18],
-  ] as const) {
-    for (let i = 0; i < count; i += 1) {
-      const angle = (i / count) * Math.PI * 2 + (count === 12 ? Math.PI / 12 : 0);
-      lidTop.holes.push(
-        circle(fanX + Math.cos(angle) * ringRadius, Math.sin(angle) * ringRadius, mm(1.4)),
-      );
-    }
+  lid.position.y = floor;
+  const openings: ShellOpening[] = [];
+  // Face gauche (-x) : fenêtres des prises, devant les blocs gris (côté 1, u = -z).
+  // Leur bas passe un peu au-dessus du circuit : on ne voit ni la carte ni le
+  // pied arrondi des blocs.
+  for (const port of [...PORTS.usb, PORTS.ethernet]) {
+    openings.push({
+      side: 1,
+      u: [port.z - port.width / 2 - clearance, port.z + port.width / 2 + clearance],
+      v: [pcbTop + mm(0.8), pcbTop + Math.min(port.height, portLimit) + clearance],
+    });
   }
-  const top = mesh(extrudeUp(lidTop, c.wall, mm(0.8), 10), m.pla);
-  top.position.y = c.lidHeight - c.wall;
-  lid.add(top);
+  // Face arrière (-z, côté 2, u = x) : USB-C et micro-HDMI, puis deux fentes d'aération.
+  const { width: sideWidth, height: sideHeight } = PORTS.sideSize;
+  for (const x of PORTS.side) {
+    const centre = boardX - x;
+    openings.push({
+      side: 2,
+      u: [centre - sideWidth / 2 - clearance, centre + sideWidth / 2 + clearance],
+      v: [pcbTop - clearance, pcbTop + sideHeight + clearance],
+    });
+  }
+  const slotTop = wallTop - mm(1.5);
+  for (const v of [
+    [slotTop - mm(1.8), slotTop],
+    [slotTop - mm(5), slotTop - mm(3.2)],
+  ] as const) {
+    openings.push({ side: 2, u: [-mm(23), c.width / 2 - radius - mm(2)], v });
+  }
+  const shell = buildShell({
+    rect,
+    height: c.lidHeight,
+    fillet: topFillet,
+    wall,
+    openings,
+  });
+  lid.add(mesh(shell.outside, m.shell), mesh(shell.inside, m.inside));
+
+  // Face droite (+x) : bouton rond en saillie et petit voyant, vers l'arrière.
+  const button = mesh(new CylinderGeometry(mm(2.6), mm(2.6), mm(2), 32), m.shell);
+  button.rotation.z = Math.PI / 2;
+  button.position.set(c.width / 2, c.lidHeight * 0.48, -(c.depth / 2 - radius - mm(3.2)));
+  const led = mesh(new CylinderGeometry(mm(0.8), mm(0.8), mm(0.6), 16), m.led);
+  led.rotation.z = Math.PI / 2;
+  led.position.set(c.width / 2 + mm(0.1), c.lidHeight * 0.48, button.position.z + mm(8));
+  lid.add(button, led);
+
+  // Kanji 箱 en relief, au centre du dessus.
+  const mark = kanjiRelief(config.procedural.logo.width, PROTOTYPE.kanjiRaise, m.kanji);
+  mark.position.y = c.lidHeight;
+  lid.add(mark);
   root.add(lid);
 
   return root;

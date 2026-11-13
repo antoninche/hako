@@ -5,7 +5,7 @@
  *   <BoxScene title="Regardez à l’intérieur" intro="Rien n’est caché : …" kicker="La box" />
  *
  * Sans JavaScript, avec « réduire les animations », sans WebGL ou sur un
- * appareil modeste : image fixe de la vue éclatée et liste des pièces.
+ * appareil modeste : le dessin de la vue éclatée et la liste des pièces.
  * Sinon : une longue piste de défilement dont la scène 3D reste à l'écran
  * (position sticky) pendant que la box tourne, s'ouvre et se referme.
  * L'introduction doit donc se lire dans les deux cas (pas de « faites
@@ -20,7 +20,9 @@
  * automatiquement si public/models/hako.glb existe au moment de la
  * construction.
  */
+import Illustration from '../Illustration.astro';
 import rawConfig from '../../data/model.config.json';
+import { company } from '../../data/entreprise';
 import { parseModelConfig } from '../../scripts/scene-3d/config';
 import { MODEL_URL } from '../../scripts/scene-3d/contract';
 
@@ -41,20 +43,6 @@ const { title, intro, kicker, id = 'la-box-en-3d' } = Astro.props;
 const config = parseModelConfig(rawConfig);
 
 /**
- * Image fixe PROVISOIRE de la vue éclatée (rendu de la scène,
- * `node scripts/model/capture-fallback.mjs`). Dès que
- * src/assets/illustrations/vue-eclatee.svg existe, l'illustration la
- * remplace automatiquement.
- */
-const FALLBACK_IMAGE = {
-  src: '/images/vue-eclatee-provisoire.webp',
-  srcset: '/images/vue-eclatee-provisoire.webp 800w, /images/vue-eclatee-provisoire@2x.webp 1600w',
-  sizes: '(min-width: 80rem) 36rem, (min-width: 48rem) 46vw, 92vw',
-  width: 800,
-  height: 800,
-} as const;
-
-/**
  * Image d'attente de la scène : la box fermée, cadrée comme au début de la
  * piste (même script). Elle s'affiche le temps que three.js arrive, ou si la
  * 3D tombe en panne pendant que le visiteur regarde la section.
@@ -67,9 +55,6 @@ const POSTER_IMAGE = {
   height: 768,
 } as const;
 
-/** Logo posé sur le côté du modèle provisoire (copie publiée par l'équipe marque). */
-const LOGO_URL = '/brand/HAKO_Landscape_Transparent.png';
-
 // On ne demande au navigateur que des fichiers qui existent : aucune erreur 404.
 // (Vérification faite par Node pendant la construction ; le projet n'embarque
 // pas les types de Node, d'où l'import non typé.)
@@ -80,22 +65,18 @@ const { existsSync } = (await import(/* @vite-ignore */ nodeFs)) as {
 const projectRoot = (globalThis as unknown as { process: { cwd(): string } }).process.cwd();
 const inPublic = (url: string) => existsSync(`${projectRoot}/public${url}`);
 const modelUrl = inPublic(MODEL_URL) ? MODEL_URL : undefined;
-const logoUrl = inPublic(LOGO_URL) ? LOGO_URL : undefined;
-const hasFallbackImage = inPublic(FALLBACK_IMAGE.src);
 const hasPoster = inPublic(POSTER_IMAGE.src);
 
-// Composants partagés, utilisés s'ils existent : l'illustration « vue-eclatee »
-// (Lot 4) et l'en-tête de section de l'accueil. Sans eux, la section garde son
-// image provisoire et son propre en-tête, au même style.
-type ComponentOf<P> = (props: P) => unknown;
-const illustrationModules = import.meta.glob<{
-  default: ComponentOf<{ name: string; ratio: '1/1'; alt: string }>;
-}>('../Illustration.astro', { eager: true });
-const hasIllustrationFile =
+/**
+ * Dessin de la vue éclatée (src/assets/illustrations/vue-eclatee.svg), à la
+ * place de la 3D. S'il manque, la liste des pièces reste seule.
+ */
+const hasDrawing =
   Object.keys(import.meta.glob('../../assets/illustrations/vue-eclatee.svg')).length > 0;
-const Illustration = hasIllustrationFile
-  ? Object.values(illustrationModules)[0]?.default
-  : undefined;
+
+// En-tête de section de l'accueil, utilisé s'il existe ; sinon la section
+// garde son propre en-tête, au même style.
+type ComponentOf<P> = (props: P) => unknown;
 const headerModules = import.meta.glob<{
   default: ComponentOf<{ id: string; kicker?: string; title: string; intro?: string }>;
 }>('../accueil/SectionHeader.astro', { eager: true });
@@ -109,7 +90,20 @@ const headerProps = {
   ...(intro ? { intro } : {}),
 };
 const listId = `${id}-pieces`;
-const parts = config.order.map((name) => ({ name, ...config.labels[name] }));
+
+/** Morceaux d'un texte : le kanji à part, pour être lu en japonais (lang="ja"). */
+const pieces = (text: string) =>
+  text
+    .split(company.kanji)
+    .flatMap((piece, index) => [
+      ...(index > 0 ? [{ text: company.kanji, ja: true }] : []),
+      ...(piece ? [{ text: piece, ja: false }] : []),
+    ]);
+// Chaque pièce de `order` a son étiquette (vérifié par parseModelConfig).
+const parts = config.order.map((name) => {
+  const { title = '', detail } = config.labels[name] ?? {};
+  return { name, title, detail: detail ? pieces(detail) : null };
+});
 ---
 
 <section
@@ -119,7 +113,6 @@ const parts = config.order.map((name) => ({ name, ...config.labels[name] }));
   data-box-scene
   data-state="idle"
   data-model-url={modelUrl}
-  data-logo-url={logoUrl}
 >
   <div class="container">
     {SectionHeader ? (
@@ -136,7 +129,7 @@ const parts = config.order.map((name) => ({ name, ...config.labels[name] }));
   </div>
 
   <div class="box-scene__track" data-box-scene-track>
-    <div class="box-scene__stage" data-box-scene-stage>
+    <div class="box-scene__stage surface-pierre" data-box-scene-stage>
       {hasPoster && (
         <img
           class="box-scene__poster"
@@ -158,7 +151,13 @@ const parts = config.order.map((name) => ({ name, ...config.labels[name] }));
             <span class="box-scene__dot" data-box-scene-dot />
             <p class="box-scene__label-text" data-box-scene-text>
               <span class="box-scene__label-title">{part.title}</span>
-              {part.detail && <span class="box-scene__label-detail">{part.detail}</span>}
+              {part.detail && (
+                <span class="box-scene__label-detail">
+                  {part.detail.map((piece) =>
+                    piece.ja ? <span lang="ja">{piece.text}</span> : piece.text,
+                  )}
+                </span>
+              )}
             </p>
           </div>
         ))}
@@ -167,22 +166,9 @@ const parts = config.order.map((name) => ({ name, ...config.labels[name] }));
   </div>
 
   <div class="container box-scene__fallback" data-box-scene-fallback>
-    {(Illustration || hasFallbackImage) && (
+    {hasDrawing && (
       <figure class="box-scene__figure">
-        {Illustration ? (
-          <Illustration name="vue-eclatee" ratio="1/1" alt={config.copy.imageAlt} />
-        ) : (
-          <img
-            src={FALLBACK_IMAGE.src}
-            srcset={FALLBACK_IMAGE.srcset}
-            sizes={FALLBACK_IMAGE.sizes}
-            width={FALLBACK_IMAGE.width}
-            height={FALLBACK_IMAGE.height}
-            alt={config.copy.imageAlt}
-            loading="lazy"
-            decoding="async"
-          />
-        )}
+        <Illustration name="vue-eclatee" ratio="1/1" alt={config.copy.imageAlt} />
       </figure>
     )}
     <div class="box-scene__parts">
@@ -193,7 +179,13 @@ const parts = config.order.map((name) => ({ name, ...config.labels[name] }));
         {parts.map((part) => (
           <li class="box-scene__part">
             <span class="box-scene__part-title">{part.title}</span>
-            {part.detail && <span class="box-scene__part-detail">{part.detail}</span>}
+            {part.detail && (
+              <span class="box-scene__part-detail">
+                {part.detail.map((piece) =>
+                  piece.ja ? <span lang="ja">{piece.text}</span> : piece.text,
+                )}
+              </span>
+            )}
           </li>
         ))}
       </ul>
@@ -268,8 +260,9 @@ const parts = config.order.map((name) => ({ name, ...config.labels[name] }));
     position: relative;
   }
 
+  /* La scène (fond pierre) va jusqu'à la section suivante, sans bande crème entre les deux. */
   .box-scene[data-mode='3d'] {
-    padding-block-end: var(--space-xl);
+    padding-block-end: 0;
   }
 
   .box-scene[data-mode='3d'] .box-scene__track {
@@ -298,7 +291,7 @@ const parts = config.order.map((name) => ({ name, ...config.labels[name] }));
 
   @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
     .box-scene:not([data-mode]) {
-      padding-block-end: var(--space-xl);
+      padding-block-end: 0;
     }
 
     .box-scene:not([data-mode]) .box-scene__track {
@@ -325,6 +318,13 @@ const parts = config.order.map((name) => ({ name, ...config.labels[name] }));
     }
   }
 
+  /*
+   * La scène est sur le fond « pierre » (surface-pierre, dans le balisage) :
+   * le fond de studio des images du prototype, comme l'image d'ouverture de
+   * l'accueil. Les étiquettes y sont en chocolat, seule couleur de texte assez
+   * contrastée sur ce fond. L'image d'attente est photographiée sur ce même
+   * fond (npm run model:fallback le lit dans la page).
+   */
   .box-scene__stage {
     position: sticky;
     inset-block-start: var(--header-height);
@@ -467,12 +467,6 @@ const parts = config.order.map((name) => ({ name, ...config.labels[name] }));
   .box-scene__figure {
     margin: 0;
     max-inline-size: 36rem;
-  }
-
-  .box-scene__figure img {
-    display: block;
-    inline-size: 100%;
-    block-size: auto;
   }
 
   .box-scene__parts-title {

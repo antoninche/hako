@@ -210,22 +210,22 @@ function buildParts() {
   const caseLid = createGeometry();
   addBox(caseLid, [0, 35, 0], [100, 6, 70]);
 
-  // Empilement du modèle dessiné en code : Raspberry Pi en bas, carte M.2
-  // au-dessus (décalée du côté opposé aux ports), puis le ventilateur.
-  const pcb = createGeometry();
-  addBox(pcb, [0, 5.8, 0], [85, 1.6, 56]);
-  const ports = createGeometry();
-  addBox(ports, [33, 13.6, 9], [19, 14, 16]);
-  addBox(ports, [33, 13.6, -9], [19, 14, 16]);
-  addBox(ports, [33, 11.6, 22], [19, 10, 8]);
-  const led = createGeometry();
-  addBox(led, [-38, 7, 24], [2, 0.8, 1.2]);
-
+  // Empilement du modèle dessiné en code (et du prototype) : carte M.2 en
+  // bas, Raspberry Pi au-dessus, puis le ventilateur.
   const nvmeBoard = createGeometry();
-  addBox(nvmeBoard, [-10, 20.4, 0], [65, 1.6, 56]);
+  addBox(nvmeBoard, [-10, 5.8, 0], [65, 1.6, 56]);
 
   const nvmeSsd = createGeometry();
-  addBox(nvmeSsd, [-15, 22.4, 0], [30, 2.4, 22]);
+  addBox(nvmeSsd, [-15, 7.8, 0], [30, 2.4, 22]);
+
+  const pcb = createGeometry();
+  addBox(pcb, [0, 12.8, 0], [85, 1.6, 56]);
+  const ports = createGeometry();
+  addBox(ports, [33, 20.6, 9], [19, 14, 16]);
+  addBox(ports, [33, 20.6, -9], [19, 14, 16]);
+  addBox(ports, [33, 18.6, 22], [19, 10, 8]);
+  const led = createGeometry();
+  addBox(led, [-38, 14, 24], [2, 0.8, 1.2]);
 
   const fanCenter = [-15, 27.5, 0];
   const fanFrame = createGeometry();

@@ -127,7 +127,7 @@ export const problem: ProblemCopy = {
   intro:
     'Photos de famille, papiers, documents de travail : peu à peu, tout part chez de grandes entreprises. C’est pratique, tant que leurs règles vous conviennent.',
   illustrationAlt:
-    'Des photos qui s’envolent vers des nuages lointains, avec de petits cadenas et des étiquettes de prix.',
+    'Une file de photos s’envole d’une maison de Provence vers des nuages lointains. Près des nuages, des cadenas ferment les dernières photos et des étiquettes de prix pendent.',
   points: [
     'Vos photos et vos documents sont gardés par de grandes entreprises, loin de chez vous.',
     'Les abonnements s’ajoutent les uns aux autres, mois après mois.',
@@ -165,7 +165,8 @@ export const mover: MoverCopy = {
   privacy:
     'Vous vous connectez vous-même à votre compte : nous ne voyons jamais vos identifiants, c’est-à-dire l’adresse e-mail et le mot de passe de ce compte.',
   included: `Compris dans ${moverOffers.names}`,
-  illustrationAlt: 'Des photos qui reviennent d’un nuage vers la box, posée dans la maison.',
+  illustrationAlt:
+    'Une file de photos quitte un nuage et entre par la fenêtre d’une maison de Provence. Derrière la fenêtre, la box est posée sur une petite console en bois.',
 };
 
 /* ------------------------------------------------------------------ */

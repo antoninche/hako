@@ -3,35 +3,54 @@
  * Carte de la zone d’intervention, dessinée en SVG directement dans la page :
  * aucune tuile, aucune requête vers un autre site.
  *
- * - Géométrie (terres, lignes d’eau) : carte-data.json, produit par
- *   `npm run map:build` à partir de Natural Earth (voir docs/carte.md).
+ * - Géométrie (terres) : carte-data.json, produit par `npm run map:build` à
+ *   partir de Natural Earth (voir docs/carte.md).
  * - Villes et textes : src/data/zone.ts ; phrase de la légende :
  *   company.serviceArea.sentence (src/data/entreprise.ts).
- * - Style : la constante PRESET ci-dessous.
+ * - Style : « papier découpé », comme les illustrations du site
+ *   (docs/illustrations.md) ; bords coupés à la main : papier.ts.
  *
  * Une seule carte par page : ses identifiants internes sont fixes.
  */
 import { company } from '../../data/entreprise';
 import { zoneCities, zoneMapText, type ZoneCity } from '../../data/zone';
 import data from './carte-data.json';
-
-/**
- * Style de la carte, calqué sur les trois pistes des illustrations :
- * 'a' trait d’encre fin, 'b' aplats chauds, 'c' papier découpé.
- * À aligner sur la série choisie par le jury des illustrations.
- */
-const PRESET: 'a' | 'b' | 'c' = 'a';
+import { paperCut, roundedRectPoints, type Point } from './papier';
 
 /** Largeur de la zone autour des villes et entre elles, en kilomètres (indicatif). */
 const ZONE_RADIUS_KM = 8;
 
-/** Place du nom de chaque ville par rapport à son point. */
+/** Place du nom de chaque ville par rapport à son repère. */
 const LABEL_PLACE: Record<ZoneCity['id'], 'droite' | 'gauche' | 'dessus'> = {
   'salon-de-provence': 'droite',
   'aix-en-provence': 'droite',
   marseille: 'droite',
   toulon: 'dessus',
 };
+
+/**
+ * Papier découpé, en unités de la carte : les mesures des illustrations
+ * (docs/illustrations.md), multipliées par 1,25, car la carte fait 1000 unités
+ * de large et les scènes 800.
+ * - la feuille de la carte : coins de 44 et coupe de 1,2 dans la série ;
+ * - son ombre : décalée de 4 et 6 ;
+ * - l’ombre de la zone, posée à plat sur les terres : 2 et 3, comme celle
+ *   d’un objet posé au sol (le chat de etape-chez-vous).
+ */
+const PAPER = {
+  card: { x: 2, y: 2, width: 991, height: 738, radius: 55 },
+  cardShadow: [5, 7.5],
+  zoneShadow: [2.5, 3.75],
+  cut: { jitter: 1.5, segment: 75 },
+} as const;
+
+/**
+ * Repère d’une ville : la goutte terre percée d’un œillet, celle de
+ * l’icône « humain proche ». Tracé en pixels d’écran, pointe en (0, 0) ; la
+ * feuille de style le met à l’échelle de la carte (--k).
+ */
+const PIN_PATH =
+  'M0 0C-1.6-3.2-6.2-7.4-6.2-11.4A6.2 6.2 0 1 1 6.2-11.4C6.2-7.4 1.6-3.2 0 0ZM0-13.8A2.4 2.4 0 1 0 0-9A2.4 2.4 0 1 0 0-13.8Z';
 
 const { width, height, frame, projection, scaleBar } = data;
 const round = (value: number) => Math.round(value * 10) / 10;
@@ -42,10 +61,14 @@ const project = (longitude: number, latitude: number): [number, number] => [
   round((frame.latMax - latitude) * projection.unitsPerDegreeLat),
 ];
 
+/**
+ * Décalage du nom par rapport au point de la ville : le nom s’aligne sur la
+ * tête du repère en goutte, à 11 px au-dessus de sa pointe.
+ */
 const labelOffsets = {
-  droite: { dx: '0.6em', dy: '0.35em', anchor: 'start' },
-  gauche: { dx: '-0.6em', dy: '0.35em', anchor: 'end' },
-  dessus: { dx: '0', dy: '-0.75em', anchor: 'middle' },
+  droite: { dx: '0.62em', dy: '-0.4em', anchor: 'start' },
+  gauche: { dx: '-0.62em', dy: '-0.4em', anchor: 'end' },
+  dessus: { dx: '0', dy: '-1.45em', anchor: 'middle' },
 } as const;
 
 const cities = zoneCities.map((city) => {
@@ -78,9 +101,9 @@ function convexHull(points: [number, number][]): [number, number][] {
 /**
  * Contour de la zone : l’enveloppe élargie de `radius` tout autour. Chaque
  * côté est décalé vers l’extérieur, et deux côtés voisins se rejoignent par
- * un arc de cercle centré sur la ville.
+ * un arc de cercle centré sur la ville, relevé tous les 22,5° au plus.
  */
-function roundedHullPath(points: [number, number][], radius: number): string {
+function roundedHullPoints(points: [number, number][], radius: number): Point[] {
   if (points.length < 3) {
     throw new Error('La zone demande au moins trois villes non alignées (src/data/zone.ts).');
   }
@@ -96,30 +119,43 @@ function roundedHullPath(points: [number, number][], radius: number): string {
     const outward = nx * ((p[0] + q[0]) / 2 - cx) + ny * ((p[1] + q[1]) / 2 - cy) > 0;
     return outward ? [nx, ny] : [-nx, -ny];
   });
-  const at = (p: [number, number], [nx, ny]: [number, number]) =>
-    `${round(p[0] + radius * nx)} ${round(p[1] + radius * ny)}`;
-  let path = `M${at(points[0]!, normals[0]!)}`;
-  for (let i = 0; i < n; i++) {
-    const corner = points[(i + 1) % n]!;
-    const normal = normals[i]!;
-    const next = normals[(i + 1) % n]!;
-    // Sens de l’arc : celui qui fait tourner la normale d’un côté vers celle du suivant.
-    const sweep = normal[0] * next[1] - normal[1] * next[0] > 0 ? 1 : 0;
-    path += `L${at(corner, normal)}A${round(radius)} ${round(radius)} 0 0 ${sweep} ${at(corner, next)}`;
-  }
-  return `${path}Z`;
+  return points.flatMap((_, i) => {
+    const [x, y] = points[(i + 1) % n]!;
+    const [nx, ny] = normals[i]!;
+    const [mx, my] = normals[(i + 1) % n]!;
+    // Arc qui fait tourner la normale d’un côté vers celle du suivant.
+    const start = Math.atan2(ny, nx);
+    const turn = Math.atan2(nx * my - ny * mx, nx * mx + ny * my);
+    const steps = Math.max(2, Math.ceil(Math.abs(turn) / (Math.PI / 8)));
+    return Array.from({ length: steps + 1 }, (_, step): Point => {
+      const angle = start + (turn * step) / steps;
+      return [x + radius * Math.cos(angle), y + radius * Math.sin(angle), true];
+    });
+  });
 }
 
-// La zone : l’enveloppe des villes élargie de ZONE_RADIUS_KM, limitée aux terres.
+// La zone : l’enveloppe des villes élargie de ZONE_RADIUS_KM, limitée aux terres
+// à l’affichage, et coupée à la main comme les illustrations.
 const hull = convexHull(cities.map((city): [number, number] => [city.x, city.y]));
-const zonePath = roundedHullPath(hull, ZONE_RADIUS_KM * projection.unitsPerKm);
+const zonePath = paperCut(roundedHullPoints(hull, ZONE_RADIUS_KM * projection.unitsPerKm), {
+  seed: 'carte-zone',
+  ...PAPER.cut,
+});
+
+// La feuille de la carte.
+const { card } = PAPER;
+const cardPath = paperCut(roundedRectPoints(card.x, card.y, card.width, card.height, card.radius), {
+  seed: 'carte-fond',
+  ...PAPER.cut,
+});
+const translate = ([dx, dy]: readonly [number, number]) => `translate(${dx} ${dy})`;
 
 // Nom de la mer, au large ; échelle graphique en haut à droite, sur les terres.
 const [seaX, seaY] = project(5.37, 42.99);
-const scaleEnd = width - 28;
+const scaleEnd = width - 56;
 // Espace insécable entre le nombre et l’unité.
 const scaleLabel = `${scaleBar.km}\u00a0km`;
-const scaleY = 48;
+const scaleY = 60;
 
 // Dans la phrase de la légende, un nom de ville ne se coupe jamais en fin de ligne.
 const cityNames = zoneCities.map((city) => city.name);
@@ -132,13 +168,19 @@ const sentenceParts = company.serviceArea.sentence
 const ids = {
   land: 'carte-zone-terres',
   clip: 'carte-zone-decoupe',
+  card: 'carte-zone-feuille',
+  cardClip: 'carte-zone-feuille-decoupe',
+  zone: 'carte-zone-contour',
+  pin: 'carte-zone-repere',
   name: 'carte-zone-nom',
   caption: 'carte-zone-legende',
 };
+const landClip = `url(#${ids.clip})`;
 ---
 
-<div class="zone-map" data-preset={PRESET}>
+<div class="zone-map">
   <figure class="zone-map__figure">
+    {/* surface-creme : noms en chocolat et liseré crème, quelle que soit la surface autour. */}
     <div class="zone-map__frame surface-creme">
       <svg
         class="zone-map__svg"
@@ -148,59 +190,83 @@ const ids = {
       >
         <defs>
           <path id={ids.land} d={data.land}></path>
+          <path id={ids.zone} d={zonePath}></path>
           <clipPath id={ids.clip}>
             <use href={`#${ids.land}`} clip-rule="evenodd"></use>
           </clipPath>
+          <path id={ids.card} d={cardPath}></path>
+          <clipPath id={ids.cardClip}>
+            <use href={`#${ids.card}`}></use>
+          </clipPath>
+          <path id={ids.pin} d={PIN_PATH} fill-rule="evenodd"></path>
         </defs>
 
-        <rect class="sea" width={width} height={height}></rect>
-        <g class="water" fill-rule="evenodd">
-          {data.water.map((level) => (
-            <path d={level.path} />
-          ))}
-        </g>
-        <use class="land-shadow" href={`#${ids.land}`} fill-rule="evenodd"></use>
-        <use class="land" href={`#${ids.land}`} fill-rule="evenodd"></use>
-        <g clip-path={`url(#${ids.clip})`}>
-          <path class="zone-shadow" d={zonePath}></path>
-          <path class="zone" d={zonePath}></path>
-        </g>
-        <use class="coast" href={`#${ids.land}`}></use>
+        <use
+          class="card-shadow"
+          href={`#${ids.card}`}
+          transform={translate(PAPER.cardShadow)}
+        ></use>
+        <g clip-path={`url(#${ids.cardClip})`}>
+          <rect class="sea" width={width} height={height}></rect>
+          <g transform={translate(PAPER.zoneShadow)}>
+            <use
+              class="zone-shadow zone-shadow--sea"
+              href={`#${ids.zone}`}
+              clip-path={landClip}
+            ></use>
+          </g>
+          <use class="land" href={`#${ids.land}`} fill-rule="evenodd"></use>
+          <g clip-path={landClip}>
+            <g transform={translate(PAPER.zoneShadow)}>
+              <use
+                class="zone-shadow zone-shadow--land"
+                href={`#${ids.zone}`}
+                clip-path={landClip}
+              ></use>
+            </g>
+          </g>
+          <use class="zone" href={`#${ids.zone}`} clip-path={landClip}></use>
 
-        <text class="sea-label" x={seaX} y={seaY} text-anchor="middle">
-          {zoneMapText.sea}
-        </text>
-
-        <g class="scale">
-          <path d={`M${round(scaleEnd - scaleBar.length)} ${scaleY}H${scaleEnd}`}></path>
-          <text
-            x={round(scaleEnd - scaleBar.length)}
-            y={scaleY}
-            dx="-0.5em"
-            dy="0.35em"
-            text-anchor="end"
-          >
-            {scaleLabel}
+          <text class="sea-label" x={seaX} y={seaY} text-anchor="middle">
+            {zoneMapText.sea}
           </text>
-        </g>
 
-        <g class="cities">
-          {cities.map((city) => (
-            <circle cx={city.x} cy={city.y} r="10" />
-          ))}
-        </g>
-        <g class="city-labels">
-          {cities.map((city) => (
+          <g class="scale">
+            <path d={`M${round(scaleEnd - scaleBar.length)} ${scaleY}H${scaleEnd}`}></path>
             <text
-              x={city.x}
-              y={city.y}
-              dx={city.label.dx}
-              dy={city.label.dy}
-              text-anchor={city.label.anchor}
+              x={round(scaleEnd - scaleBar.length)}
+              y={scaleY}
+              dx="-0.5em"
+              dy="0.35em"
+              text-anchor="end"
             >
-              {city.name}
+              {scaleLabel}
             </text>
-          ))}
+          </g>
+
+          <g class="cities">
+            {cities.map((city) => (
+              <g transform={`translate(${city.x} ${city.y})`}>
+                <g class="pin">
+                  <use class="pin-shadow" href={`#${ids.pin}`}></use>
+                  <use class="pin-face" href={`#${ids.pin}`}></use>
+                </g>
+              </g>
+            ))}
+          </g>
+          <g class="city-labels">
+            {cities.map((city) => (
+              <text
+                x={city.x}
+                y={city.y}
+                dx={city.label.dx}
+                dy={city.label.dy}
+                text-anchor={city.label.anchor}
+              >
+                {city.name}
+              </text>
+            ))}
+          </g>
         </g>
       </svg>
     </div>
@@ -220,7 +286,15 @@ const ids = {
     <ol class="zone-map__cities" aria-label={zoneMapText.citiesHeading}>
       {cities.map((city) => (
         <li>
-          <span class="zone-map__key zone-map__key--city" aria-hidden="true" />
+          <svg
+            class="zone-map__key zone-map__key--pin"
+            viewBox="-7 -18.5 15 20.5"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <use class="pin-shadow" href={`#${ids.pin}`}></use>
+            <use class="pin-face" href={`#${ids.pin}`}></use>
+          </svg>
           {city.name}
         </li>
       ))}
@@ -236,69 +310,51 @@ const ids = {
 <style>
   /*
    * Couleurs de la carte : uniquement des jetons de la palette, sans dégradé,
-   * sans filtre ni transparence. Chaque style redéfinit ces variables,
-   * partagées par la carte et sa légende ; le dessin reste le même.
-   * Valeurs par défaut : style A, trait d’encre fin (tout au trait ; la zone,
-   * seul aplat, a un bord en tirets).
+   * sans filtre ni transparence, partagées par la carte et sa légende.
+   *
+   * Papier découpé, selon les règles des illustrations du site
+   * (docs/illustrations.md) : des feuilles plates sans contour ; la
+   * profondeur vient d’une ombre plate décalée vers le bas à droite, du ton
+   * plus sombre que le papier sur lequel elle tombe (crème ou sable → lin,
+   * lin → caramel).
+   * - la feuille de la carte, sable comme la carte de chaque scène, porte les
+   *   terres ; son ombre lin tombe sur la page ;
+   * - la mer, une feuille lin, comme le sol des scènes ;
+   * - la zone, une pièce crème (la lumière) posée sur les terres ;
+   * - les villes, la goutte terre de l’icône « humain proche ».
    */
   .zone-map {
-    --carte-mer: var(--creme);
-    --carte-eau-loin: var(--noyer);
-    --carte-eau-milieu: var(--noyer);
-    --carte-eau-pres: var(--noyer);
-    --carte-terre: var(--creme);
-    --carte-ombre: var(--noyer);
-    --carte-cote: var(--chocolat);
-    --carte-zone: var(--sable);
-    --carte-zone-bord: var(--caramel);
-    --carte-point: var(--chocolat);
-    --carte-point-bord: var(--creme);
-    /* Épaisseurs en pixels à l’écran (multipliées par --k plus bas). */
-    --carte-trait-cote: 0.08rem;
-    --carte-trait-eau: 0.04rem;
-    --carte-trait-zone: 0.09rem;
+    --carte-mer: var(--lin);
+    --carte-terre: var(--sable);
+    --carte-zone: var(--creme);
+    --carte-ombre-page: var(--lin);
+    --carte-ombre-terre: var(--lin);
+    --carte-ombre-mer: var(--caramel);
+    --carte-repere: var(--terre);
   }
 
-  /* B, aplats chauds : mer et terres en aplats, cernés d’un trait fin. */
-  .zone-map[data-preset='b'] {
-    --carte-mer: var(--lin);
-    --carte-eau-loin: var(--sable);
-    --carte-eau-milieu: var(--creme);
-    --carte-eau-pres: var(--creme);
-    --carte-cote: var(--noyer);
-    --carte-trait-cote: 0.0625rem;
-    --carte-trait-eau: 0.075rem;
-    --carte-trait-zone: 0.0625rem;
-  }
-
-  /* C, papier découpé : feuilles superposées, chacune décalée de son ombre. */
-  .zone-map[data-preset='c'] {
-    --carte-mer: var(--lin);
-    --carte-eau-loin: var(--sable);
-    --carte-eau-milieu: var(--sable);
-    --carte-eau-pres: var(--sable);
-    --carte-ombre: var(--caramel);
-    --carte-zone: var(--sable);
-    --carte-zone-bord: var(--caramel);
+  /* Sur fond chocolat, aucune ombre plus sombre que le fond : la feuille n’en a pas. */
+  :global(.surface-chocolat) .zone-map {
+    --carte-ombre-page: var(--chocolat);
   }
 
   .zone-map__figure {
     margin: 0;
   }
 
+  /* La feuille est dessinée dans le SVG ; le cadre ne fait que la porter. */
   .zone-map__frame {
     container-type: inline-size;
-    overflow: hidden;
-    border: var(--rule-width) solid var(--line);
-    border-radius: var(--radius);
+    background-color: transparent;
   }
 
   /*
-   * Les tailles du texte et des traits sont données en pixels à l’écran :
-   * --k convertit un pixel affiché en unités de la carte. La carte fait
-   * 1000 unités de large, donc --k vaut 1000 divisé par la largeur la plus
-   * petite de chaque palier : le texte ne descend jamais sous sa taille
-   * prévue et la dépasse au plus d’un cinquième.
+   * Les tailles du texte, des repères et du trait de l’échelle sont données
+   * en pixels à l’écran : --k convertit un pixel affiché en unités de la
+   * carte. La carte fait 1000 unités de large, donc --k vaut 1000 divisé par
+   * la largeur la plus petite de chaque palier : le texte ne descend jamais
+   * sous sa taille prévue et la dépasse au plus d’un cinquième. Les ombres et
+   * les coins du papier, eux, suivent la carte, comme dans les illustrations.
    */
   .zone-map__svg {
     --k: 3.57;
@@ -361,141 +417,80 @@ const ids = {
     }
   }
 
+  .card-shadow {
+    fill: var(--carte-ombre-page);
+  }
+
   .sea {
     fill: var(--carte-mer);
-  }
-
-  .water path {
-    fill: none;
-    stroke-width: calc(var(--carte-trait-eau) * var(--k));
-    stroke-linejoin: round;
-  }
-
-  .water path:nth-child(1) {
-    stroke: var(--carte-eau-loin);
-  }
-
-  .water path:nth-child(2) {
-    stroke: var(--carte-eau-milieu);
-  }
-
-  .water path:nth-child(3) {
-    stroke: var(--carte-eau-pres);
-    display: none;
-  }
-
-  /* La ligne la plus proche de la côte n’apparaît que sur une carte assez large. */
-  @container (min-width: 33.75rem) {
-    .water path:nth-child(3) {
-      display: inline;
-    }
   }
 
   .land {
     fill: var(--carte-terre);
   }
 
-  .land-shadow,
-  .zone-shadow {
-    display: none;
-  }
-
   .zone {
     fill: var(--carte-zone);
-    stroke: var(--carte-zone-bord);
-    stroke-width: calc(var(--carte-trait-zone) * var(--k));
-    stroke-linecap: round;
   }
 
-  /* Tirets : la limite de la zone n’est pas exacte. */
-  .zone-map[data-preset='a'] .zone {
-    stroke-dasharray: calc(0.3rem * var(--k)) calc(0.3rem * var(--k));
+  .zone-shadow--sea {
+    fill: var(--carte-ombre-mer);
   }
 
-  .coast {
-    fill: none;
-    stroke: var(--carte-cote);
-    stroke-width: calc(var(--carte-trait-cote) * var(--k));
-    stroke-linejoin: round;
+  .zone-shadow--land {
+    fill: var(--carte-ombre-terre);
   }
 
-  /* Papier découpé : nappes d’eau pleines, sans trait ; ombres décalées. */
-  .zone-map[data-preset='c'] .water path {
-    stroke: none;
+  /* Repères : la goutte reste à taille fixe à l’écran, son ombre aussi. */
+  .pin {
+    transform: scale(var(--k));
   }
 
-  .zone-map[data-preset='c'] .water path:nth-child(1) {
-    fill: var(--carte-eau-loin);
+  .pin-face {
+    fill: var(--carte-repere);
   }
 
-  .zone-map[data-preset='c'] .water path:nth-child(2) {
-    fill: var(--carte-eau-milieu);
+  .pin-shadow {
+    fill: var(--carte-ombre-terre);
+    transform: translate(1px, 1.5px);
   }
 
-  .zone-map[data-preset='c'] .water path:nth-child(3) {
-    fill: var(--carte-eau-pres);
-  }
-
-  .zone-map[data-preset='c'] .land-shadow {
-    display: inline;
-    fill: var(--carte-ombre);
-    transform: translate(4px, 5px);
-  }
-
-  .zone-map[data-preset='c'] .zone {
-    stroke: none;
-  }
-
-  .zone-map[data-preset='c'] .zone-shadow {
-    display: inline;
-    fill: var(--carte-zone-bord);
-    transform: translate(3px, 4px);
-  }
-
-  .zone-map[data-preset='c'] .coast {
-    display: none;
-  }
-
-  /* Noms : vrai texte, avec un liseré de la couleur du fond pour rester lisible. */
+  /* Noms : vrai texte, avec un liseré crème pour rester lisible sur tous les papiers. */
   .zone-map__svg text {
     fill: var(--text);
     stroke: var(--surface);
     stroke-linejoin: round;
     paint-order: stroke;
+    font-family: var(--font-ui);
+    font-weight: 700;
   }
 
   .city-labels text {
-    font-family: var(--font-ui);
-    font-weight: 700;
     font-size: calc(0.9375rem * var(--k));
     letter-spacing: var(--tracking-ui);
     stroke-width: calc(0.25rem * var(--k));
   }
 
-  .cities circle {
-    r: calc(0.28rem * var(--k));
-    fill: var(--carte-point);
-    stroke: var(--carte-point-bord);
-    stroke-width: calc(0.125rem * var(--k));
-  }
-
   .sea-label,
   .scale text {
     fill: var(--text-muted);
-    font-family: var(--font-ui);
     font-size: calc(0.75rem * var(--k));
     stroke-width: calc(0.2rem * var(--k));
   }
 
+  /* En pleine mer, le liseré prend la couleur de la mer : il ne se voit pas. */
   .sea-label {
+    stroke: var(--carte-mer);
     text-transform: uppercase;
     letter-spacing: 0.25em;
   }
 
+  /* Échelle : un petit lien noyer aux bouts ronds, comme les ficelles de la série. */
   .scale path {
     fill: none;
     stroke: var(--text-muted);
     stroke-width: calc(0.125rem * var(--k));
+    stroke-linecap: round;
   }
 
   .zone-map__caption {
@@ -545,33 +540,50 @@ const ids = {
     display: inline-block;
   }
 
-  .zone-map__key--city {
-    inline-size: 0.6rem;
-    block-size: 0.6rem;
-    border-radius: 50%;
-    /* Forme sans texte : aucune couleur de texte à contrôler (npm run contrast). */
-    color: transparent;
-    background-color: var(--carte-point);
-    box-shadow: 0 0 0 0.125rem var(--carte-point-bord);
+  /* Repère de la légende : la même goutte, sa pointe sur la ligne de base. */
+  .zone-map__key--pin {
+    inline-size: 0.7rem;
+    block-size: 0.95rem;
+    overflow: visible;
   }
 
-  /* Pastille de la zone : même aplat et même bord que sur la carte. */
+  /* Son ombre tombe sur la page : lin sur crème ou sable, aucune sur chocolat. */
+  .zone-map__key--pin .pin-shadow {
+    fill: var(--carte-ombre-page);
+  }
+
+  /* Sur fond chocolat, un liseré crème détache la goutte terre. */
+  :global(.surface-chocolat) .zone-map__key--pin .pin-face {
+    stroke: var(--creme);
+    stroke-width: 1.5px;
+    paint-order: stroke;
+  }
+
+  /*
+   * Pastille de la zone : un petit morceau de la carte, la bande crème de la
+   * zone en travers de sa feuille sable, chacune avec son ombre. Formes sans
+   * texte : aucune couleur de texte à contrôler (npm run contrast).
+   */
   .zone-map__key--zone {
-    inline-size: 1.25rem;
-    block-size: 0.75rem;
-    border-radius: 0.375rem;
-    /* Forme sans texte : aucune couleur de texte à contrôler (npm run contrast). */
+    position: relative;
+    overflow: hidden;
+    inline-size: 1.5rem;
+    block-size: 1rem;
+    border-radius: 0.25rem;
+    color: transparent;
+    background-color: var(--carte-terre);
+    box-shadow: 0.0625rem 0.09rem 0 var(--carte-ombre-page);
+  }
+
+  .zone-map__key--zone::after {
+    content: '';
+    position: absolute;
+    inset: 0.25rem -0.25rem auto;
+    block-size: 0.45rem;
+    border-radius: 0.225rem;
     color: transparent;
     background-color: var(--carte-zone);
-    border: 0.09rem dashed var(--carte-zone-bord);
-  }
-
-  .zone-map[data-preset='b'] .zone-map__key--zone {
-    border-style: solid;
-  }
-
-  .zone-map[data-preset='c'] .zone-map__key--zone {
-    border: none;
-    box-shadow: 0.15rem 0.2rem 0 var(--carte-zone-bord);
+    box-shadow: 0.04rem 0.06rem 0 var(--carte-ombre-terre);
+    transform: rotate(32deg);
   }
 </style>

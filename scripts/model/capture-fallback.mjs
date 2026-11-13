@@ -1,36 +1,40 @@
 #!/usr/bin/env node
 /**
- * Images fixes PROVISOIRES de la scène 3D de l'accueil, rendues depuis la
+ * Image d'attente PROVISOIRE de la scène 3D de l'accueil, rendue depuis la
  * scène elle-même :
- *   public/images/vue-eclatee-provisoire.webp      (800 × 800)
- *   public/images/vue-eclatee-provisoire@2x.webp   (1600 × 1600)
- *     la vue éclatée, affichée quand la 3D ne peut pas l'être (animations
- *     réduites, pas de WebGL, appareil modeste) ;
  *   public/images/box-fermee-provisoire.webp       (960 × 768)
  *   public/images/box-fermee-provisoire@2x.webp    (1600 × 1280)
- *     la box fermée, cadrée exactement comme au début de la piste : l'image
- *     d'attente de la scène, le temps que three.js arrive.
- * Chaque fichier doit peser 120 Ko au plus.
+ * la box fermée, cadrée exactement comme au début de la piste : elle
+ * s'affiche le temps que three.js arrive, ou si la 3D tombe en panne pendant
+ * que le visiteur regarde la section. Chaque fichier doit peser 120 Ko au
+ * plus. (Sans 3D, la section montre le dessin de la vue éclatée,
+ * src/assets/illustrations/vue-eclatee.svg : ce script n'y touche pas.)
  *
  * Le script ouvre le site construit dans Chromium (rendu WebGL logiciel
  * SwiftShader, identique sur toutes les machines), fait défiler la section
- * jusqu'à chaque état, photographie la scène sans les étiquettes et recadre
- * sur fond crème.
+ * jusqu'au début de la piste, photographie la scène sans les étiquettes,
+ * recadre et pose la photo sur le fond de la scène, lu dans la page. Si ce
+ * fond change, il suffit donc de relancer le script. --background force une
+ * couleur ; --background transparent garde la transparence (ombre comprise),
+ * mais les fichiers pèsent alors trois à quatre fois plus.
  *
  * Utilisation, après une construction du site :
  *   npx astro build --outDir .tmp/dist
  *   node scripts/model/capture-fallback.mjs --dist .tmp/dist
  * ou sur un serveur déjà lancé :
  *   node scripts/model/capture-fallback.mjs --url http://localhost:4321/
- * Options : --port <n> (port du serveur temporaire, libre par défaut).
+ * Options : --port <n> (port du serveur temporaire, libre par défaut),
+ * --background <#RRGGBB | transparent> (fond de l'image ; par défaut, celui
+ * de la scène).
  *
- * À relancer après tout changement du modèle (hako.glb) ou de
- * src/data/model.config.json, puis reconstruire le site.
+ * À relancer après tout changement du modèle (hako.glb), de
+ * src/data/model.config.json ou du fond de la scène, puis reconstruire le
+ * site.
  */
 // Les fonctions passées à page.evaluate s'exécutent dans le navigateur.
 /* global document, window, getComputedStyle */
 import { spawn } from 'node:child_process';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -38,12 +42,7 @@ import { chromium } from '@playwright/test';
 import sharp from 'sharp';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const CREME = '#FDF7EF';
 const MAX_BYTES = 120 * 1024;
-const EXPLODED_OUTPUTS = [
-  { file: 'public/images/vue-eclatee-provisoire.webp', width: 800, height: 800 },
-  { file: 'public/images/vue-eclatee-provisoire@2x.webp', width: 1600, height: 1600 },
-];
 /**
  * Image d'attente : rectangle 5:4 centré sur la scène, haut de 80 % de la
  * scène. BoxScene.astro l'affiche à block-size: min(80cqh, 88cqw) : la box
@@ -59,16 +58,6 @@ const POSTER_OUTPUTS = [
 function option(name, fallback) {
   const index = process.argv.indexOf(`--${name}`);
   return index > -1 && process.argv[index + 1] ? process.argv[index + 1] : fallback;
-}
-
-/** Milieu du palier « vue éclatée » de la piste explode (valeur 1). */
-function explodedProgress() {
-  const config = JSON.parse(readFileSync(path.join(root, 'src/data/model.config.json'), 'utf8'));
-  const keys = config.timeline.explode;
-  for (let i = 0; i < keys.length - 1; i += 1) {
-    if (keys[i].value >= 1 && keys[i + 1].value >= 1) return (keys[i].at + keys[i + 1].at) / 2;
-  }
-  return 0.64;
 }
 
 /** Un port libre de la machine. */
@@ -141,7 +130,11 @@ async function scrollToProgress(page, progress) {
     const y = top - sticky + p * (track.offsetHeight - stage.offsetHeight);
     window.scrollTo({ top: y, behavior: 'instant' });
   }, progress);
-  await page.waitForSelector('[data-box-scene][data-state="ready"]', { timeout: 60_000 });
+  // « attached » : la section est masquée (visibility) pendant la photo.
+  await page.waitForSelector('[data-box-scene][data-state="ready"]', {
+    state: 'attached',
+    timeout: 60_000,
+  });
   await page.waitForFunction(
     (p) => {
       const section = document.querySelector('[data-box-scene]');
@@ -166,59 +159,89 @@ async function capture(url) {
     });
     await page.goto(url);
     await page.waitForSelector('[data-box-scene][data-mode="3d"]', { timeout: 15_000 });
-    // Ni étiquettes ni ancienne image d'attente sur la photo ; pas de fondu.
+    // Fond de la scène, lu avant de l'effacer pour la photo.
+    const background = await page.evaluate(stageBackground);
+    // Sur la photo, la scène seule : ni étiquettes, ni ancienne image
+    // d'attente, ni bordure de l'en-tête qui déborde sur la scène, ni fond de
+    // page (le fond est posé ensuite) ; pas de fondu.
     await page.addStyleTag({
       content:
         '.box-scene__labels, .box-scene__poster { display: none !important; }' +
-        ' .box-scene__canvas { transition: none !important; }',
+        ' .box-scene__canvas { transition: none !important; }' +
+        ' html, body, body * { background: transparent !important; visibility: hidden !important; }' +
+        ' [data-box-scene-canvas], [data-box-scene-canvas] * { visibility: visible !important; }',
     });
-    const stage = page.locator('[data-box-scene-stage]');
+    // Le calque du canevas couvre exactement la scène et reste visible.
+    const stage = page.locator('[data-box-scene-canvas]');
     await scrollToProgress(page, 0);
-    const poster = await stage.screenshot();
-    await scrollToProgress(page, explodedProgress());
-    const exploded = await stage.screenshot();
-    return { poster, exploded };
+    const poster = await stage.screenshot({ omitBackground: true });
+    return { poster, background };
   } finally {
     await browser.close();
   }
 }
 
-async function writeWebp(source, output) {
+/**
+ * Exécuté dans la page : la première couleur de fond opaque en remontant
+ * depuis la scène, en #RRGGBB, ou null si elle n'est pas lisible.
+ */
+function stageBackground() {
+  for (
+    let node = document.querySelector('[data-box-scene-stage]');
+    node;
+    node = node.parentElement
+  ) {
+    const color = getComputedStyle(node).backgroundColor;
+    const rgb = /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/.exec(color);
+    if (rgb && rgb[4] !== undefined && Number(rgb[4]) === 0) continue;
+    if (!rgb || (rgb[4] !== undefined && Number(rgb[4]) < 1)) return null;
+    return `#${rgb
+      .slice(1, 4)
+      .map((value) => Number(value).toString(16).padStart(2, '0'))
+      .join('')}`;
+  }
+  return null;
+}
+
+/** Fond forcé (--background), ou celui de la scène. */
+const BACKGROUND_OPTION = option('background', null);
+if (
+  BACKGROUND_OPTION !== null &&
+  BACKGROUND_OPTION !== 'transparent' &&
+  !/^#[0-9a-f]{6}$/i.test(BACKGROUND_OPTION)
+) {
+  throw new Error('--background attend une couleur #RRGGBB ou « transparent ».');
+}
+/** Crème de la marque, si la page ne donne pas de fond lisible. */
+const DEFAULT_BACKGROUND = '#FDF7EF';
+
+/** Fond retenu pour l'image : null pour la transparence. */
+function backgroundFor(fromPage) {
+  if (BACKGROUND_OPTION === 'transparent') return null;
+  if (BACKGROUND_OPTION) return BACKGROUND_OPTION;
+  if (fromPage) return fromPage;
+  console.warn(`Fond de la scène illisible dans la page : ${DEFAULT_BACKGROUND} par défaut.`);
+  return DEFAULT_BACKGROUND;
+}
+
+async function writeWebp(source, output, background) {
   let quality = 86;
   let data;
   do {
-    data = await sharp(source)
-      .resize(output.width, output.height, { kernel: 'lanczos3' })
-      .webp({ quality, effort: 6, smartSubsample: true })
+    const resized = sharp(source).resize(output.width, output.height, { kernel: 'lanczos3' });
+    data = await (background ? resized.flatten({ background }) : resized)
+      .webp({ quality, alphaQuality: 90, effort: 6, smartSubsample: true })
       .toBuffer();
     quality -= 4;
   } while (data.length > MAX_BYTES && quality >= 50);
   if (data.length > MAX_BYTES) throw new Error(`${output.file} dépasse 120 Ko.`);
   writeFileSync(path.join(root, output.file), data);
   console.log(
-    `${output.file} : ${output.width} × ${output.height}, ${(data.length / 1024).toFixed(1)} Ko`,
+    `${output.file} : ${output.width} × ${output.height}, ${(data.length / 1024).toFixed(1)} Ko, fond ${background ?? 'transparent'}`,
   );
 }
 
-async function writeExploded(png) {
-  // Recadrage sur le dessin (ombre comprise), puis carré centré avec une marge.
-  const trimmed = await sharp(png).trim({ background: CREME, threshold: 3 }).toBuffer();
-  const { width = 1, height = 1 } = await sharp(trimmed).metadata();
-  const side = Math.round(Math.max(width, height) * 1.12);
-  const square = await sharp(trimmed)
-    .extend({
-      top: Math.floor((side - height) / 2),
-      bottom: Math.ceil((side - height) / 2),
-      left: Math.floor((side - width) / 2),
-      right: Math.ceil((side - width) / 2),
-      background: CREME,
-    })
-    .flatten({ background: CREME })
-    .toBuffer();
-  for (const output of EXPLODED_OUTPUTS) await writeWebp(square, output);
-}
-
-async function writePoster(png) {
+async function writePoster(png, background) {
   // Rectangle fixe centré sur la scène (pas de recadrage sur le dessin) : la
   // box garde sa place exacte par rapport au centre de la scène.
   const { width = 1, height = 1 } = await sharp(png).metadata();
@@ -232,17 +255,15 @@ async function writePoster(png) {
       width: cropWidth,
       height: cropHeight,
     })
-    .flatten({ background: CREME })
     .toBuffer();
-  for (const output of POSTER_OUTPUTS) await writeWebp(framed, output);
+  for (const output of POSTER_OUTPUTS) await writeWebp(framed, output, background);
 }
 
 const external = option('url', null);
 const server = external ? { url: external, stop: () => {} } : await startPreview();
 try {
-  const { poster, exploded } = await capture(server.url);
-  await writeExploded(exploded);
-  await writePoster(poster);
+  const { poster, background } = await capture(server.url);
+  await writePoster(poster, backgroundFor(background));
 } finally {
   server.stop();
 }

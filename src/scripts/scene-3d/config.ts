@@ -98,13 +98,12 @@ export interface ModelConfig {
     readonly case: {
       readonly width: number;
       readonly depth: number;
-      readonly baseHeight: number;
       readonly lidHeight: number;
       readonly wall: number;
       readonly cornerRadius: number;
       readonly color: string;
     };
-    readonly logo: { readonly width: number; readonly centerY: number };
+    readonly logo: { readonly width: number };
   };
 }
 
@@ -278,7 +277,6 @@ export function parseModelConfig(raw: unknown): ModelConfig {
       case: {
         width: num(caseRaw.width, 'procedural.case.width', 0.09, 0.3),
         depth: num(caseRaw.depth, 'procedural.case.depth', 0.062, 0.3),
-        baseHeight: num(caseRaw.baseHeight, 'procedural.case.baseHeight', 0.026, 0.2),
         lidHeight: num(caseRaw.lidHeight, 'procedural.case.lidHeight', 0.005, 0.2),
         wall: num(caseRaw.wall, 'procedural.case.wall', 0.001, 0.01),
         cornerRadius: num(caseRaw.cornerRadius, 'procedural.case.cornerRadius', 0.001, 0.03),
@@ -286,7 +284,6 @@ export function parseModelConfig(raw: unknown): ModelConfig {
       },
       logo: {
         width: num(logo.width, 'procedural.logo.width', 0.01, 0.2),
-        centerY: num(logo.centerY, 'procedural.logo.centerY', 0, 0.2),
       },
     },
   };

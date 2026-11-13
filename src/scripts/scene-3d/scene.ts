@@ -3,8 +3,8 @@
  * n'est téléchargé qu'à l'approche de la section : voir boot.ts.
  *
  * Déroulé (réglé dans src/data/model.config.json) : la box tourne pour
- * montrer son côté « 箱 HAKO », s'ouvre en vue éclatée (couvercle,
- * ventilateur, disque, Raspberry Pi, base), les étiquettes apparaissent,
+ * montrer le côté de ses prises, s'ouvre en vue éclatée (coque,
+ * ventilateur, Raspberry Pi, disque, socle), les étiquettes apparaissent,
  * puis la box se referme.
  */
 import {
@@ -24,11 +24,9 @@ import {
   Quaternion,
   Scene,
   SRGBColorSpace,
-  TextureLoader,
   Vector3,
   WebGLRenderer,
   type Object3D,
-  type Texture,
 } from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import rawConfig from '../../data/model.config.json';
@@ -107,10 +105,7 @@ async function loadModel(
       console.warn('hako.glb inutilisable : affichage du modèle provisoire.', error);
     }
   }
-  const logoUrl = section.dataset.logoUrl;
-  let logo: Texture | null = null;
-  if (logoUrl) logo = await new TextureLoader().loadAsync(logoUrl).catch(() => null);
-  return { model: buildProceduralModel(config, { logo }), source: 'procedural' };
+  return { model: buildProceduralModel(config), source: 'procedural' };
 }
 
 export const mountScene: MountScene = async (section, onFailure) => {
