@@ -3,7 +3,7 @@
 Ce fichier est produit par `npm run todos` : ne le modifiez pas à la main.
 Chaque ligne donne le numéro de ligne dans le fichier source, ce qui manque, puis le texte provisoire affiché sur le site.
 
-Total : 55 informations manquantes dans 16 fichiers.
+Total : 85 informations manquantes dans 18 fichiers.
 
 ## src/components/SocialLinks.astro
 
@@ -15,7 +15,7 @@ Total : 55 informations manquantes dans 16 fichiers.
 
 ## src/content/contact.ts
 
-- L64 - Phrase sur le délai habituel de réponse aux messages et aux appels (par exemple « Nous répondons sous deux jours ouvrés. ») - Nous répondons sous [délai à préciser].
+- L64 - Phrase sur le délai habituel de réponse aux messages et aux appels, avec les jours et les heures où quelqu’un répond au téléphone (par exemple « Nous répondons sous deux jours ouvrés. Au téléphone, du lundi au vendredi, de 9 h à 18 h. ») - Nous répondons sous [délai à préciser].
 
 ## src/content/faq/consommation-electrique.mdx
 
@@ -31,7 +31,7 @@ Total : 55 informations manquantes dans 16 fichiers.
 
 ## src/content/la-box.ts
 
-- L97 - Adresse du dépôt public de la recette du système de la box (image système), à publier - [lien à venir]
+- L107 - Adresse du dépôt public de la recette du système de la box (image système), à publier - [lien à venir]
 
 ## src/content/legal/cgv.mdx
 
@@ -72,12 +72,21 @@ Total : 55 informations manquantes dans 16 fichiers.
 
 ## src/content/tutoriels.ts
 
-- L67 - Adresse de la vidéo « Prise en main et installation » sur YouTube - [lien à venir]
-- L71 - Adresse de la vidéo « Prise en main et installation » sur PeerTube - [lien à venir]
-- L86 - Adresse de la vidéo « Accéder à ses données » sur YouTube - [lien à venir]
-- L87 - Adresse de la vidéo « Accéder à ses données » sur PeerTube - [lien à venir]
-- L108 - Adresse de la vidéo « Récupérer ses photos depuis Google Photos ou iCloud » sur YouTube - [lien à venir]
-- L112 - Adresse de la vidéo « Récupérer ses photos depuis Google Photos ou iCloud » sur PeerTube - [lien à venir]
+- L70 - Adresse de la vidéo « Prise en main et installation » sur YouTube - [lien à venir]
+- L74 - Adresse de la vidéo « Prise en main et installation » sur PeerTube - [lien à venir]
+- L89 - Adresse de la vidéo « Accéder à ses données » sur YouTube - [lien à venir]
+- L90 - Adresse de la vidéo « Accéder à ses données » sur PeerTube - [lien à venir]
+- L111 - Adresse de la vidéo « Récupérer ses photos depuis Google Photos ou iCloud » sur YouTube - [lien à venir]
+- L115 - Adresse de la vidéo « Récupérer ses photos depuis Google Photos ou iCloud » sur PeerTube - [lien à venir]
+
+## src/data/assistant.ts
+
+- L145 - Durée de la première installation sur la page de la HAKO, de « Commencer » à « C’est prêt », impression de la fiche comprise, mesurée sur une HAKO de série avec quatre personnes (par exemple « environ 15 minutes ») - [durée à mesurer]
+- L149 - Durée de la création des comptes (Immich puis Nextcloud) sur une HAKO de série, pour une personne et pour huit (par exemple « environ deux minutes ») - [durée à mesurer]
+- L158 - Création des comptes interrompue (HAKO débranchée ou redémarrée) : les mots de passe de la fiche de secours restent-ils valables, ou la HAKO en tire-t-elle de nouveaux, avec une fiche à refaire ? Texte qui suit « Ce que devient votre fiche : » - [à confirmer]
+- L162 - Page de la HAKO fermée pendant la création des comptes : la création continue-t-elle, et que montre http://hako.local quand on le rouvre ? Texte qui suit « Ce qui se passe ensuite : » - [à confirmer]
+- L166 - Geste pour enregistrer la fiche de secours en PDF depuis la fenêtre d’impression d’un iPhone ou d’un iPad à jour (écarter deux doigts sur l’aperçu, puis le bouton de partage et « Enregistrer dans Fichiers » ?), à vérifier sur un appareil - [geste à vérifier]
+- L170 - Gestes sur Android après « Enregistrer au format PDF », dans la fenêtre d’impression de Chrome (toucher le rond « PDF », puis « Enregistrer » ?), et dossier où se range le fichier (« Téléchargements », ouvert par l’application « Fichiers » ?), à vérifier sur un Android 12 d’entrée de gamme. Texte qui suit « Ensuite : » - [gestes à vérifier]
 
 ## src/data/entreprise.ts
 
@@ -95,10 +104,37 @@ Total : 55 informations manquantes dans 16 fichiers.
 
 ## src/data/faits.ts
 
-- L66 - Page d’accueil de la box (http://mabox.local) : logiciel utilisé et licence, à préciser - [licence à préciser]
+- L66 - Page d’accueil de la box (http://hako.local) : logiciel utilisé et licence, à préciser - [licence à préciser]
 - L73 - Copie de secours des données : prévue, absente de la première version ; solution, date de disponibilité et fonctionnement à confirmer - [à confirmer]
 - L119 - Garantie d’un an de la box : ce qu’elle couvre (pièces, main-d’œuvre, envoi ou déplacement) et comment la faire jouer - [à confirmer]
 - L143 - Frais d’envoi de la box hors de la zone d’intervention : compris dans le prix ou en supplément, et combien - [à confirmer]
+
+## src/data/installation.ts
+
+- L239 - Durée totale de l’installation par le client, premier démarrage compris, mesurée sur une HAKO de série (par exemple « environ 45 minutes ») - [durée à mesurer]
+- L243 - Durée du premier démarrage de la HAKO (préparation des applications), mesurée sur une HAKO de série (par exemple « environ 20 minutes ») - [durée à mesurer]
+- L247 - Délai après le branchement au-delà duquel la préparation est anormale et le client doit nous écrire (par exemple « une heure ») - [délai à confirmer]
+- L251 - Contenu exact du carton (HAKO, bloc d’alimentation, papier qui donne l’adresse de ce guide ?) et moyen par lequel le client reçoit l’adresse du guide (e-mail d’envoi ?) - [contenu du carton à confirmer]
+- L255 - Emplacement de la prise réseau sur le boîtier de série de la HAKO. Sur le prototype : sur le petit côté opposé au bouton rond, dans l’une des trois grandes ouvertures (les deux autres sont des prises USB, plus plates) - [sur le petit côté opposé au bouton rond, dans l’une des trois grandes ouvertures : à confirmer]
+- L259 - Emplacement de la prise d’alimentation (USB-C) sur le boîtier de série de la HAKO. Sur le prototype : sur la grande face des fentes d’aération, dans l’une des trois petites ouvertures (les deux autres, pour un écran, ne servent pas) - [sur la grande face des fentes d’aération, dans l’une des trois petites ouvertures : à confirmer]
+- L263 - Voyant de la HAKO sur le boîtier de série : visible ou non, emplacement, et ce qu’il montre une fois branchée. Sur le prototype : un petit point sur le petit côté, à côté du bouton rond ; sur un Raspberry Pi 5 nu, rouge à la mise sous tension, puis vert fixe en marche, rouge après un arrêt ; clignotements = signal de panne - [un petit point à côté du bouton rond, rouge juste après le branchement, puis vert : à confirmer]
+- L267 - Petit bouton rond du boîtier (bouton d’alimentation du Raspberry Pi 5) : reste-t-il accessible sur le boîtier de série, et l’image garde-t-elle son réglage d’origine (un appui éteint la HAKO, un nouvel appui la rallume) ? - [à confirmer]
+- L271 - Reprise de la préparation si la HAKO est débranchée pendant son premier démarrage : reprend-elle seule, faut-il faire quelque chose ? - [à vérifier]
+- L275 - Première installation interrompue (page fermée, appareil en veille) avant la fiche de secours : comment la reprendre ? - [procédure à venir]
+- L279 - Procédure si la personne responsable perd la fiche de secours ou oublie son mot de passe, sans accès de l’équipe à la HAKO (une autre personne reçoit un nouveau mot de passe de la personne responsable : voir resetPassword). Repris par la page de la HAKO après « Vous avez perdu la fiche de secours ? » - [procédure à venir]
+- L283 - Gestes exacts, sur la version figée de la HAKO, pour que la personne responsable donne un nouveau mot de passe à une personne de la maison : dans Immich (Administration, Utilisateurs) puis dans Nextcloud (Comptes). Repris par le guide et par la fiche de secours, après « peut lui en donner un nouveau » - [gestes à confirmer]
+- L287 - Ajouter une personne de la maison après la première installation : procédure (où, par qui, d’où vient son mot de passe, fiche à compléter) - [procédure à venir]
+- L291 - Installation de Hako Pro hors de notre zone : par le client avec ce guide ou par nous ; nombre de comptes à la première installation (8 au plus aujourd’hui) ; réglage des droits par dossier - [à confirmer]
+- L295 - Solution de secours quand hako.local ne s’ouvre pas (Android plus ancien que la version 12, certains ordinateurs Windows) : adresse en chiffres lue dans la liste des appareils de la box internet (Nextcloud doit alors l’accepter, et elle peut changer), ou autre - [solution de secours à venir]
+- L299 - Android 12 : la page de la HAKO s’ouvre-t-elle sans la « Mise à jour du système Google Play » récente ? À vérifier sur un Android 12 d’entrée de gamme (analyse de recherche, partie C4 : confiance moyenne) - [à vérifier]
+- L303 - Ordinateur Windows 10 ou 11 : réglage à vérifier quand hako.local ne s’ouvre pas (profil réseau « Public » ?), avec son chemin exact - [à vérifier]
+- L307 - Deux HAKO sur le même réseau : les noms hako.local et hako-2.local restent-ils attachés à la même HAKO après une coupure de courant qui les redémarre toutes les deux ? - [à vérifier]
+- L311 - Chrome en mode le plus strict (« Toujours utiliser des connexions sécurisées ») : message exact avant d’ouvrir la page de la HAKO en http://, et bouton à choisir pour continuer - [bouton à confirmer]
+- L315 - Engagement à confirmer par les fondateurs : ne jamais demander leurs mots de passe aux clients - [Nous ne vous demanderons jamais vos mots de passe, ni par téléphone, ni par e-mail.]
+- L319 - iPhone ou iPad : Chrome, Firefox et Edge (bâtis sur WebKit) sont exemptés de l’autorisation « Réseau local » comme Safari (Apple TN3179) ; les navigateurs à moteur propre autorisés dans l’Union européenne ne sont pas vérifiés - [à vérifier]
+- L323 - Procédure exacte dans Immich (version figée sur la HAKO) pour activer la sauvegarde des photos, et autorisation « Photos » demandée par l’iPhone et par Android (choix à faire) - [procédure à confirmer]
+- L327 - Connexion dans l’application Nextcloud, sur iPhone et sur Android, avec la version figée sur la HAKO : adresse en http:// acceptée ? invite « Réseau local » ? page de connexion et bouton pour autoriser l’application (libellés exacts) - [gestes à vérifier]
+- L331 - Application Immich ou Nextcloud du téléphone, mise à jour par sa boutique, qui refuse la version figée sur la HAKO (Immich v3.4.1) : message affiché, cause et que faire - [à vérifier]
 
 ## src/data/model.config.json
 

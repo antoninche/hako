@@ -62,7 +62,7 @@ export const contactPage: ContactPageCopy = {
     emailLabel: 'Par e-mail',
     phoneLabel: 'Par téléphone',
     responseTime: todo(
-      'Phrase sur le délai habituel de réponse aux messages et aux appels (par exemple « Nous répondons sous deux jours ouvrés. »)',
+      'Phrase sur le délai habituel de réponse aux messages et aux appels, avec les jours et les heures où quelqu’un répond au téléphone (par exemple « Nous répondons sous deux jours ouvrés. Au téléphone, du lundi au vendredi, de 9 h à 18 h. »)',
       'Nous répondons sous [délai à préciser].',
     ),
     order: {
@@ -75,7 +75,7 @@ export const contactPage: ContactPageCopy = {
   team: {
     title: 'L’équipe',
     intro:
-      'Trois étudiants, chacun responsable d’un domaine. C’est nous qui assemblons votre box, l’installons chez vous et répondons à vos questions.',
+      'Trois étudiants, chacun responsable d’un domaine. C’est nous qui assemblons votre box, l’installons chez vous ou vous guidons pour l’installer, et répondons à vos questions.',
     linkedinLabel: 'Profil LinkedIn',
   },
 

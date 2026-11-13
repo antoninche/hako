@@ -1,0 +1,202 @@
+---
+/**
+ * Page « Démonstration de la première installation »
+ * (/installer/demonstration/) : la page que la HAKO affiche chez la personne,
+ * à http://hako.local, pour sa première installation, essayée ici avec une
+ * HAKO simulée dans le navigateur.
+ *
+ * 1. Ouverture : ce que l'on voit, pourquoi c'est une démonstration, et où se
+ *    fait la vraie installation (le guide /installer/).
+ * 2. La page de la HAKO, en démonstration (src/components/assistant/
+ *    Assistant.astro, mode="demo") : bandeau permanent « Démonstration :
+ *    rien n'est envoyé, aucune HAKO n'est installée », mots de passe
+ *    d'exemple fixes, fiche marquée « EXEMPLE ».
+ * 3. « Pour aller plus loin », au même dessin que sur la page Notre engagement.
+ *
+ * Rien n'est envoyé, rien n'est gardé : le script de cette page crée la HAKO
+ * simulée (src/lib/assistant/demo-box.ts), qui travaille dans la mémoire de
+ * la page ; tout s'oublie au rechargement. L'accès à la vraie HAKO n'entre
+ * jamais dans le JavaScript du site.
+ *
+ * Textes : src/content/assistant.ts ; faits : src/data/assistant.ts.
+ */
+import GuideText from '../../../components/installation/GuideText.astro';
+import Icon, { type UiIconName } from '../../../components/Icon.astro';
+import PageIntro from '../../../components/PageIntro.astro';
+import Section from '../../../components/Section.astro';
+import Assistant from '../../../components/assistant/Assistant.astro';
+import Text from '../../../components/texte/Text.astro';
+import { assistant } from '../../../content/assistant';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const { page } = assistant;
+const { intro } = page;
+
+/** Symbole de chaque point de l'ouverture : ce que l'on voit, pourquoi, et chez soi. */
+const pointIcons: readonly UiIconName[] = ['laptop', 'info', 'box'];
+---
+
+<BaseLayout title={page.meta.title} description={page.meta.description}>
+  {/* La démonstration ne doit rien pouvoir envoyer : en plus de la règle du
+      site, cette page interdit toute connexion et tout envoi de formulaire.
+      (En « astro dev », le rechargement automatique est donc coupé ici.) */}
+  <meta
+    slot="head"
+    http-equiv="Content-Security-Policy"
+    content="connect-src 'none'; form-action 'none'"
+  />
+  <PageIntro kicker={intro.kicker} title={intro.title}>
+    <p class="lead text-muted">
+      <Text text={intro.lead} />
+    </p>
+    <ul class="points">
+      {intro.points.map((point, index) => (
+        <li class="point">
+          <h2 class="point__title">
+            <Icon name={pointIcons[index] ?? 'info'} class="point__icon" />
+            <span>{point.title}</span>
+          </h2>
+          {point.text.map((sentence) => (
+            <p class="point__text">
+              <GuideText parts={sentence} />
+            </p>
+          ))}
+        </li>
+      ))}
+    </ul>
+  </PageIntro>
+
+  <Section surface="sable" id="demonstration" class="demo-section">
+    <Assistant mode="demo" />
+  </Section>
+
+  <Section labelledby="pour-aller-plus-loin" class="next-section">
+    <div class="next">
+      <h2 id="pour-aller-plus-loin">{page.next.title}</h2>
+      <ul class="next__links">
+        {page.next.links.map((link) => (
+          <li>
+            <a class="btn btn--secondary" href={link.href}>
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </Section>
+</BaseLayout>
+
+<script>
+  import { initAssistant, readFacts } from '../../../components/assistant/assistant-ui.ts';
+  import { DemoBoxAccess } from '../../../lib/assistant/demo-box.ts';
+
+  // Démonstration : la HAKO simulée, dans la mémoire de la page. Ses faits
+  // (mots de passe d'exemple, domaine des identifiants) sont écrits dans la
+  // page, comme tous les textes.
+  for (const root of document.querySelectorAll<HTMLElement>('[data-assistant][data-mode="demo"]')) {
+    const facts = readFacts(root);
+    initAssistant(
+      root,
+      () =>
+        new DemoBoxAccess({
+          passwords: facts.examplePasswords,
+          loginDomain: facts.loginDomain,
+          firstNameMaxLength: facts.firstNameMaxLength,
+        }),
+    );
+  }
+</script>
+
+<style>
+  .points {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: var(--space-l) var(--space-xl);
+    margin: var(--space-s) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Même dessin que « Pourquoi cette étape ? » dans le guide. */
+  .point {
+    display: grid;
+    align-content: start;
+    gap: var(--space-xs);
+    padding-block-start: var(--space-m);
+    border-block-start: var(--rule-width) solid var(--line-strong);
+  }
+
+  .point__title {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    margin: 0;
+    font-size: var(--step-1);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+  }
+
+  .point__title :global(.point__icon) {
+    color: var(--text-muted);
+  }
+
+  .point__text {
+    margin: 0;
+  }
+
+  /* ---------- Pour aller plus loin (comme la page Notre engagement) ---------- */
+  .next {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-m);
+    text-align: center;
+  }
+
+  /* Téléphone : les liens l'un sous l'autre, tous sur toute la largeur. */
+  .next__links {
+    display: grid;
+    justify-self: stretch;
+    gap: var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .next__links .btn {
+    inline-size: 100%;
+  }
+
+  /* Dès 30rem : côte à côte et centrés, chacun à la largeur de son texte. */
+  @media (min-width: 30rem) {
+    .next__links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      justify-self: center;
+    }
+
+    .next__links .btn {
+      inline-size: auto;
+    }
+  }
+
+  /* Sans la fiche, rien d'autre ne s'imprime (Assistant.astro) ; ces règles
+     ne servent qu'à l'impression de la page entière, si la fiche est vide :
+     les points de l'ouverture l'un sous l'autre, sans se chevaucher. */
+  @media print {
+    :global(.demo-section),
+    :global(.next-section) {
+      padding-block: var(--space-l);
+    }
+
+    .points,
+    .point {
+      display: block;
+    }
+
+    .point {
+      break-inside: avoid;
+      margin-block-end: var(--space-m);
+    }
+  }
+</style>

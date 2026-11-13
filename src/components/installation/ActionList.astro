@@ -1,0 +1,67 @@
+---
+/**
+ * Gestes à faire, dans l'ordre : une liste numérotée, un geste par ligne
+ * (src/content/installation.ts). Les numéros sont dessinés en CSS, dans un
+ * rond au trait fin ; la liste reste une vraie liste ordonnée pour les
+ * lecteurs d'écran.
+ *
+ *   <ActionList items={step.actions} labelledby="etape-cable-gestes" />
+ */
+import GuideText from './GuideText.astro';
+import type { Sentence } from '../../content/installation';
+
+interface Props {
+  items: readonly Sentence[];
+  /** id du titre qui annonce la liste (« Ce qu'il faut faire »). */
+  labelledby?: string | undefined;
+}
+
+const { items, labelledby } = Astro.props;
+---
+
+<ol class="actions" aria-labelledby={labelledby}>
+  {items.map((item) => (
+    <li class="actions__item">
+      <GuideText parts={item} />
+    </li>
+  ))}
+</ol>
+
+<style>
+  .actions {
+    display: grid;
+    gap: var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: geste;
+  }
+
+  /* Le numéro est posé à gauche, centré sur la première ligne du texte. */
+  .actions__item {
+    position: relative;
+    min-block-size: 2rem;
+    max-inline-size: var(--measure);
+    padding-inline-start: 2.75rem;
+    counter-increment: geste;
+    text-wrap: pretty;
+  }
+
+  .actions__item::before {
+    content: counter(geste);
+    position: absolute;
+    inset-block-start: -0.1rem;
+    inset-inline-start: 0;
+    display: grid;
+    place-items: center;
+    inline-size: 2rem;
+    block-size: 2rem;
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: 50%;
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text);
+  }
+</style>

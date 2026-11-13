@@ -1,0 +1,192 @@
+---
+/**
+ * Le lien vers la page de la HAKO, présenté comme un bouton, et l'adresse
+ * écrite en grand dessous, pour la taper sur un autre appareil.
+ *
+ * Juste au-dessus du bouton, dans le même panneau, deux blocs à lire avant
+ * d'appuyer : « Avant d'appuyer sur ce bouton » (la page de la HAKO va
+ * remplacer ce guide, et n'affichera les mots de passe qu'une fois) et
+ * « Pour revenir à ce guide ». Ils ne s'impriment pas : sur papier,
+ * l'étape « Faites la première installation » suit, et dit la même chose.
+ *
+ * C'est un simple lien <a href> (http://hako.local/, src/data/installation.ts) :
+ * il s'ouvre dans le même onglet, et le bouton « Retour » du navigateur
+ * ramène au guide, à la même étape (l'étape est écrite dans l'adresse). Aucun
+ * script ne contient cette adresse. Le site ne cherche pas à joindre la HAKO
+ * (sa politique de sécurité l'en empêche) : seul le navigateur de la
+ * personne l'ouvre, quand elle appuie sur le bouton.
+ * Textes : src/content/installation.ts, clés open, beforeOpen et back de
+ * l'étape « page ».
+ */
+import Icon, { type UiIconName } from '../Icon.astro';
+import GuideText from './GuideText.astro';
+import type { Note, OpenPage } from '../../content/installation';
+
+interface Props {
+  open: OpenPage;
+  beforeOpen: Note;
+  back: Note;
+}
+
+const { open, beforeOpen, back } = Astro.props;
+const notes: readonly { readonly note: Note; readonly icon: UiIconName }[] = [
+  { note: beforeOpen, icon: 'info' },
+  { note: back, icon: 'arrow-left' },
+];
+---
+
+<div class="open surface-sable">
+  {notes.map(({ note, icon }) => (
+    <div class="open__note">
+      <h3 class="open__note-title">
+        <Icon name={icon} class="open__note-icon" />
+        <span>{note.title}</span>
+      </h3>
+      {note.text.map((sentence) => (
+        <p class="open__note-text">
+          <GuideText parts={sentence} />
+        </p>
+      ))}
+    </div>
+  ))}
+
+  <div class="open__action">
+    <a class="btn btn--primary open__button" href={open.href}>
+      <span>{open.label}</span>
+      <Icon name="arrow-right" />
+    </a>
+    <p class="open__hint">
+      <GuideText parts={open.hint} />
+    </p>
+  </div>
+
+  <div class="open__address">
+    <dl class="open__value">
+      <dt class="open__label">{open.addressLabel}</dt>
+      <dd class="open__address-text" translate="no">
+        {open.address}
+      </dd>
+    </dl>
+    <p class="open__type">
+      <GuideText parts={open.typeIt} />
+    </p>
+  </div>
+</div>
+
+<style>
+  .open {
+    display: grid;
+    gap: var(--space-l);
+    padding: var(--space-l) clamp(var(--space-s), 4vw, var(--space-xl));
+    border-radius: var(--radius);
+  }
+
+  /* Les deux blocs à lire avant d'appuyer : même titre que les encadrés du
+     guide (GuideNote), séparés par un filet, dans le panneau du bouton. */
+  .open__note {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .open__note + .open__note,
+  .open__action,
+  .open__address {
+    padding-block-start: var(--space-l);
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  .open__note-title {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-0);
+    font-weight: 700;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .open__note-title :global(.open__note-icon) {
+    color: var(--text-muted);
+  }
+
+  .open__note-text {
+    margin: 0;
+  }
+
+  .open__action,
+  .open__address {
+    display: grid;
+    gap: var(--space-xs);
+    justify-items: start;
+  }
+
+  /* Le bouton garde la taille de tous les boutons du site (.btn) ; sur
+     téléphone, il prend toute la largeur, comme « C'est fait ». */
+  @media (max-width: 29.99rem) {
+    .open__button {
+      inline-size: 100%;
+    }
+  }
+
+  /* Sur un écran très étroit, le texte passe sur deux lignes de même
+     longueur, plutôt que de laisser « HAKO » seul. */
+  .open__button > span {
+    text-wrap: balance;
+  }
+
+  .open__hint,
+  .open__type {
+    margin: 0;
+  }
+
+  .open__value {
+    display: grid;
+    gap: var(--space-3xs);
+    margin: 0;
+  }
+
+  .open__label {
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* L'adresse à taper : grande, en D-DIN, jamais coupée, facile à sélectionner. */
+  .open__address-text {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-2);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: var(--tracking-ui);
+    white-space: nowrap;
+    user-select: all;
+  }
+
+  @media (min-width: 30rem) {
+    .open__address-text {
+      font-size: var(--step-3);
+    }
+  }
+
+  @media print {
+    .open {
+      padding: 0;
+    }
+
+    .open__note,
+    .open__action {
+      display: none;
+    }
+
+    .open__address {
+      padding-block-start: 0;
+      border: 0;
+    }
+  }
+</style>

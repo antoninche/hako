@@ -170,4 +170,13 @@ const { id, question } = Astro.props;
       padding-inline-end: 0;
     }
   }
+
+  /* À l'impression, pas d'animation : une réponse dépliée au moment
+     d'imprimer (le guide d'installation les ouvre toutes au beforeprint)
+     serait figée à opacity 0 sur le papier. */
+  @media print {
+    .faq-item[open] .faq-item__answer {
+      animation: none;
+    }
+  }
 </style>

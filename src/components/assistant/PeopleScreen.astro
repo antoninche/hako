@@ -1,0 +1,423 @@
+---
+/**
+ * Écran « Qui va utiliser votre HAKO ? » : un prénom par personne, de 1 à 8 ;
+ * la première est la personne responsable de la HAKO.
+ *
+ * Avec JavaScript, un formulaire : une ligne par personne (gabarit
+ * <template>), « Ajouter une personne », « Retirer », l'identifiant de chaque
+ * personne sous son prénom (et pourquoi il a reçu un chiffre), et les
+ * erreurs reliées à chaque champ, résumées en haut comme dans le formulaire
+ * de commande. Revenu ici une fois les mots de passe créés, un encadré
+ * prévient : des prénoms modifiés, et la fiche est à refaire. Le script lit tous ses textes
+ * dans les attributs data-* de ce composant (assistant-ui.ts).
+ * Sans JavaScript, à la place du formulaire : des prénoms d'exemple, en
+ * lecture.
+ * Textes : src/content/assistant.ts, clé screens.people (et demo.people) ;
+ * règles des prénoms : src/lib/assistant/household.ts.
+ */
+import DemoNote from './DemoNote.astro';
+import Glyph from '../commande/Glyph.astro';
+import GuideNote from '../installation/GuideNote.astro';
+import GuideText from '../installation/GuideText.astro';
+import Icon from '../Icon.astro';
+import Screen from './Screen.astro';
+import ScreenNav from './ScreenNav.astro';
+import ScreenWhy from './ScreenWhy.astro';
+import { assistant } from '../../content/assistant';
+import { EXAMPLE_FIRST_NAMES, LOGIN_DOMAIN, MAX_PEOPLE } from '../../data/assistant';
+import { assignLogins } from '../../lib/assistant/household.ts';
+import { fillTemplate } from '../../lib/installation/guide-state.ts';
+
+interface Props {
+  demo: boolean;
+}
+
+const { demo } = Astro.props;
+const { people } = assistant.screens;
+const { common } = assistant;
+const exampleLogins = assignLogins(EXAMPLE_FIRST_NAMES, LOGIN_DOMAIN);
+---
+
+<Screen
+  view="people"
+  title={people.title}
+  lead={people.lead}
+  illustration={{ name: 'offre-home', ratio: '16/10' }}
+  demoNote={assistant.demo.people.note}
+  demo={demo}
+  problems={people.problems}
+>
+  <div data-people-renew hidden>
+    <GuideNote note={people.renew} />
+  </div>
+
+  <form
+    class="people-form"
+    id="personnes-formulaire"
+    method="post"
+    novalidate
+    aria-labelledby="ecran-personnes-titre"
+    data-people-form
+    data-js-only
+    hidden
+    data-msg-owner-missing={people.errors.ownerMissing}
+    data-msg-missing={people.errors.missing}
+    data-msg-too-long={people.errors.tooLong}
+    data-msg-characters={people.errors.characters}
+  >
+    <div
+      class="error-summary"
+      role="group"
+      tabindex="-1"
+      aria-labelledby="personnes-erreurs-titre"
+      aria-describedby="personnes-erreurs-liste"
+      data-error-summary
+      data-title-one={common.errors.titleOne}
+      data-title-many={common.errors.titleMany}
+      hidden
+    >
+      <h3 class="error-summary__title" id="personnes-erreurs-titre">
+        <Glyph name="alert" class="error-summary__icon" />
+        <span data-error-summary-title></span>
+      </h3>
+      <ul class="error-summary__list" id="personnes-erreurs-liste" data-error-summary-list></ul>
+    </div>
+
+    <ol
+      class="people"
+      data-people-list
+      data-owner-label={people.owner.label}
+      data-member-label={people.member.label}
+      data-remove-named={people.remove.named}
+      data-remove-numbered={people.remove.numbered}
+      data-login-preview={people.login.preview}
+      data-login-taken={people.login.taken}
+      data-max={MAX_PEOPLE}
+    ></ol>
+
+    <div class="people-form__add">
+      <button
+        type="button"
+        class="btn btn--secondary"
+        data-action="add-person"
+        aria-describedby="personnes-limite"
+      >
+        {people.add}
+      </button>
+      <p class="people-form__limit" id="personnes-limite">
+        {people.limit}
+      </p>
+      <p class="people-form__full" data-people-full hidden>
+        <Icon name="info" class="people-form__full-icon" />
+        <span>{people.errors.full}</span>
+      </p>
+    </div>
+
+    {demo && (
+      <DemoNote text={assistant.demo.people.fillNote}>
+        <button type="button" class="btn btn--secondary" data-action="fill-people">
+          {assistant.demo.people.fill}
+        </button>
+      </DemoNote>
+    )}
+
+    <div class="people-form__rules">
+      <p>
+        <GuideText parts={people.login.rule} />
+      </p>
+      <p>
+        <GuideText parts={people.children} />
+      </p>
+    </div>
+  </form>
+
+  <noscript>
+    <ol class="people-example">
+      {EXAMPLE_FIRST_NAMES.map((firstName, index) => (
+        <li class="people-example__item">
+          <span class="people-example__label">
+            {index === 0 ? people.owner.label : fillTemplate(people.member.label, { n: index + 1 })}
+          </span>
+          <span class="people-example__name">{firstName}</span>
+          <span class="people-example__login" translate="no">
+            {fillTemplate(people.login.preview, { identifiant: exampleLogins[index] ?? '' })}
+          </span>
+        </li>
+      ))}
+    </ol>
+    <div class="people-form__rules">
+      <p>
+        <GuideText parts={people.login.rule} />
+      </p>
+      <p>
+        <GuideText parts={people.children} />
+      </p>
+    </div>
+  </noscript>
+
+  <GuideNote note={people.ownerNote} />
+
+  <ScreenWhy why={people.why} />
+
+  <ScreenNav>
+    <button type="button" class="btn btn--secondary" data-action="go" data-view="welcome">
+      <Icon name="arrow-left" />
+      <span>{people.back}</span>
+    </button>
+    <button
+      type="submit"
+      form="personnes-formulaire"
+      class="btn btn--primary screen-nav__main"
+      data-busy-text={common.loading}
+    >
+      <span data-label>{people.next}</span>
+      <Icon name="arrow-right" />
+    </button>
+  </ScreenNav>
+</Screen>
+
+<template data-person-template>
+  <li class="person" data-person>
+    <label class="person__label" data-person-label>
+      {people.owner.label}
+    </label>
+    <p class="person__hint" data-person-hint hidden>
+      {people.owner.hint}
+    </p>
+    <p class="person__error" data-person-error hidden>
+      <Glyph name="alert" class="person__error-icon" />
+      <span>
+        <span class="visually-hidden">{common.errors.prefix}</span>
+        <span data-error-text></span>
+      </span>
+    </p>
+    <div class="person__row">
+      <input
+        class="person__input"
+        type="text"
+        autocomplete="off"
+        autocapitalize="words"
+        spellcheck="false"
+        data-person-input
+      />
+      <button type="button" class="btn btn--secondary person__remove" data-action="remove-person">
+        {people.remove.label}
+      </button>
+    </div>
+    <p class="person__login" data-person-login translate="no" hidden></p>
+  </li>
+</template>
+
+<style>
+  .people-form {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  /* ---------- Résumé des erreurs (comme le formulaire de commande) ---------- */
+  .error-summary {
+    padding: var(--space-m);
+    border: 2px solid var(--link);
+    border-radius: var(--radius);
+    background-color: var(--surface);
+  }
+
+  .error-summary:focus-visible {
+    outline: var(--focus-width) solid var(--focus);
+    outline-offset: var(--focus-offset);
+  }
+
+  .error-summary__title {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    margin: 0 0 var(--space-xs);
+    font-family: var(--font-ui);
+    font-size: var(--step-1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .error-summary__title :global(.error-summary__icon) {
+    color: var(--link);
+  }
+
+  .error-summary__list {
+    display: grid;
+    gap: var(--space-2xs);
+    margin: 0;
+    padding-inline-start: var(--space-l);
+    list-style: disc;
+  }
+
+  .error-summary__list :global(a) {
+    font-weight: 700;
+  }
+
+  /* ---------- Une ligne par personne ---------- */
+  .people {
+    display: grid;
+    gap: var(--space-m);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .people :global(.person) {
+    display: grid;
+    gap: var(--space-3xs);
+    align-content: start;
+  }
+
+  .people :global(.person__label) {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    line-height: 1.3;
+  }
+
+  .people :global(.person__hint) {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
+  .people :global(.person__error) {
+    display: flex;
+    gap: var(--space-2xs);
+    align-items: flex-start;
+    margin: var(--space-3xs) 0 0;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .people :global(.person__error-icon) {
+    margin-block-start: 0.1em;
+    color: var(--link);
+  }
+
+  .people :global(.person__row) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    align-items: center;
+    margin-block-start: var(--space-3xs);
+  }
+
+  .people :global(.person__input) {
+    flex: 1 1 9rem;
+    min-inline-size: 0;
+    min-block-size: 3rem;
+    padding: 0.625rem 0.875rem;
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: var(--radius-s);
+    font: inherit;
+    color: var(--text);
+    background-color: var(--surface);
+    transition:
+      border-color var(--dur-1) var(--ease-out),
+      box-shadow var(--dur-1) var(--ease-out);
+  }
+
+  .people :global(.person__input:hover) {
+    border-color: var(--text);
+  }
+
+  .people :global(.person__input:focus-visible) {
+    outline: var(--focus-width) solid var(--focus);
+    outline-offset: 1px;
+    border-color: var(--text);
+  }
+
+  /* Prénom refusé : bordure épaisse en plus du message (jamais la couleur seule). */
+  .people :global(.person__input[aria-invalid='true']) {
+    border-color: var(--link);
+    box-shadow: inset 0 0 0 1px var(--link);
+  }
+
+  .people :global(.person__remove) {
+    flex: none;
+  }
+
+  .people :global(.person__login) {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    overflow-wrap: anywhere;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Ajouter, limite, exemple ---------- */
+  .people-form__add {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-m);
+    align-items: center;
+  }
+
+  .people-form__limit {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
+  .people-form__full {
+    display: flex;
+    flex-basis: 100%;
+    gap: var(--space-xs);
+    align-items: flex-start;
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .people-form__full :global(.people-form__full-icon) {
+    margin-block-start: 0.15em;
+    color: var(--link);
+  }
+
+  .people-form__rules {
+    display: grid;
+    gap: var(--space-xs);
+    padding-block-start: var(--space-m);
+    border-block-start: var(--rule-width) solid var(--line);
+    color: var(--text-muted);
+  }
+
+  .people-form__rules p {
+    margin: 0;
+  }
+
+  /* ---------- Sans JavaScript : des prénoms d'exemple ---------- */
+  .people-example {
+    display: grid;
+    gap: var(--space-s);
+    margin: 0 0 var(--space-l);
+    padding: 0;
+    list-style: none;
+  }
+
+  .people-example__item {
+    display: grid;
+    gap: var(--space-3xs);
+    padding: var(--space-s) var(--space-m);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .people-example__label,
+  .people-example__login {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .people-example__login {
+    overflow-wrap: anywhere;
+    color: var(--text-muted);
+  }
+
+  .people-example__name {
+    font-size: var(--step-1);
+  }
+</style>

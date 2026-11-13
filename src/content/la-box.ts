@@ -18,6 +18,7 @@
  */
 import { company } from '../data/entreprise';
 import { backupCopy, homePageLicense, remoteAccess } from '../data/faits';
+import { boxAddress } from '../data/installation';
 import { routes, type NavLink } from '../data/navigation';
 import { pricing } from '../data/tarifs';
 import { formatList } from '../lib/format';
@@ -29,10 +30,19 @@ export interface Japanese {
 }
 
 /**
- * Morceaux d'un paragraphe : du texte, une information manquante ou un mot
- * japonais. Ce type sert aussi aux pages Notre engagement et Tutoriels.
+ * Une adresse à taper (http://hako.local) : écrite en D-DIN sur fond sable,
+ * jamais coupée en fin de ligne, comme les adresses des réponses de la FAQ.
  */
-export type Paragraph = readonly (Maybe<string> | Japanese)[];
+export interface Address {
+  readonly address: string;
+}
+
+/**
+ * Morceaux d'un paragraphe : du texte, une information manquante, un mot
+ * japonais ou une adresse à taper. Ce type sert aussi aux pages Notre
+ * engagement et Tutoriels.
+ */
+export type Paragraph = readonly (Maybe<string> | Japanese | Address)[];
 
 /** Lien affiché dans le texte (pages La box, Notre engagement et Tutoriels). */
 export interface Link extends NavLink {
@@ -103,13 +113,13 @@ const recipeLink: Maybe<string> = todo(
 
 export const laBox = {
   meta: {
-    title: 'La box : matériel et logiciels',
+    title: 'La HAKO : matériel et logiciels',
     description:
       'La box HAKO : un Raspberry Pi 5, un disque SSD, Immich pour les photos, Nextcloud pour les fichiers. Leurs licences, leurs sources et leurs limites.',
   },
 
   intro: {
-    title: 'La box',
+    title: 'La HAKO',
     lead: 'Un petit ordinateur, assemblé à la main en Provence, qui garde vos photos et vos fichiers chez vous. Voici ce qu’il contient, les logiciels qui le font fonctionner, et ses limites.',
     highlightsLabel: 'En bref',
     highlights: [
@@ -176,9 +186,11 @@ export const laBox = {
         name: 'Le branchement',
         text: [
           [
-            'La box se branche à votre box internet par un câble réseau (Ethernet). Le Wi-Fi reste possible si le câble n’est pas pratique chez vous.',
+            'La box se branche à votre box internet par un câble réseau (Ethernet), indispensable : pour l’instant, elle ne se relie pas au Wi-Fi.',
           ],
-          ['Son alimentation est fournie avec la box.'],
+          [
+            'Son alimentation est fournie avec la box. Le câble réseau ne l’est pas : si nous vous l’envoyons, prévoyez-en un, assez long pour aller jusqu’à votre box internet.',
+          ],
         ],
       },
     ] satisfies readonly Part[],
@@ -229,7 +241,7 @@ export const laBox = {
                 'Une page simple pour ouvrir vos photos et vos fichiers. Elle s’ouvre depuis un appareil connecté au réseau de la maison.',
               ],
             ],
-            address: 'http://mabox.local',
+            address: boxAddress.display,
             license: homePageLicense,
             links: [],
           },
@@ -330,7 +342,7 @@ export const laBox = {
   limits: {
     id: 'limites',
     title: 'Les limites de la box',
-    lead: 'Trois points à connaître avant de commander.',
+    lead: 'Quatre points à connaître avant de commander.',
     items: [
       {
         id: 'pas-tout-libre',
@@ -361,6 +373,15 @@ export const laBox = {
         id: 'copie-de-secours',
         title: 'Pas encore de copie de secours',
         text: [[...backupCopy.sentence, ' ', backupCopy.advice]],
+      },
+      {
+        id: 'reseau-partage',
+        title: 'Pas sur un réseau partagé',
+        text: [
+          [
+            'Les échanges entre vos appareils et la box ne sont pas chiffrés. Ils ne quittent pas votre maison, mais la box ne convient pas à un réseau partagé avec d’autres logements (résidence, Wi-Fi d’immeuble) : quelqu’un sur ce réseau pourrait les lire.',
+          ],
+        ],
       },
     ] satisfies readonly Limit[],
   },

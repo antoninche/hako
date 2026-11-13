@@ -1,0 +1,162 @@
+---
+/**
+ * Écran « Bienvenue » de la page de la HAKO : d'où vient cette page, ce que
+ * la personne va faire, combien de temps compter, ce qu'il lui faut, puis
+ * « Commencer ». C'est l'écran affiché à l'ouverture. Tant que la HAKO n'a
+ * pas dit où elle en est, « Commencer » attend (« Un instant… »).
+ * Textes : src/content/assistant.ts, clé screens.welcome (et demo.welcome).
+ */
+import ActionList from '../installation/ActionList.astro';
+import GuideNote from '../installation/GuideNote.astro';
+import GuideText from '../installation/GuideText.astro';
+import Icon from '../Icon.astro';
+import Screen from './Screen.astro';
+import ScreenNav from './ScreenNav.astro';
+import ScreenWhy from './ScreenWhy.astro';
+import { assistant } from '../../content/assistant';
+
+interface Props {
+  demo: boolean;
+}
+
+const { demo } = Astro.props;
+const { welcome } = assistant.screens;
+---
+
+<Screen
+  view="welcome"
+  title={welcome.title}
+  lead={welcome.lead}
+  illustration={{ name: 'installation/page-hako', ratio: '4/3' }}
+  demoNote={assistant.demo.welcome}
+  demo={demo}
+  problems={welcome.problems}
+  initial
+>
+  <div class="welcome">
+    <div class="welcome__block">
+      <h3 class="welcome__title" id="ecran-bienvenue-plan">
+        {welcome.plan.title}
+      </h3>
+      <ActionList items={welcome.plan.items} labelledby="ecran-bienvenue-plan" />
+      <p class="welcome__duration">
+        <Icon name="clock" class="welcome__icon" />
+        <span>
+          <GuideText parts={welcome.duration} />
+        </span>
+      </p>
+    </div>
+
+    <div class="welcome__block welcome__block--needs">
+      <h3 class="welcome__title welcome__title--frame" id="ecran-bienvenue-besoins">
+        {welcome.needs.title}
+      </h3>
+      <ul class="welcome__needs" aria-labelledby="ecran-bienvenue-besoins">
+        {welcome.needs.items.map((item) => (
+          <li>
+            <GuideText parts={item} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  {welcome.notes.map((note) => (
+    <GuideNote note={note} />
+  ))}
+
+  <ScreenWhy why={welcome.why} />
+
+  <ScreenNav>
+    <button
+      type="button"
+      class="btn btn--primary screen-nav__main"
+      data-action="start"
+      data-busy-text={assistant.common.loading}
+    >
+      <span data-label>{welcome.start}</span>
+      <Icon name="arrow-right" />
+    </button>
+  </ScreenNav>
+</Screen>
+
+<style>
+  .welcome {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  .welcome__block {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+  }
+
+  .welcome__block--needs {
+    padding: var(--space-m);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  /* Intertitre, comme ceux du guide (« Ce qu'il faut faire »). */
+  .welcome__title {
+    margin: 0;
+    font-size: var(--step-2);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+  }
+
+  /* Titre du cadre « Ce qu'il vous faut » : une étiquette d'interface. */
+  .welcome__title--frame {
+    font-family: var(--font-ui);
+    font-size: var(--step-0);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .welcome__duration {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: flex-start;
+    margin: 0;
+  }
+
+  .welcome__duration :global(.welcome__icon) {
+    margin-block-start: 0.2em;
+    color: var(--text-muted);
+  }
+
+  .welcome__needs {
+    display: grid;
+    gap: var(--space-2xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .welcome__needs li {
+    position: relative;
+    max-inline-size: var(--measure);
+    padding-inline-start: var(--space-m);
+  }
+
+  /* Petite pastille caramel, comme les listes du guide et de la page La box. */
+  .welcome__needs li::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0.65em;
+    inset-inline-start: 0.2rem;
+    inline-size: 0.375rem;
+    block-size: 0.375rem;
+    border-radius: 50%;
+    color: transparent;
+    background-color: var(--caramel);
+  }
+
+  @container ecran (min-width: 44rem) {
+    .welcome {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--space-xl);
+    }
+  }
+</style>

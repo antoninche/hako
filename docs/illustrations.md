@@ -4,8 +4,8 @@ Les dessins du site forment une seule série, en « papier découpé » : des fo
 
 ## Les fichiers
 
-- `src/assets/illustrations/` : les 21 dessins publiés, soit 10 scènes, les 7 icônes des engagements (`icones/`) et les 4 vignettes des tutoriels (`tutoriels/`).
-- `design/illustrations/_source/` : le générateur. `dessins.mjs` décrit chaque dessin, avec des coordonnées posées une à une ; `objets.mjs` réunit les objets communs (carte de fond, sol, box, box internet, personnes, meubles, plantes) ; `papier.mjs` donne la palette, la coupe irrégulière et l’ombre ; `kanji.mjs` pose le kanji 箱 du logo sur le dessus de la box, et `mot.mjs` le mot HAKO du logo sur sa face avant.
+- `src/assets/illustrations/` : les 29 dessins publiés, soit 10 scènes, les 8 scènes du guide d’installation (`installation/`), les 7 icônes des engagements (`icones/`) et les 4 vignettes des tutoriels (`tutoriels/`).
+- `design/illustrations/_source/` : le générateur. `dessins.mjs` décrit chaque dessin du site, et `installation.mjs` les 8 scènes du guide d’installation, avec des coordonnées posées une à une ; `objets.mjs` réunit les objets communs (carte de fond, sol, box, box internet, personnes, meubles, plantes, et pour le guide : console, étagère murale, prise, bloc d’alimentation, sablier, téléphone, symbole du Wi-Fi) ; `papier.mjs` donne la palette, la coupe irrégulière et l’ombre ; `kanji.mjs` pose le kanji 箱 du logo sur le dessus de la box, et `mot.mjs` le mot HAKO du logo sur sa face avant.
 - `design/illustrations/svgo.config.mjs` : l’optimisation par SVGO.
 - `scripts/illustrations/check.mjs` et `scripts/illustrations/render.mjs` : le contrôle et le rendu en PNG.
 
@@ -69,7 +69,7 @@ Le meuble ouvert à cases (`casier()`, la bibliothèque et l’étagère des off
 
 Les bandes ont des bouts ronds. La coupe irrégulière reste sous 1,5 unité, discrète même à 360 px. Chaque scène est posée sur une carte sable aux coins arrondis (rayon 40 à 44, 30 pour les vignettes). Les icônes sont posées sur une pastille sable, sans carte.
 
-La box est dessinée comme le prototype : coque perle aux angles arrondis, socle noyer un peu en retrait sur ses pieds, kanji du logo en chocolat au centre du dessus et mot HAKO du logo en chocolat au centre de la grande face avant. Cette face est celle que l’on voit sur l’image de trois quarts du prototype : la grande face lisse, sans fentes ni ouvertures. Le kanji et le mot sont des tracés du logo officiel (`hako-kanji.svg` et `hako-mot.svg`), jamais du texte. Ses proportions sont réunies dans `BOX` (`_source/objets.mjs`). Aucun téléphone n’est dessiné (il n’y a pas d’accès depuis l’extérieur de la maison pour l’instant) et aucune copie de secours n’est montrée.
+La box est dessinée comme le prototype : coque perle aux angles arrondis, socle noyer un peu en retrait sur ses pieds, kanji du logo en chocolat au centre du dessus et mot HAKO du logo en chocolat au centre de la grande face avant. Cette face est celle que l’on voit sur l’image de trois quarts du prototype : la grande face lisse, sans fentes ni ouvertures. Le kanji et le mot sont des tracés du logo officiel (`hako-kanji.svg` et `hako-mot.svg`), jamais du texte. Ses proportions sont réunies dans `BOX` (`_source/objets.mjs`). Aucun téléphone n’est dessiné hors du guide d’installation (il n’y a pas d’accès depuis l’extérieur de la maison pour l’instant) ; dans le guide (`installation/page-hako`, `installation/applications`), il est dans la maison, relié au Wi-Fi, jamais dehors ni en 4G. Aucune copie de secours n’est montrée.
 
 La box a un ventilateur : il lui faut de l’air autour. Elle ne remplit jamais la case, la fenêtre ou le meuble qui la porte ; on voit le fond libre au-dessus d’elle et de chaque côté. Dans les offres, sa case du meuble ouvert est large et haute : 49 unités d’air au-dessus de la box, 39 (salon) et 35 (boutique) de chaque côté, soit 16, 13 et 11 px sur un écran de 360 px. Sur une étagère, on laisse aussi un écart franc entre la box et ses voisins (box internet, plante).
 
@@ -79,16 +79,28 @@ Le mot HAKO est discret, comme la marque d’un appareil : 0,3 fois la largeur d
 
 La taille à donner dépend de la largeur du dessin dans la page. Sur un écran de 360 px :
 
-| Dessin                        | Largeur dans la page | Box d’au moins | Box dessinée | Mot HAKO dans la page   |
-| ----------------------------- | -------------------- | -------------- | ------------ | ----------------------- |
-| offres (800 de large)         | 258 px               | 146 unités     | 150          | 14,5 px                 |
-| vignettes des tutoriels (640) | 322 px               | 94 unités      | de 150 à 168 | de 22,6 à 25,3 px       |
-| page 404 (600)                | 192 px               | 147 unités     | 264          | 25,3 px                 |
-| vue éclatée (800)             | 324 px               | 117 unités     | 320          | 38,8 px                 |
-| déménageur (800)              | 276 px               | pas de minimum | 110          | absent (11,4 px)        |
-| étapes (600)                  | 88 px                | pas de minimum | de 50 à 190  | absent (8,4 px au plus) |
+| Dessin                        | Largeur dans la page | Box d’au moins | Box dessinée | Mot HAKO dans la page                             |
+| ----------------------------- | -------------------- | -------------- | ------------ | ------------------------------------------------- |
+| offres (800 de large)         | 258 px               | 146 unités     | 150          | 14,5 px                                           |
+| vignettes des tutoriels (640) | 322 px               | 94 unités      | de 150 à 168 | de 22,6 à 25,3 px                                 |
+| page 404 (600)                | 192 px               | 147 unités     | 264          | 25,3 px                                           |
+| vue éclatée (800)             | 324 px               | 117 unités     | 320          | 38,8 px                                           |
+| déménageur (800)              | 276 px               | pas de minimum | 110          | absent (11,4 px)                                  |
+| étapes (600)                  | 88 px                | pas de minimum | de 50 à 190  | absent (8,4 px au plus)                           |
+| guide d’installation (800)    | 324 px               | 116 unités     | de 112 à 232 | de 18,2 à 28,2 px ; absent de page-hako (13,6 px) |
 
 Ces largeurs viennent de la mise en page des sections (mesurées le 13 novembre 2026 sur le site construit) ; si elle change, il faut les mesurer de nouveau. Entre parenthèses, la largeur qu’aurait le mot là où il n’est pas posé.
+
+## Les procédés du guide d’installation
+
+Les scènes du guide (`installation.mjs`) disent un geste : le dessin vaut consigne. Elles reprennent la série, avec quelques procédés de plus :
+
+- **Gros plan dans un rond.** Un détail trop petit (la fiche qui entre dans la prise) est repris en grand dans un rond crème à ombre lin, relié à sa place par un pointillé caramel.
+- **Le « clic ».** Trois petits traits terre, en éventail, au point où la fiche se bloque ; c’est le seul son dessiné de la série.
+- **Le Wi-Fi.** Trois arcs et un point en bandes caramel (`wifi()`), au-dessus de la box internet qui le diffuse.
+- **L’air autour de la box.** Un cadre en pointillés caramel, ouvert en bas, montre l’espace à laisser libre autour d’elle (`emplacement`).
+- **La page de la HAKO.** Sur un écran, la petite maison olive à porte crème, comme sur la vignette « Prise en main » : c’est le seul signe de cette page dans la série.
+- **Un meuble vu de près.** Quand les appareils sont le sujet (`cable-reseau`), le plateau caramel de la console occupe toute la largeur, sans sol : on voit qu’ils sont posés sur un meuble, comme le demandent les consignes.
 
 ## Reconstruire et vérifier
 

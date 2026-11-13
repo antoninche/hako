@@ -1,0 +1,48 @@
+---
+/**
+ * « Voir un autre écran », sous la page de la HAKO simulée : ce que montre la
+ * page de la HAKO quand quelque chose bloque (HAKO qui se prépare encore, qui
+ * ne répond plus, création des comptes qui s'arrête, erreur imprévue, HAKO
+ * déjà installée). Chaque bouton fait répondre la HAKO simulée en
+ * conséquence (assistant-ui.ts) ; « Réessayer », sur l'écran montré, ramène
+ * là où l'on était. Même dessin qu'une question de la FAQ, qui se déplie.
+ * Avec JavaScript seulement.
+ * Textes : src/content/assistant.ts, clé demo.scenarios.
+ */
+import FaqItem from '../faq/FaqItem.astro';
+import { assistant } from '../../content/assistant';
+import { STATE_IDS } from '../../lib/assistant/machine.ts';
+
+const { scenarios } = assistant.demo;
+---
+
+<div class="scenarios" data-js-only hidden>
+  <FaqItem id="demonstration-autres-ecrans" question={scenarios.title}>
+    <p>{scenarios.hint}</p>
+    <div class="scenarios__list">
+      {STATE_IDS.map((id) => (
+        <button type="button" class="btn btn--secondary" data-action="simulate" data-scenario={id}>
+          {scenarios.items[id]}
+        </button>
+      ))}
+    </div>
+  </FaqItem>
+</div>
+
+<style>
+  .scenarios {
+    border-block-start: var(--rule-width) solid var(--line-strong);
+  }
+
+  .scenarios__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  @media print {
+    .scenarios {
+      display: none;
+    }
+  }
+</style>

@@ -1,6 +1,7 @@
 ---
 /**
- * a. Ouverture de l’accueil : accroche (h1), promesse, deux boutons et quatre
+ * a. Ouverture de l’accueil : accroche (h1), promesse, deux boutons, une ligne
+ * vers le guide d’installation pour qui a déjà reçu sa box, et quatre
  * repères. Le texte vient en premier dans la page : il s’affiche tout de suite,
  * sans attendre d’image. À côté (dessous sur téléphone), la box vue de trois
  * quarts, en image de synthèse du prototype, sur le fond « pierre » de ses
@@ -8,6 +9,8 @@
  * légende reprend la phrase qui explique le nom (src/content/prototype.ts).
  */
 import PrototypeFigure from '../prototype/PrototypeFigure.astro';
+import Text from '../texte/Text.astro';
+import TextLink from '../texte/TextLink.astro';
 import RichText from './RichText.astro';
 import { hero } from '../../content/accueil';
 import { prototype } from '../../content/prototype';
@@ -32,6 +35,9 @@ import { company } from '../../data/entreprise';
           {hero.secondary.label}
         </a>
       </div>
+      <p class="hero__received">
+        <Text text={hero.received.text} /> <TextLink link={hero.received.link} arrow />
+      </p>
       <ul class="hero__highlights" aria-label={hero.highlightsLabel}>
         {hero.highlights.map((item) => (
           <li class="hero__highlight">
@@ -109,6 +115,14 @@ import { company } from '../../data/entreprise';
     flex-wrap: wrap;
     gap: var(--space-s);
     margin-block-start: var(--space-xl);
+  }
+
+  /* « Vous avez reçu votre HAKO ? » : une ligne sous les boutons, avec le
+     lien « pour aller plus loin » du site (TextLink), comme sur la page
+     Tutoriels. */
+  .hero__received {
+    margin: var(--space-s) 0 0;
+    color: var(--text-muted);
   }
 
   /* Sur petit écran, les deux boutons se partagent la ligne. */

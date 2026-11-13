@@ -1,0 +1,113 @@
+---
+/**
+ * « Mes photos » et « Mes fichiers » : une carte par application (Immich,
+ * Nextcloud), même dessin que les cartes des applications du guide
+ * (src/components/installation/AppCards.astro) : fond crème, surtitre en
+ * capitales, puis le bouton qui ouvre l'application.
+ *
+ * Sur la vraie HAKO, une fois l'adresse de l'application connue, le bouton
+ * l'ouvre. Tant que l'adresse est à confirmer (repère jaune), la carte la
+ * montre à la place. En démonstration, le même bouton, qui ne mène nulle
+ * part : la note de la démonstration le dit.
+ * Textes : src/content/assistant.ts, clé screens.ready.apps.
+ */
+import Fact from '../Fact.astro';
+import Icon from '../Icon.astro';
+import { assistant, type AppButton } from '../../content/assistant';
+import { isTodo } from '../../lib/todo';
+
+interface Props {
+  demo: boolean;
+}
+
+const { demo } = Astro.props;
+const apps: readonly AppButton[] = assistant.screens.ready.apps;
+---
+
+<ul class="apps">
+  {apps.map((app) => (
+    <li class="app surface-creme">
+      <p class="app__role">{app.role}</p>
+      <h3 class="app__name">{app.label}</h3>
+      {demo ? (
+        <span class="btn btn--primary app__open app__open--demo">
+          <span>{app.label}</span>
+          <Icon name="arrow-right" />
+        </span>
+      ) : !isTodo(app.address) ? (
+        <a class="btn btn--primary app__open" href={app.address}>
+          <span>{app.label}</span>
+          <Icon name="arrow-right" />
+        </a>
+      ) : (
+        <p class="app__address" translate="no">
+          <Fact value={app.address} />
+        </p>
+      )}
+    </li>
+  ))}
+</ul>
+
+<style>
+  .apps {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+    gap: var(--space-m);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+    padding: var(--space-m);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-s);
+  }
+
+  .app__name {
+    margin: 0;
+    font-size: var(--step-2);
+    font-weight: 500;
+    line-height: var(--leading-tight);
+  }
+
+  .app__role,
+  .app__address {
+    margin: 0;
+  }
+
+  /* Surtitre court, en capitales, comme les cartes des applications du guide. */
+  .app__role {
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .app__address {
+    margin-block-start: auto;
+    padding-block-start: var(--space-xs);
+    border-block-start: var(--rule-width) solid var(--line);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    overflow-wrap: anywhere;
+  }
+
+  .app__open {
+    align-self: flex-start;
+    margin-block-start: auto;
+  }
+
+  /* En démonstration : le bouton de la HAKO, sans action. */
+  .app__open--demo {
+    cursor: default;
+  }
+</style>

@@ -22,11 +22,14 @@
  *   <Detail of="outside-area" />       ce que nous proposons hors de cette zone
  *   <Detail of="email" />              adresse e-mail de contact (lien)
  *   <Detail of="phone" />              numéro de téléphone (lien)
+ *   <Detail of="box-address" />        adresse de la page de la HAKO (http://hako.local), à taper
+ *   <Detail of="android-version" />    version d’Android à partir de laquelle cette adresse s’ouvre
  *
  * Une information encore inconnue s'affiche en repère jaune, avec le même
  * texte que sur les autres pages (pour les tarifs : missingPrice, dans
  * src/data/faits.ts). Elle est recensée une seule fois dans TODO.md, depuis
- * le fichier de données.
+ * le fichier de données. Les deux dernières valeurs viennent de
+ * src/data/installation.ts, où l'adresse de la HAKO s'écrit une seule fois.
  */
 import Fact from '../Fact.astro';
 import Text from '../texte/Text.astro';
@@ -43,6 +46,7 @@ import {
   shippingCost,
   warranty,
 } from '../../data/faits';
+import { boxAddress, requirements } from '../../data/installation';
 import { pricing } from '../../data/tarifs';
 import { orMissing } from '../../lib/commande/inline';
 import { formatList } from '../../lib/format';
@@ -66,7 +70,9 @@ export type DetailId =
   | 'service-area'
   | 'outside-area'
   | 'email'
-  | 'phone';
+  | 'phone'
+  | 'box-address'
+  | 'android-version';
 
 interface Props {
   of: DetailId;
@@ -102,6 +108,8 @@ const values: Record<DetailId, Maybe<string>> = {
   'outside-area': company.serviceArea.outside,
   email: company.email,
   phone: company.phone,
+  'box-address': boxAddress.display,
+  'android-version': requirements.android,
 };
 
 const value = values[id];
@@ -113,6 +121,8 @@ const link = id === 'email' || id === 'phone' ? id : undefined;
 
 {isTodo(value) ? (
   <Todo what={value.todo}>{value.placeholder}</Todo>
+) : id === 'box-address' ? (
+  <code translate="no">{value}</code>
 ) : link ? (
   <span class="nowrap">
     <Fact value={value} link={link} />

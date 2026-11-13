@@ -470,6 +470,23 @@ main:focus {
   box-shadow: inset 0 0 0 var(--rule-width) var(--text);
 }
 
+/* ---------- Contraste élevé (Windows) ----------
+ * Les icônes au trait (Icon, Glyph) prennent la couleur du texte qui les
+ * entoure, que le système a remplacée (un SVG garde sinon sa couleur de la
+ * palette, sur un fond qui n'est plus le nôtre) ; le bouton principal se
+ * distingue des autres par un contour épais.
+ */
+@media (forced-colors: active) {
+  .icon,
+  .glyph {
+    color: inherit !important;
+  }
+
+  .btn--primary {
+    border-width: 3px;
+  }
+}
+
 /* ---------- Informations manquantes (TODO) ----------
  * Surlignage jaune tant que PUBLIC_SHOW_TODOS vaut true (data-todos="visible").
  * En mode discret, le texte provisoire reste mais se fond dans la page.

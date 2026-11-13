@@ -1,0 +1,168 @@
+---
+/**
+ * Chronomètre de l'étape « Laissez la HAKO se préparer » : il compte le temps
+ * écoulé depuis le clic sur « Lancer le chronomètre » ; « Remettre à zéro »
+ * le fait repartir de zéro.
+ *
+ * Avant le lancement, le temps affiche « 0 min 00 s » en pâle, et une ligne
+ * d'état dit « Pas encore lancé » : le grand D-DIN ne sert qu'aux chiffres,
+ * comme les prix des offres.
+ * Le temps affiché (minutes et secondes) est ignoré par les lecteurs
+ * d'écran ; ils lisent à la place le temps en minutes entières, qui ne change
+ * qu'une fois par minute (role="timer" : rien n'est annoncé de lui-même).
+ * Le chronomètre ne garde rien en mémoire et ne fonctionne qu'avec
+ * JavaScript (src/components/installation/guide.ts) ; sans lui, une phrase
+ * propose de noter l'heure du branchement.
+ * Textes : src/content/installation.ts, clé chronometer de l'étape « preparation ».
+ */
+import Icon from '../Icon.astro';
+import type { Chronometer } from '../../content/installation';
+import { elapsedText } from '../../lib/installation/guide-state.ts';
+
+interface Props {
+  chronometer: Chronometer;
+}
+
+const { chronometer } = Astro.props;
+---
+
+<div
+  class="chrono surface-sable"
+  data-chrono
+  data-format={chronometer.display}
+  data-zero={chronometer.spoken.zero}
+  data-one={chronometer.spoken.one}
+  data-many={chronometer.spoken.many}
+>
+  <h3 class="chrono__title">
+    <Icon name="clock" class="chrono__icon" />
+    <span>{chronometer.title}</span>
+  </h3>
+
+  <div class="chrono__body" data-js-only hidden>
+    <p class="chrono__intro">{chronometer.intro}</p>
+    <div class="chrono__reading">
+      <p class="chrono__label" id="chronometre-libelle">
+        {chronometer.label}
+      </p>
+      <p class="chrono__status" aria-hidden="true" data-chrono-status>
+        {chronometer.idle}
+      </p>
+      <p class="chrono__time" role="timer" aria-labelledby="chronometre-libelle">
+        <span aria-hidden="true" data-chrono-visual>
+          {elapsedText(0, chronometer.display)}
+        </span>
+        <span class="visually-hidden" data-chrono-spoken>
+          {chronometer.idle}
+        </span>
+      </p>
+    </div>
+    <div class="chrono__actions">
+      <button type="button" class="btn btn--primary" data-chrono-start>
+        {chronometer.start}
+      </button>
+      <button type="button" class="btn btn--secondary" data-chrono-reset hidden>
+        {chronometer.reset}
+      </button>
+    </div>
+    <p class="chrono__memory">{chronometer.memory}</p>
+  </div>
+
+  <noscript>
+    <p class="chrono__noscript">{chronometer.noscript}</p>
+  </noscript>
+</div>
+
+<style>
+  .chrono {
+    display: grid;
+    gap: var(--space-s);
+    padding: var(--space-m) clamp(var(--space-s), 3vw, var(--space-l));
+    border-radius: var(--radius);
+  }
+
+  .chrono__title {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-1);
+    font-weight: 700;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .chrono__title :global(.chrono__icon) {
+    color: var(--text-muted);
+  }
+
+  .chrono__body {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .chrono__intro,
+  .chrono__label,
+  .chrono__status,
+  .chrono__memory,
+  .chrono__noscript {
+    margin: 0;
+  }
+
+  .chrono__reading {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-block: var(--space-s);
+    border-block: var(--rule-width) solid var(--line);
+  }
+
+  .chrono__label {
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text-muted);
+  }
+
+  .chrono__status {
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
+  /* Le temps, au niveau du titre de l'étape (--step-3). D-DIN n'a pas de
+     chiffres de largeur fixe : le temps change un peu de largeur chaque
+     seconde, sans rien pousser autour de lui. Pas encore lancé : en pâle. */
+  .chrono__time {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-3);
+    font-weight: 700;
+    font-variant-numeric: lining-nums tabular-nums;
+    line-height: 1.1;
+    letter-spacing: var(--tracking-ui);
+    white-space: nowrap;
+  }
+
+  .chrono:not([data-running]) .chrono__time {
+    color: var(--text-muted);
+  }
+
+  .chrono__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+  }
+
+  .chrono__memory {
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
+  /* Sur papier, un chronomètre ne sert à rien. */
+  @media print {
+    .chrono {
+      display: none;
+    }
+  }
+</style>

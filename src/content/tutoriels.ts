@@ -17,6 +17,7 @@
  */
 import { company } from '../data/entreprise';
 import { backupCopy, moverOffers } from '../data/faits';
+import { boxAddress } from '../data/installation';
 import { routes } from '../data/navigation';
 import { isTodo, todo, type Maybe } from '../lib/todo';
 import type { Link, Paragraph } from './la-box';
@@ -60,7 +61,9 @@ const items = [
     title: 'Prise en main et installation',
     text: [
       [
-        'Ce que nous installons chez vous, puis vos premiers pas : ouvrir la page d’accueil de la box, à l’adresse http://mabox.local, depuis un appareil de la maison.',
+        'Ce que nous installons chez vous, ou ce que vous installez avec notre guide, puis vos premiers pas : ouvrir la page de votre HAKO, à l’adresse ',
+        { address: boxAddress.display },
+        ', depuis un appareil de la maison.',
       ],
     ],
     videos: {
@@ -124,7 +127,12 @@ const items = [
   },
 ] as const satisfies readonly Tutorial[];
 
-const videosOnline = published(items);
+/**
+ * Vrai dès qu’une vidéo est en ligne. Le guide d’installation s’en sert aussi
+ * (src/content/installation.ts) : tant qu’il est faux, il annonce les
+ * tutoriels au futur.
+ */
+export const videosOnline = published(items);
 
 export const tutoriels = {
   meta: {
@@ -140,6 +148,14 @@ export const tutoriels = {
     lead: videosOnline
       ? 'De courtes vidéos pour prendre votre box en main, à votre rythme, à regarder sur YouTube ou sur PeerTube.'
       : 'De courtes vidéos pour prendre votre box en main, à votre rythme. Vous pourrez les regarder sur YouTube ou sur PeerTube.',
+    // Hors de notre zone, la personne installe la HAKO elle-même : le guide écrit, pas à pas.
+    guide: {
+      text: 'Vous installez votre HAKO vous-même ?',
+      link: {
+        label: 'Suivez le guide d’installation pas à pas',
+        href: routes.install,
+      } satisfies Link,
+    },
   },
 
   labels: {

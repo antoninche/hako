@@ -1,0 +1,502 @@
+---
+/**
+ * Le guide d'installation, étape par étape : la progression et le sommaire,
+ * les huit étapes, la fin du guide, puis les outils (imprimer, tout voir).
+ *
+ * Sans JavaScript, tout se lit de haut en bas : les étapes se suivent, le
+ * sommaire est une liste de liens vers chacune d'elles, et ce qui ne marche
+ * qu'avec JavaScript reste caché (attribut hidden, retiré par le script).
+ * Avec JavaScript (guide.ts), une seule étape s'affiche à la fois ; l'étape
+ * en cours est écrite dans l'adresse (#etape-cable), sans rien enregistrer
+ * sur l'appareil.
+ *
+ * Progression : « Étape 3 sur 8 », la place dans le guide, et une barre.
+ * Elle ne dit jamais qu'une étape est faite : on peut arriver à l'étape 7 par
+ * un lien. Dans le sommaire, seule une étape validée par « C'est fait »
+ * pendant la visite reçoit sa coche (rien n'est gardé après la visite).
+ *
+ * Écran large (64rem et plus) : la progression et le sommaire restent à
+ * gauche, collés sous l'en-tête, comme les rubriques de la FAQ. Plus étroit :
+ * la liste des étapes se replie (« Aller directement à une étape », même dessin qu'une
+ * question de la FAQ), pour que la première étape arrive tout de suite. Les
+ * outils sont sous le guide, à toutes les largeurs : la colonne collante
+ * tient ainsi sur l'écran d'un ordinateur portable.
+ * Textes : src/content/installation.ts.
+ */
+import GuideFinish from './GuideFinish.astro';
+import GuideStep from './GuideStep.astro';
+import Glyph from '../commande/Glyph.astro';
+import Icon from '../Icon.astro';
+import { installation, type Step } from '../../content/installation';
+import { fillTemplate, stepAnchor } from '../../lib/installation/guide-state.ts';
+
+const { labels } = installation;
+const steps: readonly Step[] = installation.steps;
+const total = steps.length;
+---
+
+<div class="guide" data-guide data-mode="all">
+  <div class="guide__aside">
+    <div class="guide__progress" data-js-only hidden>
+      <label
+        class="guide__progress-label"
+        for="progression-installation"
+        data-progress-label
+        data-step-of={labels.stepOf}
+        data-end={labels.progressEnd}
+      >
+        {fillTemplate(labels.stepOf, { n: 1, total })}
+      </label>
+      <progress
+        class="guide__progress-bar"
+        id="progression-installation"
+        max={total}
+        value="0"
+        data-progress-bar
+      ></progress>
+    </div>
+
+    <nav class="toc" aria-label={labels.stepsList}>
+      <details class="toc__fold" data-toc-fold>
+        <summary class="toc__summary">
+          <span class="toc__summary-text">{fillTemplate(labels.tocToggle, { total })}</span>
+          <span class="toc__summary-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M5 12h14"></path>
+              <path class="toc__summary-bar" d="M12 5v14"></path>
+            </svg>
+          </span>
+        </summary>
+        <ol class="toc__list" data-toc-list data-done-text={labels.stepDone}>
+          {steps.map((step, index) => (
+            <li class="toc__item">
+              <a class="toc__link" href={`#${stepAnchor(step.id)}`} data-toc={step.id}>
+                <span class="toc__number" aria-hidden="true">
+                  <span class="toc__digit">{index + 1}</span>
+                  <Glyph name="check" class="toc__check" />
+                </span>
+                <span class="toc__label">
+                  {step.short}
+                  <span class="visually-hidden" data-toc-state></span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </details>
+    </nav>
+  </div>
+
+  <div class="guide__main">
+    <noscript>
+      <p class="guide__noscript">
+        <Icon name="info" class="guide__noscript-icon" />
+        <span>{labels.noscript}</span>
+      </p>
+    </noscript>
+
+    {steps.map((step, index) => (
+      <GuideStep step={step} index={index} total={total} />
+    ))}
+
+    <GuideFinish />
+
+    <div class="guide__tools" data-js-only hidden>
+      <div class="cluster">
+        <button
+          type="button"
+          class="btn btn--secondary guide__tool"
+          data-action="print"
+          aria-describedby="impression-aide"
+        >
+          <Icon name="printer" />
+          <span>{labels.print}</span>
+        </button>
+        <button
+          type="button"
+          class="btn btn--secondary guide__tool"
+          data-action="mode"
+          data-label-all={labels.showAll}
+          data-label-one={labels.showOne}
+        >
+          <span data-mode-label>{labels.showAll}</span>
+        </button>
+      </div>
+      <p class="guide__tool-hint" id="impression-aide">
+        {labels.printHint}
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { initInstallGuide } from './guide.ts';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-guide]')) {
+    initInstallGuide(root);
+  }
+</script>
+
+<style>
+  .guide {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .guide__aside {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  @media (min-width: 64rem) {
+    .guide {
+      grid-template-columns: 15rem minmax(0, 1fr);
+      gap: clamp(var(--space-xl), 5vw, var(--space-3xl));
+      align-items: start;
+    }
+  }
+
+  /* Collée sous l'en-tête seulement si la colonne tient dans la hauteur de
+     l'écran (avec l'en-tête) : sinon, elle défile avec la page, et rien ne
+     reste caché sous le bord de l'écran. */
+  @media (min-width: 64rem) and (min-height: 36rem) {
+    .guide__aside {
+      position: sticky;
+      top: calc(var(--header-height) + var(--space-l));
+    }
+  }
+
+  /* ---------- Progression ---------- */
+  .guide__progress {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .guide__progress-label {
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text-muted);
+  }
+
+  /* Sur téléphone et tablette, la place dans le guide est déjà écrite juste
+     au-dessus du titre de l'étape (« Étape 3 sur 8 ») : la progression ne
+     se répète pas en haut du guide, qui commence par la liste repliée. */
+  @media (max-width: 63.99rem) {
+    .guide__progress {
+      display: none;
+    }
+  }
+
+  /* Barre sans texte : ni la piste ni le remplissage ne portent de lettres
+     (voir docs/brand.md, « Progression »). */
+  .guide__progress-bar {
+    appearance: none;
+    display: block;
+    inline-size: 100%;
+    block-size: 0.5rem;
+    overflow: hidden;
+    border: 0;
+    border-radius: 999px;
+    color: transparent;
+    background-color: var(--line);
+  }
+
+  .guide__progress-bar::-webkit-progress-bar {
+    border-radius: 999px;
+    color: transparent;
+    background-color: var(--line);
+  }
+
+  .guide__progress-bar::-webkit-progress-value {
+    border-radius: 999px;
+    color: transparent;
+    background-color: var(--success);
+    transition: inline-size var(--dur-2) var(--ease-out);
+  }
+
+  .guide__progress-bar::-moz-progress-bar {
+    border-radius: 999px;
+    color: transparent;
+    background-color: var(--success);
+  }
+
+  /* Contraste élevé de Windows : la barre garde un contour et un
+     remplissage aux couleurs du système. Les règles -webkit- et -moz- sont
+     séparées : une liste qui les mêlerait serait ignorée en entier. */
+  @media (forced-colors: active) {
+    .guide__progress-bar {
+      forced-color-adjust: none;
+      border: 1px solid CanvasText;
+      color: transparent;
+      background-color: Canvas;
+    }
+
+    .guide__progress-bar::-webkit-progress-bar {
+      color: transparent;
+      background-color: Canvas;
+    }
+
+    .guide__progress-bar::-webkit-progress-value {
+      color: transparent;
+      background-color: Highlight;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .guide__progress-bar::-moz-progress-bar {
+      color: transparent;
+      background-color: Highlight;
+    }
+  }
+
+  /* ---------- Sommaire ----------
+   * Même dessin que les rubriques de la FAQ ; le numéro de chaque étape suit
+   * l'indicateur du formulaire de commande (en cours : cercle épais ;
+   * validée par « C'est fait » : coche verte). */
+  .toc__fold {
+    border-block: var(--rule-width) solid var(--line);
+  }
+
+  /* Le repli : même dessin qu'une question de la FAQ (FaqItem). */
+  .toc__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-m);
+    min-block-size: var(--target-min);
+    padding-block: var(--space-s);
+    border-radius: var(--radius-s);
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .toc__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .toc__summary::marker {
+    content: '';
+  }
+
+  .toc__summary-text {
+    font-family: var(--font-display);
+    font-variation-settings: var(--font-display-variation);
+    font-size: var(--step-1);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+    color: var(--text);
+    text-decoration-line: underline;
+    text-decoration-thickness: max(1px, 0.06em);
+    text-underline-offset: 0.22em;
+    text-decoration-color: transparent;
+    transition: text-decoration-color var(--dur-1) var(--ease-out);
+  }
+
+  .toc__summary:hover .toc__summary-text {
+    text-decoration-color: currentColor;
+  }
+
+  .toc__summary-icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: 50%;
+    color: var(--text);
+    transition: border-color var(--dur-1) var(--ease-out);
+  }
+
+  .toc__summary:hover .toc__summary-icon {
+    border-color: var(--text);
+  }
+
+  .toc__summary-icon svg {
+    display: block;
+    inline-size: 1rem;
+    block-size: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+  }
+
+  .toc__summary-bar {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+
+  .toc__fold[open] .toc__summary-bar {
+    transform: rotate(90deg);
+  }
+
+  /* Écran large : la liste est toujours dépliée, sans repli. Le script ouvre
+     le bloc ; sans lui, les navigateurs qui connaissent ::details-content
+     montrent quand même la liste. */
+  @media (min-width: 64rem) {
+    .toc__fold {
+      border-block-end: 0;
+    }
+
+    .toc__fold[open] > .toc__summary {
+      display: none;
+    }
+
+    @supports selector(::details-content) {
+      .toc__summary {
+        display: none;
+      }
+
+      .toc__fold::details-content {
+        content-visibility: visible;
+      }
+    }
+  }
+
+  .toc__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 10.5rem), 1fr));
+    column-gap: var(--space-m);
+    margin: 0 0 var(--space-s);
+    padding: 0;
+    list-style: none;
+  }
+
+  .toc__item {
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  @media (min-width: 64rem) {
+    .toc__list {
+      grid-template-columns: minmax(0, 1fr);
+      margin: 0;
+    }
+
+    .toc__item {
+      border-block-start: 0;
+      border-block-end: var(--rule-width) solid var(--line);
+    }
+  }
+
+  .toc__link {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    min-block-size: var(--target-min);
+    padding-block: var(--space-2xs);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text);
+    text-decoration-line: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.22em;
+  }
+
+  .toc__link:hover {
+    color: var(--text);
+    text-decoration-color: currentColor;
+  }
+
+  .toc__number {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: 2rem;
+    block-size: 2rem;
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: 50%;
+    font-size: var(--step--1);
+    line-height: 1;
+    background-color: var(--surface);
+  }
+
+  .toc__number :global(.toc__check) {
+    display: none;
+  }
+
+  .toc__link[aria-current='step'] .toc__number {
+    border: 2px solid var(--text);
+    box-shadow:
+      0 0 0 3px var(--surface),
+      0 0 0 4px var(--line-strong);
+  }
+
+  .toc__link[data-state='done'] .toc__digit {
+    display: none;
+  }
+
+  .toc__link[data-state='done'] .toc__number :global(.toc__check) {
+    display: inline-block;
+    color: var(--success);
+  }
+
+  .toc__label {
+    min-inline-size: 0;
+  }
+
+  /* ---------- Outils, sous le guide : imprimer, tout voir ----------
+   * Les deux boutons côte à côte, à gauche, puis la phrase sur l'impression,
+   * sur toute la largeur. */
+  .guide__tools {
+    display: grid;
+    gap: var(--space-xs);
+    justify-items: start;
+    margin-block-start: var(--space-xl);
+    padding-block-start: var(--space-l);
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  .guide__tool-hint {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
+  /* ---------- Étapes ---------- */
+  .guide__main {
+    min-inline-size: 0;
+  }
+
+  .guide__noscript {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: flex-start;
+    margin: 0 0 var(--space-xl);
+    padding: var(--space-s) var(--space-m);
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: var(--radius);
+  }
+
+  .guide__noscript :global(.guide__noscript-icon) {
+    margin-block-start: 0.15em;
+    color: var(--link);
+  }
+
+  /* ---------- Impression ----------
+   * Tout le guide, sans l'interface : ni en-tête ni pied du site, ni
+   * sommaire, ni boutons. Les aides s'ouvrent (voir guide.ts et
+   * StepProblems.astro). */
+  @media print {
+    :global(.site-header),
+    :global(.site-footer),
+    :global(.skip-link) {
+      display: none !important;
+    }
+
+    .guide {
+      display: block;
+    }
+
+    .guide__aside,
+    .guide__tools {
+      display: none !important;
+    }
+  }
+</style>

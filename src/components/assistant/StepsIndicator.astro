@@ -1,0 +1,142 @@
+---
+/**
+ * Indicateur des écrans de la page de la HAKO : les cinq écrans numérotés
+ * (personnes, mots de passe, fiche, vérification, comptes). Même dessin que
+ * l'indicateur du formulaire de commande : cercle fin à venir, cercle épais
+ * pour l'étape en cours (aria-current="step"), coche verte et « (faite) »,
+ * lu par les lecteurs d'écran, pour une étape faite.
+ *
+ * Sur un écran étroit, seuls les numéros restent visibles : le nom de
+ * l'écran en cours est écrit au-dessus de son titre (« Écran 2 sur 5 »), et
+ * les noms restent lus par les lecteurs d'écran. « Écran », pas « Étape » :
+ * les étapes sont celles du guide. Coche au trait du formulaire de commande
+ * (Glyph).
+ * Avec JavaScript seulement (assistant-ui.ts le met à jour).
+ * Textes : src/content/assistant.ts, clé common.
+ */
+import Glyph from '../commande/Glyph.astro';
+import { assistant } from '../../content/assistant';
+
+const { common } = assistant;
+---
+
+<ol
+  class="steps"
+  aria-label={common.stepsLabel}
+  data-steps
+  data-done-text={common.stepDone}
+  data-js-only
+  hidden
+>
+  {common.steps.map((step, index) => (
+    <li class="steps__item" data-step-indicator={step.id} data-state="upcoming">
+      <span class="steps__number" aria-hidden="true">
+        <span class="steps__digit">{index + 1}</span>
+        <Glyph name="check" class="steps__check" />
+      </span>
+      <span class="steps__label">
+        {step.name}
+        <span class="visually-hidden" data-step-state />
+      </span>
+    </li>
+  ))}
+</ol>
+
+<style>
+  /* Étapes calées en haut : un nom sur deux lignes ne décale pas les autres. */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: start;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .steps__item {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2xs);
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  /* Filet qui relie les étapes. */
+  .steps__item + .steps__item::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 1.125rem;
+    inset-inline: calc(-50% + 1.5rem) calc(50% + 1.5rem);
+    border-block-start: var(--rule-width) solid var(--line-strong);
+  }
+
+  .steps__number {
+    position: relative;
+    display: grid;
+    place-items: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: 50%;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    background-color: var(--surface);
+  }
+
+  .steps__number :global(.steps__check) {
+    display: none;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+  }
+
+  /* Écran étroit : les noms sont lus, pas affichés. */
+  .steps__label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @container page-hako (min-width: 40rem) {
+    .steps__label {
+      position: static;
+      inline-size: auto;
+      block-size: auto;
+      overflow: visible;
+      clip-path: none;
+      white-space: normal;
+      font-family: var(--font-ui);
+      font-size: var(--step--1);
+      font-weight: 700;
+      letter-spacing: var(--tracking-ui);
+      line-height: 1.25;
+    }
+  }
+
+  .steps__item[data-state='current'] {
+    color: var(--text);
+  }
+
+  .steps__item[data-state='current'] .steps__number {
+    border: 2px solid var(--text);
+    box-shadow:
+      0 0 0 3px var(--surface),
+      0 0 0 4px var(--line-strong);
+  }
+
+  .steps__item[data-state='done'] {
+    color: var(--text);
+  }
+
+  .steps__item[data-state='done'] .steps__digit {
+    display: none;
+  }
+
+  .steps__item[data-state='done'] .steps__number :global(.steps__check) {
+    display: inline-block;
+    color: var(--success);
+  }
+</style>

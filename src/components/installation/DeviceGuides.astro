@@ -1,0 +1,286 @@
+---
+/**
+ * Étape « Ouvrez la page de votre HAKO » : le choix de l'appareil, puis les
+ * consignes de chaque appareil (iPhone ou iPad, Android, ordinateur).
+ *
+ * Sans JavaScript, les trois consignes se suivent, et la question (qui n'a
+ * alors pas de réponse possible) n'est pas affichée. Avec JavaScript
+ * (src/components/installation/guide.ts), la question et ses boutons radio
+ * apparaissent : une fois l'appareil choisi, seules ses consignes restent
+ * (et, plus bas, les cas « Ça ne marche pas ? » qui le concernent). Les
+ * boutons radio ont autocomplete="off" : au retour sur le guide, le
+ * navigateur ne recoche pas un appareil sans que ses consignes suivent. À
+ * l'impression, tout s'affiche.
+ * Textes : src/content/installation.ts, clé devices de l'étape « page ».
+ */
+import ActionList from './ActionList.astro';
+import Icon, { type UiIconName } from '../Icon.astro';
+import GuideText from './GuideText.astro';
+import type { DeviceChoice, DeviceId } from '../../content/installation';
+
+interface Props {
+  devices: DeviceChoice;
+}
+
+const { devices } = Astro.props;
+
+/** Icône de chaque appareil. */
+const icons = {
+  iphone: 'smartphone',
+  android: 'smartphone',
+  ordinateur: 'laptop',
+} as const satisfies Record<DeviceId, UiIconName>;
+---
+
+<div class="devices">
+  <fieldset
+    class="devices__choice"
+    aria-describedby="appareil-doute appareil-aide"
+    data-js-only
+    hidden
+  >
+    <legend class="devices__question">{devices.question}</legend>
+    <div class="devices__options">
+      {devices.options.map((option) => (
+        <div class="device-option">
+          <input
+            class="device-option__input"
+            type="radio"
+            id={`appareil-${option.id}`}
+            name="appareil"
+            value={option.id}
+            autocomplete="off"
+          />
+          <label class="device-option__label" for={`appareil-${option.id}`}>
+            <Icon name={icons[option.id]} />
+            <span>{option.label}</span>
+          </label>
+        </div>
+      ))}
+    </div>
+  </fieldset>
+
+  <div class="devices__help">
+    <p class="devices__unsure" id="appareil-doute">
+      {devices.unsure}
+    </p>
+    <p class="devices__hint" id="appareil-aide">
+      <GuideText parts={devices.hint} />
+    </p>
+  </div>
+
+  <div class="devices__list">
+    {devices.options.map((option) => (
+      <div class="device" id={`consignes-${option.id}`} data-device={option.id}>
+        <h3 class="device__title">
+          <Icon name={icons[option.id]} class="device__icon" />
+          <span>{option.title}</span>
+        </h3>
+        <ActionList items={option.actions} />
+        {option.note && (
+          <p class="device__note">
+            <Icon name="info" class="device__note-icon" />
+            <span>
+              <GuideText parts={option.note} />
+            </span>
+          </p>
+        )}
+        {option.variants?.map((variant) => (
+          <div class="variant">
+            <h4 class="variant__title">{variant.title}</h4>
+            {variant.text.map((sentence) => (
+              <p class="variant__text">
+                <GuideText parts={sentence} />
+              </p>
+            ))}
+          </div>
+        ))}
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .devices {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  /* ---------- Le choix de l'appareil ---------- */
+  .devices__choice {
+    display: grid;
+    gap: var(--space-s);
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .devices__question {
+    padding: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-1);
+    font-weight: 700;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-ui);
+  }
+
+  /* « Vous ne savez pas ? » et le conseil de l'imprimante : au corps du
+     texte, comme les gestes, car ils aident à choisir. */
+  .devices__help {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .devices__hint,
+  .devices__unsure {
+    margin: 0;
+  }
+
+  /* Même dessin que les créneaux du formulaire de commande. */
+  .devices__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .device-option {
+    position: relative;
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    min-block-size: var(--target-min);
+    padding: var(--space-2xs) var(--space-m) var(--space-2xs) var(--space-s);
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: var(--radius);
+    transition:
+      border-color var(--dur-1) var(--ease-out),
+      box-shadow var(--dur-1) var(--ease-out);
+  }
+
+  .device-option:hover {
+    border-color: var(--text);
+  }
+
+  .device-option:has(.device-option__input:checked) {
+    border-color: var(--text);
+    box-shadow: inset 0 0 0 var(--rule-width) var(--text);
+  }
+
+  /* Au-dessus de la zone cliquable de l'intitulé, pour rester cliquable lui-même. */
+  .device-option__input {
+    position: relative;
+    z-index: 1;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    margin: 0;
+    accent-color: var(--text);
+  }
+
+  .device-option__label {
+    display: inline-flex;
+    gap: var(--space-2xs);
+    align-items: center;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    line-height: 1.2;
+    cursor: pointer;
+  }
+
+  /* Toute la pastille coche le bouton radio. */
+  .device-option__label::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+  }
+
+  @supports selector(:has(*)) {
+    .device-option__input:focus-visible {
+      outline: none;
+    }
+
+    .device-option:has(.device-option__input:focus-visible) {
+      outline: var(--focus-width) solid var(--focus);
+      outline-offset: var(--focus-offset);
+    }
+  }
+
+  /* ---------- Les consignes de chaque appareil ---------- */
+  .devices__list {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .device {
+    display: grid;
+    gap: var(--space-s);
+    padding: var(--space-m) clamp(var(--space-s), 3vw, var(--space-l));
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-s);
+  }
+
+  .device__title {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    margin: 0;
+    font-size: var(--step-1);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+  }
+
+  .device__title :global(.device__icon) {
+    color: var(--text-muted);
+  }
+
+  .device__note {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: flex-start;
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  .device__note :global(.device__note-icon) {
+    margin-block-start: 0.2em;
+  }
+
+  .variant {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-block-start: var(--space-s);
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  .variant__title {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-0);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .variant__text {
+    margin: 0;
+  }
+
+  @media print {
+    /* Le choix de l'appareil ne sert à rien sur papier. */
+    .devices__choice {
+      display: none !important;
+    }
+
+    /* Toutes les consignes s'impriment, quel que soit l'appareil choisi. */
+    .device[hidden] {
+      display: grid !important;
+    }
+
+    .device {
+      box-shadow: none;
+      break-inside: avoid;
+    }
+  }
+</style>

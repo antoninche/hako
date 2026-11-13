@@ -1,0 +1,166 @@
+---
+/**
+ * Écran d'attente ou d'erreur de la page de la HAKO, hors du parcours : la
+ * HAKO se prépare encore, ne répond plus, la création des comptes s'est
+ * arrêtée, réponse inattendue, ou HAKO installée (l'écran de tous les jours,
+ * une fois la première installation faite). Même dessin que la
+ * fin du guide et la confirmation de commande (bloc sable, grand symbole,
+ * titre) : ce qui se passe, « Que faire », puis le bouton principal
+ * (« Réessayer », « Recharger la page »). Une HAKO installée montre à la
+ * place « Mes photos » et « Mes fichiers ».
+ *
+ * Caché sans JavaScript (attribut hidden) : seul le script sait quand le
+ * montrer (assistant-ui.ts). Son titre reçoit alors le focus.
+ * Textes : src/content/assistant.ts, clé states.
+ */
+import AppButtons from './AppButtons.astro';
+import Glyph from '../commande/Glyph.astro';
+import GuideText from '../installation/GuideText.astro';
+import Icon, { type UiIconName } from '../Icon.astro';
+import { assistant, type StateScreen } from '../../content/assistant';
+import { viewAnchor, type StateId } from '../../lib/assistant/machine.ts';
+
+interface Props {
+  state: StateId;
+  demo: boolean;
+}
+
+const { state, demo } = Astro.props;
+const screen: StateScreen = assistant.states[state];
+const anchor = viewAnchor(state);
+const titleId = `${anchor}-titre`;
+
+/** Symbole de chaque écran ; la HAKO installée a la coche du guide et de la commande (Glyph). */
+const icons = {
+  preparing: 'clock',
+  unreachable: 'wifi',
+  stopped: 'plug',
+  unexpected: 'info',
+} as const satisfies Record<Exclude<StateId, 'installed'>, UiIconName>;
+---
+
+<section
+  class:list={['state surface-sable', `state--${state}`]}
+  id={anchor}
+  data-screen={state}
+  aria-labelledby={titleId}
+  hidden
+>
+  {state === 'installed' ? (
+    <Glyph name="check" class="state__icon" />
+  ) : (
+    <Icon name={icons[state]} class="state__icon" />
+  )}
+  <h2 class="state__title" id={titleId} tabindex="-1">
+    {screen.title}
+  </h2>
+  {screen.text.map((sentence) => (
+    <p class="state__text">
+      <GuideText parts={sentence} />
+    </p>
+  ))}
+  <h3 class="state__subtitle" id={`${anchor}-que-faire`}>
+    {assistant.common.problemFix}
+  </h3>
+  <ol class="state__fix" aria-labelledby={`${anchor}-que-faire`}>
+    {screen.fix.map((sentence) => (
+      <li>
+        <GuideText parts={sentence} />
+      </li>
+    ))}
+  </ol>
+  {screen.action ? (
+    <button
+      type="button"
+      class="btn btn--primary state__action"
+      data-action="retry"
+      data-busy-text={assistant.common.loading}
+    >
+      <span data-label>{screen.action}</span>
+    </button>
+  ) : (
+    <div class="state__apps">
+      <AppButtons demo={demo} />
+    </div>
+  )}
+</section>
+
+<style>
+  .state {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+    padding: clamp(var(--space-m), 5vw, var(--space-xl));
+    border-radius: var(--radius);
+  }
+
+  .state > p {
+    margin: 0;
+  }
+
+  .state :global(.state__icon) {
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    color: var(--text-muted);
+  }
+
+  .state--installed :global(.state__icon) {
+    color: var(--success);
+  }
+
+  .state__title {
+    margin: 0;
+    font-size: var(--step-3);
+    scroll-margin-top: var(--space-s);
+  }
+
+  .state__title:focus {
+    outline: none;
+  }
+
+  .state__title:focus-visible {
+    outline: var(--focus-width) solid var(--focus);
+    outline-offset: var(--focus-offset);
+  }
+
+  .state__text {
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  .state__subtitle {
+    margin: var(--space-xs) 0 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-0);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text-muted);
+  }
+
+  .state__fix {
+    display: grid;
+    gap: var(--space-2xs);
+    margin: 0;
+    padding-inline-start: 1.5em;
+    list-style: decimal;
+  }
+
+  .state__fix li {
+    max-inline-size: var(--measure);
+  }
+
+  .state__fix li::marker {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+
+  .state__action {
+    margin-block-start: var(--space-s);
+  }
+
+  .state__apps {
+    inline-size: 100%;
+    margin-block-start: var(--space-s);
+  }
+</style>

@@ -1,0 +1,106 @@
+---
+/**
+ * « Besoin d'aide ? », en bas du guide : comment nous joindre, avec un lien
+ * vers la page Contact. Même dessin que le dernier bloc de la FAQ.
+ * Textes : src/content/installation.ts, clé help ; l'e-mail et le téléphone
+ * viennent de src/data/entreprise.ts (repère jaune tant qu'ils manquent).
+ */
+import Icon from '../Icon.astro';
+import GuideText from './GuideText.astro';
+import { installation } from '../../content/installation';
+
+const { help } = installation;
+const contactIcons = ['mail', 'phone'] as const;
+---
+
+<section class="help surface-sable" aria-labelledby="titre-aide">
+  <div class="container help__inner">
+    <div class="help__text">
+      <h2 class="help__title" id="titre-aide">
+        {help.title}
+      </h2>
+      {help.text.map((sentence) => (
+        <p>
+          <GuideText parts={sentence} />
+        </p>
+      ))}
+      <ul class="help__contacts">
+        {help.contacts.map((sentence, index) => (
+          <li>
+            <Icon name={contactIcons[index] ?? 'mail'} />
+            <span>
+              <GuideText parts={sentence} />
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <a class="btn btn--primary help__button" href={help.link.href}>
+      {help.link.label}
+    </a>
+  </div>
+</section>
+
+<style>
+  .help {
+    padding-block: var(--space-2xl);
+  }
+
+  .help__inner {
+    display: grid;
+    gap: var(--space-l);
+    justify-items: start;
+  }
+
+  @media (min-width: 48rem) {
+    .help__inner {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+    }
+  }
+
+  .help__text > * {
+    margin: 0;
+  }
+
+  .help__text > * + * {
+    margin-block-start: var(--space-xs);
+  }
+
+  .help__title {
+    font-size: var(--step-2);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+  }
+
+  .help__text p {
+    max-width: var(--measure);
+    color: var(--text-muted);
+  }
+
+  .help__contacts {
+    display: grid;
+    gap: var(--space-2xs);
+    padding: 0;
+    list-style: none;
+  }
+
+  .help__contacts li {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  @media print {
+    .help {
+      padding-block: var(--space-l);
+    }
+
+    .help__button {
+      display: none;
+    }
+  }
+</style>

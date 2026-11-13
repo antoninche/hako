@@ -1,0 +1,115 @@
+---
+/**
+ * Page « Installer votre HAKO » (/installer/) : le guide, pas à pas, pour la
+ * personne qui reçoit sa HAKO chez elle et l'installe seule.
+ *
+ * 1. Ouverture : à qui sert le guide et combien de temps prévoir.
+ * 2. « Avant de commencer » : les objets à réunir, les mots du guide.
+ * 3. Le guide : huit étapes, une à la fois avec JavaScript, toutes à la suite
+ *    sans lui (src/components/installation/InstallGuide.astro).
+ * 4. « Besoin d'aide ? ».
+ *
+ * Le guide s'arrête à la page de la HAKO : la première installation (comptes
+ * et mots de passe) se fait sur cette page, chez la personne, jamais sur ce
+ * site. À l'impression, un logo remplace l'en-tête du site (masqué) : le
+ * papier que la famille garde dit HAKO. Tous les textes sont dans src/content/installation.ts, les faits
+ * (adresse de la HAKO, liens des applications, informations à confirmer)
+ * dans src/data/installation.ts.
+ */
+import Icon from '../../components/Icon.astro';
+import Logo from '../../components/Logo.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import Section from '../../components/Section.astro';
+import BeforeYouStart from '../../components/installation/BeforeYouStart.astro';
+import GuideHelp from '../../components/installation/GuideHelp.astro';
+import GuideText from '../../components/installation/GuideText.astro';
+import InstallGuide from '../../components/installation/InstallGuide.astro';
+import Text from '../../components/texte/Text.astro';
+import { installation } from '../../content/installation';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const { meta, intro } = installation;
+---
+
+<BaseLayout title={meta.title} description={meta.description}>
+  <div class="print-brand container">
+    <Logo variant="paysage" />
+  </div>
+
+  <PageIntro title={intro.title}>
+    <p class="lead text-muted">
+      <Text text={intro.lead} />
+    </p>
+    <ul class="intro-facts">
+      <li class="intro-facts__item">
+        <Icon name="clock" class="intro-facts__icon" />
+        <span>
+          <GuideText parts={intro.duration} />
+        </span>
+      </li>
+      <li class="intro-facts__item">
+        <Icon name="map-pin" class="intro-facts__icon" />
+        <span>
+          <GuideText parts={intro.shipped} />
+        </span>
+      </li>
+    </ul>
+  </PageIntro>
+
+  <BeforeYouStart />
+
+  <Section as="div" class="guide-section">
+    <InstallGuide />
+  </Section>
+
+  <GuideHelp />
+</BaseLayout>
+
+<style>
+  .intro-facts {
+    display: grid;
+    gap: var(--space-xs);
+    margin: var(--space-2xs) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .intro-facts__item {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: flex-start;
+  }
+
+  /* Lignes de 70 caractères au plus, comme le texte courant (--measure). */
+  .intro-facts__item > span {
+    max-inline-size: var(--measure);
+  }
+
+  /* Logo réservé au papier (voir plus haut). */
+  .print-brand {
+    display: none;
+  }
+
+  .intro-facts__item :global(.intro-facts__icon) {
+    margin-block-start: 0.2em;
+    color: var(--text-muted);
+  }
+
+  @media print {
+    .print-brand {
+      display: block;
+      padding-block: var(--space-s) 0;
+      color: var(--text);
+    }
+
+    .print-brand :global(.logo) {
+      inline-size: auto;
+      block-size: 24px;
+    }
+
+    :global(.page-intro),
+    :global(.guide-section) {
+      padding-block: var(--space-l);
+    }
+  }
+</style>

@@ -5,9 +5,10 @@
  * - paragraphs : des paragraphes venus de src/content/*.ts (pages La box,
  *   Notre engagement et Tutoriels). Chaque paragraphe est une liste de
  *   morceaux mis bout à bout : du texte, une information manquante (affichée
- *   en jaune avec <Todo>) ou un mot japonais (lu en japonais par les lecteurs
- *   d'écran). Un paragraphe vide est ignoré. Le texte garde la couleur du
- *   bloc qui l'entoure.
+ *   en jaune avec <Todo>), un mot japonais (lu en japonais par les lecteurs
+ *   d'écran) ou une adresse à taper (même dessin que les adresses des
+ *   réponses de la FAQ). Un paragraphe vide est ignoré. Le texte garde la
+ *   couleur du bloc qui l'entoure.
  * - sans paragraphs : le texte écrit en MDX, passé en contenu (réponses de
  *   la FAQ, pages légales). Ses éléments, produits par le Markdown sans
  *   classe, sont mis en forme ici : paragraphes, listes, intertitres, liens,
@@ -39,6 +40,10 @@ const filled = paragraphs?.filter((parts) => parts.length > 0);
             <Text text={part} />
           ) : isTodo(part) ? (
             <Todo what={part.todo}>{part.placeholder}</Todo>
+          ) : 'address' in part ? (
+            <code class="prose__address" translate="no">
+              {part.address}
+            </code>
           ) : (
             <span lang="ja">{part.ja}</span>
           ),
@@ -142,8 +147,9 @@ const filled = paragraphs?.filter((parts) => parts.length > 0);
     margin-block-start: 0;
   }
 
-  /* Adresse à taper (ex. http://mabox.local) : jamais coupée en fin de ligne. */
-  .prose--mdx :global(code) {
+  /* Adresse à taper (ex. http://hako.local) : jamais coupée en fin de ligne. */
+  .prose--mdx :global(code),
+  .prose__address {
     padding: 0.05em 0.35em;
     border-radius: var(--radius-s);
     font-family: var(--font-ui);

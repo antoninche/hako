@@ -1,0 +1,116 @@
+---
+/**
+ * « Ça ne marche pas ? » : les cas d'un écran de la page de la HAKO, chacun
+ * dans un bloc qui se déplie. Même dessin et même comportement que les cas
+ * du guide (src/components/installation/StepProblems.astro) et que les
+ * questions de la FAQ (src/components/faq/FaqItem.astro) : chaque cas dit
+ * pourquoi, puis que faire. Chaque cas a une ancre : #ecran-fiche-photo ouvre
+ * le cas « photo » de l'écran « fiche ».
+ * Textes : src/content/assistant.ts.
+ */
+import FaqItem from '../faq/FaqItem.astro';
+import Icon from '../Icon.astro';
+import GuideText from '../installation/GuideText.astro';
+import { assistant, type Problem } from '../../content/assistant';
+import { viewAnchor, type ViewId } from '../../lib/assistant/machine.ts';
+
+interface Props {
+  view: ViewId;
+  problems: readonly Problem[];
+}
+
+const { view, problems } = Astro.props;
+const { common } = assistant;
+const anchor = viewAnchor(view);
+const titleId = `${anchor}-problemes`;
+---
+
+<div class="problems" role="group" aria-labelledby={titleId}>
+  <div class="problems__head">
+    <h3 class="problems__title" id={titleId}>
+      <Icon name="question" class="problems__icon" />
+      <span>{common.problems}</span>
+    </h3>
+    <p class="problems__hint">{common.problemsHint}</p>
+  </div>
+
+  <div class="problems__list">
+    {problems.map((problem) => (
+      <FaqItem id={`${anchor}-${problem.id}`} question={problem.title}>
+        <p class="problems__label">{common.problemWhy}</p>
+        {problem.why.map((sentence) => (
+          <p>
+            <GuideText parts={sentence} />
+          </p>
+        ))}
+        <p class="problems__label">{common.problemFix}</p>
+        {problem.fix.length > 1 ? (
+          <ol>
+            {problem.fix.map((sentence) => (
+              <li>
+                <GuideText parts={sentence} />
+              </li>
+            ))}
+          </ol>
+        ) : (
+          problem.fix.map((sentence) => (
+            <p>
+              <GuideText parts={sentence} />
+            </p>
+          ))
+        )}
+      </FaqItem>
+    ))}
+  </div>
+
+  <p class="problems__more">
+    <GuideText parts={common.stillStuck} />
+  </p>
+</div>
+
+<style>
+  .problems {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .problems__head {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .problems__title {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    margin: 0;
+    font-size: var(--step-2);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+  }
+
+  .problems__title :global(.problems__icon) {
+    color: var(--text-muted);
+  }
+
+  .problems__hint,
+  .problems__more {
+    margin: 0;
+  }
+
+  .problems__hint {
+    color: var(--text-muted);
+  }
+
+  .problems__list {
+    border-block-start: var(--rule-width) solid var(--line-strong);
+  }
+
+  /* « Pourquoi », « Que faire » : petites étiquettes d'interface (D-DIN). */
+  .problems__label {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text-muted);
+  }
+</style>

@@ -1,0 +1,151 @@
+---
+/**
+ * Fin du guide : « Votre HAKO est installée », puis quelques conseils pour la
+ * suite. Sans JavaScript, ce bloc suit la dernière étape. Avec JavaScript, il
+ * s'affiche après « C'est fait, j'ai terminé », à l'adresse #hako-installee,
+ * et son titre reçoit le focus. Même dessin que la confirmation du
+ * formulaire de commande, avec la même coche (Glyph). La page défile jusqu'au
+ * titre en laissant voir la coche au-dessus de lui.
+ * Textes : src/content/installation.ts, clé finish.
+ */
+import Glyph from '../commande/Glyph.astro';
+import Icon from '../Icon.astro';
+import GuideText from './GuideText.astro';
+import { installation } from '../../content/installation';
+
+const { finish, labels } = installation;
+---
+
+<section
+  class="finish surface-sable"
+  id="hako-installee"
+  aria-labelledby="hako-installee-titre"
+  data-finish
+>
+  <Glyph name="check" class="finish__icon" />
+  <h2 class="finish__title" id="hako-installee-titre" tabindex="-1">
+    {finish.title}
+  </h2>
+  <p class="finish__lead">{finish.lead}</p>
+  <ul class="finish__list">
+    {finish.items.map((item) => (
+      <li>
+        <GuideText parts={item} />
+      </li>
+    ))}
+  </ul>
+  <p class="finish__next">
+    <GuideText parts={finish.next} />
+  </p>
+  <div class="finish__actions" data-js-only hidden>
+    <button type="button" class="btn btn--secondary" data-action="restart">
+      <Icon name="arrow-left" />
+      <span>{labels.restart}</span>
+    </button>
+  </div>
+</section>
+
+<style>
+  .finish {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+    padding: clamp(var(--space-m), 5vw, var(--space-xl));
+    border-radius: var(--radius);
+  }
+
+  /* Toutes les étapes à la suite : un peu d'air avant la fin du guide. */
+  :global(.guide[data-mode='all']) .finish {
+    margin-block-start: var(--space-2xl);
+  }
+
+  .finish > p {
+    margin: 0;
+  }
+
+  .finish :global(.finish__icon) {
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    color: var(--success);
+  }
+
+  /* Au défilement vers le titre, la coche (2,5rem) et son écart restent
+     visibles sous l'en-tête collant. */
+  .finish__title {
+    margin: 0;
+    font-size: var(--step-3);
+    scroll-margin-top: calc(var(--space-s) + 2.5rem + var(--space-s));
+  }
+
+  .finish__title:focus {
+    outline: none;
+  }
+
+  .finish__title:focus-visible {
+    outline: var(--focus-width) solid var(--focus);
+    outline-offset: var(--focus-offset);
+  }
+
+  .finish__lead {
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  /* Chaque conseil précédé d'une coche, comme les listes vérifiées des
+     pages légales (src/components/legal/Checklist.astro). */
+  .finish__list {
+    display: grid;
+    gap: var(--space-s);
+    margin: var(--space-2xs) 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .finish__list li {
+    position: relative;
+    max-inline-size: var(--measure);
+    padding-inline-start: 2.25rem;
+  }
+
+  .finish__list li::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0.2em;
+    inset-inline-start: 0.45rem;
+    inline-size: 0.5rem;
+    block-size: 0.95rem;
+    border: solid var(--success);
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg);
+  }
+
+  .finish__list li::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 0.05em;
+    inset-inline-start: 0;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    border: var(--rule-width) solid var(--success);
+    border-radius: 50%;
+  }
+
+  .finish__actions {
+    margin-block-start: var(--space-s);
+  }
+
+  @media print {
+    .finish[hidden] {
+      display: grid !important;
+    }
+
+    .finish {
+      margin-block-start: var(--space-xl);
+      break-inside: avoid;
+    }
+
+    .finish__actions {
+      display: none !important;
+    }
+  }
+</style>

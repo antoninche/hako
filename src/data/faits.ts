@@ -60,11 +60,11 @@ export const proMaintenance =
 /* ---------- Logiciels de la box ---------- */
 
 /**
- * Page d'accueil de la box (http://mabox.local) : le logiciel qui l'affiche
+ * Page d'accueil de la box (http://hako.local) : le logiciel qui l'affiche
  * et sa licence ne sont pas encore fixés (pages La box et Notre engagement).
  */
 export const homePageLicense = todo(
-  'Page d’accueil de la box (http://mabox.local) : logiciel utilisé et licence, à préciser',
+  'Page d’accueil de la box (http://hako.local) : logiciel utilisé et licence, à préciser',
   '[licence à préciser]',
 );
 

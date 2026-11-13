@@ -311,12 +311,14 @@ export const offresPage = {
         text: [
           'Nous vous appelons sous ',
           callbackDelay,
-          ' pour confirmer votre commande et fixer le rendez-vous d’installation.',
+          ' pour confirmer votre commande et fixer le rendez-vous d’installation, ou la date d’envoi.',
         ],
       },
       {
-        title: 'Nous installons',
-        text: ['Nous installons la box chez vous, puis nous vous montrons comment vous en servir.'],
+        title: 'Nous installons, ou nous envoyons',
+        text: [
+          'Dans notre zone, nous installons la box chez vous, puis nous vous montrons comment vous en servir. Ailleurs, nous vous l’envoyons, et vous l’installez avec notre guide pas à pas.',
+        ],
       },
     ] satisfies readonly { title: string; text: RichText }[],
     cta: { label: 'Commander', href: routes.order } satisfies LinkValue,

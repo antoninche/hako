@@ -1,0 +1,346 @@
+---
+/**
+ * Écran « Vérifiez votre fiche » : la personne recopie, depuis sa fiche de
+ * secours, le mot de passe de la personne responsable ; la HAKO le vérifie.
+ * Une fois la fiche vérifiée, le message de réussite s'affiche juste
+ * au-dessus de « Créer les comptes », qui reçoit le focus.
+ *
+ * Avec JavaScript, le formulaire : le champ (masqué, ou en clair avec
+ * « Afficher ce que je tape »), son message d'erreur au-dessus, relié au
+ * champ, et « Vérifier ». « Revoir mes mots de passe » ramène à l'écran des
+ * mots de passe. Le script lit tous ses textes dans les attributs data-* de
+ * ce composant (assistant-ui.ts).
+ * Textes : src/content/assistant.ts, clé screens.check (et demo.check).
+ */
+import DemoNote from './DemoNote.astro';
+import Glyph from '../commande/Glyph.astro';
+import GuideNote from '../installation/GuideNote.astro';
+import GuideText from '../installation/GuideText.astro';
+import Icon from '../Icon.astro';
+import Screen from './Screen.astro';
+import ScreenNav from './ScreenNav.astro';
+import ScreenWhy from './ScreenWhy.astro';
+import { assistant } from '../../content/assistant';
+import { elides } from '../../lib/assistant/household.ts';
+import { fillTemplate } from '../../lib/installation/guide-state.ts';
+import { exampleAccounts } from './examples';
+
+interface Props {
+  demo: boolean;
+}
+
+const { demo } = Astro.props;
+const { check } = assistant.screens;
+const { common } = assistant;
+const ownerName = exampleAccounts[0]?.firstName ?? '';
+const ofOwner = fillTemplate(elides(ownerName) ? common.of.vowel : common.of.consonant, {
+  prenom: ownerName,
+});
+---
+
+<Screen view="check" title={check.title} lead={check.lead} demo={demo} problems={check.problems}>
+  <p class="check-hidden" slot="lead">
+    <Icon name="info" class="check-hidden__icon" />
+    <span>
+      <GuideText parts={check.hidden} />
+    </span>
+  </p>
+
+  <form
+    class="check-form"
+    id="verification-formulaire"
+    method="post"
+    novalidate
+    aria-labelledby="ecran-verification-titre"
+    data-check-form
+    data-js-only
+    hidden
+    data-msg-empty={check.errors.empty}
+    data-msg-wrong={check.errors.wrong}
+    data-msg-uppercase={check.errors.uppercase}
+    data-msg-space={check.errors.space}
+    data-msg-character={check.errors.character}
+    data-msg-again={check.errors.again}
+  >
+    <div class="check-field">
+      <label
+        class="check-field__label"
+        for="verification-mot-de-passe"
+        data-check-label
+        data-template={check.field.label}
+      >
+        {fillTemplate(check.field.label, { de_prenom: ofOwner })}
+      </label>
+      <p class="check-field__hint" id="verification-aide">
+        {check.field.hint}
+      </p>
+      <p class="check-field__error" id="verification-erreur" data-check-error hidden>
+        <Glyph name="alert" class="check-field__error-icon" />
+        <span>
+          <span class="visually-hidden">{common.errors.prefix}</span>
+          <span data-error-text></span>
+        </span>
+      </p>
+      <input
+        class="check-field__control"
+        id="verification-mot-de-passe"
+        type="password"
+        autocomplete="off"
+        autocapitalize="none"
+        autocorrect="off"
+        spellcheck="false"
+        aria-describedby="verification-aide"
+        data-check-input
+      />
+    </div>
+
+    <div class="check-show">
+      <input class="check-show__input" type="checkbox" id="verification-afficher" data-check-show />
+      <label class="check-show__label" for="verification-afficher">
+        {check.show}
+      </label>
+    </div>
+
+    <div class="check-form__actions">
+      <button type="submit" class="btn btn--primary" data-check-submit data-busy-text={check.busy}>
+        <span data-label>{check.submit}</span>
+      </button>
+    </div>
+    {demo && (
+      <DemoNote text={assistant.demo.check.note}>
+        <button type="button" class="btn btn--secondary" data-action="fill-password">
+          {assistant.demo.check.fill}
+        </button>
+      </DemoNote>
+    )}
+  </form>
+
+  <div class="check-notes">
+    {check.notes.map((note) => (
+      <GuideNote note={note} />
+    ))}
+    <div class="check-review" data-js-only hidden>
+      <button type="button" class="check-review__button" data-action="go" data-view="passwords">
+        {check.review}
+      </button>
+    </div>
+  </div>
+
+  <ScreenWhy why={check.why} />
+
+  <p class="check-success" data-check-success hidden>
+    <Glyph name="check" class="check-success__icon" />
+    <span>{check.success}</span>
+  </p>
+
+  <ScreenNav>
+    <button type="button" class="btn btn--secondary" data-action="go" data-view="sheet">
+      <Icon name="arrow-left" />
+      <span>{check.back}</span>
+    </button>
+    <button
+      type="button"
+      class="btn btn--primary screen-nav__main"
+      data-action="create"
+      data-check-create
+      hidden
+    >
+      <span>{check.create}</span>
+      <Icon name="arrow-right" />
+    </button>
+  </ScreenNav>
+</Screen>
+
+<style>
+  .check-hidden {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: flex-start;
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  .check-hidden :global(.check-hidden__icon) {
+    margin-block-start: 0.2em;
+  }
+
+  .check-form {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  /* ---------- Le champ (comme le formulaire de commande) ---------- */
+  .check-field {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .check-field__label {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    line-height: 1.3;
+  }
+
+  .check-field__hint {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
+  .check-field__error {
+    display: flex;
+    gap: var(--space-2xs);
+    align-items: flex-start;
+    margin: var(--space-3xs) 0 0;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .check-field__error :global(.check-field__error-icon) {
+    margin-block-start: 0.1em;
+    color: var(--link);
+  }
+
+  /* Ce que l'on tape : grand, dans la police du texte, comme sur la fiche. */
+  .check-field__control {
+    inline-size: 100%;
+    min-block-size: 3.25rem;
+    margin-block-start: var(--space-3xs);
+    padding: 0.625rem 0.875rem;
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: var(--radius-s);
+    font: inherit;
+    font-size: var(--step-1);
+    letter-spacing: 0.03em;
+    color: var(--text);
+    background-color: var(--surface);
+    transition:
+      border-color var(--dur-1) var(--ease-out),
+      box-shadow var(--dur-1) var(--ease-out);
+  }
+
+  .check-field__control:hover {
+    border-color: var(--text);
+  }
+
+  .check-field__control:focus-visible {
+    outline: var(--focus-width) solid var(--focus);
+    outline-offset: 1px;
+    border-color: var(--text);
+  }
+
+  .check-field__control[aria-invalid='true'] {
+    border-color: var(--link);
+    box-shadow: inset 0 0 0 1px var(--link);
+  }
+
+  /* Téléphone : un mot de passe entier tient dans le champ. */
+  @media (max-width: 29.99rem) {
+    .check-field__control {
+      font-size: var(--step-0);
+      letter-spacing: 0.02em;
+    }
+  }
+
+  /* ---------- « Afficher ce que je tape » : toute la rangée coche la case ---------- */
+  .check-show {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-xs);
+    align-items: start;
+    min-block-size: var(--target-min);
+    padding-block: var(--space-2xs);
+  }
+
+  .check-show__input {
+    position: relative;
+    z-index: 1;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    margin: 0.1rem 0 0;
+    accent-color: var(--text);
+  }
+
+  .check-show__input:focus-visible {
+    outline: var(--focus-width) solid var(--focus);
+    outline-offset: var(--focus-offset);
+  }
+
+  .check-show__label {
+    cursor: pointer;
+  }
+
+  .check-show__label::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .check-form__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+  }
+
+  /* ---------- Fiche vérifiée ---------- */
+  .check-success {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: flex-start;
+    max-inline-size: none;
+    margin: 0;
+    padding: var(--space-s) var(--space-m);
+    border: var(--rule-width) solid var(--line);
+    border-inline-start: 3px solid var(--success);
+    border-radius: var(--radius);
+    font-size: var(--step-1);
+    font-weight: 700;
+    line-height: 1.5;
+  }
+
+  .check-success :global(.check-success__icon) {
+    margin-block-start: 0.2em;
+    color: var(--success);
+  }
+
+  .check-notes {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .check-review {
+    display: flex;
+  }
+
+  /* « Revoir mes mots de passe » : un lien d'action, pas un second bouton
+     « Retour » (même dessin que « Modifier » du récapitulatif de commande). */
+  .check-review__button {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--target-min);
+    padding: 0 var(--space-xs);
+    border: 0;
+    border-radius: var(--radius-s);
+    font-family: var(--font-ui);
+    font-size: var(--step-0);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    color: var(--link);
+    background: none;
+    cursor: pointer;
+  }
+
+  .check-review__button:hover {
+    color: var(--link-hover);
+    text-decoration-thickness: 2px;
+  }
+
+  .check-review__button:focus-visible {
+    outline: var(--focus-width) solid var(--focus);
+    outline-offset: var(--focus-offset);
+  }
+</style>

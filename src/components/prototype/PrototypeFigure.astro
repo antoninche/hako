@@ -100,6 +100,8 @@ const text = caption ?? view.caption;
           <Text text={part} />
         ) : isTodo(part) ? (
           <Todo what={part.todo}>{part.placeholder}</Todo>
+        ) : 'address' in part ? (
+          <span translate="no">{part.address}</span>
         ) : (
           <span lang="ja">{part.ja}</span>
         ),

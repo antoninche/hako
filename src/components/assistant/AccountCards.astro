@@ -1,0 +1,188 @@
+---
+/**
+ * Écran « Vos mots de passe » : une carte par personne, une par ligne, avec
+ * son prénom, « Responsable de la HAKO » pour la première, son identifiant et
+ * son mot de passe, écrits en grand dans la police du texte (Atkinson
+ * Hyperlegible Next), qui distingue bien l, 1 et I, et barre le zéro.
+ * translate="no" : la traduction automatique du navigateur ne touche ni aux
+ * identifiants ni aux mots de passe.
+ *
+ * Un mot de passe trop long pour la ligne passe à la ligne devant un tiret,
+ * jamais après : une ligne ne finit jamais par un tiret, que l'on oublierait
+ * en recopiant. Un identifiant passe à la ligne devant « @ ».
+ *
+ * Sans JavaScript, en démonstration, les cartes des comptes d'exemple
+ * (examples.ts) ; sur la HAKO, aucune. Avec JavaScript, le script les
+ * remplace par les comptes que la HAKO remet (gabarit <template>), et les
+ * efface une fois les comptes créés.
+ * Textes : src/content/assistant.ts, clé screens.passwords.card.
+ */
+import { assistant } from '../../content/assistant';
+import { elides, loginChunks, passwordChunks } from '../../lib/assistant/household.ts';
+import { fillTemplate } from '../../lib/installation/guide-state.ts';
+import { exampleAccounts } from './examples';
+
+interface Props {
+  demo: boolean;
+}
+
+const { demo } = Astro.props;
+const { card } = assistant.screens.passwords;
+const { of } = assistant.common;
+const passwordOf = (firstName: string): string =>
+  fillTemplate(card.passwordOf, {
+    de_prenom: fillTemplate(elides(firstName) ? of.vowel : of.consonant, { prenom: firstName }),
+  });
+---
+
+<ul class="accounts" data-accounts data-password-of={card.passwordOf}>
+  {demo &&
+    exampleAccounts.map((account) => (
+      <li class="account">
+        <h3 class="account__name">
+          <span>{account.firstName}</span>
+          {account.owner && <span class="account__owner">{card.owner}</span>}
+        </h3>
+        <dl class="account__facts">
+          <div class="account__row">
+            <dt class="account__label">{card.login}</dt>
+            <dd class="account__login" translate="no">
+              {loginChunks(account.login).map((chunk, index) => (
+                <>
+                  {index > 0 && <wbr />}
+                  <span class:list={{ nowrap: index > 0 }}>{chunk}</span>
+                </>
+              ))}
+            </dd>
+          </div>
+          <div class="account__row">
+            <dt class="account__label">
+              <span aria-hidden="true">{card.password}</span>
+              <span class="visually-hidden">{passwordOf(account.firstName)}</span>
+            </dt>
+            <dd class="account__password" translate="no">
+              {passwordChunks(account.password).map((chunk, index) => (
+                <>
+                  {index > 0 && <wbr />}
+                  <span class="nowrap">{chunk}</span>
+                </>
+              ))}
+            </dd>
+          </div>
+        </dl>
+      </li>
+    ))}
+</ul>
+
+<template data-account-template>
+  <li class="account">
+    <h3 class="account__name">
+      <span data-first-name></span>
+      <span class="account__owner" data-owner hidden>
+        {card.owner}
+      </span>
+    </h3>
+    <dl class="account__facts">
+      <div class="account__row">
+        <dt class="account__label">{card.login}</dt>
+        <dd class="account__login" translate="no" data-login></dd>
+      </div>
+      <div class="account__row">
+        <dt class="account__label">
+          <span aria-hidden="true">{card.password}</span>
+          <span class="visually-hidden" data-password-of></span>
+        </dt>
+        <dd class="account__password" translate="no" data-password></dd>
+      </div>
+    </dl>
+  </li>
+</template>
+
+<style>
+  /* Une carte par ligne : le mot de passe tient sur une ligne, dès que la
+     largeur le permet. */
+  .accounts {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-m);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Même dessin que les cartes des applications (SoftwareCard, AppCards). */
+  .accounts :global(.account) {
+    display: grid;
+    align-content: start;
+    gap: var(--space-s);
+    padding: var(--space-m);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+    background-color: var(--surface);
+    box-shadow: var(--shadow-s);
+  }
+
+  .accounts :global(.account__name) {
+    display: grid;
+    gap: var(--space-3xs);
+    margin: 0;
+    font-size: var(--step-2);
+    font-weight: 500;
+    line-height: var(--leading-tight);
+  }
+
+  .accounts :global(.account__owner) {
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text-muted);
+  }
+
+  .accounts :global(.account__facts) {
+    display: grid;
+    gap: var(--space-s);
+    margin: 0;
+    padding-block-start: var(--space-s);
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  .accounts :global(.account__row) {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .accounts :global(.account__label) {
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text-muted);
+  }
+
+  /* Coupures de ligne : seulement aux <wbr> (devant un tiret, devant « @ »).
+     Un identifiant plus long que la ligne se coupe en dernier recours. */
+  .accounts :global(.account__login),
+  .accounts :global(.account__password) {
+    min-inline-size: 0;
+    margin: 0;
+    overflow-wrap: break-word;
+  }
+
+  .accounts :global(.account__login) {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  /* Le mot de passe : grand, dans la police du texte, facile à sélectionner. */
+  .accounts :global(.account__password) {
+    font-size: var(--step-1);
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: 0.03em;
+    overflow-wrap: normal;
+    user-select: all;
+  }
+</style>

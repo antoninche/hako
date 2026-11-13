@@ -1,0 +1,68 @@
+---
+/**
+ * Note de la démonstration, sur un écran de la page de la HAKO : ce qui
+ * change par rapport à la vraie installation (« En démonstration, … »). Même
+ * dessin que l'encadré « Formulaire de démonstration » de la page Commander
+ * (cadre fin, symbole « info »), pour ne pas se confondre avec les encadrés
+ * de la vraie page. Un bouton propre à la démonstration (« Remplir avec… »)
+ * se place dedans, après sa phrase. La vraie page de la HAKO ne l'affiche
+ * jamais.
+ * Textes : src/content/assistant.ts, clé demo.
+ */
+import Glyph from '../commande/Glyph.astro';
+import GuideText from '../installation/GuideText.astro';
+import type { Sentence } from '../../content/assistant';
+
+interface Props {
+  text?: string;
+  /** Une phrase avec liens, à la place de `text`. */
+  parts?: Sentence;
+}
+
+const { text, parts } = Astro.props;
+---
+
+<div class="demo-note">
+  <Glyph name="info" class="demo-note__icon" />
+  <div class="demo-note__body">
+    <p class="demo-note__text">{parts ? <GuideText parts={parts} /> : text}</p>
+    <slot />
+  </div>
+</div>
+
+<style>
+  .demo-note {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: flex-start;
+    padding: var(--space-s) var(--space-m);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .demo-note :global(.demo-note__icon) {
+    flex: none;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    margin-block-start: 0.1em;
+    color: var(--text-muted);
+  }
+
+  .demo-note__body {
+    display: grid;
+    gap: var(--space-xs);
+    justify-items: start;
+  }
+
+  .demo-note__text {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
+  @media print {
+    .demo-note {
+      display: none;
+    }
+  }
+</style>

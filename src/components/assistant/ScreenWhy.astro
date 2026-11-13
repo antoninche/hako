@@ -1,0 +1,57 @@
+---
+/**
+ * « Pourquoi ? » : à quoi sert un écran de la page de la HAKO. Même dessin
+ * que « Pourquoi cette étape ? » dans le guide (filet fort au-dessus, titre
+ * avec le symbole « info »).
+ * Textes : src/content/assistant.ts (clé why de chaque écran).
+ */
+import Icon from '../Icon.astro';
+import GuideText from '../installation/GuideText.astro';
+import { assistant, type Sentence } from '../../content/assistant';
+
+interface Props {
+  why: readonly Sentence[];
+}
+
+const { why } = Astro.props;
+---
+
+<div class="why">
+  <h3 class="why__title">
+    <Icon name="info" class="why__icon" />
+    <span>{assistant.common.why}</span>
+  </h3>
+  {why.map((sentence) => (
+    <p class="why__text">
+      <GuideText parts={sentence} />
+    </p>
+  ))}
+</div>
+
+<style>
+  .why {
+    display: grid;
+    align-content: start;
+    gap: var(--space-xs);
+    padding-block-start: var(--space-m);
+    border-block-start: var(--rule-width) solid var(--line-strong);
+  }
+
+  .why__title {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    margin: 0;
+    font-size: var(--step-1);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+  }
+
+  .why__title :global(.why__icon) {
+    color: var(--text-muted);
+  }
+
+  .why__text {
+    margin: 0;
+  }
+</style>

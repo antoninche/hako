@@ -1,0 +1,200 @@
+---
+/**
+ * « Avant de commencer » : les objets à réunir, chacun avec son icône dans
+ * une pastille (comme la page Contact), un intitulé court en D-DIN gras
+ * (comme les pièces de la page La box) et ses explications ; puis les mots
+ * techniques du guide, expliqués dans un bloc qui se déplie (même dessin
+ * qu'une question de la FAQ).
+ * Textes : src/content/installation.ts, clés before et glossary.
+ */
+import FaqItem from '../faq/FaqItem.astro';
+import Icon, { type UiIconName } from '../Icon.astro';
+import Section from '../Section.astro';
+import GuideText from './GuideText.astro';
+import Text from '../texte/Text.astro';
+import { installation, type Need } from '../../content/installation';
+
+const { before, glossary } = installation;
+
+/** Icône de chaque objet à réunir. */
+const icons = {
+  hako: 'box',
+  cable: 'cable',
+  prise: 'plug',
+  appareil: 'wifi',
+  impression: 'printer',
+} as const satisfies Record<Need['id'], UiIconName>;
+---
+
+<Section surface="sable" labelledby="titre-avant" class="before-section">
+  <div class="before">
+    <div class="before__head">
+      <h2 id="titre-avant">{before.title}</h2>
+      <p class="text-muted">
+        <Text text={before.lead} />
+      </p>
+    </div>
+
+    <ul class="needs">
+      {before.items.map((item: Need) => (
+        <li class="need">
+          <span class="need__icon">
+            <Icon name={icons[item.id]} />
+          </span>
+          <div class="need__body">
+            <p class="need__text">
+              <GuideText parts={item.text} />
+            </p>
+            {item.detail?.map((sentence) => (
+              <p class="need__detail">
+                <GuideText parts={sentence} />
+              </p>
+            ))}
+          </div>
+        </li>
+      ))}
+    </ul>
+
+    <div class="glossary">
+      <FaqItem id="lexique" question={glossary.title}>
+        <dl class="glossary__list">
+          {glossary.items.map((item) => (
+            <div class="glossary__row">
+              <dt class="glossary__term">{item.term}</dt>
+              <dd class="glossary__definition">{item.definition}</dd>
+            </div>
+          ))}
+        </dl>
+      </FaqItem>
+    </div>
+  </div>
+</Section>
+
+<style>
+  .before {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .before__head {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .before__head h2 {
+    margin: 0;
+  }
+
+  .before__head p {
+    margin: 0;
+  }
+
+  /* ---------- Les objets à réunir ---------- */
+  .needs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    gap: var(--space-l) var(--space-xl);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .need {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-m);
+    align-items: start;
+  }
+
+  .need__icon {
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: 50%;
+    color: var(--text);
+  }
+
+  .need__body {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-block-start: 0.4rem;
+  }
+
+  .need__text {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-1);
+    font-weight: 700;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .need__detail {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Les mots du guide ---------- */
+  .glossary {
+    border-block-start: var(--rule-width) solid var(--line-strong);
+  }
+
+  .glossary__list {
+    display: grid;
+    gap: var(--space-s);
+    margin: 0;
+  }
+
+  .glossary__row {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .glossary__term {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .glossary__definition {
+    margin: 0;
+  }
+
+  @media (min-width: 40rem) {
+    .glossary__row {
+      grid-template-columns: 11rem minmax(0, 1fr);
+      gap: var(--space-m);
+      align-items: baseline;
+    }
+  }
+
+  /* Sur papier, les objets se suivent en une colonne : dans une grille, un
+     objet qui ne doit pas se couper laisserait le titre seul en bas de page. */
+  @media print {
+    :global(.before-section) {
+      padding-block: var(--space-l);
+    }
+
+    .needs {
+      display: block;
+    }
+
+    .need {
+      break-inside: auto;
+      margin-block-end: var(--space-m);
+    }
+
+    /* Le lexique s'imprime déplié, même sans JavaScript (avec lui, guide.ts
+       ouvre aussi les blocs repliés le temps d'imprimer). */
+    .glossary :global(details)::details-content {
+      display: block;
+      content-visibility: visible;
+    }
+
+    .glossary :global(.faq-item__icon) {
+      display: none;
+    }
+  }
+</style>

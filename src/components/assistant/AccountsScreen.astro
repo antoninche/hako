@@ -1,0 +1,176 @@
+---
+/**
+ * Écran « Votre HAKO crée vos comptes » : l'avancement, ligne par ligne
+ * (comptes des photos, puis des fichiers, puis derniers réglages), chaque
+ * ligne marquée « À venir », « En cours… » ou « Terminé ». Même dessin que
+ * l'indicateur d'étapes du formulaire de commande : cercle fin à venir,
+ * cercle épais en cours, coche verte une fois fait.
+ *
+ * Le script (assistant-ui.ts) suit l'avancement que la HAKO donne, et
+ * annonce chaque ligne terminée aux lecteurs d'écran, poliment (zone
+ * role="status" d'Assistant.astro), sans jamais lire de pourcentage ; la fin
+ * est annoncée par l'écran « C'est prêt ». Sous l'avancement, l'encadré
+ * « Pendant la création » (laisser la HAKO branchée, la page ouverte). Seul le
+ * cercle de la ligne en cours bouge, doucement, et plus du tout si
+ * l'appareil demande moins d'animations.
+ * Textes : src/content/assistant.ts, clé screens.accounts (et demo.accounts).
+ */
+import Glyph from '../commande/Glyph.astro';
+import GuideNote from '../installation/GuideNote.astro';
+import Screen from './Screen.astro';
+import ScreenWhy from './ScreenWhy.astro';
+import { assistant } from '../../content/assistant';
+
+interface Props {
+  demo: boolean;
+}
+
+const { demo } = Astro.props;
+const { accounts } = assistant.screens;
+---
+
+<Screen
+  view="accounts"
+  title={accounts.title}
+  lead={accounts.lead}
+  illustration={{ name: 'installation/preparation', ratio: '4/3' }}
+  demoNote={assistant.demo.accounts}
+  demo={demo}
+  problems={accounts.problems}
+>
+  <div class="creation" slot="lead">
+    <ol
+      class="tasks"
+      data-tasks
+      data-waiting={accounts.status.waiting}
+      data-running={accounts.status.running}
+      data-done={accounts.status.done}
+    >
+      {accounts.tasks.map((task, index) => (
+        <li class="task" data-task={task.id} data-state="waiting" data-done-text={task.done}>
+          <span class="task__mark" aria-hidden="true">
+            <span class="task__number">{index + 1}</span>
+            <Glyph name="check" class="task__check" />
+          </span>
+          <span class="task__body">
+            <span class="task__label">{task.label}</span>
+            <span class="task__state" data-task-state>
+              {accounts.status.waiting}
+            </span>
+          </span>
+        </li>
+      ))}
+    </ol>
+    <GuideNote note={accounts.keep} />
+  </div>
+
+  <ScreenWhy why={accounts.why} />
+</Screen>
+
+<style>
+  .creation {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .tasks {
+    display: grid;
+    gap: var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .task {
+    display: flex;
+    gap: var(--space-s);
+    align-items: center;
+    padding: var(--space-s) var(--space-m);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .task__mark {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: 50%;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    color: var(--text-muted);
+    background-color: var(--surface);
+  }
+
+  .task__mark :global(.task__check) {
+    display: none;
+  }
+
+  .task__body {
+    display: grid;
+    gap: var(--space-3xs);
+    min-inline-size: 0;
+  }
+
+  .task__label {
+    font-weight: 700;
+    line-height: var(--leading-snug);
+  }
+
+  .task__state {
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text-muted);
+  }
+
+  /* En cours : le cercle épais de l'étape en cours, qui respire doucement. */
+  .task[data-state='running'] .task__mark {
+    border: 2px solid var(--text);
+    color: var(--text);
+    box-shadow:
+      0 0 0 3px var(--surface),
+      0 0 0 4px var(--line-strong);
+    animation: tache-en-cours var(--dur-3) var(--ease-in-out) infinite alternate;
+  }
+
+  .task[data-state='running'] .task__state {
+    color: var(--text);
+  }
+
+  @keyframes tache-en-cours {
+    to {
+      box-shadow:
+        0 0 0 3px var(--surface),
+        0 0 0 6px var(--line-strong);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .task[data-state='running'] .task__mark {
+      animation: none;
+    }
+  }
+
+  /* Fait : la coche verte, comme une étape faite de la commande. */
+  .task[data-state='done'] .task__number {
+    display: none;
+  }
+
+  .task[data-state='done'] .task__mark :global(.task__check) {
+    display: inline-block;
+    color: var(--success);
+  }
+
+  .task[data-state='done'] .task__state {
+    color: var(--success);
+  }
+
+  .task__mark :global(.task__check) {
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+  }
+</style>

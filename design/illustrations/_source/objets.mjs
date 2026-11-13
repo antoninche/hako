@@ -1,5 +1,7 @@
 // Le vocabulaire commun de la série : carte de fond, sol, box HAKO, box
-// internet, photos, nuages, plantes, meubles et personnages.
+// internet, photos, nuages, plantes, meubles et personnages ; à la fin, les
+// objets ajoutés pour le guide d'installation (console, étagère murale, prise,
+// bloc d'alimentation, sablier, téléphone, symbole du Wi-Fi).
 import { KANJI_H, KANJI_W, kanjiD } from './kanji.mjs';
 import { MOT_H, MOT_W, motD } from './mot.mjs';
 import { C, cut, ell, leaf, mapNodes, rrect, soft, turn } from './papier.mjs';
@@ -1449,5 +1451,230 @@ export function olivier(sv, cx, yb, s, { sh = C.lin } = {}) {
     o.piece(ell(cx - s * 0.22, yb - s * 0.6, s * 0.26, s * 0.17), C.olive);
     o.piece(ell(cx + s * 0.16, yb - s * 0.62, s * 0.24, s * 0.16), C.olive);
     o.piece(ell(cx - s * 0.02, yb - s * 0.8, s * 0.26, s * 0.18), C.olive);
+  });
+}
+
+// --- Objets du guide d'installation (installation.mjs) ------------------------------
+
+/**
+ * Console ouverte : un plateau caramel vu de face sur deux pieds noyer, rien
+ * autour, rien de fermé. (x, y) : bord gauche et dessus du plateau ; w : largeur ;
+ * yb : bas des pieds. Renvoie le repère sous lequel glisser l'ombre des objets
+ * posés dessus (le plateau en cache le pied, seule la part sur le mur reste).
+ */
+export function consoleOuverte(sv, x, y, w, yb, { ep = 14 } = {}) {
+  const sous = sv.marque();
+  sv.obj(C.lin, (o) => {
+    for (const lx of [x + 26, x + w - 26])
+      o.line(
+        [
+          [lx, y + ep - 2],
+          [lx, yb],
+        ],
+        C.noyer,
+        12,
+        { smooth: false, cap: 'butt' },
+      );
+    o.piece(rrect(x, y, w, ep, 3, { j: 0.6 }), C.caramel);
+  });
+  return sous;
+}
+
+/** Étagère murale : une planche caramel et deux équerres noyer. Renvoie le repère des ombres. */
+export function etagereMurale(sv, x, y, w, ep = 13) {
+  const sous = sv.marque();
+  sv.obj(C.lin, (o) => {
+    for (const [ax, sens] of [
+      [x + w * 0.12, 1],
+      [x + w * 0.88, -1],
+    ])
+      o.piece(
+        soft(
+          [
+            [ax, y + ep],
+            [ax + sens * 22, y + ep],
+            [ax, y + ep + 26],
+          ],
+          2,
+        ),
+        C.noyer,
+      );
+    o.piece(rrect(x, y, w, ep, 3, { j: 0.7 }), C.caramel);
+  });
+  return sous;
+}
+
+/**
+ * Bloc d'alimentation posé à plat, vu de côté : boîtier noyer, deux broches
+ * (pierre) qui sortent à droite, câble noyer enroulé jusqu'à sa petite fiche.
+ * (x, yb) : coin bas gauche du boîtier ; s : sa longueur. cable : points du câble,
+ * du boîtier jusqu'à la fiche ; fiche : [x, y, angle] du bout. sh : couleur de
+ * l'ombre (caramel : posé sur le sol lin) ; sous : repère du meuble qui le porte.
+ */
+export function blocPose(sv, x, yb, s, cable, fiche, { sh = C.caramel, sous = null } = {}) {
+  const h = s * 0.66;
+  sv.obj(
+    sh,
+    (o) => {
+      o.line(cable, C.noyer, 5);
+      const [fx, fy, fa] = fiche;
+      o.piece(turn(rrect(fx - 14, fy - 6.5, 22, 13, 4, { j: 0.2 }), fa, fx, fy), C.noyer);
+      o.piece(turn(rrect(fx + 7, fy - 4, 10, 8, [0, 3, 3, 0], { j: 0.1 }), fa, fx, fy), C.pierre);
+      for (const by of [yb - h * 0.7, yb - h * 0.32])
+        o.line(
+          [
+            [x + s - 2, by],
+            [x + s + s * 0.3, by],
+          ],
+          C.pierre,
+          s * 0.11,
+          { smooth: false },
+        );
+      o.piece(rrect(x, yb - h, s, h, s * 0.16, { j: 0.4 }), C.noyer);
+      o.piece(rrect(x - 12, yb - h * 0.62, 16, h * 0.3, 3, { j: 0.2 }), C.noyer);
+    },
+    [2, 3],
+    sous,
+  );
+}
+
+/** Prise électrique murale : plaque crème, puits lin, deux trous chocolat. */
+export function priseMurale(sv, cx, cy, s, { trous = true } = {}) {
+  sv.obj(C.lin, (o) => {
+    o.piece(rrect(cx - s / 2, cy - s / 2, s, s, s * 0.2, { j: 0.4 }), C.creme);
+    o.detail(ell(cx, cy, s * 0.34, s * 0.34, { j: 0.2, n: 10 }), C.lin);
+    if (trous) {
+      o.detail(
+        ell(cx - s * 0.13, cy + s * 0.02, s * 0.05, s * 0.05, { j: 0.05, n: 6 }),
+        C.chocolat,
+      );
+      o.detail(
+        ell(cx + s * 0.13, cy + s * 0.02, s * 0.05, s * 0.05, { j: 0.05, n: 6 }),
+        C.chocolat,
+      );
+    }
+  });
+}
+
+/** Sablier : deux plateaux et deux montants noyer, verre crème, sable caramel qui coule. */
+export function sablier(sv, cx, yb, h, { sh = C.lin, sous = null } = {}) {
+  const w = h * 0.6;
+  const p = h * 0.085; // épaisseur d'un plateau
+  const y0 = yb - h + p; // haut du verre
+  const y1 = yb - p; // bas du verre
+  const ym = (y0 + y1) / 2;
+  const a = w * 0.34; // demi-largeur des bulbes
+  const n = w * 0.05; // demi-largeur du col
+  sv.obj(
+    sh,
+    (o) => {
+      o.piece(
+        cut(
+          [
+            [cx - a, y0],
+            [cx + a, y0],
+            [cx + a, y0 + h * 0.1, true],
+            [cx + n * 1.4, ym - h * 0.05, true],
+            [cx + n, ym],
+            [cx + n * 1.4, ym + h * 0.05, true],
+            [cx + a, y1 - h * 0.1, true],
+            [cx + a, y1],
+            [cx - a, y1],
+            [cx - a, y1 - h * 0.1, true],
+            [cx - n * 1.4, ym + h * 0.05, true],
+            [cx - n, ym],
+            [cx - n * 1.4, ym - h * 0.05, true],
+            [cx - a, y0 + h * 0.1, true],
+          ],
+          { j: 0.3 },
+        ),
+        C.creme,
+      );
+      // le sable du haut, déjà à moitié passé
+      o.detail(
+        cut(
+          [
+            [cx - a * 0.86, ym - h * 0.17],
+            [cx + a * 0.86, ym - h * 0.17],
+            [cx + n * 1.2, ym - h * 0.03, true],
+            [cx, ym],
+            [cx - n * 1.2, ym - h * 0.03, true],
+          ],
+          { j: 0.2 },
+        ),
+        C.caramel,
+      );
+      // le filet qui tombe, puis le petit tas
+      o.trait(
+        [
+          [cx, ym],
+          [cx, y1 - h * 0.12],
+        ],
+        C.caramel,
+        Math.max(2, h * 0.02),
+        { smooth: false },
+      );
+      o.detail(
+        cut(
+          [
+            [cx - a * 0.92, y1 + 0.5],
+            [cx - a * 0.5, y1 - h * 0.08, true],
+            [cx, y1 - h * 0.15, true],
+            [cx + a * 0.5, y1 - h * 0.08, true],
+            [cx + a * 0.92, y1 + 0.5],
+          ],
+          { j: 0.2 },
+        ),
+        C.caramel,
+      );
+      // montants et plateaux
+      for (const sx of [-1, 1])
+        o.line(
+          [
+            [cx + sx * w * 0.42, y0 - 1],
+            [cx + sx * w * 0.42, y1 + 1],
+          ],
+          C.noyer,
+          h * 0.05,
+          { smooth: false, cap: 'butt' },
+        );
+      o.piece(rrect(cx - w / 2, yb - h, w, p, p * 0.4, { j: 0.3 }), C.noyer);
+      o.piece(rrect(cx - w / 2, yb - p, w, p, p * 0.4, { j: 0.3 }), C.noyer);
+    },
+    undefined,
+    sous,
+  );
+}
+
+/**
+ * Téléphone vu de face : coque noyer, écran crème. (x, y) : coin haut gauche ;
+ * w, h : taille. ecran(sx, sy, sw, sh) dessine sur l'écran.
+ */
+export function telephone(sv, x, y, w, h, { sh = C.lin, ecran, sous = null } = {}) {
+  const m = w * 0.07;
+  sv.obj(
+    sh,
+    (o) => {
+      o.piece(rrect(x, y, w, h, w * 0.16, { j: 0.4 }), C.noyer);
+      o.detail(rrect(x + m, y + m * 1.6, w - 2 * m, h - m * 3.2, w * 0.09, { j: 0.3 }), C.creme);
+    },
+    undefined,
+    sous,
+  );
+  if (ecran) ecran(x + m, y + m * 1.6, w - 2 * m, h - m * 3.2);
+}
+
+/** Symbole du Wi-Fi : trois arcs et un point, en bandes de papier. */
+export function wifi(sv, cx, cy, r, { couleur = C.caramel, ep = 7, sh = C.lin } = {}) {
+  sv.obj(sh, (o) => {
+    for (const k of [1, 0.68, 0.36]) {
+      const pts = [];
+      for (let i = 0; i <= 6; i++) {
+        const t = ((-138 + (i * 96) / 6) * Math.PI) / 180;
+        pts.push([cx + r * k * Math.cos(t), cy + r * k * Math.sin(t)]);
+      }
+      o.line(pts, couleur, ep, { j: 0.2 });
+    }
+    o.piece(ell(cx, cy - ep * 0.2, ep * 0.85, ep * 0.85, { j: 0.1, n: 7 }), couleur);
   });
 }

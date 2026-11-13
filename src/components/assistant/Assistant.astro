@@ -1,0 +1,312 @@
+---
+/**
+ * La page de la HAKO qui fait la première installation : elle crée un compte
+ * pour chaque personne de la maison et lui donne son mot de passe.
+ *
+ * mode="demo" : sur le site (/installer/demonstration/), avec la HAKO
+ * simulée. Le bandeau « Démonstration » au-dessus, une note « En
+ * démonstration… » sur chaque écran, la fiche marquée « EXEMPLE », et
+ * « Voir un autre écran » en dessous. mode="box" : la même page, servie
+ * plus tard par la HAKO elle-même (lot 3 de MaBox OS), sans aucune de ces
+ * mentions.
+ *
+ * Dans l'ordre : l'en-tête (logo HAKO et « Première installation »),
+ * l'indicateur des écrans, les sept écrans du parcours, puis les écrans
+ * d'attente et d'erreur, « Besoin d'aide ? » et le pied de page.
+ * - Sans JavaScript, en démonstration, les écrans du parcours se lisent l'un
+ *   sous l'autre, avec des comptes d'exemple ; les boutons, les formulaires,
+ *   l'indicateur et les écrans d'erreur restent cachés. Sur la HAKO, seul
+ *   l'accueil reste, avec le message qui demande JavaScript.
+ * - Avec JavaScript (assistant-ui.ts, lancé par le <script> de la page, qui
+ *   choisit l'accès à la HAKO), un seul écran à la fois. Les liens vers le
+ *   site s'ouvrent dans un nouvel onglet (common.newTab) : sur la HAKO,
+ *   siteUrl leur donne l'adresse complète du site.
+ * - Si le script ne démarre pas (navigateur trop ancien), un message le dit
+ *   au bout de quelques secondes (common.stuck).
+ * - Impression : seule la fiche de secours, sur une page A4.
+ *
+ * Les faits dont le script a besoin (nombre de personnes, longueur d'un
+ * prénom, domaine des identifiants, et en démonstration les prénoms et les
+ * mots de passe d'exemple) sont écrits ici, en attributs data-* : le script
+ * n'importe ni textes ni faits.
+ * Textes : src/content/assistant.ts ; faits : src/data/assistant.ts.
+ */
+import AccountsScreen from './AccountsScreen.astro';
+import CheckScreen from './CheckScreen.astro';
+import DemoBanner from './DemoBanner.astro';
+import DemoScenarios from './DemoScenarios.astro';
+import GuideNote from '../installation/GuideNote.astro';
+import GuideText from '../installation/GuideText.astro';
+import Icon from '../Icon.astro';
+import Logo from '../Logo.astro';
+import PasswordsScreen from './PasswordsScreen.astro';
+import PeopleScreen from './PeopleScreen.astro';
+import ReadyScreen from './ReadyScreen.astro';
+import SheetScreen from './SheetScreen.astro';
+import StateScreen from './StateScreen.astro';
+import StepsIndicator from './StepsIndicator.astro';
+import WelcomeScreen from './WelcomeScreen.astro';
+import { assistant } from '../../content/assistant';
+import {
+  EXAMPLE_FIRST_NAMES,
+  EXAMPLE_PASSWORDS,
+  FIRST_NAME_MAX_LENGTH,
+  LOGIN_DOMAIN,
+  MAX_PEOPLE,
+} from '../../data/assistant';
+import { STATE_IDS } from '../../lib/assistant/machine.ts';
+
+interface Props {
+  mode: 'demo' | 'box';
+  /** Sur la HAKO : l'adresse du site (https://…, sans « / » final), devant ses liens. */
+  siteUrl?: string | undefined;
+}
+
+const { mode, siteUrl } = Astro.props;
+const demo = mode === 'demo';
+const { common, page } = assistant;
+const Page = demo ? 'section' : 'div';
+---
+
+<div
+  class="assistant"
+  data-assistant
+  data-mode={mode}
+  data-max-people={MAX_PEOPLE}
+  data-first-name-max={FIRST_NAME_MAX_LENGTH}
+  data-login-domain={LOGIN_DOMAIN}
+  data-example-names={demo ? JSON.stringify(EXAMPLE_FIRST_NAMES) : undefined}
+  data-example-passwords={demo ? JSON.stringify(EXAMPLE_PASSWORDS) : undefined}
+  data-restarted={demo ? assistant.demo.restarted : undefined}
+  data-new-tab={common.newTab}
+  data-site-url={demo ? undefined : siteUrl}
+  data-of-consonant={common.of.consonant}
+  data-of-vowel={common.of.vowel}
+>
+  <div class="assistant__frame">
+    {demo && <DemoBanner />}
+
+    <Page class="hako-page surface-creme" aria-label={demo ? page.frame.label : undefined}>
+      <div class="hako-page__head">
+        <p class="hako-page__name">
+          <Logo variant="paysage" class="hako-page__logo" />
+          <span>{common.title}</span>
+        </p>
+        <StepsIndicator />
+      </div>
+
+      <p class="visually-hidden" role="status" data-announcer></p>
+
+      <noscript>
+        <p class="hako-page__noscript">
+          <Icon name="info" class="hako-page__noscript-icon" />
+          <span>
+            <GuideText parts={demo ? page.noscript : common.noscript} />
+          </span>
+        </p>
+      </noscript>
+      <p class="hako-page__noscript hako-page__stuck">
+        <Icon name="info" class="hako-page__noscript-icon" />
+        <span>
+          <GuideText parts={common.stuck} />
+        </span>
+      </p>
+
+      <div class="hako-page__screens">
+        <WelcomeScreen demo={demo} />
+        <PeopleScreen demo={demo} />
+        <PasswordsScreen demo={demo} />
+        <SheetScreen demo={demo} />
+        <CheckScreen demo={demo} />
+        <AccountsScreen demo={demo} />
+        <ReadyScreen demo={demo} />
+        {STATE_IDS.map((state) => (
+          <StateScreen state={state} demo={demo} />
+        ))}
+      </div>
+
+      <div class="hako-page__help">
+        <GuideNote note={common.help} icon="question" />
+      </div>
+
+      <p class="hako-page__footer">{demo ? assistant.demo.footer : common.footer}</p>
+    </Page>
+  </div>
+
+  {demo && <DemoScenarios />}
+</div>
+
+<style>
+  /* Calée sur la colonne de texte de la page, comme le guide ; assez large
+     pour que, sur ordinateur, les dessins se placent à côté du texte, à la
+     taille du guide (Screen.astro, 50rem et plus). */
+  .assistant {
+    display: grid;
+    gap: var(--space-l);
+    max-inline-size: 64rem;
+    margin-inline: 0;
+  }
+
+  .assistant__frame {
+    display: grid;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-m);
+  }
+
+  /* La page de la HAKO : une feuille crème posée sur la section sable, collée
+     sous le bandeau de la démonstration. */
+  .hako-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-xl);
+    padding: var(--space-l) clamp(var(--space-s), 4vw, var(--space-2xl)) var(--space-xl);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+    container: page-hako / inline-size;
+  }
+
+  .hako-page:not(:first-child) {
+    border-block-start: 0;
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+  }
+
+  .hako-page__head {
+    display: grid;
+    gap: var(--space-m);
+    padding-block-end: var(--space-m);
+    border-block-end: var(--rule-width) solid var(--line);
+  }
+
+  /* Le logo, puis « Première installation » : à la ligne sur un écran étroit. */
+  .hako-page__name {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-s);
+    align-items: center;
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .hako-page__name :global(.hako-page__logo) {
+    flex: none;
+    block-size: 1.75rem;
+    inline-size: auto;
+  }
+
+  .hako-page__noscript {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: flex-start;
+    max-inline-size: none;
+    margin: 0;
+    padding: var(--space-s) var(--space-m);
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: var(--radius);
+  }
+
+  .hako-page__noscript :global(.hako-page__noscript-icon) {
+    margin-block-start: 0.15em;
+    color: var(--link);
+  }
+
+  /* Script qui ne démarre pas (navigateur trop ancien) : le message apparaît
+     au bout de 4 secondes, tant que la page n'est pas prête (data-ready). */
+  .hako-page__stuck {
+    display: none;
+  }
+
+  @media (scripting: enabled) {
+    .assistant:not([data-ready]) .hako-page__stuck {
+      display: flex;
+      opacity: 0;
+      animation: hako-message 1ms linear 4s forwards;
+    }
+  }
+
+  @keyframes hako-message {
+    to {
+      opacity: 1;
+    }
+  }
+
+  .hako-page__screens {
+    display: grid;
+    min-inline-size: 0;
+  }
+
+  /* Avant le démarrage du script, seul l'accueil est montré : pas d'éclair
+     de tous les écrans. Sans JavaScript, tous se lisent l'un sous l'autre. */
+  @media (scripting: enabled) {
+    .hako-page__screens > :global([data-screen]:not([data-active])) {
+      display: none;
+    }
+  }
+
+  /* Sur la HAKO, sans JavaScript : l'accueil seul, avec le message qui le
+     demande. Pas de comptes d'exemple qui passeraient pour les vrais. */
+  @media (scripting: none) {
+    .assistant[data-mode='box']
+      .hako-page__screens
+      > :global([data-screen]:not([data-screen='welcome'])) {
+      display: none;
+    }
+  }
+
+  .hako-page__footer {
+    max-inline-size: none;
+    margin: 0;
+    padding-block-start: var(--space-m);
+    border-block-start: var(--rule-width) solid var(--line);
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
+  /* ---------- Impression : la fiche de secours, rien d'autre ----------
+   * Tout ce qui n'est ni la fiche, ni dans la fiche, ni autour d'elle
+   * disparaît ; ce qui l'entoure perd marges, cadres et fonds. La fiche
+   * s'imprime même si son écran n'est pas affiché (Ctrl+P sur un autre
+   * écran), tant qu'elle porte des comptes (data-filled). */
+  @media print {
+    @page {
+      size: A4 portrait;
+      margin: 10mm 12mm;
+    }
+
+    :global(.site-header),
+    :global(.site-footer),
+    :global(.skip-link) {
+      display: none !important;
+    }
+
+    /* Le fond crème du site ne s'imprime pas, même si « Graphiques
+       d'arrière-plan » est coché. */
+    :global(html),
+    :global(body) {
+      background: none !important;
+    }
+
+    :global(
+      body:has([data-printout][data-filled])
+        main
+        :not([data-printout], [data-printout] *, :has([data-printout]))
+    ) {
+      display: none !important;
+    }
+
+    :global(
+      body:has([data-printout][data-filled]) main :is([hidden], :not([hidden])):has([data-printout])
+    ) {
+      display: block !important;
+      max-inline-size: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      background: none !important;
+    }
+  }
+</style>

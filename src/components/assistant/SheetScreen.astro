@@ -1,0 +1,172 @@
+---
+/**
+ * Écran « Gardez vos mots de passe sur une fiche » : les trois façons de
+ * garder la fiche de secours (au choix : une liste à puces, pas des gestes
+ * numérotés), le bouton « Imprimer ou enregistrer la fiche »
+ * (il ouvre la fenêtre d'impression, qui sait aussi enregistrer en PDF),
+ * puis l'aperçu de la fiche (Printout.astro), où la ranger, et « J'ai ma
+ * fiche, continuer ».
+ * Textes : src/content/assistant.ts, clé screens.sheet (et demo.sheet).
+ */
+import GuideNote from '../installation/GuideNote.astro';
+import GuideText from '../installation/GuideText.astro';
+import Icon from '../Icon.astro';
+import Printout from './Printout.astro';
+import Screen from './Screen.astro';
+import ScreenNav from './ScreenNav.astro';
+import ScreenWhy from './ScreenWhy.astro';
+import { assistant } from '../../content/assistant';
+
+interface Props {
+  demo: boolean;
+}
+
+const { demo } = Astro.props;
+const { sheet } = assistant.screens;
+---
+
+<Screen
+  view="sheet"
+  title={sheet.title}
+  lead={sheet.lead}
+  illustration={{ name: 'installation/fiche-secours', ratio: '4/3' }}
+  demoNote={assistant.demo.sheet}
+  demo={demo}
+  problems={sheet.problems}
+>
+  <div class="ways">
+    <h3 class="ways__title" id="ecran-fiche-facons">
+      {sheet.ways.title}
+    </h3>
+    <ul class="ways__list" aria-labelledby="ecran-fiche-facons">
+      {sheet.ways.items.map((way) => (
+        <li class="way">
+          <h4 class="way__title">{way.title}</h4>
+          {way.text.map((sentence) => (
+            <p class="way__text">
+              <GuideText parts={sentence} />
+            </p>
+          ))}
+        </li>
+      ))}
+    </ul>
+
+    <div class="ways__print surface-sable" data-js-only hidden>
+      <button type="button" class="btn btn--primary" data-action="print">
+        <Icon name="printer" />
+        <span>{sheet.print}</span>
+      </button>
+      <p class="ways__printed" data-printed hidden>
+        <GuideText parts={sheet.printed} />
+      </p>
+    </div>
+  </div>
+
+  <div class="preview">
+    <h3 class="preview__title" id="ecran-fiche-apercu">
+      {sheet.preview}
+    </h3>
+    <Printout demo={demo} />
+  </div>
+
+  {sheet.notes.map((note) => (
+    <GuideNote note={note} />
+  ))}
+
+  <ScreenWhy why={sheet.why} />
+
+  <ScreenNav>
+    <button type="button" class="btn btn--secondary" data-action="go" data-view="passwords">
+      <Icon name="arrow-left" />
+      <span>{sheet.back}</span>
+    </button>
+    <button
+      type="button"
+      class="btn btn--primary screen-nav__main"
+      data-action="go"
+      data-view="check"
+    >
+      <span>{sheet.next}</span>
+      <Icon name="arrow-right" />
+    </button>
+  </ScreenNav>
+</Screen>
+
+<style>
+  .ways {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  /* Intertitres, comme ceux du guide. */
+  .ways__title,
+  .preview__title {
+    margin: 0;
+    font-size: var(--step-2);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+  }
+
+  /* Trois façons au choix : des puces, pas les numéros des gestes à faire
+     dans l'ordre. */
+  .ways__list {
+    display: grid;
+    gap: var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .way {
+    position: relative;
+    display: grid;
+    gap: var(--space-2xs);
+    padding-inline-start: var(--space-m);
+  }
+
+  /* Petite pastille caramel, comme les listes du guide et de la page La box. */
+  .way::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0.65em;
+    inset-inline-start: 0.2rem;
+    inline-size: 0.375rem;
+    block-size: 0.375rem;
+    border-radius: 50%;
+    color: transparent;
+    background-color: var(--caramel);
+  }
+
+  .way__title {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-0);
+    font-weight: 700;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .way__text {
+    margin: 0;
+  }
+
+  /* Le bouton le plus visible de l'écran, sur son bandeau sable. */
+  .ways__print {
+    display: grid;
+    gap: var(--space-xs);
+    justify-items: start;
+    padding: var(--space-m) clamp(var(--space-s), 3vw, var(--space-l));
+    border-radius: var(--radius);
+  }
+
+  .ways__printed {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
+  .preview {
+    display: grid;
+    gap: var(--space-s);
+  }
+</style>

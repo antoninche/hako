@@ -1,0 +1,596 @@
+---
+/**
+ * La fiche de secours : une page A4, en portrait. À l'écran, l'aperçu de
+ * l'écran « Gardez vos mots de passe sur une fiche » ; à l'impression (ou à
+ * l'enregistrement en PDF), la seule chose imprimée de la page (feuille
+ * d'impression d'Assistant.astro).
+ *
+ * - Les personnes : une ligne par personne (prénom, identifiant, mot de
+ *   passe). Sur un écran étroit, chaque ligne passe sur plusieurs lignes,
+ *   avec le nom de chaque colonne ; sur un écran large et sur papier, un
+ *   tableau à trois colonnes, avec une ligne d'en-tête.
+ * - Sans JavaScript, en démonstration, les comptes d'exemple (examples.ts) ;
+ *   avec JavaScript, le script les remplace par les comptes que la HAKO
+ *   remet (gabarit <template>), et les efface une fois les comptes créés.
+ * - Le logo HAKO en tête : c'est le papier que la famille garde.
+ * - Un mot de passe passe à la ligne devant un tiret, jamais après ; un
+ *   identifiant, devant « @ ».
+ * - Sur papier, jusqu'à quatre personnes, le texte est plus grand
+ *   (data-people, écrit par le script) : la fiche tient toujours sur une page.
+ * - Pendant l'impression, le titre de la page devient `fileName` : c'est le
+ *   nom proposé pour le fichier PDF (assistant-ui.ts).
+ * - En démonstration : titre « Fiche de secours (exemple) », filigrane
+ *   « EXEMPLE » en travers de la fiche, à l'écran comme sur papier, et pied
+ *   de fiche qui le redit. Pas de date calculée : une ligne « Date : » à
+ *   remplir à la main.
+ * Textes : src/content/assistant.ts, clés printout et demo.printout.
+ */
+import GuideText from '../installation/GuideText.astro';
+import Logo from '../Logo.astro';
+import { assistant } from '../../content/assistant';
+import { loginChunks, passwordChunks } from '../../lib/assistant/household.ts';
+import { exampleAccounts } from './examples';
+
+interface Props {
+  demo: boolean;
+}
+
+const { demo } = Astro.props;
+const { printout } = assistant;
+const { columns } = printout.people;
+const title = demo ? assistant.demo.printout.title : printout.title;
+const fileName = demo ? assistant.demo.printout.fileName : printout.fileName;
+const examples = demo ? exampleAccounts : [];
+// En démonstration, « Fiche créée par votre HAKO » serait faux : le pied de
+// fiche de la démonstration le remplace.
+const footer = demo
+  ? [[assistant.demo.printout.footer], ...printout.footer.slice(1)]
+  : printout.footer;
+---
+
+<article
+  class="printout"
+  aria-labelledby="fiche-titre"
+  data-printout
+  data-filled={examples.length > 0 ? '' : undefined}
+  data-people={examples.length}
+  data-file-name={fileName}
+>
+  {demo && (
+    <p class="printout__watermark" aria-hidden="true">
+      {assistant.demo.printout.watermark}
+    </p>
+  )}
+
+  <header class="printout__head">
+    <Logo variant="paysage" class="printout__logo" />
+    <h4 class="printout__title" id="fiche-titre">
+      {title}
+    </h4>
+    <p class="printout__subtitle">{printout.subtitle}</p>
+  </header>
+
+  <div class="printout__keep">
+    {printout.keep.map((sentence) => (
+      <p>
+        <GuideText parts={sentence} />
+      </p>
+    ))}
+  </div>
+
+  <section class="printout__block" aria-labelledby="fiche-hako">
+    <h5 class="printout__block-title" id="fiche-hako">
+      {printout.box.title}
+    </h5>
+    <ul class="printout__facts">
+      {printout.box.rows.map((row) => (
+        <li>
+          <GuideText parts={row} />
+        </li>
+      ))}
+    </ul>
+    <p class="printout__note">
+      <GuideText parts={printout.box.note} />
+    </p>
+  </section>
+
+  <section class="printout__block" aria-labelledby="fiche-personnes">
+    <h5 class="printout__block-title" id="fiche-personnes">
+      {printout.people.title}
+    </h5>
+    <div class="printout__people">
+      <div class="printout__row printout__row--head" aria-hidden="true">
+        <span>{columns.firstName}</span>
+        <span>{columns.login}</span>
+        <span>{columns.password}</span>
+      </div>
+      <ul class="printout__rows" data-printout-rows>
+        {examples.map((account) => (
+          <li class="printout__row">
+            <span class="printout__cell printout__cell--name">
+              <span class="printout__label printout__label--name">{columns.firstName}&nbsp;: </span>
+              <span>{account.firstName}</span>
+              {account.owner && <span class="printout__owner">{printout.people.owner}</span>}
+            </span>
+            <span class="printout__cell printout__cell--login" translate="no">
+              <span class="printout__label">{columns.login}&nbsp;: </span>
+              <span>
+                {loginChunks(account.login).map((chunk, index) => (
+                  <>
+                    {index > 0 && <wbr />}
+                    <span class:list={{ nowrap: index > 0 }}>{chunk}</span>
+                  </>
+                ))}
+              </span>
+            </span>
+            <span class="printout__cell printout__cell--password" translate="no">
+              <span class="printout__label">{columns.password}&nbsp;: </span>
+              <span>
+                {passwordChunks(account.password).map((chunk, index) => (
+                  <>
+                    {index > 0 && <wbr />}
+                    <span class="nowrap">{chunk}</span>
+                  </>
+                ))}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <p class="printout__note">
+      <GuideText parts={printout.people.note} />
+    </p>
+  </section>
+
+  <section class="printout__block" aria-labelledby="fiche-a-savoir">
+    <h5 class="printout__block-title" id="fiche-a-savoir">
+      {printout.tips.title}
+    </h5>
+    <ul class="printout__tips">
+      {printout.tips.items.map((item) => (
+        <li>
+          <GuideText parts={item} />
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="printout__block printout__notes" aria-labelledby="fiche-notes">
+    <h5 class="printout__block-title" id="fiche-notes">
+      {printout.notes.title}
+    </h5>
+    <p class="printout__note">{printout.notes.hint}</p>
+    <div class="printout__lines" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </section>
+
+  <p class="printout__date">
+    <span>{printout.date}</span>
+    <span class="printout__date-line" aria-hidden="true"></span>
+  </p>
+
+  <footer class="printout__footer">
+    {footer.map((sentence) => (
+      <p>
+        <GuideText parts={sentence} />
+      </p>
+    ))}
+  </footer>
+</article>
+
+<template data-printout-row-template>
+  <li class="printout__row">
+    <span class="printout__cell printout__cell--name">
+      <span class="printout__label printout__label--name">{columns.firstName}&nbsp;: </span>
+      <span data-first-name></span>
+      <span class="printout__owner" data-owner hidden>
+        {printout.people.owner}
+      </span>
+    </span>
+    <span class="printout__cell printout__cell--login" translate="no">
+      <span class="printout__label">{columns.login}&nbsp;: </span>
+      <span data-login></span>
+    </span>
+    <span class="printout__cell printout__cell--password" translate="no">
+      <span class="printout__label">{columns.password}&nbsp;: </span>
+      <span data-password></span>
+    </span>
+  </li>
+</template>
+
+<style>
+  /* Une feuille de papier posée sur la page : fond crème, ombre douce. */
+  .printout {
+    position: relative;
+    display: grid;
+    gap: var(--space-m);
+    overflow: hidden;
+    padding: clamp(var(--space-s), 4vw, var(--space-xl));
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius-s);
+    background-color: var(--surface);
+    box-shadow: var(--shadow-m);
+    container: fiche / inline-size;
+  }
+
+  /* Tout le contenu passe au-dessus du filigrane. */
+  .printout > :not(.printout__watermark) {
+    position: relative;
+  }
+
+  /* Filigrane « EXEMPLE » : de grandes lettres lin, l'aplat discret des
+     filets, en travers de la fiche, derrière le texte (le chocolat du texte
+     reste lisible dessus) ; jamais lu par les lecteurs d'écran : le titre
+     dit déjà « exemple ». */
+  .printout__watermark {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    max-inline-size: none;
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: clamp(4rem, 17cqi, 10rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    color: transparent;
+    -webkit-text-fill-color: var(--line);
+    transform: rotate(-28deg);
+    pointer-events: none;
+    user-select: none;
+    /* Sur papier, le navigateur foncerait ce ton clair : il le garde tel quel. */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .printout__head {
+    display: grid;
+    gap: var(--space-3xs);
+    justify-items: start;
+    padding-block-end: var(--space-s);
+    border-block-end: 2px solid var(--line-strong);
+  }
+
+  .printout :global(.printout__logo) {
+    block-size: 1.75rem;
+    inline-size: auto;
+    margin-block-end: var(--space-2xs);
+  }
+
+  .printout__title {
+    margin: 0;
+    font-size: var(--step-3);
+  }
+
+  .printout__subtitle {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text-muted);
+  }
+
+  .printout__keep {
+    display: grid;
+    gap: var(--space-2xs);
+    padding: var(--space-s) var(--space-m);
+    border: var(--rule-width) solid var(--line-strong);
+    border-inline-start-width: 3px;
+    border-radius: var(--radius-s);
+    font-weight: 700;
+  }
+
+  .printout__keep p,
+  .printout__note,
+  .printout__footer p {
+    margin: 0;
+  }
+
+  .printout__block {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .printout__block-title {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-1);
+    font-weight: 700;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .printout__note {
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
+  .printout__facts,
+  .printout__tips {
+    display: grid;
+    gap: var(--space-3xs);
+    margin: 0;
+    padding-inline-start: 1.25em;
+  }
+
+  .printout__facts {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+
+  .printout__tips {
+    list-style: disc;
+  }
+
+  .printout__tips li::marker {
+    color: var(--text-muted);
+  }
+
+  /* ---------- Les personnes ---------- */
+  .printout__people {
+    display: grid;
+    border-block-start: var(--rule-width) solid var(--line-strong);
+  }
+
+  .printout__rows {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Écran étroit : une personne par bloc, le nom de chaque colonne devant sa valeur. */
+  .printout :global(.printout__row) {
+    display: grid;
+    gap: var(--space-3xs);
+    padding-block: var(--space-xs);
+    border-block-end: var(--rule-width) solid var(--line);
+  }
+
+  .printout__row--head {
+    display: none !important;
+  }
+
+  /* Coupures de ligne : seulement aux <wbr> (devant un tiret, devant « @ »),
+     puis, en dernier recours, au milieu d'un mot trop long. */
+  .printout :global(.printout__cell) {
+    min-inline-size: 0;
+    overflow-wrap: break-word;
+  }
+
+  .printout :global(.printout__cell--name) {
+    font-weight: 700;
+  }
+
+  .printout :global(.printout__owner) {
+    display: block;
+    font-weight: 400;
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
+  .printout :global(.printout__label) {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text-muted);
+  }
+
+  .printout :global(.printout__label--name) {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .printout :global(.printout__cell--password) {
+    font-size: var(--step-1);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    overflow-wrap: normal;
+  }
+
+  /* Écran étroit : « Mot de passe : » seul sur sa ligne, à la taille de
+     « Identifiant : », et le mot de passe en entier en dessous. */
+  .printout :global(.printout__cell--password .printout__label) {
+    display: block;
+    font-size: var(--step--1);
+  }
+
+  /* Écran large (et papier) : un tableau à trois colonnes, avec une ligne d'en-tête. */
+  @container fiche (min-width: 36rem) {
+    .printout :global(.printout__row) {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1.4fr);
+      gap: var(--space-s);
+      align-items: baseline;
+    }
+
+    .printout__row--head {
+      display: grid !important;
+      font-family: var(--font-ui);
+      font-size: var(--step--1);
+      font-weight: 700;
+      letter-spacing: var(--tracking-ui);
+      color: var(--text-muted);
+    }
+
+    .printout :global(.printout__label),
+    .printout :global(.printout__cell--password .printout__label) {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+
+  /* ---------- À remplir à la main ---------- */
+  .printout__notes {
+    padding: var(--space-s) var(--space-m);
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: var(--radius-s);
+  }
+
+  .printout__lines {
+    display: grid;
+    gap: var(--space-l);
+    padding-block: var(--space-s) var(--space-2xs);
+  }
+
+  .printout__lines span {
+    display: block;
+    border-block-end: var(--rule-width) solid var(--line-strong);
+  }
+
+  .printout__date {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: baseline;
+    margin: 0;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .printout__date-line {
+    inline-size: min(100%, 12rem);
+    border-block-end: var(--rule-width) solid var(--line-strong);
+  }
+
+  .printout__footer {
+    display: grid;
+    gap: var(--space-3xs);
+    padding-block-start: var(--space-s);
+    border-block-start: var(--rule-width) solid var(--line);
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
+  /* ---------- Papier : une page A4, sans ombre ni cadre ----------
+   * Tailles en points, serrées pour que la fiche tienne sur une page avec
+   * huit personnes. */
+  @media print {
+    .printout {
+      gap: 3mm;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      font-size: 10pt;
+      line-height: 1.3;
+    }
+
+    /* Sur papier, les phrases prennent toute la largeur de la page. */
+    .printout p {
+      max-inline-size: none;
+    }
+
+    .printout__watermark {
+      font-size: 96pt;
+    }
+
+    .printout :global(.printout__logo) {
+      block-size: 24px;
+      margin-block-end: 1mm;
+    }
+
+    .printout__head {
+      padding-block-end: 2mm;
+    }
+
+    .printout__title {
+      font-size: 20pt;
+    }
+
+    .printout__subtitle {
+      font-size: 10pt;
+    }
+
+    .printout__keep {
+      padding: 2.5mm 4mm;
+    }
+
+    .printout__block {
+      gap: 1.5mm;
+    }
+
+    .printout__block-title {
+      font-size: 12pt;
+    }
+
+    .printout__note,
+    .printout__footer,
+    .printout :global(.printout__owner),
+    .printout__row--head {
+      font-size: 9pt;
+    }
+
+    .printout :global(.printout__row) {
+      padding-block: 1.5mm;
+    }
+
+    .printout :global(.printout__cell--password) {
+      font-size: 12pt;
+    }
+
+    /* Jusqu'à quatre personnes, la place permet un texte plus grand, plus
+       facile à relire ; au-delà, les tailles serrées gardent une page. */
+    .printout:is([data-people='1'], [data-people='2'], [data-people='3'], [data-people='4']) {
+      font-size: 11pt;
+    }
+
+    .printout:is([data-people='1'], [data-people='2'], [data-people='3'], [data-people='4'])
+      :global(.printout__cell) {
+      font-size: 12pt;
+    }
+
+    .printout:is([data-people='1'], [data-people='2'], [data-people='3'], [data-people='4'])
+      :global(.printout__cell--password) {
+      font-size: 14pt;
+    }
+
+    .printout:is([data-people='1'], [data-people='2'], [data-people='3'], [data-people='4'])
+      :is(.printout__note, .printout__footer, :global(.printout__owner)) {
+      font-size: 10pt;
+    }
+
+    .printout__facts,
+    .printout__tips {
+      gap: 0.8mm;
+    }
+
+    .printout__notes {
+      padding: 2.5mm 4mm;
+    }
+
+    .printout__lines {
+      gap: 5.5mm;
+      padding-block: 3mm 1mm;
+    }
+
+    /* Trois lignes à remplir suffisent sur papier : la fiche tient sur une page. */
+    .printout__lines span:nth-child(n + 4) {
+      display: none;
+    }
+
+    .printout__footer {
+      gap: 1mm;
+      padding-block-start: 2mm;
+    }
+
+    .printout__block,
+    .printout :global(.printout__row),
+    .printout__notes {
+      break-inside: avoid;
+    }
+  }
+</style>

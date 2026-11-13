@@ -43,7 +43,7 @@ La carte Raspberry Pi 5 n’est pas du matériel libre. Sa documentation officie
 
 ## Ce qui reste à préciser
 
-Le logiciel qui affiche la page d’accueil de la box (http://mabox.local) et sa licence ne sont pas encore fixés. La recette qui fabrique le système de la box est notre propre travail, mais son dépôt n’est pas encore publié. Ces deux informations manquantes sont signalées en jaune sur la page « La box » (et, pour la page d’accueil, sur la page « Notre engagement ») et recensées dans TODO.md. Tant qu’elles manquent, le site ne dit pas que tous les logiciels de la box sont libres : il nomme ceux qui le sont (Immich, Nextcloud, Docker et Raspberry Pi OS).
+Le logiciel qui affiche la page d’accueil de la box (http://hako.local) et sa licence ne sont pas encore fixés. La recette qui fabrique le système de la box est notre propre travail, mais son dépôt n’est pas encore publié. Ces deux informations manquantes sont signalées en jaune sur la page « La box » (et, pour la page d’accueil, sur la page « Notre engagement ») et recensées dans TODO.md. Tant qu’elles manquent, le site ne dit pas que tous les logiciels de la box sont libres : il nomme ceux qui le sont (Immich, Nextcloud, Docker et Raspberry Pi OS).
 
 ## Refaire les vérifications
 

@@ -9,6 +9,7 @@
  * liens sont montrés sans interaction grâce aux classes .is-hover et .is-focus.
  */
 import Icon, { type IconName } from '../components/Icon.astro';
+import { uiIcons as uiIconPaths } from '../components/icons';
 import Logo from '../components/Logo.astro';
 import Section from '../components/Section.astro';
 import Todo from '../components/Todo.astro';
@@ -100,18 +101,9 @@ const todoExamples = {
   price: { what: 'Exemple de la charte : prix TTC ou HT', placeholder: '[TTC ou HT]' },
 };
 
-const uiIcons: IconName[] = [
-  'menu',
-  'close',
-  'mail',
-  'phone',
-  'map-pin',
-  'arrow-right',
-  'external',
-  'box',
-  'video',
-  'clock',
-];
+// Toutes les icônes d'interface, lues dans la liste du composant : la charte
+// ne peut pas en oublier une.
+const uiIcons = Object.keys(uiIconPaths) as IconName[];
 const socialIcons: IconName[] = ['linkedin', 'youtube', 'facebook', 'instagram', 'peertube'];
 const logos = LOGO_VARIANTS.map((variant) => ({ variant, available: Boolean(logoFile(variant)) }));
 ---
@@ -493,6 +485,21 @@ const logos = LOGO_VARIANTS.map((variant) => ({ variant, available: Boolean(logo
         </p>
       </div>
       <div class="stack stack--s">
+        <h3 class="h4">Progression</h3>
+        <p>
+          Une barre en pilule (rayon de 999 px), haute de 0,5 rem&nbsp;: piste <code>--line</code>,
+          remplissage <code>--success</code>, toujours nommée par un libellé visible (
+          <code>&lt;label&gt;</code>). Elle ne sert qu’au guide d’installation, sous «&nbsp;Étape 3
+          sur 8&nbsp;». En contraste élevé, elle prend un contour et les couleurs du système.
+        </p>
+        <div class="progress-demo">
+          <label class="progress-demo__label" for="charte-progression">
+            Étape 3 sur 8
+          </label>
+          <progress class="progress-demo__bar" id="charte-progression" max="8" value="2"></progress>
+        </div>
+      </div>
+      <div class="stack stack--s">
         <h3 class="h4">Focus</h3>
         <p>
           Anneau de 2 px (<code>--focus-width</code>) de la couleur <code>--focus</code>, décalé de
@@ -831,6 +838,53 @@ const logos = LOGO_VARIANTS.map((variant) => ({ variant, available: Boolean(logo
   }
 
   /* ---------- Détails ---------- */
+
+  /* Même dessin que la progression du guide d'installation
+     (src/components/installation/InstallGuide.astro). */
+  .progress-demo {
+    display: grid;
+    gap: var(--space-2xs);
+    max-inline-size: 15rem;
+  }
+
+  .progress-demo__label {
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text-muted);
+  }
+
+  .progress-demo__bar {
+    appearance: none;
+    display: block;
+    inline-size: 100%;
+    block-size: 0.5rem;
+    overflow: hidden;
+    border: 0;
+    border-radius: 999px;
+    color: transparent;
+    background-color: var(--line);
+  }
+
+  .progress-demo__bar::-webkit-progress-bar {
+    border-radius: 999px;
+    color: transparent;
+    background-color: var(--line);
+  }
+
+  .progress-demo__bar::-webkit-progress-value {
+    border-radius: 999px;
+    color: transparent;
+    background-color: var(--success);
+  }
+
+  .progress-demo__bar::-moz-progress-bar {
+    border-radius: 999px;
+    color: transparent;
+    background-color: var(--success);
+  }
 
   .rules {
     display: grid;

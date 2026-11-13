@@ -1,0 +1,74 @@
+---
+/**
+ * Encadré d'une étape du guide (« Deux mots à connaître », « Votre fiche de
+ * secours »…) : même dessin que l'encadré des pages légales et de la FAQ
+ * (src/components/legal/Callout.astro), fond sable et filet fort à gauche.
+ *
+ *   <GuideNote note={note} icon="info" />
+ */
+import Icon, { type UiIconName } from '../Icon.astro';
+import GuideText from './GuideText.astro';
+import type { Note } from '../../content/installation';
+
+interface Props {
+  note: Note;
+  icon?: UiIconName;
+  /** true : l'encadré ne sert qu'à l'écran (il n'est pas imprimé). */
+  screenOnly?: boolean;
+}
+
+const { note, icon = 'info', screenOnly = false } = Astro.props;
+---
+
+<div class:list={['note', 'surface-sable', { 'note--screen': screenOnly }]}>
+  <h3 class="note__title">
+    <Icon name={icon} class="note__icon" />
+    <span>{note.title}</span>
+  </h3>
+  {note.text.map((sentence) => (
+    <p class="note__text">
+      <GuideText parts={sentence} />
+    </p>
+  ))}
+</div>
+
+<style>
+  .note {
+    display: grid;
+    gap: var(--space-xs);
+    padding: var(--space-m) clamp(var(--space-s), 3vw, var(--space-l));
+    border: var(--rule-width) solid var(--line);
+    border-inline-start: 3px solid var(--line-strong);
+    border-radius: var(--radius);
+  }
+
+  .note__title {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-0);
+    font-weight: 700;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-ui);
+  }
+
+  .note__title :global(.note__icon) {
+    color: var(--text-muted);
+  }
+
+  .note__text {
+    margin: 0;
+  }
+
+  @media print {
+    .note--screen {
+      display: none;
+    }
+
+    .note {
+      break-inside: avoid;
+    }
+  }
+</style>

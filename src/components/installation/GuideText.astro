@@ -1,0 +1,68 @@
+---
+/**
+ * Une phrase du guide (src/content/installation.ts), mise bout à bout comme
+ * avec RichText (src/components/commande/RichText.astro) : texte, repère
+ * jaune, liens. Un détail en plus : l'adresse de la HAKO (http://hako.local,
+ * src/data/installation.ts) et, une fois connues, celles des applications
+ * (src/data/assistant.ts), qu'il faut parfois recopier, s'écrivent en D-DIN et
+ * ne se coupent jamais en fin de ligne, comme les adresses des réponses de la
+ * FAQ (src/components/texte/Prose.astro). translate="no" : la traduction
+ * automatique du navigateur n'y touche pas.
+ *
+ *   <GuideText parts={sentence} />
+ */
+import RichText from '../commande/RichText.astro';
+import type { Sentence } from '../../content/installation';
+import { pending } from '../../data/assistant';
+import { boxAddress } from '../../data/installation';
+import { isLink } from '../../lib/commande/inline.ts';
+
+interface Props {
+  parts: Sentence;
+}
+
+const { parts } = Astro.props;
+const addresses: readonly string[] = [
+  boxAddress.display,
+  boxAddress.secondDisplay,
+  ...[pending.photosAddress, pending.filesAddress].filter(
+    (address): address is string => typeof address === 'string',
+  ),
+];
+---
+
+{parts.map((part) =>
+  typeof part === 'string' && addresses.includes(part) ? (
+    <span class="address" translate="no">
+      {part}
+    </span>
+  ) : isLink(part) && addresses.includes(part.label) ? (
+    <a class="address-link" href={part.href} translate="no">
+      {part.label}
+    </a>
+  ) : (
+    <RichText parts={[part]} />
+  ),
+)}
+
+<style>
+  /* Même dessin que les adresses à taper de la FAQ. */
+  .address {
+    padding: 0.05em 0.35em;
+    border-radius: var(--radius-s);
+    font-family: var(--font-ui);
+    font-size: 0.95em;
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    white-space: nowrap;
+    color: var(--chocolat);
+    background-color: var(--sable);
+  }
+
+  .address-link {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    white-space: nowrap;
+  }
+</style>

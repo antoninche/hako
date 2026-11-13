@@ -1,0 +1,42 @@
+---
+/**
+ * Boutons d'un écran de la page de la HAKO : « Retour » d'abord, puis
+ * l'action principale, côte à côte à gauche, comme dans le guide : avec une
+ * loupe ou un zoom, l'action principale reste près du bord gauche. Sur
+ * téléphone, ils prennent toute la largeur, l'un sous l'autre, dans l'ordre
+ * de la page : l'ordre visuel reste celui du clavier.
+ *
+ * Ces boutons ne marchent qu'avec JavaScript : sans lui, ils restent cachés
+ * (hidden, retiré par assistant-ui.ts au démarrage).
+ */
+---
+
+<div class="screen-nav" data-js-only hidden>
+  <slot />
+</div>
+
+<style>
+  .screen-nav {
+    display: grid;
+    gap: var(--space-s);
+    padding-block-start: var(--space-m);
+    border-block-start: var(--rule-width) solid var(--line);
+  }
+
+  .screen-nav :global(.btn) {
+    inline-size: 100%;
+  }
+
+  @media (min-width: 30rem) {
+    .screen-nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+    }
+
+    .screen-nav :global(.btn) {
+      inline-size: auto;
+      min-inline-size: 9rem;
+    }
+  }
+</style>

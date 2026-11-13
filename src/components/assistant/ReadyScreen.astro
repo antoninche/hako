@@ -1,0 +1,194 @@
+---
+/**
+ * Écran « C'est prêt » : la HAKO est installée. « Mes photos » et « Mes
+ * fichiers », les applications à installer sur les téléphones, avec le
+ * bouton « Revenir au guide pour installer les applications » (dans le même
+ * onglet : plus rien n'est à perdre), comment revenir plus tard, et « Et
+ * maintenant ? ». À l'arrivée, le titre reçoit le focus et la page annonce
+ * « Votre HAKO est installée. » (assistant-ui.ts).
+ *
+ * En démonstration, rien n'est installé : une note le dit sous le titre, le
+ * bouton ramène au guide pour faire la vraie installation, l'annonce dit
+ * « Fin de la démonstration », et l'encadré « Fin de la démonstration » ferme
+ * l'écran.
+ * Textes : src/content/assistant.ts, clé screens.ready (et demo.ready).
+ */
+import AppButtons from './AppButtons.astro';
+import DemoNote from './DemoNote.astro';
+import GuideNote from '../installation/GuideNote.astro';
+import GuideText from '../installation/GuideText.astro';
+import Icon from '../Icon.astro';
+import Screen from './Screen.astro';
+import { assistant } from '../../content/assistant';
+
+interface Props {
+  demo: boolean;
+}
+
+const { demo } = Astro.props;
+const { ready } = assistant.screens;
+const back = demo ? assistant.demo.ready.guide : ready.phones.guide;
+---
+
+<Screen
+  view="ready"
+  title={ready.title}
+  lead={ready.lead}
+  illustration={{ name: 'installation/applications', ratio: '4/3' }}
+  demoNote={assistant.demo.ready.note}
+  demo={demo}
+  problems={ready.problems}
+>
+  <div class="ready-apps" data-ready-done={demo ? assistant.demo.ready.done : ready.done}>
+    <AppButtons demo={demo} />
+    {demo && <DemoNote text={assistant.demo.ready.apps} />}
+  </div>
+
+  <section class="phones" aria-labelledby="ecran-pret-telephones">
+    <h3 class="phones__title" id="ecran-pret-telephones">
+      <Icon name="smartphone" class="phones__icon" />
+      <span>{ready.phones.title}</span>
+    </h3>
+    {ready.phones.text.map((sentence) => (
+      <p class="phones__text">
+        <GuideText parts={sentence} />
+      </p>
+    ))}
+    <ul class="phones__addresses">
+      {ready.phones.addresses.map((sentence) => (
+        <li>
+          <GuideText parts={sentence} />
+        </li>
+      ))}
+    </ul>
+    <p class="phones__guide" data-same-tab>
+      <a class="btn btn--primary" href={back.href}>
+        <Icon name="arrow-left" />
+        <span>{back.label}</span>
+      </a>
+    </p>
+  </section>
+
+  <div class="ready-later">
+    <GuideNote note={ready.later} icon="laptop" />
+  </div>
+
+  <div class="next">
+    <h3 class="next__title" id="ecran-pret-ensuite">
+      {ready.next.title}
+    </h3>
+    <ul class="next__list" aria-labelledby="ecran-pret-ensuite">
+      {ready.next.items.map((item) => (
+        <li>
+          <GuideText parts={item} />
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  {demo && (
+    <div data-same-tab>
+      <GuideNote note={assistant.demo.ready.end} icon="info" />
+    </div>
+  )}
+</Screen>
+
+<style>
+  .ready-apps {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .phones {
+    display: grid;
+    gap: var(--space-s);
+    padding-block-start: var(--space-m);
+    border-block-start: var(--rule-width) solid var(--line-strong);
+  }
+
+  .phones__title,
+  .next__title {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    margin: 0;
+    font-size: var(--step-2);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+  }
+
+  .phones__title :global(.phones__icon) {
+    color: var(--text-muted);
+  }
+
+  .phones__text,
+  .phones__guide {
+    margin: 0;
+  }
+
+  .phones__guide {
+    padding-block-start: var(--space-xs);
+  }
+
+  .phones__addresses {
+    display: grid;
+    gap: var(--space-2xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+  }
+
+  /* L'adresse à recopier, sur l'encadré sable : en pastille crème, pour
+     qu'elle reste visible (sur sable, la pastille sable disparaît). */
+  .ready-later :global(.surface-sable .address) {
+    color: var(--chocolat);
+    background-color: var(--creme);
+  }
+
+  /* Chaque conseil précédé d'une coche, comme la fin du guide
+     (GuideFinish.astro) et les listes vérifiées des pages légales. */
+  .next {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .next__list {
+    display: grid;
+    gap: var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .next__list li {
+    position: relative;
+    max-inline-size: var(--measure);
+    padding-inline-start: 2.25rem;
+  }
+
+  .next__list li::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0.2em;
+    inset-inline-start: 0.45rem;
+    inline-size: 0.5rem;
+    block-size: 0.95rem;
+    border: solid var(--success);
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg);
+  }
+
+  .next__list li::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 0.05em;
+    inset-inline-start: 0;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    border: var(--rule-width) solid var(--success);
+    border-radius: 50%;
+  }
+</style>

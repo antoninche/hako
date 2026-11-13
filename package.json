@@ -30,7 +30,7 @@
     "model:test-glb": "node scripts/model/make-test-glb.mjs",
     "model:fallback": "node scripts/model/capture-fallback.mjs",
     "map:build": "node scripts/map/build.mjs",
-    "illustrations:build": "node design/illustrations/_source/dessins.mjs && svgo --config design/illustrations/svgo.config.mjs --quiet -r -f src/assets/illustrations",
+    "illustrations:build": "node design/illustrations/_source/dessins.mjs && node design/illustrations/_source/installation.mjs && svgo --config design/illustrations/svgo.config.mjs --quiet -r -f src/assets/illustrations",
     "illustrations:check": "node scripts/illustrations/check.mjs",
     "illustrations:render": "node scripts/illustrations/render.mjs",
     "prototype:images": "node scripts/prototype/prepare.mjs"

@@ -1,0 +1,182 @@
+---
+/**
+ * « Ça ne marche pas ? » : les cas d'une étape, chacun dans un bloc qui se
+ * déplie (même dessin et même comportement qu'une question de la FAQ :
+ * src/components/faq/FaqItem.astro). Chaque cas dit pourquoi, puis que faire.
+ *
+ * Avec `filterable`, un cas propre à certains appareils porte data-devices :
+ * le script du guide le masque quand la personne a choisi un autre appareil.
+ * Chaque cas a une ancre : #etape-page-vpn ouvre le cas « vpn » de l'étape
+ * « page ».
+ */
+import FaqItem from '../faq/FaqItem.astro';
+import Icon from '../Icon.astro';
+import GuideText from './GuideText.astro';
+import { installation, type Problem, type Sentence, type StepId } from '../../content/installation';
+import { stepAnchor } from '../../lib/installation/guide-state.ts';
+
+interface Props {
+  stepId: StepId;
+  problems: readonly Problem[];
+  /** Phrase d'entrée, sous le titre. */
+  intro?: Sentence | undefined;
+  /** Cas filtrés selon l'appareil choisi (étape « page »). */
+  filterable?: boolean;
+}
+
+const { stepId, problems, intro, filterable = false } = Astro.props;
+const { labels } = installation;
+const anchor = stepAnchor(stepId);
+const titleId = `${anchor}-problemes`;
+---
+
+<div class="problems" role="group" aria-labelledby={titleId}>
+  <div class="problems__head">
+    <h3 class="problems__title" id={titleId}>
+      <Icon name="question" class="problems__icon" />
+      <span>{labels.problems}</span>
+    </h3>
+    <p class="problems__hint">{labels.problemsHint}</p>
+    {intro && (
+      <p class="problems__intro">
+        <GuideText parts={intro} />
+      </p>
+    )}
+  </div>
+
+  <div class="problems__list">
+    {problems.map((problem) => (
+      <div
+        class="problems__item"
+        data-devices={filterable && problem.devices ? problem.devices.join(' ') : undefined}
+      >
+        <FaqItem id={`${anchor}-${problem.id}`} question={problem.title}>
+          <p class="problems__label">{labels.problemWhy}</p>
+          {problem.why.map((sentence) => (
+            <p>
+              <GuideText parts={sentence} />
+            </p>
+          ))}
+          <p class="problems__label">{labels.problemFix}</p>
+          {problem.fix.length > 1 ? (
+            <ol>
+              {problem.fix.map((sentence) => (
+                <li>
+                  <GuideText parts={sentence} />
+                </li>
+              ))}
+            </ol>
+          ) : (
+            problem.fix.map((sentence) => (
+              <p>
+                <GuideText parts={sentence} />
+              </p>
+            ))
+          )}
+        </FaqItem>
+      </div>
+    ))}
+  </div>
+
+  <p class="problems__more">
+    <GuideText parts={labels.stillStuck} />
+  </p>
+</div>
+
+<style>
+  .problems {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .problems__head {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .problems__title {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    margin: 0;
+    font-size: var(--step-2);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+  }
+
+  .problems__title :global(.problems__icon) {
+    color: var(--text-muted);
+  }
+
+  .problems__hint,
+  .problems__intro {
+    margin: 0;
+  }
+
+  .problems__hint {
+    color: var(--text-muted);
+  }
+
+  .problems__intro {
+    font-weight: 700;
+  }
+
+  .problems__list {
+    border-block-start: var(--rule-width) solid var(--line-strong);
+  }
+
+  /* « Pourquoi », « Que faire » : petites étiquettes d'interface (D-DIN). */
+  .problems__label {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text-muted);
+  }
+
+  .problems__more {
+    margin: 0;
+  }
+
+  @media print {
+    /* Sans grille à l'impression : le titre « Ça ne marche pas ? » reste
+       avec ses premiers cas (break-after n'agit que dans un flux de blocs). */
+    .problems {
+      display: block;
+    }
+
+    .problems > * + * {
+      margin-block-start: var(--space-m);
+    }
+
+    .problems__head {
+      break-after: avoid;
+    }
+
+    /* Tous les cas s'impriment, ouverts, quel que soit l'appareil choisi ;
+       leurs réponses un cran plus petit, pour tenir en moins de pages. */
+    .problems__item[hidden] {
+      display: block !important;
+    }
+
+    .problems__list :global(.faq-item__answer) {
+      font-size: var(--step--1);
+    }
+
+    .problems__item {
+      break-inside: avoid;
+    }
+
+    .problems__list :global(details)::details-content {
+      display: block;
+      content-visibility: visible;
+    }
+
+    .problems__list :global(.faq-item__icon) {
+      display: none;
+    }
+
+    .problems__list :global(.faq-item__summary) {
+      padding-block: var(--space-s) var(--space-2xs);
+    }
+  }
+</style>

@@ -2,6 +2,27 @@
 
 Les modifications notables du site sont notées ici, de la plus récente à la plus ancienne. Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et les numéros de version suivent la [gestion sémantique de version](https://semver.org/lang/fr/).
 
+## [Non publié]
+
+### Ajouté
+
+- Guide d’installation pas à pas (`/installer/`), pour la personne qui installe sa HAKO elle-même : « Avant de commencer », puis huit étapes, du carton aux applications des téléphones. Chaque étape dit quoi faire, pourquoi, comment savoir que c’est bon, et quoi faire quand ça ne marche pas. Consignes selon l’appareil (iPhone ou iPad, Android, ordinateur), chronomètre pendant la préparation, lexique et version imprimable. L’étape en cours est gardée dans l’adresse (`#etape-…`) : rien n’est enregistré dans le navigateur. Textes dans `src/content/installation.ts`, faits dans `src/data/installation.ts`.
+- Démonstration de la première installation (`/installer/demonstration/`) : la page que la HAKO affichera chez la personne, à `http://hako.local`, essayée avec une HAKO simulée. On y tape les prénoms de la maison ; la HAKO invente les mots de passe ; on garde la fiche de secours, on la vérifie, puis la HAKO crée les comptes. Bandeau « Démonstration », mots de passe d’exemple et fiche marquée EXEMPLE. Rien n’est envoyé ni gardé, et la page interdit toute connexion par sa propre règle de sécurité. Le composant (`src/components/assistant/`, logique dans `src/lib/assistant/`) servira sur la HAKO.
+- « Installer votre HAKO » dans le menu et le plan du site, et des liens vers le guide depuis l’accueil, les tutoriels et la FAQ.
+- Huit dessins « papier découpé » pour le guide, avec leur générateur (`design/illustrations/_source/installation.mjs`), et de nouvelles icônes d’interface, réunies dans `src/components/icons.ts`.
+
+### Modifié
+
+- Adresse de la box : `hako.local` partout.
+- Installation : dans la zone, l’équipe installe la box ; ailleurs, elle est envoyée et le client l’installe avec le guide (accueil, offres, FAQ, contact, tutoriels). La box crée les comptes et invente les mots de passe.
+- « Sans votre demande, nous n’avons pas accès à vos données », en accord avec la maintenance à distance de Hako Pro.
+- Branchement par câble réseau seulement pour l’instant, sans Wi-Fi ; le câble n’est pas fourni. Nouvelle limite sur la page de la box : pas sur un réseau partagé avec d’autres logements.
+- Menu et titre de la page `/la-box/` : « La HAKO ».
+- FAQ : les réponses s’impriment ouvertes, sans animation.
+- En-tête : le lien de la rubrique est souligné sur les pages rangées dessous, et le logo est un peu plus petit entre 64 et 70rem pour que les six liens tiennent sur une ligne.
+- `BaseLayout` : emplacement `head` pour les balises propres à une page.
+- Aperçu en ligne : le script construit de la démonstration est contrôlé à chaque publication.
+
 ## [0.2.0] - 2026-11-13
 
 ### Ajouté

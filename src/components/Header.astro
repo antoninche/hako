@@ -5,14 +5,18 @@
  * - Écran large (64rem et plus) : logo, menu principal, bouton « Commander ».
  * - Écran étroit : logo, « Commander » (toujours visible) et bouton « Menu »
  *   qui déplie un panneau sous la barre (voir header-menu.ts).
- * Les liens viennent de src/data/navigation.ts.
+ * Les liens viennent de src/data/navigation.ts. Le lien de la page en cours
+ * porte aria-current="page" ; celui de la rubrique d'une page rangée dessous
+ * (/installer/ pour /installer/demonstration/), aria-current="true", avec le
+ * même soulignement.
  */
 import Icon from './Icon.astro';
 import Logo from './Logo.astro';
-import { isCurrentPage, mainNav, orderLink, routes } from '../data/navigation';
+import { isCurrentPage, isInSection, mainNav, orderLink, routes } from '../data/navigation';
 
 const pathname = Astro.url.pathname;
-const current = (href: string) => (isCurrentPage(href, pathname) ? 'page' : undefined);
+const current = (href: string) =>
+  isCurrentPage(href, pathname) ? 'page' : isInSection(href, pathname) ? 'true' : undefined;
 ---
 
 <header class="site-header">
@@ -174,7 +178,8 @@ const current = (href: string) => (isCurrentPage(href, pathname) ? 'page' : unde
     text-decoration-color: var(--line-strong);
   }
 
-  .site-header__link[aria-current='page'] {
+  .site-header__link[aria-current='page'],
+  .site-header__link[aria-current='true'] {
     text-decoration-color: var(--link);
     text-decoration-thickness: 2px;
   }
@@ -296,6 +301,25 @@ const current = (href: string) => (isCurrentPage(href, pathname) ? 'page' : unde
     }
   }
 
+  /* De 64 à 70rem, les six liens du menu et « Commander » tiennent à peine
+     sur une ligne : l'écart visible entre deux liens passe de 32 à 20 px
+     (12 px ici + 4 px de marge intérieure de chaque côté). Chaque lien garde
+     sa cible de 44 px. */
+  @media (min-width: 64rem) and (max-width: 69.99rem) {
+    /* Le logo passe de 36 à 32 px de haut : le menu ne colle plus au logo. */
+    .site-header {
+      --logo-height: 2rem;
+    }
+
+    .site-header__list {
+      gap: var(--space-xs);
+    }
+
+    .site-header__link {
+      padding-inline: var(--space-3xs);
+    }
+  }
+
   /* ---------- Panneau du menu mobile ---------- */
 
   /* Le panneau part du bas de l'en-tête (100 % : sa hauteur réelle, même sur
@@ -376,7 +400,8 @@ const current = (href: string) => (isCurrentPage(href, pathname) ? 'page' : unde
     text-underline-offset: 0.4em;
   }
 
-  .menu-panel__link[aria-current='page'] {
+  .menu-panel__link[aria-current='page'],
+  .menu-panel__link[aria-current='true'] {
     text-decoration: underline;
     text-decoration-color: var(--link);
     text-decoration-thickness: 2px;

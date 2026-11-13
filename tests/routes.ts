@@ -23,6 +23,8 @@ export const routes: readonly SiteRoute[] = [
   { path: '/engagement/', slug: 'engagement' },
   { path: '/faq/', slug: 'faq' },
   { path: '/tutoriels/', slug: 'tutoriels' },
+  { path: '/installer/', slug: 'installer' },
+  { path: '/installer/demonstration/', slug: 'installer-demonstration' },
   { path: '/commander/', slug: 'commander' },
   { path: '/contact/', slug: 'contact' },
   { path: '/mentions-legales/', slug: 'mentions-legales' },
@@ -37,9 +39,10 @@ export const notFound: SiteRoute = { path: '/cette-page-n-existe-pas/', slug: '4
 /** Menu principal de l'en-tête, dans l'ordre d'affichage. */
 export const mainNav = [
   { label: 'Offres', path: '/offres/' },
-  { label: 'La box', path: '/la-box/' },
+  { label: 'La HAKO', path: '/la-box/' },
   { label: 'Notre engagement', path: '/engagement/' },
   { label: 'FAQ', path: '/faq/' },
+  { label: 'Installer votre HAKO', path: '/installer/' },
   { label: 'Contact', path: '/contact/' },
 ] as const;
 

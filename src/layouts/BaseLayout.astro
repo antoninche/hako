@@ -82,6 +82,9 @@ const shareImageAlt = frenchTypography(
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#FDF7EF" />
+    {/* Balises propres à une page, par exemple une règle de sécurité plus
+        stricte (src/pages/installer/demonstration/index.astro). */}
+    <slot name="head" />
   </head>
   <body class={`surface-${surface}`}>
     <a class="skip-link" href="#contenu">

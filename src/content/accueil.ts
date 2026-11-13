@@ -87,6 +87,11 @@ export interface HeroCopy {
   readonly kicker: string;
   readonly primary: NavLink;
   readonly secondary: NavLink;
+  /**
+   * Sous les deux boutons : pour la personne qui a déjà reçu sa box, un lien
+   * vers le guide d’installation (« Vous avez reçu votre HAKO ? »).
+   */
+  readonly received: { readonly text: string; readonly link: NavLink };
   /** Nom de la liste de repères, lu par les lecteurs d’écran. */
   readonly highlightsLabel: string;
   readonly highlights: readonly string[];
@@ -105,12 +110,16 @@ export const hero: HeroCopy = {
   kicker: 'Une box pour vos photos et vos fichiers',
   primary: orderLink,
   secondary: { label: 'Découvrir la box', href: routes.box },
+  received: {
+    text: 'Vous avez reçu votre HAKO ?',
+    link: { label: 'Installez-la pas à pas', href: routes.install },
+  },
   highlightsLabel: 'En bref',
   highlights: [
     'Assemblée à la main en Provence',
     `${homePrice}, sans abonnement (Hako Home)`,
     'Logiciels libres pour vos photos et fichiers',
-    'Aucun accès de notre part à vos données',
+    'Aucun accès à vos données sans votre demande',
   ],
 };
 
@@ -225,7 +234,7 @@ export const steps: StepsCopy = {
     {
       illustration: 'etape-installation',
       title: 'Nous l’installons chez vous',
-      text: 'Nous la branchons à votre box internet. Vous créez vous-même vos comptes, puis nous vous montrons comment tout fonctionne.',
+      text: 'Dans notre zone, nous la branchons à votre box internet, puis nous vous montrons comment tout fonctionne. Plus loin, nous vous l’envoyons, et vous l’installez avec notre guide pas à pas.',
     },
     {
       illustration: 'etape-chez-vous',
@@ -351,7 +360,7 @@ export const trust: TrustCopy = {
     {
       icon: 'icones/engagement-zero-acces',
       title: 'Zéro accès',
-      text: 'Nous n’avons pas accès à vos données. Vous créez vous-même vos comptes à l’installation, et chaque box crée ses propres codes secrets.',
+      text: 'Sans votre demande, nous n’avons pas accès à vos données. À l’installation, votre box crée les comptes et les mots de passe, chez vous. Avec Hako Pro, la maintenance à distance n’a lieu que si vous la demandez.',
     },
     {
       icon: 'icones/engagement-logiciels-libres',
