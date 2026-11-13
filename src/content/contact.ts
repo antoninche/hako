@@ -63,7 +63,7 @@ export const contactPage: ContactPageCopy = {
     phoneLabel: 'Par téléphone',
     responseTime: todo(
       'Phrase sur le délai habituel de réponse aux messages et aux appels (par exemple « Nous répondons sous deux jours ouvrés. »)',
-      '[délai de réponse habituel]',
+      'Nous répondons sous [délai à préciser].',
     ),
     order: {
       title: 'Pour commander',

@@ -1,14 +1,14 @@
 {
   "_notice": "Réglages de la scène 3D de l’accueil (src/components/home/BoxScene.astro). Distances en mètres, angles en radians, progression du défilement de 0 (début de la section) à 1 (fin). Validé au chargement par src/scripts/scene-3d/config.ts : une erreur ici fait échouer la construction du site.",
   "copy": {
-    "imageAlt": "Dessin de la box en vue éclatée, de haut en bas : la coque blanc perlé, avec le kanji du logo sur le dessus ; le ventilateur ; la carte Raspberry Pi 5 ; le disque SSD sur sa petite carte ; le socle brun foncé.",
+    "imageAlt": "La box en vue éclatée, de haut en bas : la coque blanc perlé, avec le kanji du logo sur le dessus et le mot HAKO sur la face avant ; le ventilateur ; la carte Raspberry Pi 5 ; le disque SSD sur sa petite carte ; puis le socle brun foncé.",
     "partsHeading": "Les pièces de la box, de haut en bas"
   },
   "order": ["Case_Lid", "Fan", "RPi5_Board", "NVMe_Board", "Case_Base"],
   "labels": {
     "Case_Lid": {
       "title": "Coque",
-      "detail": "Imprimée en 3D, en blanc perlé, avec le kanji 箱 en relief sur le dessus."
+      "detail": "Imprimée en 3D, en blanc perlé, avec le kanji 箱 en relief sur le dessus et le mot HAKO sur un côté."
     },
     "Fan": {
       "title": "Ventilateur",
@@ -187,7 +187,7 @@
   },
   "portraitSpread": 1.4,
   "procedural": {
-    "todo": "Proportions relevées sur les images du prototype (modèle 3D de l’équipe) ; à confirmer avec le modèle Blender et le matériel : cotes de la coque et de ses ouvertures, du socle et des pieds ; ordre des cartes (ici la carte M.2 sous le Raspberry Pi, comme sur l’image de l’intérieur) et modèle de la carte M.2 (ici à l’empreinte du Raspberry Pi) ; format du SSD (ici M.2 2230) ; taille et place du ventilateur (ici 40 mm, au-dessus du Raspberry Pi, absent des images). Seule la carte Raspberry Pi 5 (85 × 56 mm) a déjà ses cotes officielles.",
+    "todo": "Proportions relevées sur les images du prototype (modèle 3D de l’équipe) ; à confirmer avec le modèle Blender et le matériel : cotes de la coque et de ses ouvertures, du socle et des pieds ; ordre des cartes (ici la carte M.2 sous le Raspberry Pi, comme sur l’image de l’intérieur) et modèle de la carte M.2 (ici à l’empreinte du Raspberry Pi) ; format du SSD (ici M.2 2230) ; taille et place du ventilateur (ici 40 mm, au-dessus du Raspberry Pi, absent des images) ; type de marquage (relief, gravure ou impression), taille et place du mot HAKO sur la grande face sans ouverture (ici en relief de 0,3 mm, 28 mm de large, milieu à 16 mm du bas de la coque, absent des images). Seule la carte Raspberry Pi 5 (85 × 56 mm) a déjà ses cotes officielles.",
     "case": {
       "width": 0.095,
       "depth": 0.062,
@@ -197,7 +197,9 @@
       "color": "#E3D9C6"
     },
     "logo": {
-      "width": 0.0247
+      "width": 0.0247,
+      "wordmarkWidth": 0.028,
+      "wordmarkCentre": 0.016
     }
   }
 }

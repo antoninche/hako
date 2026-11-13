@@ -15,7 +15,7 @@ Total : 55 informations manquantes dans 16 fichiers.
 
 ## src/content/contact.ts
 
-- L64 - Phrase sur le délai habituel de réponse aux messages et aux appels (par exemple « Nous répondons sous deux jours ouvrés. ») - [délai de réponse habituel]
+- L64 - Phrase sur le délai habituel de réponse aux messages et aux appels (par exemple « Nous répondons sous deux jours ouvrés. ») - Nous répondons sous [délai à préciser].
 
 ## src/content/faq/consommation-electrique.mdx
 
@@ -76,8 +76,8 @@ Total : 55 informations manquantes dans 16 fichiers.
 - L71 - Adresse de la vidéo « Prise en main et installation » sur PeerTube - [lien à venir]
 - L86 - Adresse de la vidéo « Accéder à ses données » sur YouTube - [lien à venir]
 - L87 - Adresse de la vidéo « Accéder à ses données » sur PeerTube - [lien à venir]
-- L108 - Adresse de la vidéo « Récupérer ses photos depuis Google ou iCloud » sur YouTube - [lien à venir]
-- L112 - Adresse de la vidéo « Récupérer ses photos depuis Google ou iCloud » sur PeerTube - [lien à venir]
+- L108 - Adresse de la vidéo « Récupérer ses photos depuis Google Photos ou iCloud » sur YouTube - [lien à venir]
+- L112 - Adresse de la vidéo « Récupérer ses photos depuis Google Photos ou iCloud » sur PeerTube - [lien à venir]
 
 ## src/data/entreprise.ts
 
@@ -102,7 +102,7 @@ Total : 55 informations manquantes dans 16 fichiers.
 
 ## src/data/model.config.json
 
-- L190 - Proportions relevées sur les images du prototype (modèle 3D de l’équipe) ; à confirmer avec le modèle Blender et le matériel : cotes de la coque et de ses ouvertures, du socle et des pieds ; ordre des cartes (ici la carte M.2 sous le Raspberry Pi, comme sur l’image de l’intérieur) et modèle de la carte M.2 (ici à l’empreinte du Raspberry Pi) ; format du SSD (ici M.2 2230) ; taille et place du ventilateur (ici 40 mm, au-dessus du Raspberry Pi, absent des images). Seule la carte Raspberry Pi 5 (85 × 56 mm) a déjà ses cotes officielles. - (valeurs provisoires)
+- L190 - Proportions relevées sur les images du prototype (modèle 3D de l’équipe) ; à confirmer avec le modèle Blender et le matériel : cotes de la coque et de ses ouvertures, du socle et des pieds ; ordre des cartes (ici la carte M.2 sous le Raspberry Pi, comme sur l’image de l’intérieur) et modèle de la carte M.2 (ici à l’empreinte du Raspberry Pi) ; format du SSD (ici M.2 2230) ; taille et place du ventilateur (ici 40 mm, au-dessus du Raspberry Pi, absent des images) ; type de marquage (relief, gravure ou impression), taille et place du mot HAKO sur la grande face sans ouverture (ici en relief de 0,3 mm, 28 mm de large, milieu à 16 mm du bas de la coque, absent des images). Seule la carte Raspberry Pi 5 (85 × 56 mm) a déjà ses cotes officielles. - (valeurs provisoires)
 
 ## src/data/tarifs.ts
 

@@ -1,23 +1,32 @@
 #!/usr/bin/env node
 /**
- * Contour du kanji 箱 pour le modèle 3D provisoire, calculé une fois pour
- * toutes à partir du logo officiel (src/assets/brand/hako-kanji.svg).
+ * Contours des deux marquages du modèle 3D provisoire, calculés une fois pour
+ * toutes à partir des fichiers officiels du logo :
+ *   src/assets/brand/hako-kanji.svg → src/scripts/scene-3d/kanji-outline.json
+ *     (le kanji 箱, en relief sur le dessus de la coque) ;
+ *   src/assets/brand/hako-mot.svg   → src/scripts/scene-3d/mot-outline.json
+ *     (le mot HAKO, sur la grande face avant de la coque).
  *
  * Le navigateur n'a donc ni fichier SVG à télécharger ni lecteur SVG à
- * embarquer : src/scripts/scene-3d/kanji-outline.json contient directement
- * les contours, déjà aplatis en lignes brisées (courbes de Bézier et arcs
- * découpés en segments, puis simplifiés sans écart visible).
+ * embarquer : chaque JSON contient directement les contours, déjà aplatis en
+ * lignes brisées (courbes de Bézier et arcs découpés en segments, puis
+ * simplifiés sans écart visible). Le mot HAKO n'est jamais écrit avec une
+ * police : ses contours sont ceux du logo.
  *
- * Format du JSON :
+ * Format de chaque JSON :
  *   width, height  dimensions du dessin dans le SVG (viewBox) ;
- *   unit           nombre d'unités entières pour la largeur du kanji ;
+ *   unit           nombre d'unités entières pour la largeur du dessin ;
  *   shapes         liste de formes ; chaque forme est une liste de contours,
  *                  le premier extérieur, les suivants des trous ; chaque
  *                  contour est une suite plate [x0, y0, x1, y1, …] d'entiers,
- *                  centrée sur le kanji, y vers le haut (haut du kanji).
+ *                  centrée sur le dessin, y vers le haut (haut du dessin).
  *
- * Utilisation (à relancer seulement si le logo change) :
- *   node scripts/model/kanji-outline.mjs
+ * Le résultat ne dépend que des SVG : deux exécutions donnent les mêmes
+ * fichiers, octet pour octet.
+ *
+ * Utilisation (à relancer seulement si le logo change), depuis la racine du
+ * site :
+ *   node scripts/model/logo-outline.mjs
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -25,9 +34,12 @@ import { fileURLToPath } from 'node:url';
 import * as prettier from 'prettier';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const SOURCE = 'src/assets/brand/hako-kanji.svg';
-const OUTPUT = 'src/scripts/scene-3d/kanji-outline.json';
-/** Largeur du kanji en unités entières (précision : 1/2000 de la largeur). */
+/** Marquages à calculer : dessin source et fichier écrit. */
+const MARKS = [
+  { source: 'src/assets/brand/hako-kanji.svg', output: 'src/scripts/scene-3d/kanji-outline.json' },
+  { source: 'src/assets/brand/hako-mot.svg', output: 'src/scripts/scene-3d/mot-outline.json' },
+];
+/** Largeur du dessin en unités entières (précision : 1/2000 de la largeur). */
 const UNIT = 2000;
 /** Écart maximal toléré entre le contour simplifié et le dessin, en unités du SVG. */
 const TOLERANCE = 0.35;
@@ -358,52 +370,61 @@ function simplify(points, tolerance) {
 
 // ---------------------------------------------------------------------------
 
-const { viewBox, d } = readSvg(SOURCE);
-const [minX, minY, width, height] = viewBox;
-const contours = flatten(d)
-  .map(dedupe)
-  .filter((points) => points.length >= 3 && Math.abs(signedArea(points)) > 1);
+/** Contours d'un dessin SVG, au format décrit en tête de fichier. */
+function outline(source) {
+  const { viewBox, d } = readSvg(source);
+  const [minX, minY, width, height] = viewBox;
+  const contours = flatten(d)
+    .map(dedupe)
+    .filter((points) => points.length >= 3 && Math.abs(signedArea(points)) > 1);
 
-// Profondeur d'imbrication : paire = contour extérieur, impaire = trou.
-const depth = contours.map((points, i) =>
-  contours.reduce((count, other, j) => count + (j !== i && contains(other, points[0]) ? 1 : 0), 0),
-);
-const shapes = [];
-contours.forEach((points, i) => {
-  if (depth[i] % 2 === 0) shapes.push({ outer: i, holes: [] });
-});
-contours.forEach((points, i) => {
-  if (depth[i] % 2 === 0) return;
-  // Trou : rattaché au contour extérieur le plus proche qui le contient.
-  const parent = shapes
-    .filter((shape) => contains(contours[shape.outer], points[0]))
-    .sort(
-      (a, b) => Math.abs(signedArea(contours[a.outer])) - Math.abs(signedArea(contours[b.outer])),
-    )[0];
-  if (!parent) throw new Error('Trou sans contour extérieur.');
-  parent.holes.push(i);
-});
+  // Profondeur d'imbrication : paire = contour extérieur, impaire = trou.
+  const depth = contours.map((points, i) =>
+    contours.reduce(
+      (count, other, j) => count + (j !== i && contains(other, points[0]) ? 1 : 0),
+      0,
+    ),
+  );
+  const shapes = [];
+  contours.forEach((points, i) => {
+    if (depth[i] % 2 === 0) shapes.push({ outer: i, holes: [] });
+  });
+  contours.forEach((points, i) => {
+    if (depth[i] % 2 === 0) return;
+    // Trou : rattaché au contour extérieur le plus proche qui le contient.
+    const parent = shapes
+      .filter((shape) => contains(contours[shape.outer], points[0]))
+      .sort(
+        (a, b) => Math.abs(signedArea(contours[a.outer])) - Math.abs(signedArea(contours[b.outer])),
+      )[0];
+    if (!parent) throw new Error(`${source} : trou sans contour extérieur.`);
+    parent.holes.push(i);
+  });
 
-const scale = UNIT / width;
-const encode = (points) =>
-  simplify(points, TOLERANCE).flatMap(([x, y]) => [
-    Math.round((x - minX - width / 2) * scale),
-    // y du SVG vers le bas ; ici vers le haut du kanji.
-    Math.round((minY + height / 2 - y) * scale),
-  ]);
+  const scale = UNIT / width;
+  const encode = (points) =>
+    simplify(points, TOLERANCE).flatMap(([x, y]) => [
+      Math.round((x - minX - width / 2) * scale),
+      // y du SVG vers le bas ; ici vers le haut du dessin.
+      Math.round((minY + height / 2 - y) * scale),
+    ]);
 
-const data = {
-  _notice: `Généré par scripts/model/kanji-outline.mjs depuis ${SOURCE} : ne pas modifier à la main.`,
-  width,
-  height,
-  unit: UNIT,
-  shapes: shapes.map((shape) => [shape.outer, ...shape.holes].map((i) => encode(contours[i]))),
-};
+  return {
+    _notice: `Généré par scripts/model/logo-outline.mjs depuis ${source} : ne pas modifier à la main.`,
+    width,
+    height,
+    unit: UNIT,
+    shapes: shapes.map((shape) => [shape.outer, ...shape.holes].map((i) => encode(contours[i]))),
+  };
+}
 
-const config = (await prettier.resolveConfig(path.join(root, OUTPUT))) ?? {};
-const text = await prettier.format(JSON.stringify(data), { ...config, parser: 'json' });
-writeFileSync(path.join(root, OUTPUT), text);
-const points = data.shapes.flat().reduce((sum, contour) => sum + contour.length / 2, 0);
-console.log(
-  `${OUTPUT} : ${data.shapes.length} formes, ${data.shapes.flat().length} contours, ${points} points, ${text.length} octets.`,
-);
+for (const { source, output } of MARKS) {
+  const data = outline(source);
+  const config = (await prettier.resolveConfig(path.join(root, output))) ?? {};
+  const text = await prettier.format(JSON.stringify(data), { ...config, parser: 'json' });
+  writeFileSync(path.join(root, output), text);
+  const points = data.shapes.flat().reduce((sum, contour) => sum + contour.length / 2, 0);
+  console.log(
+    `${output} : ${data.shapes.length} formes, ${data.shapes.flat().length} contours, ${points} points, ${text.length} octets.`,
+  );
+}

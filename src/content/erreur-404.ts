@@ -15,7 +15,7 @@ export const erreur404 = {
 
   kicker: 'Erreur 404',
   title: 'Cette page est introuvable',
-  lead: 'Comme cette boîte, cette page est vide. Son adresse a peut-être changé, ou une lettre s’est glissée de travers.',
+  lead: 'Cette page est vide, comme une boîte qu’on vient d’ouvrir. Son adresse a peut-être changé, ou une lettre s’est glissée de travers.',
   illustrationAlt:
     'La box, ouverte et vide : son socle brun foncé est posé au sol et sa coque blanc perlé flotte au-dessus.',
 

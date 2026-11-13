@@ -38,7 +38,7 @@ export const company: Company = withFrenchTypography<Company>({
 
   serviceArea: {
     sentence:
-      'Nous intervenons de Salon-de-Provence à Toulon, en passant par Aix-en-Provence et Marseille.',
+      'Nous intervenons de Salon-de-Provence à Toulon, en passant par Aix-en-Provence et Marseille.',
     outside:
       'nous vous envoyons la box, et vous l’installez vous-même avec notre guide pas à pas et nos tutoriels vidéo (en préparation)',
   },

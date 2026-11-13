@@ -204,6 +204,9 @@ function parse(d) {
 
 const SUBPATHS = parse(KANJI_D);
 
+/** La même lecture, pour le mot HAKO du logo (mot.mjs). */
+export { parse as lireContour };
+
 // --- Simplification (Douglas-Peucker) et écriture --------------------------------
 
 function dpSimplify(pts, tol) {

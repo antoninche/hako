@@ -145,7 +145,7 @@ export const offresPage = {
   intro: {
     kicker: 'Nos offres',
     title: 'Pour la famille ou pour l’entreprise',
-    lead: `${home.name}\u00a0: ${withTax(home.priceEur, home.taxStatus)}, une fois, sans abonnement. ${pro.name}\u00a0: ${withTax(pro.priceEur, pro.taxStatus)}, puis ${withTax(subscription?.monthlyEur ?? 0, subscription?.taxStatus)} par mois pour l’assistance et des outils pour travailler en équipe. Dans notre zone d’intervention, les deux comprennent l’installation chez vous et une formation sur place.`,
+    lead: `${home.name}\u00a0: ${withTax(home.priceEur, home.taxStatus)}, une fois, sans abonnement. ${pro.name}\u00a0: ${withTax(pro.priceEur, pro.taxStatus)}, puis ${withTax(subscription?.monthlyEur ?? 0, subscription?.taxStatus)} par mois pour l’assistance, les mises à jour et la maintenance. ${pro.name} ajoute des outils pour travailler en équipe. Dans notre zone d’intervention, les deux comprennent l’installation chez vous et une formation sur place.`,
   },
   offersLabel: 'Les deux offres',
   includedTitle: 'Ce qui est compris',

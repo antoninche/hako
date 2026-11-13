@@ -166,7 +166,8 @@ DESSINS.demenageur = () => {
     C.lin,
   );
   photo(sv, 600, 354, 36, 5, { motif: 'portrait' });
-  // console et box ; l'ombre de la box passe sous la console
+  // console et box ; l'ombre de la box passe sous la console. La box ne
+  // remplit pas la fenêtre : on voit le mur autour d'elle, l'air qu'il lui faut.
   const sousConsole = sv.marque();
   sv.obj(C.lin, (o) => {
     for (const lx of [462, 596])
@@ -181,7 +182,7 @@ DESSINS.demenageur = () => {
       );
     o.piece(rrect(446, 450, 166, 10, 2, { j: 0.4 }), C.caramel);
   });
-  boite(sv, 520, 450, 124, { sous: sousConsole });
+  boite(sv, 520, 450, 110, { sous: sousConsole });
   sv.piece(rrect(wx - 14, wy + wh - 2, ww + 28, 12, 3, { j: 0.5 }), C.caramel, C.lin);
   // le trajet des photos, du nuage jusqu'à la fenêtre
   nuage(sv, 330, 108, 96);
@@ -718,9 +719,10 @@ DESSINS['etape-chez-vous'] = () => {
     C.noyer,
     3.5,
   );
+  // de l'air de chaque côté de la box, entre la box internet et la plante
   routeur(sv, 296, 374, 68, { sous: sousEtagere });
-  boite(sv, 408, 374, 104, { sous: sousEtagere });
-  plante(sv, 494, 374, 62, { retombante: true, sous: sousEtagere });
+  boite(sv, 406, 374, 100, { sous: sousEtagere });
+  plante(sv, 502, 374, 62, { retombante: true, sous: sousEtagere });
   // chat endormi, roulé en boule (ombre courte : il est posé au sol)
   sv.obj(
     C.caramel,
@@ -770,7 +772,7 @@ DESSINS['offre-home'] = () => {
   const sv = new Svg('offre-home.svg', 800, 500, {
     ...F800,
     title: 'Un salon familial',
-    desc: 'Sur un canapé, une grand-mère, un enfant et un adulte regardent ensemble des photos sur une tablette. À droite, au milieu d’une bibliothèque, la box est rangée entre des livres et la box internet.',
+    desc: 'Sur un canapé, une grand-mère, un enfant et un adulte regardent ensemble des photos sur une tablette. À droite, la box est posée seule dans la grande case du milieu d’une bibliothèque, avec de l’air autour ; des livres au-dessus, la box internet en dessous.',
   });
   carte(sv, 26, 26, 742, 440, 40);
   sol(sv, 50, 392, 694, 52, 18);
@@ -880,8 +882,9 @@ DESSINS['offre-home'] = () => {
     ],
   });
   // la bibliothèque du salon : la box au milieu, sur le fond noyer, des livres
-  // au-dessus, la box internet en dessous
-  const biblio = casier(sv, 508, 100, 218, 288, [82, 136, 61]);
+  // au-dessus, la box internet en dessous. La case de la box est large et haute :
+  // la box a un ventilateur, on lui laisse de l'air au-dessus et sur les côtés.
+  const biblio = casier(sv, 494, 70, 246, 318, [82, 166, 61]);
   const [haut, milieu, bas] = biblio.cases;
   sv.obj(
     C.noyer,
@@ -913,7 +916,7 @@ DESSINS['offre-home'] = () => {
     biblio.sous,
   );
   const cx = (milieu.x0 + milieu.x1) / 2;
-  boite(sv, cx, milieu.yb - 3, 160, { sh: C.noyer, sous: biblio.sous });
+  boite(sv, cx, milieu.yb - 3, 150, { sh: C.noyer, sous: biblio.sous, mot: true });
   routeur(sv, cx, bas.yb - 2, 56, { sh: C.noyer, sous: biblio.sous });
   return sv;
 };
@@ -923,7 +926,7 @@ DESSINS['offre-pro'] = () => {
   const sv = new Svg('offre-pro.svg', 800, 500, {
     ...F800,
     title: 'Une petite boutique provençale',
-    desc: 'Dans une petite épicerie de Provence, une commerçante en tablier se tient derrière son comptoir, devant son ordinateur. Un collègue porte une caisse de bouteilles. À droite, au milieu d’une étagère peinte en vert, la box est rangée entre des bocaux et la box internet ; à côté, une fenêtre cintrée aux volets verts.',
+    desc: 'Dans une petite épicerie de Provence, une commerçante en tablier se tient derrière son comptoir, devant son ordinateur. Un collègue porte une caisse de bouteilles. À droite, la box est posée seule dans la grande case du milieu d’une étagère peinte en vert, avec de l’air autour ; à côté, une fenêtre cintrée aux volets verts.',
   });
   carte(sv, 26, 26, 742, 440, 40);
   sol(sv, 50, 392, 694, 52, 18);
@@ -992,9 +995,9 @@ DESSINS['offre-pro'] = () => {
   });
   // comptoir et dos de l'ordinateur
   sv.obj(C.lin, (o) => {
-    o.piece(rrect(178, 314, 228, 80, [2, 2, 4, 4], { j: 0.7 }), C.noyer);
-    o.piece(rrect(168, 302, 248, 14, 3, { j: 0.6 }), C.caramel);
-    for (const lx of [224, 269, 315, 360])
+    o.piece(rrect(178, 314, 220, 80, [2, 2, 4, 4], { j: 0.7 }), C.noyer);
+    o.piece(rrect(168, 302, 240, 14, 3, { j: 0.6 }), C.caramel);
+    for (const lx of [222, 266, 310, 354])
       o.trait(
         [
           [lx, 324],
@@ -1056,8 +1059,9 @@ DESSINS['offre-pro'] = () => {
     },
   });
   // l'étagère peinte de la boutique : des bocaux en haut, la box au milieu, sur
-  // le fond noyer, la box internet en dessous
-  const meubleVert = casier(sv, 436, 100, 202, 288, [82, 136, 61], { cadre: C.olive });
+  // le fond noyer, la box internet en dessous. Comme dans le salon, la case de
+  // la box est large et haute : de l'air au-dessus et sur les côtés.
+  const meubleVert = casier(sv, 418, 70, 238, 318, [82, 166, 61], { cadre: C.olive });
   const [haut, milieu, bas] = meubleVert.cases;
   sv.obj(
     C.noyer,
@@ -1075,20 +1079,20 @@ DESSINS['offre-pro'] = () => {
     meubleVert.sous,
   );
   const cx = (milieu.x0 + milieu.x1) / 2;
-  boite(sv, cx, milieu.yb - 3, 156, { sh: C.noyer, sous: meubleVert.sous });
+  boite(sv, cx, milieu.yb - 3, 150, { sh: C.noyer, sous: meubleVert.sous, mot: true });
   routeur(sv, cx, bas.yb - 2, 54, { sh: C.noyer, sous: meubleVert.sous });
-  // fenêtre cintrée et volets
-  sv.path(rrect(652, 78, 20, 120, 2, { j: 0.4 }), C.olive);
-  sv.path(rrect(740, 78, 20, 120, 2, { j: 0.4 }), C.olive);
-  sv.path(rrect(672, 72, 68, 128, [34, 34, 2, 2], { j: 0.5 }), C.creme);
+  // fenêtre cintrée et volets (des volets étroits : l'étagère prend la place)
+  sv.path(rrect(664, 78, 14, 120, 2, { j: 0.4 }), C.olive);
+  sv.path(rrect(746, 78, 14, 120, 2, { j: 0.4 }), C.olive);
+  sv.path(rrect(678, 72, 68, 128, [34, 34, 2, 2], { j: 0.5 }), C.creme);
   sv.path(
     cut(
       [
-        [672, 200],
-        [672, 162],
-        [704, 152, true],
-        [740, 164],
-        [740, 200],
+        [678, 200],
+        [678, 162],
+        [710, 152, true],
+        [746, 164],
+        [746, 200],
       ],
       { j: 0.4 },
     ),
@@ -1097,11 +1101,11 @@ DESSINS['offre-pro'] = () => {
   sv.path(
     cut(
       [
-        [672, 200],
-        [672, 182],
-        [710, 174, true],
-        [740, 180],
-        [740, 200],
+        [678, 200],
+        [678, 182],
+        [716, 174, true],
+        [746, 180],
+        [746, 200],
       ],
       { j: 0.4 },
     ),
@@ -1109,15 +1113,15 @@ DESSINS['offre-pro'] = () => {
   );
   sv.line(
     [
-      [706, 72],
-      [706, 200],
+      [712, 72],
+      [712, 200],
     ],
     C.sable,
     5,
     { smooth: false, cap: 'butt' },
   );
-  sv.piece(rrect(662, 198, 88, 12, 3, { j: 0.5 }), C.caramel, C.lin);
-  plante(sv, 706, 400, 70);
+  sv.piece(rrect(668, 198, 88, 12, 3, { j: 0.5 }), C.caramel, C.lin);
+  plante(sv, 712, 400, 70);
   return sv;
 };
 
@@ -1126,7 +1130,7 @@ DESSINS['vue-eclatee'] = () => {
   const sv = new Svg('vue-eclatee.svg', 800, 800, {
     ...F800,
     title: 'La box en vue éclatée',
-    desc: 'Les cinq pièces de la box, écartées de haut en bas : la coque blanc perlé, avec le kanji du logo sur le dessus ; le ventilateur ; la carte Raspberry Pi 5 avec son bloc de prises, sa puce et sa rangée de broches ; la carte NVMe avec son disque SSD, reliée à la Raspberry Pi par une nappe ; puis le socle brun foncé, sur ses pieds.',
+    desc: 'Les cinq pièces de la box, écartées de haut en bas : la coque blanc perlé, avec le kanji du logo sur le dessus et le mot HAKO du logo sur la face avant ; le ventilateur ; la carte Raspberry Pi 5 avec son bloc de prises, sa puce et sa rangée de broches ; la carte NVMe avec son disque SSD, reliée à la Raspberry Pi par une nappe ; puis le socle brun foncé, sur ses pieds.',
   });
   const CX = 400; // la pile, au milieu de sa carte
   const WC = 320; // largeur de la coque
@@ -1173,7 +1177,7 @@ DESSINS['vue-eclatee'] = () => {
     );
 
   // la coque, avec le kanji sur le dessus
-  const coque = boite(sv, CX, 256, WC, { socle: false, sh: OMB });
+  const coque = boite(sv, CX, 256, WC, { socle: false, sh: OMB, mot: true });
   anchor('Case_Lid', CX + WC / 2, coque.yDos, coque.yCoque);
 
   // ventilateur
@@ -1320,7 +1324,7 @@ DESSINS['404'] = () => {
   const sv = new Svg('404.svg', 600, 600, {
     ...F600,
     title: 'Une box vide, ouverte',
-    desc: 'Le socle brun foncé de la box, vide, posé au sol ; sa coque blanc perlé, marquée du kanji du logo, flotte au-dessus, un peu penchée.',
+    desc: 'Le socle brun foncé de la box, vide, posé au sol ; sa coque blanc perlé, marquée du kanji et du mot HAKO du logo, flotte au-dessus, un peu penchée.',
   });
   carte(sv, 36, 36, 520, 520, 44);
   sol(sv, 60, 470, 472, 62, 18);
@@ -1330,6 +1334,7 @@ DESSINS['404'] = () => {
   const [ox, oy] = [312, 262];
   boite(sv, 312, 336, 264, {
     socle: false,
+    mot: true,
     map: (x, y) => [
       ox + (x - ox) * Math.cos(a) - (y - oy) * Math.sin(a),
       oy + (x - ox) * Math.sin(a) + (y - oy) * Math.cos(a),
@@ -1362,7 +1367,7 @@ tuto(
       [374, 92],
       [434, 120],
     ]);
-    boite(sv, 204, 276, 164);
+    boite(sv, 204, 276, 164, { mot: true });
     portableFace(sv, 460, 274, 176, {
       ecran: (cx, cy) => {
         sv.piece(
@@ -1399,7 +1404,7 @@ tuto(
       [340, 98],
       [380, 112],
     ]);
-    boite(sv, 222, 276, 150);
+    boite(sv, 222, 276, 150, { mot: true });
     const x = 352;
     const y = 92;
     sv.piece(
@@ -1464,7 +1469,7 @@ tuto(
     photo(sv, 250, 146, 52, 8);
     photo(sv, 320, 172, 60, -6);
     photo(sv, 382, 198, 64, 5);
-    boite(sv, 500, 276, 160);
+    boite(sv, 500, 276, 160, { mot: true });
   },
 );
 
@@ -1473,7 +1478,7 @@ tuto(
   'Vérifier que ses photos sont bien gardées',
   'La box, avec à côté une pile de photos bien rangées et une pastille verte cochée.',
   (sv) => {
-    boite(sv, 214, 276, 168);
+    boite(sv, 214, 276, 168, { mot: true });
     photo(sv, 452, 238, 106, -4);
     photo(sv, 458, 220, 106, 3);
     photo(sv, 454, 198, 106, -1, { motif: 'portrait' });

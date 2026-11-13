@@ -132,7 +132,7 @@ export const laBox = {
     title: 'Ce qu’il y a dedans',
     lead: 'Une petite carte, un disque, un ventilateur et un boîtier.',
     illustrationAlt:
-      'La box en vue éclatée, de haut en bas : la coque blanc perlé avec le logo sur le dessus, le ventilateur, la carte Raspberry Pi 5, le disque SSD sur sa petite carte, puis le socle brun foncé.',
+      'La box en vue éclatée, de haut en bas : la coque blanc perlé, avec le kanji du logo sur le dessus et le mot HAKO sur la face avant ; le ventilateur ; la carte Raspberry Pi 5 ; le disque SSD sur sa petite carte ; puis le socle brun foncé.',
     parts: [
       {
         name: 'Un Raspberry Pi 5, 8 Go',

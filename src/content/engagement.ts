@@ -1,7 +1,7 @@
 /**
  * Textes de la page « Notre engagement » (/engagement/).
  *
- * Sept principes, chacun avec un paragraphe court et honnête. Tout le texte
+ * Sept engagements, chacun avec un paragraphe court et honnête. Tout le texte
  * visible est ici : les composants de src/components/engagement/ ne font que
  * le mettre en forme.
  *
@@ -80,16 +80,16 @@ export const engagement = {
   meta: {
     title: 'Notre engagement : vos données restent chez vous',
     description:
-      'Nos sept principes : vos données restent chez vous, nous n’y avons pas accès, des logiciels libres, pas d’abonnement caché, un humain près de chez vous.',
+      'Nos sept engagements : vos données restent chez vous, nous n’y avons pas accès, des logiciels libres, pas d’abonnement caché, un humain près de chez vous.',
   },
 
   intro: {
     title: 'Notre engagement',
-    lead: 'Sept principes guident ce que nous faisons. Les voici, avec ce qu’ils changent pour vous, et leurs limites quand il y en a.',
+    lead: 'Sept engagements guident ce que nous faisons. Les voici, avec ce qu’ils changent pour vous, et leurs limites quand il y en a.',
   },
 
-  /** Titre (lu par les lecteurs d'écran) de la liste des principes. */
-  listLabel: 'Nos sept principes',
+  /** Titre (lu par les lecteurs d'écran) de la liste des engagements. */
+  listLabel: 'Nos sept engagements',
 
   principles: [
     {
@@ -136,9 +136,9 @@ export const engagement = {
         [
           `${home.name} s’achète une fois, sans abonnement. Les mises à jour de sécurité sont incluses pendant `,
           homeUpdates,
-          '. Si vous avez besoin de nous après l’installation, hors garantie, chaque intervention est facturée ',
+          '. Hors garantie, le service après-vente est facturé ',
           homeAfterSalesRate,
-          '.',
+          ' par intervention.',
         ],
         proSubscription,
       ],
@@ -173,7 +173,7 @@ export const engagement = {
           'Chaque box est assemblée et vérifiée à la main, en Provence, avant d’arriver chez vous. Son boîtier est imprimé en 3D.',
         ],
         [
-          'Nous sommes trois, chacun avec son domaine : le logiciel et le système, le commerce et la relation avec vous, le design.',
+          'Nous sommes trois, chacun avec son domaine : le logiciel et le système, le commerce et la relation avec vous, le design et la finance.',
         ],
       ],
       link: { label: 'Faire connaissance avec l’équipe', href: routes.contact },

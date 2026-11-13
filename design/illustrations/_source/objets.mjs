@@ -1,6 +1,7 @@
 // Le vocabulaire commun de la série : carte de fond, sol, box HAKO, box
 // internet, photos, nuages, plantes, meubles et personnages.
 import { KANJI_H, KANJI_W, kanjiD } from './kanji.mjs';
+import { MOT_H, MOT_W, motD } from './mot.mjs';
 import { C, cut, ell, leaf, mapNodes, rrect, soft, turn } from './papier.mjs';
 
 // --- Décor -------------------------------------------------------------------------
@@ -141,7 +142,8 @@ export function etagere(sv, x, y, w, ep = 13) {
  * Proportions de la box, relevées sur les images du modèle 3D du prototype :
  * dessus de 1,5 sur 1, coque haute d'environ 0,4 fois sa largeur, angles très
  * arrondis ; socle brun foncé (bois imprimé, peint en noyer) un peu en retrait
- * sous la coque, posé sur quatre petits pieds ; le kanji au centre du dessus.
+ * sous la coque, posé sur quatre petits pieds ; le kanji au centre du dessus ;
+ * le mot HAKO au centre de la grande face avant, discret, comme une marque.
  * Mesures en part de la largeur de la coque.
  */
 export const BOX = {
@@ -155,6 +157,7 @@ export const BOX = {
   pied: 0.13, // largeur d'un pied, vu de face
   retrait: 0.022, // retrait du socle sous la coque, de chaque côté
   kanji: 0.26, // largeur du kanji
+  mot: 0.3, // largeur du mot HAKO sur la face avant
   vue: 0.4, // raccourci de la profondeur : on voit le dessus d'un peu haut
   fuite: 0.045, // le dessus rétrécit un peu vers le fond, de chaque côté
 };
@@ -222,6 +225,21 @@ function kanjiSurDessus(p, map, tol) {
 }
 
 /**
+ * Points du mot HAKO centré sur la face avant de la box g (largeur BOX.mot de
+ * la coque), à mi-hauteur entre le bord arrondi du dessus et le bas de la coque.
+ * La face est vue de face : le mot garde ses proportions.
+ */
+function motSurFace(g, w, map) {
+  const k = (w * BOX.mot) / MOT_W;
+  const x0 = g.cx - (MOT_W * k) / 2;
+  const y0 = (g.yFace + w * BOX.bord + g.yCoque) / 2 - (MOT_H * k) / 2;
+  return motD((gx, gy) => {
+    const pt = [x0 + gx * k, y0 + gy * k];
+    return map ? map(...pt) : pt;
+  });
+}
+
+/**
  * Repères de la box vue de face et d'un peu haut. (cx, yb) : milieu du bas, sous
  * les pieds (ou sous la coque, sans socle) ; w : largeur de la coque.
  */
@@ -235,8 +253,10 @@ export function boxGeo(cx, yb, w, { socle = true } = {}) {
 
 /**
  * La box HAKO, comme le prototype : coque perle (RAL 1013, blanc perlé) aux
- * angles très arrondis, socle noyer un peu en retrait, posé sur ses pieds, et
- * le kanji 箱 du logo au centre du dessus. Une seule ombre pour toute la
+ * angles très arrondis, socle noyer un peu en retrait, posé sur ses pieds, le
+ * kanji 箱 du logo au centre du dessus et, si mot est vrai, le mot HAKO du logo
+ * sur la face avant (seulement là où il mesure au moins 14 px sur un écran de
+ * 360 px : voir docs/illustrations.md). Une seule ombre pour toute la
  * silhouette ; le bord arrondi du dessus et l'angle de droite, qui tournent vers
  * l'ombre, sont en pierre (le lin, trop proche du perle, s'y perdrait).
  * (cx, yb) : milieu du bas, sous les pieds ; w : largeur de la coque.
@@ -256,6 +276,7 @@ export function boite(
     sous = null,
     socle = true,
     kanji = true,
+    mot = false,
     bord = C.pierre,
     angle = C.pierre,
     map,
@@ -333,7 +354,9 @@ export function boite(
         .map(([x, y]) => [x, y + e * fin(x), true])
         .reverse();
       o.detail(M(cut([...avant, ...dessous], { j: j * 0.5, seg: 80 })), bord);
-      if (kanji) o.detail(kanjiSurDessus(g, map, w > 120 ? 0.12 : 0.2), C.chocolat);
+      // écart toléré : 0,2 unité, invisible sous 200 de large ; plus fin au-delà
+      if (kanji) o.detail(kanjiSurDessus(g, map, w > 200 ? 0.12 : 0.2), C.chocolat);
+      if (mot) o.detail(motSurFace(g, w, map), C.chocolat);
     },
     offset,
     sous,
@@ -1161,7 +1184,8 @@ export function casier(
           { smooth: false, cap: 'butt' },
         );
     }
-    o.piece(rrect(x, y, w, h, [3, 3, 5, 5], { j: 0.6 }), cadre);
+    // de longs côtés presque droits (seg 100) : des octets en moins, la même coupe à l'œil
+    o.piece(rrect(x, y, w, h, [3, 3, 5, 5], { j: 0.6, seg: 100 }), cadre);
   });
   const out = [];
   let top = y + ep;

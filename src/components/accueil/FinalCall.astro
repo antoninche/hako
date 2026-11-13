@@ -1,8 +1,9 @@
 ---
 /**
  * h. Dernier appel : commander, ou poser d’abord une question.
- * La petite boîte dessinée en CSS reprend celle de l’ouverture.
+ * Au-dessus du titre, le kanji du logo, comme un sceau (décoratif).
  */
+import Logo from '../Logo.astro';
 import Arrow from './Arrow.astro';
 import RichText from './RichText.astro';
 import { finalCall } from '../../content/accueil';
@@ -10,7 +11,7 @@ import { finalCall } from '../../content/accueil';
 
 <section class="final surface-sable" aria-labelledby="titre-appel">
   <div class="container final__inner">
-    <div class="final__box" aria-hidden="true"></div>
+    <Logo variant="kanji" decorative class="final__mark" />
     <h2 id="titre-appel" class="final__title">
       <RichText text={finalCall.title} />
     </h2>
@@ -44,20 +45,10 @@ import { finalCall } from '../../content/accueil';
   }
 
   /* Une boîte en miniature : contour fin et filet du couvercle. */
-  .final__box {
-    position: relative;
-    inline-size: 3.25rem;
-    block-size: 2.25rem;
-    border: 1.5px solid var(--line-strong);
-    border-radius: var(--radius-s);
-  }
-
-  .final__box::before {
-    content: '';
-    position: absolute;
-    inset-inline: 0;
-    inset-block-start: 28%;
-    border-block-start: 1.5px solid var(--line-strong);
+  .final__inner :global(.final__mark) {
+    inline-size: 2.75rem;
+    block-size: auto;
+    color: var(--text);
   }
 
   .final__title {

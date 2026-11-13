@@ -12,7 +12,8 @@
  *
  * Pièces :
  * - Case_Lid : la coque blanc perlé (RAL 1013), qui recouvre tout et se
- *   soulève ; elle porte le kanji 箱 en relief (Logo_Decal) ;
+ *   soulève ; elle porte les marquages chocolat (Logo_Decal) : le kanji 箱
+ *   en relief au centre du dessus et le mot HAKO sur la grande face avant ;
  * - Case_Base : le socle en bois imprimé couleur noyer et ses quatre pieds
  *   d'angle ;
  * - RPi5_Board, NVMe_Board et NVMe_SSD (carte M.2 sous le Raspberry Pi, comme
@@ -28,9 +29,11 @@
  */
 import {
   BoxGeometry,
+  BufferGeometry,
   Color,
   CylinderGeometry,
   ExtrudeGeometry,
+  Float32BufferAttribute,
   Group,
   InstancedMesh,
   Matrix4,
@@ -40,15 +43,20 @@ import {
   Path,
   RingGeometry,
   Shape,
-  type BufferGeometry,
   type Material,
   type Object3D,
   type Texture,
 } from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import type { ModelConfig } from './config';
-// Imports nommés : seules ces deux clés du JSON entrent dans le code publié.
+// Imports nommés : seules les clés utilisées de chaque JSON entrent dans le code publié.
 import { shapes as kanjiShapes, unit as kanjiUnit } from './kanji-outline.json';
+import {
+  height as wordmarkDrawingHeight,
+  shapes as wordmarkShapes,
+  unit as wordmarkUnit,
+  width as wordmarkDrawingWidth,
+} from './mot-outline.json';
 import {
   buildCornerFoot,
   buildShell,
@@ -76,6 +84,16 @@ const PROTOTYPE = {
   feetAlongZ: mm(12),
   /** Relief du kanji au-dessus du couvercle. */
   kanjiRaise: mm(1),
+  /**
+   * Relief du mot HAKO sur la face avant : une fraction de millimètre, assez
+   * pour ne jamais se confondre avec la paroi à l'affichage (aucun
+   * scintillement), trop peu pour épaissir les lettres vues de biais.
+   */
+  wordmarkRaise: mm(0.3),
+  /** Partie des marquages enfoncée dans la coque : aucun jour sur le bord. */
+  markSink: mm(0.1),
+  /** Écart minimal entre le mot HAKO et les arrondis de sa face. */
+  wordmarkMargin: mm(3),
 } as const;
 
 type Rgb = readonly [number, number, number];
@@ -91,8 +109,8 @@ type Rgb = readonly [number, number, number];
  * reçoit la face qui la porte (LIGHT).
  */
 const SCREEN = {
-  /** Dessus du kanji (chocolat de la marque). */
-  kanji: '#412d1e',
+  /** Marquages, kanji et mot HAKO (chocolat de la marque). */
+  mark: '#412d1e',
   /** Face éclairée du socle (noyer), au début de la piste. */
   wood: '#5f3e27',
   /** Dessus des cartes (vert du prototype). */
@@ -230,7 +248,9 @@ function materials(config: ModelConfig) {
   return {
     shell,
     inside: inner(matte(albedoFor(SCREEN.inside, LIGHT.lit)), 2),
-    kanji: matte(albedoFor(SCREEN.kanji, LIGHT.top)),
+    // Réglée pour le dessus du kanji ; sur la face avant, éclairée un peu moins,
+    // le mot HAKO s'affiche à peine plus foncé (écart inférieur à 1 %).
+    mark: matte(albedoFor(SCREEN.mark, LIGHT.top)),
     led: standard('#fffaf2', 0.3),
     wood,
     pcb: inner(matte(albedoFor(SCREEN.pcb, LIGHT.top))),
@@ -439,10 +459,13 @@ function fan(m: Palette): Group {
   return group;
 }
 
-/** Kanji 箱 en relief (contour précalculé), centré, le haut vers -z, posé sur y = 0. */
-function kanjiRelief(width: number, raise: number, material: Material): Mesh {
-  const scale = width / kanjiUnit;
-  const shapes = kanjiShapes.map((contours) => {
+/** Contour précalculé par scripts/model/logo-outline.mjs (voir ce script). */
+type Outline = readonly (readonly (readonly number[])[])[];
+
+/** Formes 2D d'un contour précalculé, centrées sur l'origine, larges de `width`, y vers le haut. */
+function outlineShapes(outline: Outline, unit: number, width: number): Shape[] {
+  const scale = width / unit;
+  return outline.map((contours) => {
     const [outer = [], ...holes] = contours.map((flat) => {
       const points: Array<[number, number]> = [];
       for (let i = 0; i + 1 < flat.length; i += 2) {
@@ -459,16 +482,72 @@ function kanjiRelief(width: number, raise: number, material: Material): Mesh {
     }
     return shape;
   });
-  // Un léger enfoncement sous le dessus évite tout jour entre le kanji et la coque.
-  const sink = mm(0.1);
+}
+
+/**
+ * Relief d'un marquage, dans le plan de ses formes : l'épaisseur va de
+ * z = -sink (enfoncée dans la coque, sans jour au bord) à z = raise.
+ */
+function markRelief(shapes: Shape[], raise: number, sink: number): BufferGeometry {
   const geometry = new ExtrudeGeometry(shapes, {
     depth: raise + sink,
     bevelEnabled: false,
     curveSegments: 1,
   });
-  geometry.rotateX(-Math.PI / 2);
-  geometry.translate(0, -sink, 0);
-  return mesh(geometry, material, 'Logo_Decal');
+  geometry.translate(0, 0, -sink);
+  return geometry;
+}
+
+/**
+ * Réunit des géométries non indexées (positions et normales) en une seule :
+ * les deux marquages ne coûtent qu'un appel de dessin.
+ */
+function mergeMarks(geometries: readonly BufferGeometry[]): BufferGeometry {
+  const merged = new BufferGeometry();
+  for (const name of ['position', 'normal'] as const) {
+    const arrays = geometries.map((geometry) => geometry.getAttribute(name).array);
+    const data = new Float32Array(arrays.reduce((sum, array) => sum + array.length, 0));
+    let offset = 0;
+    for (const array of arrays) {
+      data.set(array, offset);
+      offset += array.length;
+    }
+    merged.setAttribute(name, new Float32BufferAttribute(data, 3));
+  }
+  for (const geometry of geometries) geometry.dispose();
+  return merged;
+}
+
+/** Placement des marquages sur la coque (repère de Case_Lid, bas de la coque à y = 0). */
+interface MarkLayout {
+  readonly kanjiWidth: number;
+  readonly lidHeight: number;
+  readonly frontZ: number;
+  readonly wordmarkWidth: number;
+  readonly wordmarkCentre: number;
+}
+
+/**
+ * Logo_Decal : le kanji 箱 en relief au centre du dessus (le haut du kanji
+ * vers l'arrière, -z) et le mot HAKO sur la grande face avant (+z), lisible
+ * de face, dans un seul objet.
+ */
+function logoDecal(layout: MarkLayout, material: Material): Mesh {
+  const kanji = markRelief(
+    outlineShapes(kanjiShapes, kanjiUnit, layout.kanjiWidth),
+    PROTOTYPE.kanjiRaise,
+    PROTOTYPE.markSink,
+  );
+  // Le relief monte vers +y ; le haut du kanji part vers -z.
+  kanji.rotateX(-Math.PI / 2);
+  kanji.translate(0, layout.lidHeight, 0);
+  const wordmark = markRelief(
+    outlineShapes(wordmarkShapes, wordmarkUnit, layout.wordmarkWidth),
+    PROTOTYPE.wordmarkRaise,
+    PROTOTYPE.markSink,
+  );
+  wordmark.translate(0, layout.wordmarkCentre, layout.frontZ);
+  return mesh(mergeMarks([kanji, wordmark]), material, 'Logo_Decal');
 }
 
 /** Construit la box complète. */
@@ -596,10 +675,29 @@ export function buildProceduralModel(config: ModelConfig): Group {
   led.position.set(c.width / 2 + mm(0.1), c.lidHeight * 0.48, button.position.z + mm(8));
   lid.add(button, led);
 
-  // Kanji 箱 en relief, au centre du dessus.
-  const mark = kanjiRelief(config.procedural.logo.width, PROTOTYPE.kanjiRaise, m.kanji);
-  mark.position.y = c.lidHeight;
-  lid.add(mark);
+  // Marquages : le kanji au centre du dessus, le mot HAKO au milieu de la
+  // grande face avant. Garde-fous : le mot reste sur la partie plate de la
+  // face, loin des arrondis des angles et du dessus.
+  const logo = config.procedural.logo;
+  const flatHalf = c.width / 2 - radius - PROTOTYPE.wordmarkMargin;
+  const wordmarkWidth = Math.min(logo.wordmarkWidth, 2 * flatHalf);
+  const halfHeight = (wordmarkWidth * wordmarkDrawingHeight) / wordmarkDrawingWidth / 2;
+  const wordmarkCentre = Math.min(
+    Math.max(logo.wordmarkCentre, halfHeight + PROTOTYPE.wordmarkMargin),
+    c.lidHeight - topFillet - halfHeight - PROTOTYPE.wordmarkMargin,
+  );
+  lid.add(
+    logoDecal(
+      {
+        kanjiWidth: logo.width,
+        lidHeight: c.lidHeight,
+        frontZ: c.depth / 2,
+        wordmarkWidth,
+        wordmarkCentre,
+      },
+      m.mark,
+    ),
+  );
   root.add(lid);
 
   return root;

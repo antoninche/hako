@@ -92,7 +92,7 @@ const items = [
   },
   {
     slug: 'recuperer-photos',
-    title: 'Récupérer ses photos depuis Google ou iCloud',
+    title: 'Récupérer ses photos depuis Google Photos ou iCloud',
     text: [
       [
         'Rapatrier vos photos de Google Photos ou d’iCloud vers la box. C’est vous qui vous connectez à votre compte : nous ne voyons jamais vos identifiants.',
@@ -106,11 +106,11 @@ const items = [
     ],
     videos: {
       youtube: todo(
-        'Adresse de la vidéo « Récupérer ses photos depuis Google ou iCloud » sur YouTube',
+        'Adresse de la vidéo « Récupérer ses photos depuis Google Photos ou iCloud » sur YouTube',
         '[lien à venir]',
       ),
       peertube: todo(
-        'Adresse de la vidéo « Récupérer ses photos depuis Google ou iCloud » sur PeerTube',
+        'Adresse de la vidéo « Récupérer ses photos depuis Google Photos ou iCloud » sur PeerTube',
         '[lien à venir]',
       ),
     },
@@ -131,8 +131,8 @@ export const tutoriels = {
     title: 'Tutoriels vidéo pour prendre en main votre box',
     // Futur tant qu'aucune vidéo n'est en ligne, présent ensuite (voir published()).
     description: videosOnline
-      ? 'Les tutoriels vidéo de HAKO : prise en main de la box, accès à vos données, photos récupérées depuis Google ou iCloud. Sur YouTube et sur PeerTube.'
-      : 'Les tutoriels vidéo de HAKO : prise en main de la box, accès à vos données, photos récupérées depuis Google ou iCloud. À venir sur YouTube et PeerTube.',
+      ? 'Les tutoriels vidéo de HAKO : prise en main de la box, accès à vos données, photos récupérées depuis Google Photos ou iCloud. Sur YouTube et sur PeerTube.'
+      : 'Les tutoriels vidéo de HAKO : prise en main de la box, accès à vos données, photos récupérées depuis Google Photos ou iCloud. À venir sur YouTube et PeerTube.',
   },
 
   intro: {
@@ -174,7 +174,7 @@ export const tutoriels = {
   },
 
   help: {
-    text: 'Une question que ces vidéos ne couvrent pas ?',
+    text: 'Une question en attendant les vidéos ?',
     link: { label: 'Écrivez-nous', href: routes.contact } satisfies Link,
   },
 } as const;

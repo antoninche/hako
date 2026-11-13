@@ -122,7 +122,17 @@ const NAME_ALIASES = {
   NVMe_Board: ['m2', 'hat', 'm2hat', 'nvmehat', 'nvmebase', 'cartem2', 'cartenvme', 'adaptateur'],
   NVMe_SSD: ['ssd', 'nvme', 'disque', 'm2ssd', 'ssdnvme'],
   RPi5_Board: ['raspberry', 'raspberrypi', 'raspberrypi5', 'rpi', 'rpi5', 'pi', 'pi5', 'cartemere'],
-  Logo_Decal: ['logo', 'decal', 'kanji', 'marquage', 'logohako'],
+  Logo_Decal: [
+    'logo',
+    'decal',
+    'kanji',
+    'marquage',
+    'logohako',
+    'mot',
+    'mothako',
+    'hakomot',
+    'wordmark',
+  ],
 };
 
 const BLENDER_COPY_SUFFIX = /\.\d{3}$/;

@@ -103,7 +103,15 @@ export interface ModelConfig {
       readonly cornerRadius: number;
       readonly color: string;
     };
-    readonly logo: { readonly width: number };
+    /** Marquages de la coque (Logo_Decal). */
+    readonly logo: {
+      /** Largeur du kanji 箱, au centre du dessus. */
+      readonly width: number;
+      /** Largeur du mot HAKO, centré sur la grande face avant. */
+      readonly wordmarkWidth: number;
+      /** Hauteur du milieu du mot HAKO au-dessus du bas de la coque. */
+      readonly wordmarkCentre: number;
+    };
   };
 }
 
@@ -284,6 +292,8 @@ export function parseModelConfig(raw: unknown): ModelConfig {
       },
       logo: {
         width: num(logo.width, 'procedural.logo.width', 0.01, 0.2),
+        wordmarkWidth: num(logo.wordmarkWidth, 'procedural.logo.wordmarkWidth', 0.01, 0.2),
+        wordmarkCentre: num(logo.wordmarkCentre, 'procedural.logo.wordmarkCentre', 0.002, 0.2),
       },
     },
   };
