@@ -17,7 +17,34 @@ import { isTodo } from '../src/lib/todo.ts';
 
 const AXE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
+/**
+ * Attend que la page ne défile plus : après un changement d'étape, le formulaire
+ * fait défiler la page jusqu'au titre de l'étape. Pendant ce défilement, une case
+ * peut passer un instant sous l'en-tête collant, et axe la compterait comme une
+ * cible masquée.
+ */
+async function waitForScrollToSettle(page: Page): Promise<void> {
+  await page.waitForFunction(
+    () =>
+      new Promise<boolean>((resolve) => {
+        let last = window.scrollY;
+        let still = 0;
+        const tick = () => {
+          if (window.scrollY === last) still += 1;
+          else {
+            still = 0;
+            last = window.scrollY;
+          }
+          if (still >= 6) resolve(true);
+          else requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }),
+  );
+}
+
 async function expectNoSeriousViolations(page: Page, context: string): Promise<void> {
+  await waitForScrollToSettle(page);
   const results = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
   const serious = results.violations
     .filter((violation) => violation.impact === 'serious' || violation.impact === 'critical')

@@ -233,7 +233,7 @@ export const commandePage = {
   consents: {
     legend: 'Avant d’envoyer',
     termsLink: {
-      label: 'Lire les conditions générales de vente (en cours de rédaction)',
+      label: 'Lire les conditions générales de vente',
       href: routes.terms,
     } satisfies LinkValue,
     newTab: '(s’ouvre dans un nouvel onglet)',
