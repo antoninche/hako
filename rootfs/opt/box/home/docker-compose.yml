@@ -1,0 +1,27 @@
+# Page d'accueil de la box (http://hako.local, port 80) : nginx sert le site statique de ./site,
+# en lecture seule, avec la configuration de ./nginx.conf. /photos et /fichiers renvoient vers
+# Immich (port 2283) et Nextcloud (port 8080), sur le nom ou l'adresse IP utilisé par le navigateur.
+# Le fichier .env de ce dossier est écrit au premier démarrage (lignes de versions.env, puis
+# env.modele) : il donne le nom de l'image et le fuseau horaire.
+name: hakos-accueil
+
+services:
+  nginx:
+    image: ${NGINX_IMAGE:?absent du fichier .env}
+    pull_policy: never
+    environment:
+      TZ: ${TZ:-Europe/Paris}
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./site:/usr/share/nginx/html:ro
+    restart: unless-stopped
+    healthcheck:
+      # wget de busybox, présent dans l'image alpine.
+      test: ['CMD', 'wget', '-q', '--spider', 'http://127.0.0.1/']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+      start_interval: 2s

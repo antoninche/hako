@@ -1,0 +1,58 @@
+# Nextcloud (fichiers) : image officielle nextcloud:<version>-apache et sa base Postgres.
+# Documentation de l'image : https://github.com/nextcloud/docker (README).
+#
+# Aucun compte administrateur n'est créé d'avance : la personne le crée dans l'installateur web
+# (http://hako.local:8080). Les variables POSTGRES_* du fichier .env règlent déjà la base :
+# l'installateur ne la demande pas (autoconfig.php de l'image).
+#
+# Domaines de confiance : l'installateur web retient le seul nom ou la seule adresse IP qui a
+# servi à l'ouvrir (trusted_domains). Ouvert par http://hako.local:8080, Nextcloud refusera
+# ensuite l'adresse IP de la box, et inversement. L'image n'applique NEXTCLOUD_TRUSTED_DOMAINS
+# qu'après une installation automatique (NEXTCLOUD_ADMIN_USER et NEXTCLOUD_ADMIN_PASSWORD),
+# que HakoS ne fait pas : la variable est posée pour le jour où elle servira.
+#
+# Le fichier .env de ce dossier est écrit au premier démarrage (mode 600). Les chemins de données
+# sont relatifs à ce dossier : ./html (Nextcloud, sa configuration et les fichiers dans
+# ./html/data) et ./db (base Postgres).
+name: hakos-nextcloud
+
+services:
+  db:
+    image: ${NEXTCLOUD_POSTGRES_IMAGE:?absent du fichier .env}
+    pull_policy: never
+    env_file:
+      - .env
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      # Par TCP : pendant sa préparation, la base n'écoute que sur son socket local.
+      test: ['CMD-SHELL', 'pg_isready -q -h 127.0.0.1 -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 2m
+      start_interval: 5s
+
+  nextcloud:
+    image: ${NEXTCLOUD_IMAGE:?absent du fichier .env}
+    pull_policy: never
+    env_file:
+      - .env
+    ports:
+      - '8080:80'
+    volumes:
+      - ./html:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      # status.php répond 200 avant comme après l'installation ; localhost est toujours accepté.
+      # Au premier lancement, l'image copie d'abord Nextcloud dans ./html, d'où le délai.
+      test: ['CMD', 'curl', '-fsS', '-o', '/dev/null', 'http://localhost/status.php']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+      start_interval: 5s
