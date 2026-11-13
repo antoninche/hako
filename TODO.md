@@ -43,7 +43,7 @@ Total : 55 informations manquantes dans 16 fichiers.
 - L32 - CGV : délais, déroulement de l’installation à domicile et de la formation, zone d’intervention - [délais, installation, formation]
 - L36 - CGV : droit de rétractation pour la vente à distance (délai, conditions, formulaire type, cas d’une installation déjà faite) - [délai, conditions, formulaire de rétractation]
 - L40 - CGV : garantie légale de conformité (deux ans pour les particuliers) et garantie commerciale d’un an de HAKO, ce qu’elle couvre et comment la faire jouer - [garanties de la box]
-- L44 - CGV : fonctionnement du service après-vente (hors garantie, intervention facturée 100 € pour Hako Home comme pour Hako Pro) - [fonctionnement et tarif]
+- L44 - CGV : fonctionnement du service après-vente (hors garantie, intervention facturée 100 € TTC pour Hako Home comme pour Hako Pro) - [fonctionnement et tarif]
 - L48 - CGV : abonnement d’assistance de Hako Pro (prix mensuel, durée d’engagement, délai de réponse garanti, résiliation) - [prix, engagement, résiliation]
 - L52 - CGV : responsabilités de HAKO et du client - [responsabilités de chacun]
 - L56 - CGV : renvoi vers la politique de confidentialité pour les données liées aux commandes - [renvoi vers la politique de confidentialité]
@@ -106,4 +106,4 @@ Total : 55 informations manquantes dans 16 fichiers.
 
 ## src/data/tarifs.ts
 
-- L100 - acompte demandé à la commande, entre 30 et 50 % - `null`
+- L104 - acompte demandé à la commande, entre 30 et 50 % - `null`

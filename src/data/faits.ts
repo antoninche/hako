@@ -168,6 +168,8 @@ export const missingPrice = {
     missing(`Durée des mises à jour de sécurité comprises dans ${offer.name}`, '[durée]'),
   afterSalesRate: (offer: Offer): TodoValue =>
     missing(`Tarif d’une intervention du service après-vente (${offer.name})`, '[tarif]'),
+  afterSalesTax: (offer: Offer): TodoValue =>
+    missing(`Préciser si le tarif d’intervention de ${offer.name} est TTC ou HT`, '[TTC ou HT]'),
   storageExtra: (option: StorageOption): TodoValue =>
     missing(`Supplément de l’option de stockage ${option.label}`, '[à confirmer]'),
   deposit: missing('Acompte demandé à la commande, entre 30 et 50 %', '[30 à 50 %]'),

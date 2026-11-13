@@ -94,6 +94,8 @@ export const offerCopy: Readonly<Record<OfferId, OfferCopy>> = {
     note: [
       'Hors garantie, le service après-vente est facturé ',
       price(home.afterSalesRateEur ?? null, missingPrice.afterSalesRate(home)),
+      '\u00a0',
+      orMissing(home.afterSalesTaxStatus, missingPrice.afterSalesTax(home)),
       ' par intervention.',
     ],
     cta: 'Commander Hako Home',
@@ -120,6 +122,8 @@ export const offerCopy: Readonly<Record<OfferId, OfferCopy>> = {
     note: [
       'Hors garantie, le service après-vente est facturé ',
       price(pro.afterSalesRateEur ?? null, missingPrice.afterSalesRate(pro)),
+      '\u00a0',
+      orMissing(pro.afterSalesTaxStatus, missingPrice.afterSalesTax(pro)),
       ' par intervention.',
     ],
     cta: 'Commander Hako Pro',
@@ -239,8 +243,16 @@ export const offresPage = {
       },
       {
         label: 'Intervention hors garantie',
-        home: [price(home.afterSalesRateEur ?? null, missingPrice.afterSalesRate(home))],
-        pro: [price(pro.afterSalesRateEur ?? null, missingPrice.afterSalesRate(pro))],
+        home: [
+          price(home.afterSalesRateEur ?? null, missingPrice.afterSalesRate(home)),
+          '\u00a0',
+          orMissing(home.afterSalesTaxStatus, missingPrice.afterSalesTax(home)),
+        ],
+        pro: [
+          price(pro.afterSalesRateEur ?? null, missingPrice.afterSalesRate(pro)),
+          '\u00a0',
+          orMissing(pro.afterSalesTaxStatus, missingPrice.afterSalesTax(pro)),
+        ],
       },
       { label: 'Comptes pour toute l’équipe, droits par dossier', home: 'no', pro: 'yes' },
       { label: 'Agenda et contacts partagés', home: 'no', pro: 'yes' },

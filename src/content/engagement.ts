@@ -58,7 +58,7 @@ const homeUpdates: Maybe<string> = orMissing(
 const homeAfterSalesRate: Maybe<string> =
   home.afterSalesRateEur == null
     ? missingPrice.afterSalesRate(home)
-    : formatEur(home.afterSalesRateEur);
+    : [formatEur(home.afterSalesRateEur), home.afterSalesTaxStatus].filter(Boolean).join('\u00a0');
 
 // Le statut de TVA suit le montant, avant « par mois » (« … € HT par mois »).
 const proSubscription: Paragraph = subscription

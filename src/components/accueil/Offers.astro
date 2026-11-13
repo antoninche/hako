@@ -27,13 +27,17 @@ const extraStorage = pricing.storage
 
 const orderHref = (id: string) => `${routes.order}?offre=${id}`;
 
+/** Montant et statut de TVA, par exemple « 100 € TTC » (statut omis s'il manque). */
+const withTax = (amountEur: number, tax: string | null | undefined): string =>
+  [formatEur(amountEur), tax].filter(Boolean).join('\u00a0');
+
 const homeValues = {
   stockage: included.label,
   majSecurite: orMissing(home.securityUpdates, missingPrice.securityUpdates(home)),
   tarifSav:
     home.afterSalesRateEur == null
       ? missingPrice.afterSalesRate(home)
-      : formatEur(home.afterSalesRateEur),
+      : withTax(home.afterSalesRateEur, home.afterSalesTaxStatus),
 };
 
 const subscription = pro.subscription;
@@ -49,7 +53,7 @@ const proValues = {
   tarifSav:
     pro.afterSalesRateEur == null
       ? missingPrice.afterSalesRate(pro)
-      : formatEur(pro.afterSalesRateEur),
+      : withTax(pro.afterSalesRateEur, pro.afterSalesTaxStatus),
 };
 ---
 

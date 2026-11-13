@@ -61,10 +61,12 @@ const lines: Record<PriceId, Line> = {
   'after-sales': {
     amount: home.afterSalesRateEur ?? null,
     missing: missingPrice.afterSalesRate(home),
+    tax: orMissing(home.afterSalesTaxStatus, missingPrice.afterSalesTax(home)),
   },
   'after-sales-pro': {
     amount: pro.afterSalesRateEur ?? null,
     missing: missingPrice.afterSalesRate(pro),
+    tax: orMissing(pro.afterSalesTaxStatus, missingPrice.afterSalesTax(pro)),
   },
 };
 

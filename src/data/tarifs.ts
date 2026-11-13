@@ -43,6 +43,8 @@ export interface Offer {
   readonly securityUpdates?: string | null;
   /** Tarif d'une intervention de service après-vente, en euros. */
   readonly afterSalesRateEur?: number | null;
+  /** Statut de TVA de ce tarif : « TTC », « HT »… ; null = à confirmer. */
+  readonly afterSalesTaxStatus?: string | null;
 }
 
 export interface StorageOption {
@@ -74,6 +76,7 @@ export const pricing: Pricing = {
       taxStatus: 'TTC',
       securityUpdates: '5 ans, renouvelables',
       afterSalesRateEur: 100,
+      afterSalesTaxStatus: 'TTC',
     },
     pro: {
       id: 'pro',
@@ -82,6 +85,7 @@ export const pricing: Pricing = {
       priceEur: 1000,
       taxStatus: 'TTC',
       afterSalesRateEur: 100,
+      afterSalesTaxStatus: 'TTC',
       subscription: {
         monthlyEur: 25,
         taxStatus: 'TTC',
