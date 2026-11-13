@@ -7,7 +7,7 @@ import { todo } from '../../../../../src/lib/todo';
  */
 export const offre = {
   nom: 'Hako Home',
-  prix: 600,
+  prix: 750,
   tva: todo('Prix TTC ou HT', '[TTC ?]'),
   duree: todo(
     "Durée des mises à jour de sécurité",
@@ -19,7 +19,7 @@ export const offre = {
   option2To: null, // TODO: prix de l'option 2 To
   option4To: null, // TODO : prix de l'option 4 To
   remise: null,
-  acompte: 30, // TODO: ce commentaire ne suit pas une valeur null
+  intervention: 100, // TODO: ce commentaire ne suit pas une valeur null
 };
 
 const variable = 'Ce qui manque';

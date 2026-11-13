@@ -113,13 +113,13 @@ const recipeLink: Maybe<string> = todo(
 
 export const laBox = {
   meta: {
-    title: 'La HAKO : matériel et logiciels',
+    title: 'Votre HAKO : matériel et logiciels',
     description:
       'La box HAKO : un Raspberry Pi 5, un disque SSD, Immich pour les photos, Nextcloud pour les fichiers. Leurs licences, leurs sources et leurs limites.',
   },
 
   intro: {
-    title: 'La HAKO',
+    title: 'Votre HAKO',
     lead: 'Un petit ordinateur, assemblé à la main en Provence, qui garde vos photos et vos fichiers chez vous. Voici ce qu’il contient, les logiciels qui le font fonctionner, et ses limites.',
     highlightsLabel: 'En bref',
     highlights: [
@@ -186,10 +186,10 @@ export const laBox = {
         name: 'Le branchement',
         text: [
           [
-            'La box se branche à votre box internet par un câble réseau (Ethernet), indispensable : pour l’instant, elle ne se relie pas au Wi-Fi.',
+            'La box se branche à votre box internet par un câble réseau (Ethernet). Le Wi-Fi reste possible si le câble n’est pas pratique chez vous.',
           ],
           [
-            'Son alimentation est fournie avec la box. Le câble réseau ne l’est pas : si nous vous l’envoyons, prévoyez-en un, assez long pour aller jusqu’à votre box internet.',
+            'Son alimentation est fournie avec la box. Le câble réseau ne l’est pas : si la box vous est envoyée, prévoyez-en un, assez long pour aller jusqu’à votre box internet.',
           ],
         ],
       },

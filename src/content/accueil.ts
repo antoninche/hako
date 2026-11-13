@@ -2,7 +2,7 @@
  * Textes de la page d’accueil, dans l’ordre de la page.
  *
  * Modifier un texte : changez simplement la phrase entre apostrophes droites.
- * Les mots entre accolades, comme {acompte} ou {stockage}, sont remplacés
+ * Les mots entre accolades, comme {stockage} ou {mensuel}, sont remplacés
  * automatiquement par une valeur tirée de src/data/tarifs.ts : gardez-les
  * tels quels, sans espace ni accent. Le site refuse de se construire si l’un
  * d’eux est mal écrit, ou si une accolade reste seule ; le message d’erreur
@@ -88,8 +88,8 @@ export interface HeroCopy {
   readonly primary: NavLink;
   readonly secondary: NavLink;
   /**
-   * Sous les deux boutons : pour la personne qui a déjà reçu sa box, un lien
-   * vers le guide d’installation (« Vous avez reçu votre HAKO ? »).
+   * Sous les deux boutons : un lien vers le guide d’installation, qui servira
+   * bientôt, quand nous enverrons la box hors de notre zone.
    */
   readonly received: { readonly text: string; readonly link: NavLink };
   /** Nom de la liste de repères, lu par les lecteurs d’écran. */
@@ -111,8 +111,8 @@ export const hero: HeroCopy = {
   primary: orderLink,
   secondary: { label: 'Découvrir la box', href: routes.box },
   received: {
-    text: 'Vous avez reçu votre HAKO ?',
-    link: { label: 'Installez-la pas à pas', href: routes.install },
+    text: 'Bientôt, hors de notre zone, vous installerez votre HAKO vous-même.',
+    link: { label: 'Voir le guide pas à pas', href: routes.install },
   },
   highlightsLabel: 'En bref',
   highlights: [
@@ -208,7 +208,6 @@ export const boxScene: BoxSceneCopy = {
 export interface Step {
   readonly illustration: HomeIllustration;
   readonly title: string;
-  /** {acompte} : pourcentage de l’acompte, tiré de src/data/tarifs.ts. */
   readonly text: string;
 }
 
@@ -224,7 +223,7 @@ export const steps: StepsCopy = {
     {
       illustration: 'etape-commande',
       title: 'Vous commandez',
-      text: 'Vous choisissez Hako Home ou Hako Pro, et la place de stockage qu’il vous faut. Un acompte de {acompte} est demandé à la commande.',
+      text: 'Vous choisissez Hako Home ou Hako Pro, et la place de stockage qu’il vous faut. La box se règle en une seule fois, avant l’installation.',
     },
     {
       illustration: 'etape-assemblage',
@@ -234,7 +233,7 @@ export const steps: StepsCopy = {
     {
       illustration: 'etape-installation',
       title: 'Nous l’installons chez vous',
-      text: 'Dans notre zone, nous la branchons à votre box internet, puis nous vous montrons comment tout fonctionne. Plus loin, nous vous l’envoyons, et vous l’installez avec notre guide pas à pas.',
+      text: 'Dans notre zone, nous la branchons à votre box internet, puis nous vous montrons comment tout fonctionne. Hors de notre zone, bientôt, nous vous l’enverrons, et vous l’installerez avec notre guide pas à pas.',
     },
     {
       illustration: 'etape-chez-vous',

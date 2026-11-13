@@ -39,7 +39,7 @@ export const notFound: SiteRoute = { path: '/cette-page-n-existe-pas/', slug: '4
 /** Menu principal de l'en-tête, dans l'ordre d'affichage. */
 export const mainNav = [
   { label: 'Offres', path: '/offres/' },
-  { label: 'La HAKO', path: '/la-box/' },
+  { label: 'Votre HAKO', path: '/la-box/' },
   { label: 'Notre engagement', path: '/engagement/' },
   { label: 'FAQ', path: '/faq/' },
   { label: 'Installer votre HAKO', path: '/installer/' },

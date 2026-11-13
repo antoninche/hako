@@ -15,6 +15,11 @@
  * Les montants affichés en direct sont calculés ici, au moment de la
  * construction du site, pour chaque combinaison offre + stockage (gabarits
  * <template>) : le script choisit le bon gabarit et ne calcule aucun prix.
+ *
+ * Hako Pro ouvrira plus tard (src/data/faits.ts) : son nom porte l'étiquette
+ * « Bientôt » sur sa carte, dans le total et dans le récapitulatif, et sa
+ * carte donne la phrase, visible même sans JavaScript. La demande ne change
+ * pas : l'équipe y répond, comme pour Hako Home.
  */
 import Choice from './Choice.astro';
 import CheckField from './CheckField.astro';
@@ -26,7 +31,7 @@ import TextField from './TextField.astro';
 import Fact from '../Fact.astro';
 import { commandePage } from '../../content/commande.ts';
 import { offerCopy } from '../../content/offres.ts';
-import { missingPrice } from '../../data/faits.ts';
+import { missingPrice, proOpening } from '../../data/faits.ts';
 import { pricing, type OfferId } from '../../data/tarifs.ts';
 import { orMissing } from '../../lib/commande/inline.ts';
 import { computeQuote, listQuotes, quoteKey } from '../../lib/commande/pricing.ts';
@@ -109,9 +114,13 @@ const stepLabel = (step: StepNumber) => copy.stepOf.replace('{n}', String(step))
               label={offer.name}
               checked={offer.id === defaultOffer}
               size="l"
+              badge={offer.id === proOpening.offer ? proOpening.label : undefined}
             >
               <span class="offer-choice">
                 <span class="offer-choice__audience">{offer.audience}</span>
+                {offer.id === proOpening.offer && (
+                  <span class="offer-choice__soon">{proOpening.sentence}</span>
+                )}
                 <span class="offer-choice__price">
                   <Price
                     amount={offer.priceEur}
@@ -771,6 +780,7 @@ const stepLabel = (step: StepNumber) => copy.stepOf.replace('{n}', String(step))
   }
 
   .offer-choice__audience,
+  .offer-choice__soon,
   .offer-choice__payment {
     color: var(--text-muted);
   }

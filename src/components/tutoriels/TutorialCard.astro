@@ -4,10 +4,11 @@
  * par vidéo en ligne (YouTube, PeerTube). Une vidéo dont l'adresse est encore
  * inconnue n'a pas de ligne (voir videos.ts). Sans aucune vidéo en ligne, ou
  * pour un tutoriel pas encore prêt (soon: true), la carte porte l'étiquette
- * « Bientôt » et n'a pas de liens.
+ * « Bientôt » (SoonBadge.astro, partagée avec les offres) et n'a pas de liens.
  * Textes : src/content/tutoriels.ts, clé items.
  */
 import Illustration from '../Illustration.astro';
+import SoonBadge from '../SoonBadge.astro';
 import Prose from '../texte/Prose.astro';
 import VideoLink from './VideoLink.astro';
 import { isComingSoon, onlineVideos } from './videos';
@@ -36,13 +37,7 @@ const soon = isComingSoon(tutorial, platforms);
   <div class="tutorial__body">
     <h2 class="tutorial__title" id={titleId}>
       <span>{tutorial.title}</span>{' '}
-      {soon && (
-        <span class="tutorial__badge">
-          <span class="visually-hidden">(</span>
-          {labels.soon}
-          <span class="visually-hidden">)</span>
-        </span>
-      )}
+      {soon && <SoonBadge label={labels.soon} class="tutorial__badge" />}
     </h2>
     <Prose paragraphs={tutorial.text} />
     {videos.length > 0 && (
@@ -103,19 +98,6 @@ const soon = isComingSoon(tutorial, platforms);
     font-weight: 450;
     line-height: var(--leading-snug);
     text-wrap: balance;
-  }
-
-  .tutorial__badge {
-    padding: 0.1rem 0.55rem;
-    border: var(--rule-width) solid var(--line-strong);
-    border-radius: 999px;
-    font-family: var(--font-ui);
-    font-size: var(--step--1);
-    font-weight: 700;
-    letter-spacing: var(--tracking-ui);
-    line-height: 1.4;
-    color: var(--text-muted);
-    white-space: nowrap;
   }
 
   .tutorial__videos {

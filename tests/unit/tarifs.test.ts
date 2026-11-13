@@ -42,11 +42,6 @@ describe('fichier des tarifs', () => {
     }
   });
 
-  it('a un acompte inconnu (null) ou compris entre 1 et 100 %', () => {
-    const percent = pricing.depositPercent;
-    assert.ok(percent === null || (percent > 0 && percent <= 100));
-  });
-
   it('accompagne chaque valeur manquante (null) d’un commentaire « // TODO: »', () => {
     const source: string = readFileSync(
       new URL('../../src/data/tarifs.ts', import.meta.url),

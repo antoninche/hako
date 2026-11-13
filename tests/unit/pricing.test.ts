@@ -9,7 +9,6 @@ import { describe, it } from 'node:test';
 import { pricing, type Pricing } from '../../src/data/tarifs.ts';
 import { formatEur, formatPercent } from '../../src/lib/format.ts';
 import {
-  computeDeposit,
   computeQuote,
   findStorage,
   listQuotes,
@@ -17,8 +16,8 @@ import {
   quoteKey,
 } from '../../src/lib/commande/pricing.ts';
 
-/** Tarifs d'essai : mêmes offres que le site, suppléments et acompte au choix. */
-function fixture(extra2: number | null, extra4: number | null, deposit: number | null): Pricing {
+/** Tarifs d'essai : mêmes offres que le site, suppléments au choix. */
+function fixture(extra2: number | null, extra4: number | null): Pricing {
   return {
     ...pricing,
     storage: [
@@ -26,7 +25,6 @@ function fixture(extra2: number | null, extra4: number | null, deposit: number |
       { id: '2to', label: '2 To', extraEur: extra2 },
       { id: '4to', label: '4 To', extraEur: extra4 },
     ],
-    depositPercent: deposit,
   };
 }
 
@@ -37,7 +35,7 @@ describe('mise en forme des montants', () => {
   it('écrit les euros à la française, avec des espaces insécables', () => {
     assert.equal(formatEur(1000), `1${nbsp}000${nbsp}€`);
     assert.equal(formatEur(1090), `1${nbsp}090${nbsp}€`);
-    assert.equal(formatEur(600), `600${nbsp}€`);
+    assert.equal(formatEur(750), `750${nbsp}€`);
     assert.equal(formatEur(381.5), `381,50${nbsp}€`);
     assert.equal(formatEur(12500), `12${nbsp}500${nbsp}€`);
   });
@@ -62,7 +60,7 @@ describe('mise en forme des montants', () => {
 
 describe('total d’une commande', () => {
   it('additionne la box et un supplément connu', () => {
-    const quote = computeQuote(fixture(90, 250, null), 'pro', '2to');
+    const quote = computeQuote(fixture(90, 250), 'pro', '2to');
     assert.equal(quote.offerPriceEur, 1000);
     assert.equal(quote.storageExtraEur, 90);
     assert.equal(quote.oneTimeKnownEur, 1090);
@@ -70,13 +68,13 @@ describe('total d’une commande', () => {
   });
 
   it('compte le stockage compris pour 0 €', () => {
-    const quote = computeQuote(fixture(null, null, null), 'home', '1to');
+    const quote = computeQuote(fixture(null, null), 'home', '1to');
     assert.equal(quote.storageExtraEur, 0);
-    assert.equal(quote.oneTimeTotalEur, 600);
+    assert.equal(quote.oneTimeTotalEur, 750);
   });
 
   it('ne compte jamais un supplément inconnu comme 0 : le total devient inconnu', () => {
-    const quote = computeQuote(fixture(null, null, 30), 'pro', '4to');
+    const quote = computeQuote(fixture(null, null), 'pro', '4to');
     assert.equal(quote.storageExtraEur, null);
     assert.equal(quote.oneTimeTotalEur, null);
     // La partie déjà chiffrée reste disponible, pour afficher « 1 000 € + [prix] ».
@@ -98,35 +96,12 @@ describe('total d’une commande', () => {
       extra === null ? null : pricing.offers.pro.priceEur + extra,
     );
   });
-});
 
-describe('acompte', () => {
-  it('reste inconnu tant que le pourcentage n’est pas décidé', () => {
-    const quote = computeQuote(fixture(90, 250, null), 'home', '2to');
-    assert.deepEqual(quote.deposit, { percent: null, amountEur: null });
-  });
-
-  it('se calcule sur le paiement unique quand le pourcentage est fixé', () => {
-    assert.deepEqual(computeQuote(fixture(90, 250, 30), 'home', '1to').deposit, {
-      percent: 30,
-      amountEur: 180,
-    });
-    assert.deepEqual(computeQuote(fixture(90, 250, 30), 'pro', '2to').deposit, {
-      percent: 30,
-      amountEur: 327,
-    });
-  });
-
-  it('s’arrondit au centime', () => {
-    assert.deepEqual(computeDeposit(1090, 35), { percent: 35, amountEur: 381.5 });
-    assert.deepEqual(computeDeposit(999, 33), { percent: 33, amountEur: 329.67 });
-  });
-
-  it('n’a pas de montant si le total dépend d’un prix inconnu', () => {
-    assert.deepEqual(computeQuote(fixture(null, null, 40), 'pro', '2to').deposit, {
-      percent: 40,
-      amountEur: null,
-    });
+  it('Hako Home revient à 750 €, 950 € ou 1 150 € avec 1, 2 ou 4 To', () => {
+    const totals = (['1to', '2to', '4to'] as const).map(
+      (storage) => computeQuote(pricing, 'home', storage).oneTimeTotalEur,
+    );
+    assert.deepEqual(totals, [750, 950, 1150]);
   });
 });
 

@@ -16,7 +16,7 @@ const onlyNoBreakSpaces = (text: string) => !/\s/u.test(text.replaceAll(nbsp, ''
 
 describe('mise en forme des nombres', () => {
   it('écrit les prix comme sur toutes les pages', () => {
-    assert.equal(formatEur(600), `600${nbsp}€`);
+    assert.equal(formatEur(750), `750${nbsp}€`);
     assert.equal(formatEur(1000), `1${nbsp}000${nbsp}€`);
     assert.equal(formatEur(25), `25${nbsp}€`);
   });

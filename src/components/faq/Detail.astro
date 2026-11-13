@@ -7,17 +7,14 @@
  *   <Detail of="security-updates" />   durée des mises à jour de sécurité de Hako Home
  *   <Detail of="pro-commitment" />     durée d'engagement de l'abonnement de Hako Pro
  *   <Detail of="pro-response-time" />  délai de réponse garanti de Hako Pro
- *   <Detail of="deposit" />            acompte demandé à la commande (« 30 % »)
  *   <Detail of="included-storage" />   stockage inclus (« 1 To »)
  *   <Detail of="storage-options" />    stockages proposés en option (« 2 To ou 4 To »)
  *   <Detail of="mover-offers" />       offres qui comprennent le déménageur (« Hako Home et Hako Pro »)
  *   <Detail of="remote-access" />      accès depuis l’extérieur : pas prévu, choix de sécurité
  *   <Detail of="pro-maintenance" />    maintenance à distance de Hako Pro : tunnel WireGuard, sur demande
- *   <Detail of="backup-copy" />        copie de secours : ce qui reste à confirmer
  *   <Detail of="payment" />            paiement : par virement, pas encore en ligne (phrase)
  *   <Detail of="warranty" />           garantie d'un an, en plus de la garantie légale (phrase)
  *   <Detail of="warranty-terms" />     ce que couvre la garantie, et comment la faire jouer
- *   <Detail of="shipping" />           frais d'envoi de la box hors de la zone d'intervention
  *   <Detail of="service-area" />       phrase sur la zone d'intervention
  *   <Detail of="outside-area" />       ce que nous proposons hors de cette zone
  *   <Detail of="email" />              adresse e-mail de contact (lien)
@@ -36,14 +33,11 @@ import Text from '../texte/Text.astro';
 import Todo from '../Todo.astro';
 import { company } from '../../data/entreprise';
 import {
-  backupCopy,
-  depositText,
   missingPrice,
   moverOffers,
   payment,
   proMaintenance,
   remoteAccess,
-  shippingCost,
   warranty,
 } from '../../data/faits';
 import { boxAddress, requirements } from '../../data/installation';
@@ -56,17 +50,14 @@ export type DetailId =
   | 'security-updates'
   | 'pro-commitment'
   | 'pro-response-time'
-  | 'deposit'
   | 'included-storage'
   | 'storage-options'
   | 'mover-offers'
   | 'remote-access'
   | 'pro-maintenance'
-  | 'backup-copy'
   | 'payment'
   | 'warranty'
   | 'warranty-terms'
-  | 'shipping'
   | 'service-area'
   | 'outside-area'
   | 'email'
@@ -93,17 +84,14 @@ const values: Record<DetailId, Maybe<string>> = {
   'security-updates': orMissing(home.securityUpdates, missingPrice.securityUpdates(home)),
   'pro-commitment': orMissing(pro.subscription?.commitment, missingPrice.commitment(pro)),
   'pro-response-time': orMissing(pro.subscription?.responseTime, missingPrice.responseTime(pro)),
-  deposit: depositText,
   'included-storage': included.label,
   'storage-options': formatList(options, 'or'),
   'mover-offers': moverOffers.names,
   'remote-access': remoteAccess.choice,
   'pro-maintenance': proMaintenance,
-  'backup-copy': backupCopy.status,
   payment,
   warranty: warranty.sentence,
   'warranty-terms': warranty.terms,
-  shipping: shippingCost,
   'service-area': company.serviceArea.sentence,
   'outside-area': company.serviceArea.outside,
   email: company.email,

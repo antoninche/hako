@@ -3,7 +3,7 @@
 Ce fichier est produit par `npm run todos` : ne le modifiez pas à la main.
 Chaque ligne donne le numéro de ligne dans le fichier source, ce qui manque, puis le texte provisoire affiché sur le site.
 
-Total : 85 informations manquantes dans 18 fichiers.
+Total : 82 informations manquantes dans 17 fichiers.
 
 ## src/components/SocialLinks.astro
 
@@ -38,7 +38,7 @@ Total : 85 informations manquantes dans 18 fichiers.
 - L10 - Conditions générales de vente complètes : à faire rédiger et valider par un professionnel du droit, y compris le droit de rétractation pour la vente à distance - [texte à venir]
 - L16 - CGV : objet du contrat, et à qui s’appliquent ces conditions (particuliers, professionnels) - [objet du contrat, clients concernés]
 - L20 - CGV : contenu des offres Hako Home et Hako Pro, prix HT ou TTC, options de stockage - [contenu des offres, prix, options]
-- L24 - CGV : étapes de la commande, confirmation, acompte demandé (entre 30 et 50 % du prix, à fixer) - [étapes de la commande, acompte]
+- L24 - CGV : étapes de la commande, confirmation, paiement en une seule fois, avant l’installation - [étapes de la commande, paiement]
 - L28 - CGV : moyens de paiement acceptés et échéance du solde (le paiement en ligne n’existe pas encore) - [moyens de paiement, échéance du solde]
 - L32 - CGV : délais, déroulement de l’installation à domicile et de la formation, zone d’intervention - [délais, installation, formation]
 - L36 - CGV : droit de rétractation pour la vente à distance (délai, conditions, formulaire type, cas d’une installation déjà faite) - [délai, conditions, formulaire de rétractation]
@@ -68,7 +68,7 @@ Total : 85 informations manquantes dans 18 fichiers.
 
 ## src/content/offres.ts
 
-- L36 - Délai sous lequel nous rappelons après une demande de commande - [délai]
+- L34 - Délai sous lequel nous rappelons après une demande de commande - [délai]
 
 ## src/content/tutoriels.ts
 
@@ -104,10 +104,8 @@ Total : 85 informations manquantes dans 18 fichiers.
 
 ## src/data/faits.ts
 
-- L66 - Page d’accueil de la box (http://hako.local) : logiciel utilisé et licence, à préciser - [licence à préciser]
-- L73 - Copie de secours des données : prévue, absente de la première version ; solution, date de disponibilité et fonctionnement à confirmer - [à confirmer]
-- L119 - Garantie d’un an de la box : ce qu’elle couvre (pièces, main-d’œuvre, envoi ou déplacement) et comment la faire jouer - [à confirmer]
-- L143 - Frais d’envoi de la box hors de la zone d’intervention : compris dans le prix ou en supplément, et combien - [à confirmer]
+- L85 - Page d’accueil de la box (http://hako.local) : logiciel utilisé et licence, à préciser - [licence à préciser]
+- L135 - Garantie d’un an de la box : ce qu’elle couvre (pièces, main-d’œuvre, envoi ou déplacement) et comment la faire jouer - [à confirmer]
 
 ## src/data/installation.ts
 
@@ -139,7 +137,3 @@ Total : 85 informations manquantes dans 18 fichiers.
 ## src/data/model.config.json
 
 - L190 - Proportions relevées sur les images du prototype (modèle 3D de l’équipe) ; à confirmer avec le modèle Blender et le matériel : cotes de la coque et de ses ouvertures, du socle et des pieds ; ordre des cartes (ici la carte M.2 sous le Raspberry Pi, comme sur l’image de l’intérieur) et modèle de la carte M.2 (ici à l’empreinte du Raspberry Pi) ; format du SSD (ici M.2 2230) ; taille et place du ventilateur (ici 40 mm, au-dessus du Raspberry Pi, absent des images) ; type de marquage (relief, gravure ou impression), taille et place du mot HAKO sur la grande face sans ouverture (ici en relief de 0,3 mm, 28 mm de large, milieu à 16 mm du bas de la coque, absent des images). Seule la carte Raspberry Pi 5 (85 × 56 mm) a déjà ses cotes officielles. - (valeurs provisoires)
-
-## src/data/tarifs.ts
-
-- L104 - acompte demandé à la commande, entre 30 et 50 % - `null`

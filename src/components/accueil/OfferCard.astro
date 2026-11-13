@@ -2,11 +2,15 @@
 /**
  * Carte d’une offre sur l’accueil. Les prix arrivent déjà mis en forme
  * (voir Offers.astro) ; une information manquante s’affiche en repère jaune.
+ * Une offre qui ouvrira plus tard (Hako Pro) porte l’étiquette « Bientôt » à
+ * côté de son nom, et sa phrase sous la ligne « Pour… ».
  */
 import Fact from '../Fact.astro';
 import Illustration from '../Illustration.astro';
+import SoonBadge from '../SoonBadge.astro';
 import RichText from './RichText.astro';
 import type { HomeIllustration } from '../../content/accueil';
+import { proOpening } from '../../data/faits';
 import type { Maybe } from '../../lib/todo';
 
 interface Props {
@@ -14,7 +18,7 @@ interface Props {
   name: string;
   audience: string;
   illustration: HomeIllustration;
-  /** Prix d’achat, déjà mis en forme (« 600 € »). */
+  /** Prix d’achat, déjà mis en forme (« 750 € »). */
   price: string;
   /** TTC, HT… ou repère à compléter. */
   tax: Maybe<string>;
@@ -43,6 +47,8 @@ const {
   cta,
 } = Astro.props;
 const titleId = `offre-${id}`;
+// L'offre qui ouvrira plus tard (src/data/faits.ts) : étiquette et phrase.
+const soon = id === proOpening.offer;
 ---
 
 <article class="offer" aria-labelledby={titleId}>
@@ -52,9 +58,10 @@ const titleId = `offre-${id}`;
   <div class="offer__body">
     <div class="offer__head">
       <h3 id={titleId} class="offer__name">
-        {name}
+        <span>{name}</span> {soon && <SoonBadge label={proOpening.label} />}
       </h3>
       <p class="offer__audience">{audience}</p>
+      {soon && <p class="offer__soon">{proOpening.sentence}</p>}
     </div>
 
     <div class="offer__pricing">
@@ -140,7 +147,12 @@ const titleId = `offre-${id}`;
     gap: var(--space-3xs);
   }
 
+  /* Le nom, puis l'étiquette « Bientôt » s'il y en a une, comme sur les tutoriels. */
   .offer__name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2xs) var(--space-s);
     margin: 0;
     font-family: var(--font-ui);
     font-size: var(--step-2);
@@ -149,7 +161,8 @@ const titleId = `offre-${id}`;
     letter-spacing: var(--tracking-ui);
   }
 
-  .offer__audience {
+  .offer__audience,
+  .offer__soon {
     margin: 0;
     color: var(--text-muted);
   }

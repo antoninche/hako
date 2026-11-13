@@ -10,11 +10,11 @@
  *   (voir no-break.ts). Un repère « à compléter », toujours court, ne se coupe
  *   pas non plus.
  *
- * Une valeur mal écrite ({ acompte }, {majSécurite}, {inconnue}) ou une
+ * Une valeur mal écrite ({ stockage }, {majSécurite}, {inconnue}) ou une
  * accolade seule arrête la construction du site, avec un message qui cite la
  * phrase à corriger : rien de tel ne peut s’afficher sur la page.
  *
- *   <RichText text="Un acompte de {acompte} est demandé." values={{ acompte }} />
+ *   <RichText text="La box, avec {stockage} de stockage." values={{ stockage }} />
  */
 import Fact from '../Fact.astro';
 import { keepHyphenatedWords } from '../typo';
@@ -48,7 +48,7 @@ const pieces: Piece[] = text
       const key = part.slice(1, -1);
       if (!/^[A-Za-z]+$/.test(key)) {
         throw problem(
-          `la valeur ${part} est mal écrite (lettres sans accent ni espace, comme {acompte})`,
+          `la valeur ${part} est mal écrite (lettres sans accent ni espace, comme {stockage})`,
         );
       }
       const value = Object.hasOwn(values, key) ? values[key] : undefined;

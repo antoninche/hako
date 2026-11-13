@@ -1,5 +1,5 @@
 /**
- * Mise en forme des nombres du site, à la française : « 600 € », « 1 000 € »,
+ * Mise en forme des nombres du site, à la française : « 750 € », « 1 000 € »,
  * « 381,50 € », « 30 % », « 12,2 ».
  *
  * C'est le seul endroit du site qui met un nombre en forme : prix,
@@ -57,7 +57,7 @@ export function formatEur(amount: number): string {
   return withNoBreakSpaces(format.format(amount));
 }
 
-/** Pourcentage écrit comme dans le fichier des tarifs : 30 → « 30 % », 37,5 → « 37,5 % ». */
+/** Pourcentage, donné en nombre de pour cent : 30 → « 30 % », 37,5 → « 37,5 % ». */
 export function formatPercent(value: number): string {
   return withNoBreakSpaces(percent.format(value / 100));
 }

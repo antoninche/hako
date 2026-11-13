@@ -79,7 +79,5 @@ export interface OrderRequest {
   readonly displayedQuote: {
     readonly oneTimeTotalEur: number | null;
     readonly monthlyEur: number | null;
-    readonly depositPercent: number | null;
-    readonly depositEur: number | null;
   };
 }

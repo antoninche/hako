@@ -11,7 +11,7 @@
  * « {max} », le formulaire écrit la longueur maximale du champ.
  */
 import { company } from '../data/entreprise.ts';
-import { payment, shippingCost } from '../data/faits.ts';
+import { payment } from '../data/faits.ts';
 import { routes } from '../data/navigation.ts';
 import { pricing } from '../data/tarifs.ts';
 import { emailLink, phoneLink } from '../lib/commande/inline.ts';
@@ -99,8 +99,6 @@ export const commandePage = {
     oneTime: 'À payer une fois',
     monthly: 'Abonnement',
     commitment: 'Durée d’engagement',
-    deposit: 'Acompte à la commande',
-    depositOf: 'du total',
     note: 'Aucun paiement maintenant.',
   },
 
@@ -188,8 +186,6 @@ export const commandePage = {
     outside: [
       'Ce code postal semble hors de notre zone d’intervention. Vous pouvez tout de même commander : ',
       outside,
-      '. Frais d’envoi : ',
-      shippingCost,
       '.',
     ] satisfies RichText,
   },

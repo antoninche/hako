@@ -15,13 +15,11 @@
 import { company } from '../data/entreprise.ts';
 import {
   backupCopy,
-  depositText,
   missingPrice,
   moverOffers,
   payment,
   proMaintenance,
   remoteAccess,
-  shippingCost,
   warranty,
 } from '../data/faits.ts';
 import { routes } from '../data/navigation.ts';
@@ -40,7 +38,7 @@ export const callbackDelay = todo(
 
 const home = pricing.offers.home;
 
-/** Montant et statut de TVA, par exemple « 600 € TTC » (statut omis s'il manque). */
+/** Montant et statut de TVA, par exemple « 750 € TTC » (statut omis s'il manque). */
 const withTax = (amountEur: number, tax: string | null | undefined): string =>
   [formatEur(amountEur), tax].filter(Boolean).join('\u00a0');
 const pro = pricing.offers.pro;
@@ -281,14 +279,12 @@ export const offresPage = {
           company.serviceArea.sentence,
           ' Hors de cette zone : ',
           company.serviceArea.outside,
-          '. Frais d’envoi : ',
-          shippingCost,
           '.',
         ],
       },
       {
         title: 'Le paiement',
-        text: ['Un acompte de ', depositText, ' est demandé à la commande. ', payment],
+        text: [payment, ' L’abonnement de Hako Pro, lui, se paie chaque mois.'],
       },
       {
         title: 'La garantie',
@@ -311,14 +307,12 @@ export const offresPage = {
         text: [
           'Nous vous appelons sous ',
           callbackDelay,
-          ' pour confirmer votre commande et fixer le rendez-vous d’installation, ou la date d’envoi.',
+          ' pour confirmer votre commande et fixer le rendez-vous d’installation.',
         ],
       },
       {
-        title: 'Nous installons, ou nous envoyons',
-        text: [
-          'Dans notre zone, nous installons la box chez vous, puis nous vous montrons comment vous en servir. Ailleurs, nous vous l’envoyons, et vous l’installez avec notre guide pas à pas.',
-        ],
+        title: 'Nous installons',
+        text: ['Nous installons la box chez vous, puis nous vous montrons comment vous en servir.'],
       },
     ] satisfies readonly { title: string; text: RichText }[],
     cta: { label: 'Commander', href: routes.order } satisfies LinkValue,

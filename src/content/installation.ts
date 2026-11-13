@@ -416,11 +416,7 @@ const steps = [
       {
         id: 'autre-piece',
         title: 'Votre box internet est dans une autre pièce.',
-        why: [
-          [
-            'La HAKO doit être reliée à votre box internet par un câble : pour l’instant, vous ne pouvez pas la relier au Wi-Fi.',
-          ],
-        ],
+        why: [['L’installation se fait avec un câble entre la HAKO et votre box internet.']],
         fix: [
           [
             'Prenez un câble réseau plus long : il fonctionne aussi bien, même sur plusieurs dizaines de mètres.',
@@ -472,7 +468,6 @@ const steps = [
       [
         'C’est par ce câble que la HAKO rejoint le réseau de la maison : tous les appareils reliés à votre box internet, par le Wi-Fi ou par un câble. Vos appareils pourront ensuite la trouver.',
       ],
-      ['Pour l’instant, vous ne pouvez pas relier la HAKO au Wi-Fi : le câble est indispensable.'],
     ],
     success: [
       ['Le câble tient des deux côtés : il ne ressort pas quand vous tirez doucement dessus.'],
@@ -482,9 +477,7 @@ const steps = [
         id: 'pas-de-cable',
         title: 'Vous n’avez pas de câble réseau.',
         why: [
-          [
-            'Le câble réseau n’est pas fourni avec la HAKO. Et comme la HAKO ne peut pas encore se relier au Wi-Fi, vos appareils ne la trouveront pas sans lui.',
-          ],
+          ['Le câble réseau n’est pas fourni avec la HAKO, et l’installation se fait avec lui.'],
         ],
         fix: [
           ['Regardez dans le carton de votre box internet : il y en a souvent un.'],
@@ -1802,6 +1795,21 @@ const steps = [
 
 /* ---------- Page ---------- */
 
+/**
+ * « de Salon-de-Provence à Toulon » : les deux bouts de notre zone, lus dans
+ * sa phrase (company.serviceArea.sentence, src/data/entreprise.ts), le seul
+ * endroit où s’écrivent les noms des villes.
+ */
+function zoneEnds(sentence: string): string {
+  const found = /\bde\s+\S.*?\s+à\s+[^,.]+/u.exec(sentence);
+  if (!found) {
+    throw new Error(
+      `Guide d’installation : la phrase de la zone (company.serviceArea.sentence) doit dire « de … à … ». Phrase lue : ${sentence}`,
+    );
+  }
+  return found[0];
+}
+
 export const installation = {
   meta: {
     title: 'Installer votre HAKO pas à pas',
@@ -1817,10 +1825,16 @@ export const installation = {
       toConfirm.totalDuration,
       ' en tout, dont une attente pendant que votre HAKO se prépare toute seule.',
     ] satisfies Sentence,
-    /** Ce guide sert quand nous envoyons la HAKO (company.serviceArea.outside). */
+    /**
+     * Ce guide servira quand nous enverrons la HAKO hors de notre zone
+     * (company.serviceArea.outside) : ce n’est pas encore possible. Dans la
+     * zone, nous l’installons chez vous.
+     */
     shipped: [
-      'Ce guide sert quand nous vous envoyons votre HAKO. Si vous habitez dans ',
+      'Ce guide servira quand nous enverrons la HAKO hors de ',
       { label: 'notre zone d’intervention', href: `${routes.faq}#zone-intervention` },
+      ', ce qui n’est pas encore possible : ',
+      zoneEnds(company.serviceArea.sentence),
       ', nous venons l’installer chez vous. Vous avez choisi Hako Pro ? ',
       toConfirm.hakoPro,
       '.',
@@ -1841,7 +1855,7 @@ export const installation = {
         text: ['Un câble réseau (Ethernet), non fourni'],
         detail: [
           [
-            'Ses deux bouts ont un embout en plastique, souvent transparent, avec un petit clip. Le carton de votre box internet en contient peut-être un. Il est indispensable : pour l’instant, vous ne pouvez pas relier la HAKO au Wi-Fi.',
+            'Ses deux bouts ont un embout en plastique, souvent transparent, avec un petit clip. Le carton de votre box internet en contient peut-être un. L’installation se fait avec ce câble.',
           ],
           ['Mesurez la distance entre la place prévue pour la HAKO et votre box internet.'],
           [

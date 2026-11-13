@@ -26,7 +26,7 @@ devient
 { id: '2to', label: '2 To', extraEur: 90 },
 ```
 
-L’acompte (`depositPercent`) s’écrit en pourcentage : `30` pour 30 %. Le montant de l’acompte est alors calculé sur le paiement unique et arrondi au centime. Les tests de `tests/unit/tarifs.test.ts` vérifient que le fichier reste cohérent (prix positifs, stockage compris à 0 €, acompte entre 1 et 100 %, chaque `null` accompagné de son commentaire `// TODO:` pour `npm run todos`).
+Le prix de la box se règle en une seule fois, avant l’installation : cette règle est écrite une fois, dans la phrase `payment` de `src/data/faits.ts`. Les tests de `tests/unit/tarifs.test.ts` vérifient que le fichier reste cohérent (prix positifs, stockage compris à 0 €, chaque `null` accompagné de son commentaire `// TODO:` pour `npm run todos`).
 
 Les montants des pages sont calculés au moment de la construction du site, pour chaque combinaison d’offre et de stockage. Après une modification de `tarifs.ts`, il faut donc reconstruire le site.
 
@@ -38,7 +38,7 @@ Les règles de validation (champs obligatoires, formats, longueurs) sont dans `s
 
 ## Zone d’intervention
 
-Quand le code postal semble hors de la zone, le formulaire affiche une note avec ce que nous proposons ailleurs (`company.serviceArea.outside` : l’envoi de la box et son installation avec notre guide pas à pas, à venir, et nos tutoriels vidéo) et les frais d’envoi (`shippingCost` dans `src/data/faits.ts`, encore à fixer), sans bloquer la demande. La règle est la constante `SERVICE_AREA_DEPARTMENTS` de `src/lib/commande/service-area.ts` : pour l’instant, tout code postal des Bouches-du-Rhône (13) ou du Var (83). C’est une règle provisoire, plus large que la zone réelle (de Salon-de-Provence à Toulon) : elle peut être remplacée par une liste de codes postaux sans toucher au reste. Elle figure dans `TODO.md` (constante `SERVICE_AREA_RULE_PENDING`, à supprimer une fois la règle confirmée).
+Quand le code postal semble hors de la zone, le formulaire affiche une note avec ce que nous proposerons ailleurs (`company.serviceArea.outside` : bientôt, l’envoi de la box et son installation avec notre guide pas à pas et nos tutoriels vidéo), sans bloquer la demande. La règle est la constante `SERVICE_AREA_DEPARTMENTS` de `src/lib/commande/service-area.ts` : pour l’instant, tout code postal des Bouches-du-Rhône (13) ou du Var (83). C’est une règle provisoire, plus large que la zone réelle (de Salon-de-Provence à Toulon) : elle peut être remplacée par une liste de codes postaux sans toucher au reste. Elle figure dans `TODO.md` (constante `SERVICE_AREA_RULE_PENDING`, à supprimer une fois la règle confirmée).
 
 ## Brancher un vrai service de commande
 
@@ -59,7 +59,7 @@ Côté serveur, quelques règles. Le service recalcule toujours les montants à 
 
 ## Paiement en ligne, plus tard
 
-Le paiement en ligne n’existe pas encore : la page annonce un appel de confirmation, puis un acompte dont le pourcentage reste à fixer. Le jour où un prestataire de paiement est choisi, la solution la plus simple pour rester fidèle à nos engagements est une page de paiement hébergée par le prestataire, vers laquelle on redirige la personne après la confirmation de la commande, ou un lien de paiement envoyé par e-mail. Le montant à payer est alors calculé par notre serveur.
+Le paiement en ligne n’existe pas encore : la page annonce un appel de confirmation, puis un paiement en une seule fois, par virement bancaire, avant l’installation. Le jour où un prestataire de paiement est choisi, la solution la plus simple pour rester fidèle à nos engagements est une page de paiement hébergée par le prestataire, vers laquelle on redirige la personne après la confirmation de la commande, ou un lien de paiement envoyé par e-mail. Le montant à payer est alors calculé par notre serveur.
 
 ## Ce qu’il ne faut pas faire
 
@@ -71,4 +71,4 @@ La notice « Vos données », sous le formulaire, dit à quoi servent les inform
 
 ## Tests
 
-Les tests unitaires (`tests/unit/*.test.ts`) se lancent avec `node --test tests/unit/` : calcul des montants avec des prix connus ou inconnus, part mensuelle de Hako Pro, acompte, validation des champs, règle du code postal et envoi de démonstration sans réseau ni stockage. Les tests de bout en bout (`tests/commande.spec.ts`) passent par Playwright : total de Hako Pro avec 2 To calculé d’après `tarifs.ts`, erreurs accessibles, envoi de démonstration sans aucune requête, choix d’avance par `?offre=pro`, page sans JavaScript, et contrôle axe sur les deux pages.
+Les tests unitaires (`tests/unit/*.test.ts`) se lancent avec `node --test tests/unit/` : calcul des montants avec des prix connus ou inconnus, part mensuelle de Hako Pro, validation des champs, règle du code postal et envoi de démonstration sans réseau ni stockage. Les tests de bout en bout (`tests/commande.spec.ts`) passent par Playwright : total de Hako Pro avec 2 To calculé d’après `tarifs.ts`, erreurs accessibles, envoi de démonstration sans aucune requête, choix d’avance par `?offre=pro`, page sans JavaScript, et contrôle axe sur les deux pages.

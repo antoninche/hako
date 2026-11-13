@@ -15,7 +15,8 @@
  *   écrit avant le bouton ; l'étape 7 reprend le même bouton après ses gestes.
  * - « Avant de commencer » se lit sur place : aucun de ses liens ne fait
  *   changer d'étape.
- * - Le guide est dans le menu de l'en-tête et sur l'accueil.
+ * - Le guide est dans le menu de l'en-tête et sur l'accueil. Il dit qu'il
+ *   servira hors de notre zone, ce qui n'est pas encore possible.
  * - Le lien vers la HAKO et les liens vers les boutiques sont exactement ceux
  *   de src/data/installation.ts ; rien n'est écrit dans le stockage du
  *   navigateur, aucune requête ne part pendant le parcours.
@@ -33,8 +34,10 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 import { startProdServer } from '../scripts/serve-prod.mjs';
 import { hero } from '../src/content/accueil';
 import { installation, type DeviceId, type StepId } from '../src/content/installation';
+import { company } from '../src/data/entreprise';
 import { apps, boxAddress } from '../src/data/installation';
 import { mainNav, routes } from '../src/data/navigation';
+import { zoneCities } from '../src/data/zone';
 import { DESKTOP, MOBILE } from './routes';
 import { pathExists } from './support/node-tools.mjs';
 import { builtDir } from './support/settings.mjs';
@@ -891,6 +894,8 @@ test.describe('Accès au guide', () => {
     await expect(nav.getByRole('link', { name: install.label })).toHaveAttribute('href', PATH);
     const received = page.locator('.hero__received');
     await expect(received).toContainText(hero.received.text);
+    // L'envoi hors de notre zone n'est pas encore ouvert : le guide est pour plus tard.
+    await expect(received).toContainText('Bientôt');
     await expect(received.getByRole('link', { name: hero.received.link.label })).toHaveAttribute(
       'href',
       PATH,
@@ -899,7 +904,19 @@ test.describe('Accès au guide', () => {
     await expect(nav.locator('[aria-current="page"]')).toHaveAttribute('href', PATH);
   });
 
-  for (const width of [1024, 1100, 1120]) {
+  test('ouverture : le guide servira hors de notre zone, pas encore ouverte', async ({ page }) => {
+    await page.goto(PATH);
+    const shipped = page.locator('.intro-facts__item').last();
+    await expect(shipped).toContainText('ce qui n’est pas encore possible');
+    await expect(shipped).toContainText('nous venons l’installer chez vous');
+    // Les deux bouts de la zone, lus dans sa phrase (src/data/entreprise.ts).
+    for (const city of zoneCities.filter((zoneCity) => zoneCity.role !== 'passage')) {
+      expect(company.serviceArea.sentence).toContain(city.name);
+      await expect(shipped).toContainText(city.name);
+    }
+  });
+
+  for (const width of [1024, 1100, 1120, 1152]) {
     test(`${width} px : le menu tient sur une ligne`, async ({ page }) => {
       await page.setViewportSize({ width, height: 800 });
       await page.goto('/');

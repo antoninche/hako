@@ -31,7 +31,7 @@ export const routes = {
 } as const;
 
 const offers: NavLink = { label: 'Offres', href: routes.offers };
-const box: NavLink = { label: 'La HAKO', href: routes.box };
+const box: NavLink = { label: 'Votre HAKO', href: routes.box };
 const commitment: NavLink = { label: 'Notre engagement', href: routes.commitment };
 const faq: NavLink = { label: 'FAQ', href: routes.faq };
 const tutorials: NavLink = { label: 'Tutoriels', href: routes.tutorials };

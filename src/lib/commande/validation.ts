@@ -224,8 +224,6 @@ export function toOrderRequest(draft: OrderDraft, quote: Quote): OrderRequest {
     displayedQuote: {
       oneTimeTotalEur: quote.oneTimeTotalEur,
       monthlyEur: quote.monthlyEur,
-      depositPercent: quote.deposit.percent,
-      depositEur: quote.deposit.amountEur,
     },
   };
 }

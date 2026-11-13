@@ -2,16 +2,19 @@
 /**
  * Carte d'une offre (page Offres) : à qui elle s'adresse, son prix, ce qui
  * est compris, et le bouton vers le formulaire de commande avec l'offre
- * déjà choisie (/commander/?offre=home ou ?offre=pro).
+ * déjà choisie (/commander/?offre=home ou ?offre=pro). L'offre qui ouvrira
+ * plus tard (Hako Pro, src/data/faits.ts) porte l'étiquette « Bientôt » à
+ * côté de son nom, et sa phrase sous le résumé.
  *
  *   <OfferCard offer={pricing.offers.home} />
  */
 import Fact from '../Fact.astro';
+import SoonBadge from '../SoonBadge.astro';
 import Glyph from '../commande/Glyph.astro';
 import Price from '../commande/Price.astro';
 import RichText from '../commande/RichText.astro';
 import { offerCopy, offresPage, orderHref } from '../../content/offres.ts';
-import { missingPrice } from '../../data/faits.ts';
+import { missingPrice, proOpening } from '../../data/faits.ts';
 import type { Offer } from '../../data/tarifs.ts';
 import { orMissing } from '../../lib/commande/inline.ts';
 
@@ -23,15 +26,17 @@ const { offer } = Astro.props;
 const copy = offerCopy[offer.id];
 const titleId = `offre-${offer.id}`;
 const subscription = offer.subscription;
+const soon = offer.id === proOpening.offer;
 ---
 
 <article class="offer surface-creme" aria-labelledby={titleId}>
   <header class="offer__header">
     <p class="offer__audience">{offer.audience}</p>
     <h2 class="offer__name" id={titleId}>
-      {offer.name}
+      <span>{offer.name}</span> {soon && <SoonBadge label={proOpening.label} />}
     </h2>
     <p class="offer__summary">{copy.summary}</p>
+    {soon && <p class="offer__soon">{proOpening.sentence}</p>}
   </header>
 
   <div class="offer__pricing">
@@ -126,7 +131,12 @@ const subscription = offer.subscription;
     color: var(--text-muted);
   }
 
+  /* Le nom, puis l'étiquette « Bientôt » s'il y en a une, comme sur les tutoriels. */
   .offer__name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2xs) var(--space-s);
     margin: 0;
     font-family: var(--font-ui);
     font-size: var(--step-3);
@@ -137,6 +147,11 @@ const subscription = offer.subscription;
 
   .offer__summary {
     margin: var(--space-2xs) 0 0;
+    color: var(--text-muted);
+  }
+
+  .offer__soon {
+    margin: 0;
     color: var(--text-muted);
   }
 

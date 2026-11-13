@@ -75,7 +75,7 @@ export const contactPage: ContactPageCopy = {
   team: {
     title: 'L’équipe',
     intro:
-      'Trois étudiants, chacun responsable d’un domaine. C’est nous qui assemblons votre box, l’installons chez vous ou vous guidons pour l’installer, et répondons à vos questions.',
+      'Trois étudiants, chacun responsable d’un domaine. C’est nous qui assemblons votre box, l’installons chez vous et répondons à vos questions.',
     linkedinLabel: 'Profil LinkedIn',
   },
 

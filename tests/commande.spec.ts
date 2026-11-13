@@ -10,6 +10,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
 import { company } from '../src/data/entreprise.ts';
+import { payment } from '../src/data/faits.ts';
 import { pricing } from '../src/data/tarifs.ts';
 import { formatEur } from '../src/lib/format.ts';
 import { computeQuote, findStorage } from '../src/lib/commande/pricing.ts';
@@ -107,6 +108,20 @@ test.describe('Page Offres', () => {
         await expect(item).toContainText(formatEur(option.extraEur));
       }
     }
+  });
+
+  test('le paiement : la box en une seule fois, l’abonnement de Hako Pro chaque mois', async ({
+    page,
+  }) => {
+    await page.goto('/offres/');
+    const item = page
+      .locator('.good-to-know__item')
+      .filter({ has: page.getByRole('heading', { name: 'Le paiement', exact: true }) });
+    await expect(item).toHaveCount(1);
+    // La règle est dite une seule fois, par la phrase payment.
+    expect((await item.innerText()).match(/en une seule fois/gu)).toHaveLength(1);
+    await expect(item).toContainText(payment);
+    await expect(item).toContainText('L’abonnement de Hako Pro, lui, se paie chaque mois.');
   });
 
   test('les capacités de stockage ont le même contour : aucune ne semble choisie', async ({
@@ -216,11 +231,22 @@ test.describe('Page Commander', () => {
         await expect(commitment).toContainText(subscription.commitment);
       }
     }
-    const deposit = totalSlot(page).locator('[data-quote-deposit]');
-    if (quote.deposit.percent === null) await expect(deposit.locator('mark.todo')).toHaveCount(1);
-    else if (quote.deposit.amountEur !== null) {
-      await expect(deposit).toContainText(formatEur(quote.deposit.amountEur));
+  });
+
+  test('Hako Home : un seul montant à payer, qui suit le stockage choisi', async ({ page }) => {
+    await page.goto('/commander/?offre=home');
+    const quote = totalSlot(page).locator('.quote');
+    for (const option of pricing.storage) {
+      await page.getByRole('radio', { name: option.label }).check();
+      await expect(quote).toHaveAttribute('data-quote', `home:${option.id}`);
+      const expected = computeQuote(pricing, 'home', option.id).oneTimeTotalEur;
+      expect(expected, `total de Hako Home avec ${option.label}`).not.toBeNull();
+      await expect(quote.locator('[data-quote-total]')).toContainText(formatEur(expected ?? 0));
+      // Le prix se paie en une fois : aucune part à verser d'avance, en pourcentage.
+      await expect(quote).not.toContainText('%');
     }
+    // Avant l'envoi, la note du récapitulatif rappelle comment se règle la box.
+    await expect(page.locator('.payment-note')).toContainText(payment);
   });
 
   test('les erreurs sont annoncées, reliées aux champs et résumées', async ({ page }) => {

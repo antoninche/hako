@@ -9,17 +9,25 @@
  * - Les réseaux sociaux sans adresse : nom sans lien et un seul repère jaune.
  * - Les liens vers d'autres sites gardent leur flèche sur la même ligne que
  *   le texte, même sur un écran étroit.
- * - Les faits partagés (src/data/faits.ts) se lisent avec les mêmes mots et
- *   le même repère jaune sur chaque page qui les cite.
+ * - Les faits partagés (src/data/faits.ts) se lisent avec les mêmes mots sur
+ *   chaque page qui les cite : la copie de secours, sans date ; Hako Pro, qui
+ *   ouvrira après Hako Home, avec l'étiquette « Bientôt » et sa phrase.
  */
 
 import { expect, test, type Page } from '@playwright/test';
 
 import { tutoriels } from '../src/content/tutoriels';
 import { company } from '../src/data/entreprise';
-import { backupCopy, moverOffers, proMaintenance, remoteAccess } from '../src/data/faits';
+import {
+  backupCopy,
+  moverOffers,
+  proMaintenance,
+  proOpening,
+  remoteAccess,
+} from '../src/data/faits';
+import { pricing } from '../src/data/tarifs';
 import { isTodo, type Maybe } from '../src/lib/todo';
-import { MOBILE } from './routes';
+import { MOBILE, notFound, routes } from './routes';
 
 /** Toutes les espaces (insécables ou non) deviennent une espace simple. */
 const normalize = (text: string | null): string => (text ?? '').replace(/\s+/gu, ' ').trim();
@@ -57,10 +65,11 @@ test('/tutoriels/ : aucun lecteur intégré, aucune ligne « [lien à venir] »'
   // dans TODO.md. (Les chaînes, plus bas, gardent leur repère « [lien à venir] ».)
   await expect(main.locator('article.tutorial').getByText('[lien à venir]')).toHaveCount(0);
 
-  // La copie de secours n'est pas disponible : le tutoriel annoncé le dit avec un repère jaune.
-  for (const item of tutoriels.items.filter((tutorial) => 'soon' in tutorial && tutorial.soon)) {
-    await expect(main.locator(`article#${item.slug} mark.todo`)).toHaveCount(1);
-  }
+  // La copie de secours n'est pas disponible : son tutoriel, annoncé, le dit
+  // avec la phrase commune au site.
+  await expect(main.locator('article#verifier-sauvegarde')).toContainText(
+    normalize(backupCopy.sentence.join('')),
+  );
 });
 
 test('/tutoriels/ : « Bientôt » sans vidéo en ligne, sinon un lien nommé par vidéo', async ({
@@ -182,6 +191,14 @@ test('/la-box/ : en mode discret, les repères ne sont plus surlignés', async (
   }
 });
 
+test('/la-box/ : la page s’appelle « Votre HAKO », comme son lien dans le menu', async ({
+  page,
+}) => {
+  await page.goto('/la-box/');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Votre HAKO');
+  await expect(page).toHaveTitle(/^Votre HAKO\b/u);
+});
+
 test('/engagement/ : la phrase sur le nom est celle de l’accueil, kanji lu en japonais', async ({
   page,
 }) => {
@@ -191,16 +208,7 @@ test('/engagement/ : la phrase sur le nom est celle de l’accueil, kanji lu en 
   await expect(note.locator('[lang="ja"]')).toHaveText(company.kanji);
 });
 
-test.describe('Faits partagés : mêmes mots, même repère jaune', () => {
-  const sameMark = async (page: Page, value: unknown) => {
-    if (!isTodo(value)) return;
-    const marks = page.locator(`main mark.todo[data-todo="${value.todo}"]`);
-    expect(await marks.count(), value.todo).toBeGreaterThan(0);
-    for (const mark of await marks.all()) {
-      expect(normalize(await mark.textContent())).toBe(normalize(value.placeholder));
-    }
-  };
-
+test.describe('Faits partagés : mêmes mots', () => {
   for (const path of ['/', '/offres/', '/la-box/', '/engagement/']) {
     test(`${path} : pas d’accès depuis l’extérieur, par choix de sécurité`, async ({ page }) => {
       await page.goto(path);
@@ -223,12 +231,90 @@ test.describe('Faits partagés : mêmes mots, même repère jaune', () => {
   for (const path of ['/offres/', '/la-box/', '/tutoriels/']) {
     test(`${path} : la copie de secours, prévue mais pas encore là`, async ({ page }) => {
       await page.goto(path);
-      const sentence = backupCopy.sentence.filter((part) => typeof part === 'string').join('');
-      // Le repère jaune coupe la phrase : on cherche le début, puis le repère.
-      expect(await mainText(page)).toContain(normalize(sentence.split(':')[0] ?? ''));
-      await sameMark(page, backupCopy.status);
+      expect(await mainText(page)).toContain(normalize(backupCopy.sentence.join('')));
     });
   }
+
+  test('aucune page n’annonce de date pour la copie de secours', async ({ request }) => {
+    for (const route of [...routes, notFound]) {
+      const html = await (await request.get(route.path)).text();
+      expect(html, route.path).not.toMatch(/Date\s+prévue/iu);
+    }
+  });
+
+  // Hako Pro ouvrira après Hako Home : là où il est proposé, son nom porte
+  // l'étiquette « Bientôt », lue avec lui (« Hako Pro (Bientôt) », jamais
+  // « Hako ProBientôt »), et sa carte donne la phrase. Hako Home n'a rien.
+  const { home, pro } = pricing.offers;
+  const proName = new RegExp(
+    `^${literal(pro.name)} \\(\\s*${literal(proOpening.label)}\\s*\\)$`,
+    'u',
+  );
+
+  test('/ : Hako Pro porte « Bientôt » et sa phrase, Hako Home aucune étiquette', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const card = (id: string) =>
+      page.locator('main article', { has: page.locator(`#offre-${id}`) });
+    await expect(card(pro.id).getByRole('heading')).toHaveAccessibleName(proName);
+    await expect(card(pro.id)).toContainText(proOpening.sentence);
+    await expect(card(home.id).getByRole('heading')).toHaveAccessibleName(home.name);
+    await expect(card(home.id)).not.toContainText(proOpening.label);
+  });
+
+  test('/offres/ : carte et tableau, Hako Pro « Bientôt », Hako Home aucune étiquette', async ({
+    page,
+  }) => {
+    await page.goto('/offres/');
+    await expect(page.getByRole('article', { name: proName })).toContainText(proOpening.sentence);
+    await expect(page.getByRole('article', { name: home.name, exact: true })).not.toContainText(
+      proOpening.label,
+    );
+    const table = page.getByRole('table');
+    await expect(table.getByRole('columnheader', { name: proName })).toBeVisible();
+    await expect(table.getByRole('columnheader', { name: home.name, exact: true })).toBeVisible();
+  });
+
+  test('/commander/ : Hako Pro choisi, « Bientôt » et sa phrase, jusque dans le total', async ({
+    page,
+  }) => {
+    await page.goto('/commander/?offre=pro');
+    const proRadio = page.getByRole('radio', { name: proName });
+    await expect(proRadio).toBeChecked();
+    await expect(page.locator('.choice').filter({ has: proRadio })).toContainText(
+      proOpening.sentence,
+    );
+    const offerLine = page.locator('[data-quote-slot="total"] dt').first();
+    await expect(offerLine).toHaveText(proName);
+
+    // Hako Home choisi : aucune étiquette, ni sur sa carte, ni dans le total.
+    const homeRadio = page.getByRole('radio', { name: home.name, exact: true });
+    await homeRadio.check();
+    await expect(offerLine).toHaveText(home.name);
+    await expect(page.locator('[data-quote-slot="total"]')).not.toContainText(proOpening.label);
+    await expect(page.locator('.choice').filter({ has: homeRadio })).not.toContainText(
+      proOpening.label,
+    );
+  });
+
+  test.describe('sans JavaScript', () => {
+    test.use({ javaScriptEnabled: false });
+
+    test('/commander/ : la carte de Hako Pro garde « Bientôt » et sa phrase', async ({ page }) => {
+      await page.goto('/commander/?offre=pro');
+      const proRadio = page.getByRole('radio', { name: proName });
+      await proRadio.check();
+      await expect(proRadio).toBeChecked();
+      const proChoice = page.locator('.choice').filter({ has: proRadio });
+      await expect(proChoice).toBeVisible();
+      await expect(proChoice).toContainText(proOpening.sentence);
+      const homeRadio = page.getByRole('radio', { name: home.name, exact: true });
+      await expect(page.locator('.choice').filter({ has: homeRadio })).not.toContainText(
+        proOpening.label,
+      );
+    });
+  });
 
   test('/tutoriels/ : le déménageur, avec les offres qui le comprennent', async ({ page }) => {
     await page.goto('/tutoriels/');

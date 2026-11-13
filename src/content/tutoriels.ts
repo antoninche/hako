@@ -61,7 +61,7 @@ const items = [
     title: 'Prise en main et installation',
     text: [
       [
-        'Ce que nous installons chez vous, ou ce que vous installez avec notre guide, puis vos premiers pas : ouvrir la page de votre HAKO, à l’adresse ',
+        'Ce que nous installons chez vous, ou ce que vous installerez bientôt avec notre guide, puis vos premiers pas : ouvrir la page de votre HAKO, à l’adresse ',
         { address: boxAddress.display },
         ', depuis un appareil de la maison.',
       ],
@@ -148,11 +148,11 @@ export const tutoriels = {
     lead: videosOnline
       ? 'De courtes vidéos pour prendre votre box en main, à votre rythme, à regarder sur YouTube ou sur PeerTube.'
       : 'De courtes vidéos pour prendre votre box en main, à votre rythme. Vous pourrez les regarder sur YouTube ou sur PeerTube.',
-    // Hors de notre zone, la personne installe la HAKO elle-même : le guide écrit, pas à pas.
+    // Bientôt, hors de notre zone, la personne installera la HAKO elle-même : le guide écrit, pas à pas.
     guide: {
-      text: 'Vous installez votre HAKO vous-même ?',
+      text: 'Bientôt, hors de notre zone, vous installerez votre HAKO vous-même.',
       link: {
-        label: 'Suivez le guide d’installation pas à pas',
+        label: 'Voir le guide d’installation pas à pas',
         href: routes.install,
       } satisfies Link,
     },

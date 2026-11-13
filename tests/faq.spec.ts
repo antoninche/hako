@@ -8,7 +8,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-import { backupCopy, payment, shippingCost, warranty } from '../src/data/faits';
+import { backupCopy, payment, warranty } from '../src/data/faits';
 import { pricing } from '../src/data/tarifs';
 import { formatEur } from '../src/lib/format';
 import { isTodo } from '../src/lib/todo';
@@ -94,6 +94,20 @@ for (const path of MDX_PAGES) {
   });
 }
 
+test('CGV : « Commande et paiement », un seul paiement avant l’installation', async ({ page }) => {
+  await page.goto('/cgv/');
+  await expect(
+    page.getByRole('heading', { level: 2, name: 'Commande et paiement', exact: true }),
+  ).toBeVisible();
+  // Les CGV restent à rédiger : la section garde son repère jaune.
+  const mark = page.locator('mark.todo', { hasText: '[étapes de la commande, paiement]' });
+  await expect(mark).toHaveCount(1);
+  await expect(mark).toHaveAttribute(
+    'data-todo',
+    /paiement en une seule fois, avant l’installation/,
+  );
+});
+
 test('page contact : liens de contact d’au moins 44 px de haut, une fois renseignés', async ({
   page,
 }) => {
@@ -110,7 +124,7 @@ test('FAQ : les prix s’écrivent comme sur les pages Offres et Commander', asy
   await page.goto('/faq/');
   const answer = (await page.locator('details#abonnement').textContent()) ?? '';
   const { home, pro } = pricing.offers;
-  // Texte exact, espaces insécables comprises : « 600 € », « 1 000 € ».
+  // Texte exact, espaces insécables comprises : « 750 € », « 1 000 € ».
   expect(answer).toContain(formatEur(home.priceEur));
   expect(answer).toContain(formatEur(pro.priceEur));
   // « 25 € HT par mois » : le statut de TVA suit le montant, avant « par mois ».
@@ -126,7 +140,7 @@ test('FAQ : les prix s’écrivent comme sur les pages Offres et Commander', asy
 
 test('FAQ : les faits partagés gardent le repère jaune des autres pages', async ({ page }) => {
   await page.goto('/faq/');
-  for (const value of [backupCopy.status, warranty.terms, shippingCost]) {
+  for (const value of [warranty.terms]) {
     if (!isTodo(value)) continue;
     const marks = page.locator(`main mark.todo[data-todo="${value.todo}"]`);
     await expect(marks).toHaveCount(1);
@@ -134,11 +148,17 @@ test('FAQ : les faits partagés gardent le repère jaune des autres pages', asyn
   }
 });
 
-test('FAQ : paiement et garantie, avec les phrases communes au site', async ({ page }) => {
+test('FAQ : paiement, garantie et copie de secours, avec les phrases communes au site', async ({
+  page,
+}) => {
   await page.goto('/faq/');
   const normalize = (text: string | null) => (text ?? '').replace(/\s+/gu, ' ').trim();
   const order = normalize(await page.locator('details#commander').textContent());
+  // La règle est dite une seule fois, par la phrase payment.
+  expect(order.match(/en une seule fois/gu)).toHaveLength(1);
   expect(order).toContain(normalize(payment));
   const breakdown = normalize(await page.locator('details#panne').textContent());
   expect(breakdown).toContain(normalize(warranty.sentence));
+  // La copie de secours : la phrase de src/data/faits.ts, sans date annoncée.
+  expect(breakdown).toContain(normalize(backupCopy.sentence.join('')));
 });

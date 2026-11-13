@@ -42,7 +42,6 @@ const displayedPrices: readonly { readonly gap: TodoValue; readonly value: unkno
   { gap: missingPrice.subscriptionTax(pro), value: pro.subscription?.taxStatus },
   { gap: missingPrice.commitment(pro), value: pro.subscription?.commitment },
   { gap: missingPrice.responseTime(pro), value: pro.subscription?.responseTime },
-  { gap: missingPrice.deposit, value: pricing.depositPercent },
 ];
 
 test.beforeEach(async ({ page }) => {
@@ -97,6 +96,16 @@ test('chaque tarif manquant est un repère jaune', async ({ page }) => {
       expect(found, `plus de repère une fois renseigné : ${what}`).toHaveLength(0);
     }
   }
+});
+
+test('« Vous commandez » : la box se règle en une seule fois, avant l’installation', async ({
+  page,
+}) => {
+  const order = page.locator('.steps .step').first();
+  await expect(order).toContainText('Vous commandez');
+  await expect(order).toContainText('La box se règle en une seule fois, avant l’installation.');
+  // Plus rien à fixer dans cette étape : aucun repère jaune.
+  await expect(order.locator('mark.todo')).toHaveCount(0);
 });
 
 test('les boutons de commande choisissent l’offre', async ({ page }) => {

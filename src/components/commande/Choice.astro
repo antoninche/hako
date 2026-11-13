@@ -3,11 +3,15 @@
  * Choix sous forme de carte (bouton radio) du formulaire de commande.
  * Toute la carte est cliquable ; le nom de l'option est l'intitulé du bouton
  * radio, le reste de la carte (contenu passé) en est la description.
+ * La propriété badge ajoute une étiquette après le nom (« Bientôt », voir
+ * SoonBadge.astro), lue avec lui : « Hako Pro (Bientôt) ».
  *
  *   <Choice name="offre" value="home" id="offre-home" label="Hako Home" checked>
  *     …description…
  *   </Choice>
  */
+import SoonBadge from '../SoonBadge.astro';
+
 interface Props {
   name: string;
   value: string;
@@ -16,9 +20,11 @@ interface Props {
   checked?: boolean;
   /** Taille du nom : « l » pour les offres, « m » pour le stockage. */
   size?: 'm' | 'l';
+  /** Étiquette écrite après le nom, par exemple « Bientôt ». */
+  badge?: string | undefined;
 }
 
-const { name, value, id, label, checked = false, size = 'm' } = Astro.props;
+const { name, value, id, label, checked = false, size = 'm', badge } = Astro.props;
 const detailsId = `${id}-details`;
 ---
 
@@ -34,6 +40,12 @@ const detailsId = `${id}-details`;
   />
   <label class="choice__label" for={id}>
     {label}
+    {badge && (
+      <>
+        {' '}
+        <SoonBadge label={badge} />
+      </>
+    )}
   </label>
   <div class="choice__details" id={detailsId}>
     <slot />

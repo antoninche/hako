@@ -1,19 +1,20 @@
 ---
 /**
  * Détail chiffré d'une commande : prix de la box, stockage, paiement unique,
- * abonnement et durée d'engagement (Hako Pro), acompte. Tous les montants
+ * abonnement et durée d'engagement (Hako Pro). Tous les montants
  * passent par <Price> : un prix pas encore fixé s'affiche en jaune, jamais
  * comme 0 €. Si le total dépend d'un tel prix, il s'écrit « 1 000 € + [prix] ».
  * L'abonnement s'écrit « 25 € HT par mois » : le statut de TVA suit le montant.
+ * L'offre qui ouvrira plus tard (Hako Pro) garde son étiquette « Bientôt ».
  *
  *   <QuoteLines quote={computeQuote(pricing, 'pro', '2to')} />
  */
 import Fact from '../Fact.astro';
+import SoonBadge from '../SoonBadge.astro';
 import Price from './Price.astro';
 import { commandePage } from '../../content/commande.ts';
-import { missingPrice } from '../../data/faits.ts';
+import { missingPrice, proOpening } from '../../data/faits.ts';
 import { orMissing } from '../../lib/commande/inline.ts';
-import { formatPercent } from '../../lib/format.ts';
 import type { Quote } from '../../lib/commande/pricing.ts';
 
 interface Props {
@@ -21,7 +22,7 @@ interface Props {
 }
 
 const { quote } = Astro.props;
-const { offer, storage, deposit } = quote;
+const { offer, storage } = quote;
 const labels = commandePage.total;
 const offerTax = orMissing(offer.taxStatus, missingPrice.taxStatus(offer));
 const subscription = offer.subscription;
@@ -29,7 +30,15 @@ const subscription = offer.subscription;
 
 <dl class="quote" data-quote={`${offer.id}:${storage.id}`}>
   <div class="quote__row">
-    <dt>{offer.name}</dt>
+    <dt>
+      {offer.name}
+      {offer.id === proOpening.offer && (
+        <>
+          {' '}
+          <SoonBadge label={proOpening.label} />
+        </>
+      )}
+    </dt>
     <dd>
       <Price amount={quote.offerPriceEur} missing={missingPrice.offerPrice(offer)} />
     </dd>
@@ -88,21 +97,6 @@ const subscription = offer.subscription;
       </dd>
     </div>
   )}
-  <div class="quote__row">
-    <dt>{labels.deposit}</dt>
-    <dd data-quote-deposit>
-      {deposit.percent === null ? (
-        <Price amount={null} missing={missingPrice.deposit} />
-      ) : deposit.amountEur === null ? (
-        `${formatPercent(deposit.percent)} ${labels.depositOf}`
-      ) : (
-        <>
-          <Price amount={deposit.amountEur} missing={missingPrice.deposit} />
-          {` (${formatPercent(deposit.percent)} ${labels.depositOf})`}
-        </>
-      )}
-    </dd>
-  </div>
 </dl>
 
 <style>

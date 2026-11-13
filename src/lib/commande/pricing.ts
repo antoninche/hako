@@ -7,13 +7,6 @@
  */
 import type { Offer, OfferId, Pricing, StorageId, StorageOption } from '../../data/tarifs.ts';
 
-export interface Deposit {
-  /** Pourcentage du paiement unique ; null tant qu'il n'est pas décidé. */
-  readonly percent: number | null;
-  /** Montant de l'acompte ; null si le pourcentage ou le total manque. */
-  readonly amountEur: number | null;
-}
-
 export interface Quote {
   readonly offer: Offer;
   readonly storage: StorageOption;
@@ -27,7 +20,6 @@ export interface Quote {
   readonly oneTimeTotalEur: number | null;
   /** Abonnement mensuel (Hako Pro) ; null pour une offre sans abonnement. */
   readonly monthlyEur: number | null;
-  readonly deposit: Deposit;
 }
 
 const OFFER_IDS: readonly OfferId[] = ['home', 'pro'];
@@ -48,12 +40,6 @@ export function findStorage(pricing: Pricing, id: StorageId): StorageOption {
   return option;
 }
 
-/** Acompte : arrondi au centime, et seulement si le pourcentage et le total sont connus. */
-export function computeDeposit(totalEur: number | null, percent: number | null): Deposit {
-  if (percent === null || totalEur === null) return { percent, amountEur: null };
-  return { percent, amountEur: Math.round(totalEur * percent) / 100 };
-}
-
 export function computeQuote(pricing: Pricing, offerId: OfferId, storageId: StorageId): Quote {
   const offer = findOffer(pricing, offerId);
   const storage = findStorage(pricing, storageId);
@@ -68,7 +54,6 @@ export function computeQuote(pricing: Pricing, offerId: OfferId, storageId: Stor
     oneTimeKnownEur,
     oneTimeTotalEur,
     monthlyEur: offer.subscription?.monthlyEur ?? null,
-    deposit: computeDeposit(oneTimeTotalEur, pricing.depositPercent),
   };
 }
 

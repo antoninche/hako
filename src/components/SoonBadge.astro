@@ -1,0 +1,49 @@
+---
+/**
+ * Étiquette « Bientôt », écrite à côté d'un nom : un tutoriel pas encore prêt
+ * (tutoriels/TutorialCard.astro), et Hako Pro, qui ouvrira après Hako Home
+ * (cartes des offres, tableau comparatif, formulaire de commande).
+ *
+ * Les parenthèses, invisibles à l'écran, font lire « Hako Pro (Bientôt) » aux
+ * lecteurs d'écran, jamais « Hako ProBientôt ». Laissez une espace entre le
+ * nom et l'étiquette :
+ *
+ *   <span>{offer.name}</span>{' '}<SoonBadge label={proOpening.label} />
+ *
+ * Le texte vient des fichiers de contenu (src/content/tutoriels.ts,
+ * src/data/faits.ts).
+ */
+interface Props {
+  label: string;
+  /** Classe en plus, pour retrouver l'étiquette dans une page (tests, mise en page). */
+  class?: string;
+}
+
+const { label, class: className } = Astro.props;
+---
+
+<span class:list={['soon-badge', className]}>
+  <span class="visually-hidden">(</span>
+  {label}
+  <span class="visually-hidden">)</span>
+</span>
+
+<style>
+  /* Une seule boîte, jamais coupée en fin de ligne. Dans une ligne de texte
+     (tableau, formulaire), son cadre compte dans la hauteur de la ligne et
+     ne déborde pas sur la voisine ; dans un titre en flex (tutoriels, cartes
+     des offres), l'étiquette est un élément du flex, comme le nom. */
+  .soon-badge {
+    display: inline-block;
+    padding: 0.1rem 0.55rem;
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: 999px;
+    font-family: var(--font-ui);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    line-height: 1.4;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+</style>

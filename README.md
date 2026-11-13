@@ -50,7 +50,7 @@ Les informations de l’entreprise sont rassemblées dans `src/data/`, les texte
 
 - `entreprise.ts` : nom, accroche, promesse, e-mail, téléphone, nom de domaine, réseaux sociaux, zone d’intervention, équipe et phrases du pied de page.
 - `tarifs.ts` : tous les prix et les options de stockage (voir [docs/commande.md](docs/commande.md)).
-- `faits.ts` : les faits que plusieurs pages reprennent (accès depuis l’extérieur, copie de secours, déménageur, paiement, garantie, frais d’envoi, acompte), écrits une seule fois.
+- `faits.ts` : les faits que plusieurs pages reprennent (accès depuis l’extérieur, copie de secours, déménageur, paiement, garantie), écrits une seule fois.
 - `navigation.ts` : liens de l’en-tête, du plan du site et des pages légales.
 - `credits.ts` : auteurs et licences des polices et des icônes, affichés dans les mentions légales.
 - `types.ts` : forme des informations de `entreprise.ts` (à changer seulement pour un nouveau genre d’information).

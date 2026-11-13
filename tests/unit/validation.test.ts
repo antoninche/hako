@@ -179,7 +179,11 @@ describe('mise en forme de la demande', () => {
     const request = toOrderRequest({ ...valid, offer: 'pro', companyName: 'A', users: '2' }, quote);
     assert.equal(request.displayedQuote.oneTimeTotalEur, quote.oneTimeTotalEur);
     assert.equal(request.displayedQuote.monthlyEur, quote.monthlyEur);
-    assert.equal(request.displayedQuote.depositPercent, pricing.depositPercent);
+    // Un seul paiement pour la box, puis l'abonnement : rien d'autre n'est transmis.
+    assert.deepEqual(request.displayedQuote, {
+      oneTimeTotalEur: quote.oneTimeTotalEur,
+      monthlyEur: quote.monthlyEur,
+    });
   });
 
   it('refuse de mettre en forme une demande incomplète', () => {

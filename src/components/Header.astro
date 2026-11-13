@@ -301,22 +301,26 @@ const current = (href: string) =>
     }
   }
 
-  /* De 64 à 70rem, les six liens du menu et « Commander » tiennent à peine
-     sur une ligne : l'écart visible entre deux liens passe de 32 à 20 px
-     (12 px ici + 4 px de marge intérieure de chaque côté). Chaque lien garde
-     sa cible de 44 px. */
-  @media (min-width: 64rem) and (max-width: 69.99rem) {
+  /* De 64 à 72rem, les six liens du menu et « Commander » tiennent à peine
+     sur une ligne : l'écart visible entre deux liens passe de 32 à 16 px
+     (8 px ici + 4 px de marge intérieure de chaque côté), et de 32 à 20 px
+     avant « Commander ». Chaque lien garde sa cible de 44 px. */
+  @media (min-width: 64rem) and (max-width: 71.99rem) {
     /* Le logo passe de 36 à 32 px de haut : le menu ne colle plus au logo. */
     .site-header {
       --logo-height: 2rem;
     }
 
     .site-header__list {
-      gap: var(--space-xs);
+      gap: var(--space-2xs);
     }
 
     .site-header__link {
       padding-inline: var(--space-3xs);
+    }
+
+    .site-header__actions {
+      margin-inline-start: var(--space-s);
     }
   }
 

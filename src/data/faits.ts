@@ -2,8 +2,8 @@
  * Faits partagés : ce que plusieurs pages disent, écrit une seule fois.
  *
  * L'accès depuis l'extérieur de la maison, la copie de secours, les offres
- * qui comprennent le déménageur, le paiement, la garantie, l'envoi hors de
- * la zone d'intervention, la phrase qui explique le nom, et ce qui s'affiche
+ * qui comprennent le déménageur, le paiement, la garantie, la phrase qui
+ * explique le nom, et ce qui s'affiche
  * à la place d'un prix pas encore fixé. L'accueil, les pages Offres,
  * Commander, La box, Notre engagement, Tutoriels et la FAQ lisent tous ce
  * fichier : un même fait s'y lit de la même façon, et une information
@@ -23,8 +23,8 @@
  * espace insécable après « à », pour ne pas se couper en fin de ligne.
  */
 import { missing } from '../lib/commande/inline.ts';
-import { formatList, formatPercent } from '../lib/format.ts';
-import { todo, type Maybe, type TodoValue } from '../lib/todo.ts';
+import { formatList } from '../lib/format.ts';
+import { todo, type TodoValue } from '../lib/todo.ts';
 import { company } from './entreprise.ts';
 import { pricing, type Offer, type OfferId, type StorageOption } from './tarifs.ts';
 
@@ -57,6 +57,25 @@ export const remoteAccess = {
 export const proMaintenance =
   'Pour Hako Pro, la maintenance à distance passe par un tunnel sécurisé entre votre box et nous : un VPN, c’est-à-dire un passage chiffré à travers internet, avec le logiciel libre WireGuard. Il n’est mis en place que si vous demandez la maintenance : sans votre demande, nous n’avons aucun accès à votre box.';
 
+/* ---------- Ouverture de Hako Pro ---------- */
+
+/**
+ * Hako Pro ouvrira après le lancement de Hako Home (décision de l'équipe,
+ * 13 novembre 2026). Là où Hako Pro est proposé (carte de l'accueil, page
+ * Offres et son tableau comparatif, formulaire de commande), son nom porte
+ * l'étiquette « Bientôt » (src/components/SoonBadge.astro, la même que celle
+ * des tutoriels à venir), et sa carte ajoute la phrase ci-dessous. Rien
+ * d'autre ne change : une commande de Hako Pro reste une demande, à laquelle
+ * l'équipe répond.
+ */
+export const proOpening = {
+  /** L'offre qui ouvrira plus tard. */
+  offer: 'pro',
+  /** Étiquette écrite à côté de son nom. */
+  label: 'Bientôt',
+  sentence: 'Hako Pro ouvrira après le lancement de Hako Home.',
+} as const satisfies { offer: OfferId; label: string; sentence: string };
+
 /* ---------- Logiciels de la box ---------- */
 
 /**
@@ -70,18 +89,13 @@ export const homePageLicense = todo(
 
 /* ---------- Copie de secours ---------- */
 
-const backupCopyStatus = todo(
-  'Copie de secours des données : prévue, absente de la première version ; solution, date de disponibilité et fonctionnement à confirmer',
-  '[à confirmer]',
-);
-
-/** Prévue, mais pas dans la première version : jamais présentée comme disponible. */
+/**
+ * Prévue pour une prochaine version, sans date annoncée (décision de
+ * l'équipe) : jamais présentée comme disponible.
+ */
 export const backupCopy = {
-  status: backupCopyStatus,
   sentence: [
-    'Une copie de secours de vos données est prévue, mais elle ne fait pas partie de cette première version. Date prévue : ',
-    backupCopyStatus,
-    '.',
+    'Une copie de secours de vos données est prévue pour une prochaine version : elle ne fait pas partie de cette première version.',
   ] satisfies FactText,
   /** Conseil écrit juste après la phrase, là où l’on décide d’acheter. */
   advice: 'En attendant, gardez une autre copie de vos photos les plus précieuses.',
@@ -108,11 +122,13 @@ export const moverOffers = {
 /* ---------- Paiement ---------- */
 
 /**
- * Le paiement en ligne n'existe pas encore : l'acompte et le solde se paient
- * par virement (confirmé par l'équipe). Pages Offres et Commander, et FAQ.
+ * Le paiement en ligne n'existe pas encore : la box se paie en une seule
+ * fois, par virement, avant l'installation (décision de l'équipe). Seul le
+ * prix d'achat se paie ainsi : l'abonnement de Hako Pro reste mensuel.
+ * Pages Offres et Commander, et FAQ.
  */
 export const payment =
-  'Le paiement en ligne n’est pas encore possible : l’acompte et le solde se paient par virement bancaire.';
+  'Le paiement en ligne n’est pas encore possible : la box se règle en une seule fois, par virement bancaire, avant l’installation.';
 
 /* ---------- Garantie ---------- */
 
@@ -132,18 +148,6 @@ export const warranty = {
   termsLead: 'Ce que couvre cette garantie, et comment la faire jouer : ',
   terms: warrantyTerms,
 } as const;
-
-/* ---------- Hors de la zone d'intervention ---------- */
-
-/**
- * Hors de la zone, nous envoyons la box (company.serviceArea.outside, dans
- * src/data/entreprise.ts). Les frais d'envoi ne sont pas encore fixés : pages
- * Offres et Commander, et FAQ.
- */
-export const shippingCost = todo(
-  'Frais d’envoi de la box hors de la zone d’intervention : compris dans le prix ou en supplément, et combien',
-  '[à confirmer]',
-);
 
 /* ---------- Prix pas encore fixés (null dans src/data/tarifs.ts) ---------- */
 
@@ -172,12 +176,7 @@ export const missingPrice = {
     missing(`Préciser si le tarif d’intervention de ${offer.name} est TTC ou HT`, '[TTC ou HT]'),
   storageExtra: (option: StorageOption): TodoValue =>
     missing(`Supplément de l’option de stockage ${option.label}`, '[à confirmer]'),
-  deposit: missing('Acompte demandé à la commande, entre 30 et 50 %', '[30 à 50 %]'),
 } as const;
-
-/** Acompte demandé à la commande : « 30 % », ou le repère jaune. */
-export const depositText: Maybe<string> =
-  pricing.depositPercent === null ? missingPrice.deposit : formatPercent(pricing.depositPercent);
 
 /* ---------- Le nom ---------- */
 

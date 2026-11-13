@@ -1,17 +1,12 @@
 ---
 /**
  * d. Comment ça marche : quatre étapes, chacune avec son dessin.
- * Le pourcentage de l’acompte vient de src/data/tarifs.ts, mis en forme
- * comme sur les autres pages (depositText, src/data/faits.ts).
  */
 import Illustration from '../Illustration.astro';
 import RichText from './RichText.astro';
 import SectionHeader from './SectionHeader.astro';
 import './rules.css';
 import { steps } from '../../content/accueil';
-import { depositText } from '../../data/faits';
-
-const values = { acompte: depositText };
 ---
 
 <section class="steps surface-sable" aria-labelledby="titre-etapes">
@@ -37,7 +32,7 @@ const values = { acompte: depositText };
             </h3>
           </div>
           <p class="step__text">
-            <RichText text={step.text} values={values} />
+            <RichText text={step.text} />
           </p>
         </li>
       ))}

@@ -13,10 +13,15 @@
  * perdre son rôle), et les en-têtes de colonnes restent lus avec chaque
  * valeur. Les noms visibles au-dessus des valeurs sont donc masqués pour
  * eux (aria-hidden), pour ne pas être lus deux fois.
+ *
+ * L'en-tête de l'offre qui ouvrira plus tard (Hako Pro, src/data/faits.ts)
+ * porte l'étiquette « Bientôt » à côté du nom.
  */
+import SoonBadge from '../SoonBadge.astro';
 import Glyph from '../commande/Glyph.astro';
 import RichText from '../commande/RichText.astro';
 import { offresPage, type ComparisonCell } from '../../content/offres.ts';
+import { proOpening } from '../../data/faits.ts';
 import { pricing } from '../../data/tarifs.ts';
 
 const copy = offresPage.comparison;
@@ -38,7 +43,8 @@ const cellOf = (row: (typeof copy.rows)[number], id: 'home' | 'pro'): Comparison
           </th>
           {offers.map((offer) => (
             <th scope="col" class="compare__offer">
-              {offer.name}
+              <span>{offer.name}</span>{' '}
+              {offer.id === proOpening.offer && <SoonBadge label={proOpening.label} />}
             </th>
           ))}
         </tr>

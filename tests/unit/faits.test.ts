@@ -26,7 +26,6 @@ const SHARED_FACTS: readonly { readonly name: string; readonly pattern: RegExp }
   { name: 'licence de la page d’accueil de la box', pattern: /page d’accueil de la box/iu },
   { name: 'moyens de paiement', pattern: /^moyens de paiement/iu },
   { name: 'garantie de la box', pattern: /^garantie/iu },
-  { name: 'frais d’envoi hors de la zone', pattern: /frais d’envoi/iu },
 ];
 
 describe('faits partagés', () => {

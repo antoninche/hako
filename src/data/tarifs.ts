@@ -61,8 +61,6 @@ export interface Pricing {
   readonly storage: readonly StorageOption[];
   /** Stockage inclus dans toutes les offres. */
   readonly includedStorage: StorageId;
-  /** Acompte demandé à la commande, en pourcentage du prix ; null = à décider. */
-  readonly depositPercent: number | null;
 }
 
 export const pricing: Pricing = {
@@ -72,7 +70,7 @@ export const pricing: Pricing = {
       id: 'home',
       name: 'Hako Home',
       audience: 'Pour les familles',
-      priceEur: 600,
+      priceEur: 750,
       taxStatus: 'TTC',
       securityUpdates: '5 ans, renouvelables',
       afterSalesRateEur: 100,
@@ -101,5 +99,4 @@ export const pricing: Pricing = {
     { id: '4to', label: '4 To', extraEur: 400 },
   ],
   includedStorage: '1to',
-  depositPercent: null, // TODO: acompte demandé à la commande, entre 30 et 50 %
 };
