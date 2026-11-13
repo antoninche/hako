@@ -1,41 +1,38 @@
 ---
 /**
- * Liens vers les réseaux sociaux de HAKO (données : src/data/entreprise.ts).
+ * Liens vers les réseaux sociaux de HAKO, dans le pied de page (données :
+ * src/data/entreprise.ts).
  *
- * Tant que l'adresse d'un réseau est inconnue, on affiche son icône et son
- * nom suivis du texte provisoire surligné, sans lien (jamais de lien mort).
- *
- * Deux dispositions :
- * - column (par défaut) : une liste en colonne, discrète (pied de page) ;
- * - row : les réseaux côte à côte, qui passent à la ligne au besoin, avec
- *   des icônes un peu plus grandes (page Contact).
- * Les noms sont toujours en police d'interface (D-DIN gras).
+ * Un réseau dont l'adresse est connue devient un lien. Tant qu'elle ne l'est
+ * pas, on affiche son icône et son nom sans lien (jamais de lien mort), en
+ * couleur plus discrète, et un seul repère jaune après la liste vaut pour
+ * tous les réseaux. Chaque adresse reste un todo(…) dans entreprise.ts :
+ * TODO.md les liste une par une.
+ * Les noms sont en police d'interface (D-DIN gras), comme le plan du site.
  *
  *   <SocialLinks />
- *   <SocialLinks layout="row" />
  */
 import Icon from './Icon.astro';
 import Todo from './Todo.astro';
 import { company } from '../data/entreprise';
-import { isTodo } from '../lib/todo';
+import { isTodo, todo } from '../lib/todo';
 
-interface Props {
-  /** Disposition : en colonne (par défaut) ou en ligne. */
-  layout?: 'column' | 'row';
-  class?: string;
-}
-
-const { layout = 'column', class: className } = Astro.props;
+const anyMissing = company.social.some((network) => isTodo(network.url));
+// Le repère commun, recensé aussi dans TODO.md. Il disparaît de la page dès
+// que toutes les adresses sont connues : retirez alors aussi cette ligne.
+const missingLinks = todo(
+  'Adresses des pages et chaînes de HAKO sur les réseaux sociaux',
+  '[liens à venir]',
+);
 ---
 
-<ul class:list={['social-links', `social-links--${layout}`, className]}>
+<ul class="social-links">
   {company.social.map((network) => (
     <li>
       {isTodo(network.url) ? (
-        <span class="social-links__entry">
+        <span class="social-links__entry social-links__entry--pending">
           <Icon name={network.id} />
           <span class="social-links__name">{network.name}</span>
-          <Todo what={network.url.todo}>{network.url.placeholder}</Todo>
         </span>
       ) : (
         <a class="social-links__entry social-links__link" href={network.url}>
@@ -46,6 +43,11 @@ const { layout = 'column', class: className } = Astro.props;
     </li>
   ))}
 </ul>
+{anyMissing && (
+  <p class="social-links__todo">
+    <Todo what={missingLinks.todo}>{missingLinks.placeholder}</Todo>
+  </p>
+)}
 
 <style>
   .social-links {
@@ -56,10 +58,8 @@ const { layout = 'column', class: className } = Astro.props;
   /* Mêmes lettres que le plan du site voisin (D-DIN, taille du texte courant). */
   .social-links__entry {
     display: inline-flex;
-    flex-wrap: wrap;
     align-items: center;
-    column-gap: var(--space-xs);
-    row-gap: var(--space-3xs);
+    gap: var(--space-xs);
     min-height: var(--target-min);
     font-family: var(--font-ui);
     font-size: var(--step-0);
@@ -73,40 +73,23 @@ const { layout = 'column', class: className } = Astro.props;
     color: var(--text-muted);
   }
 
+  /* Pas encore d'adresse : rien à cliquer, le nom se fait plus discret. */
+  .social-links__entry--pending {
+    color: var(--text-muted);
+  }
+
+  /* Le soulignement n'apparaît qu'au survol. */
   .social-links__link {
     color: var(--text);
+    text-decoration: none;
   }
 
   .social-links__link:hover {
     color: var(--text);
-  }
-
-  /* En colonne : le soulignement n'apparaît qu'au survol. */
-  .social-links--column .social-links__link {
-    text-decoration: none;
-  }
-
-  .social-links--column .social-links__link:hover {
     text-decoration: underline;
   }
 
-  /* En ligne : le soulignement des liens du site, invisible jusqu'au survol. */
-  .social-links--row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-xs) var(--space-l);
-  }
-
-  .social-links--row .social-links__entry :global(.icon) {
-    width: 1.375rem;
-    height: 1.375rem;
-  }
-
-  .social-links--row .social-links__link {
-    text-decoration-color: transparent;
-  }
-
-  .social-links--row .social-links__link:hover {
-    text-decoration-color: currentColor;
+  .social-links__todo {
+    margin-block-start: var(--space-2xs);
   }
 </style>

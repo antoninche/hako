@@ -82,6 +82,18 @@ test.describe('Page Offres', () => {
     }
   });
 
+  test('les capacités de stockage ont le même contour : aucune ne semble choisie', async ({
+    page,
+  }) => {
+    await page.goto('/offres/');
+    const list = page.getByRole('list', { name: 'Capacités proposées' });
+    const borders = await list
+      .getByRole('listitem')
+      .evaluateAll((items) => items.map((item) => getComputedStyle(item).borderColor));
+    expect(borders).toHaveLength(pricing.storage.length);
+    expect(new Set(borders).size, 'une seule couleur de contour').toBe(1);
+  });
+
   for (const width of [320, 360]) {
     test(`compare les offres dans un vrai tableau, lisible à ${width} px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 800 });
@@ -275,6 +287,18 @@ test.describe('Page Commander', () => {
     expect(
       await page.evaluate(() => [window.localStorage.length, window.sessionStorage.length]),
     ).toEqual([0, 0]);
+
+    // Rien n'est parti : le symbole « info », jamais la coche d'une demande reçue.
+    const box = page.locator('[data-confirmation]');
+    await expect(box).toHaveAttribute('data-status', 'demo');
+    await expect(box.locator('.confirmation__icon--demo')).toBeVisible();
+    await expect(box.locator('.confirmation__icon--received')).toBeHidden();
+    // Une demande reçue par un vrai service (data-status="received") montre la coche.
+    await box.evaluate((element) => {
+      element.dataset['status'] = 'received';
+    });
+    await expect(box.locator('.confirmation__icon--received')).toBeVisible();
+    await expect(box.locator('.confirmation__icon--demo')).toBeHidden();
   });
 
   test('Entrée dans un champ de l’étape 2 continue, sans envoyer', async ({ page }) => {
@@ -308,6 +332,17 @@ test.describe('Page Commander', () => {
     await expectNoSeriousViolations(page, 'étape 1 à 1440 px');
   });
 
+  test('à 390 px, les intitulés des étapes commencent à la même hauteur', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/commander/');
+    const labels = page.locator('[data-steps] .steps__label');
+    await expect(labels).toHaveCount(3);
+    const tops = await labels.evaluateAll((all) =>
+      all.map((label) => Math.round(label.getBoundingClientRect().top)),
+    );
+    expect(new Set(tops).size, `hauts des intitulés : ${tops.join(', ')}`).toBe(1);
+  });
+
   test('ne déborde pas de côté à 360 px', async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     await page.goto('/commander/?offre=pro');
@@ -320,11 +355,17 @@ test.describe('Page Commander', () => {
 test.describe('Page Commander sans JavaScript', () => {
   test.use({ javaScriptEnabled: false });
 
-  test('les trois étapes restent lisibles, avec une note', async ({ page }) => {
+  test('les étapes 1 et 2 restent lisibles, avec une note ; l’étape 3 est masquée', async ({
+    page,
+  }) => {
     await page.goto('/commander/');
-    for (const title of ['Votre box', 'Vos coordonnées', 'Récapitulatif']) {
+    for (const title of ['Votre box', 'Vos coordonnées']) {
       await expect(page.getByRole('heading', { level: 2, name: new RegExp(title) })).toBeVisible();
     }
+    // Récapitulatif, consentements et envoi ne servent à rien sans JavaScript.
+    await expect(page.locator('[data-step="3"]')).toBeHidden();
+    // La notice « Vos données » reste lisible sous le formulaire.
+    await expect(page.getByRole('heading', { level: 2, name: 'Vos données' })).toBeVisible();
     // Le moteur de texte de Playwright ignore <noscript> : on vise l'élément.
     const notice = page.locator('noscript p');
     await expect(notice).toBeVisible();

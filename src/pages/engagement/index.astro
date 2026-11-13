@@ -69,13 +69,31 @@ const { meta, intro, listLabel, principles, next } = engagement;
     text-align: center;
   }
 
+  /* Téléphone : les liens l'un sous l'autre, tous sur toute la largeur. */
   .next__links {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    justify-self: stretch;
     gap: var(--space-s);
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+
+  .next__links .btn {
+    inline-size: 100%;
+  }
+
+  /* Dès 30rem : côte à côte et centrés, chacun à la largeur de son texte. */
+  @media (min-width: 30rem) {
+    .next__links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      justify-self: center;
+    }
+
+    .next__links .btn {
+      inline-size: auto;
+    }
   }
 </style>

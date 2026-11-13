@@ -138,6 +138,25 @@ test('l’image de l’ouverture est la box du prototype, chargée en premier', 
   expect(await image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
 });
 
+test('tablette (768 px) : l’image de l’ouverture est centrée sous le texte', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto('/');
+  // Marges à gauche et à droite de l'image, dans la grille (sans ses marges intérieures).
+  const gaps = await page.locator('.hero-visual').evaluate((figure) => {
+    const grid = figure.closest('.hero__grid');
+    if (!grid) return null;
+    const style = getComputedStyle(grid);
+    const outer = grid.getBoundingClientRect();
+    const box = figure.getBoundingClientRect();
+    return {
+      left: box.left - (outer.left + parseFloat(style.paddingLeft)),
+      right: outer.right - parseFloat(style.paddingRight) - box.right,
+    };
+  });
+  expect(gaps?.left ?? 0, 'image plus étroite que la colonne').toBeGreaterThan(0);
+  expect(Math.abs((gaps?.left ?? 0) - (gaps?.right ?? 1)), 'marges égales').toBeLessThanOrEqual(1);
+});
+
 test('le fait d’actualité garde sa source, en anglais', async ({ page }) => {
   const sources = page.locator('main a[href^="https://apnews.com/"]');
   await expect(sources).toHaveCount(1);

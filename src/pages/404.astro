@@ -109,11 +109,20 @@ const { meta, kicker, title, lead, illustrationAlt, linksTitle, links } = erreur
     }
   }
 
-  /* Sur grand écran, les quatre chemins se rangent en deux colonnes. */
+  /* Sur grand écran, les quatre chemins se rangent en deux colonnes égales,
+     aussi larges que le plus long, dès qu'elles tiennent côte à côte (vers
+     1100 px de large) ; avant, une seule colonne, comme sur tablette. */
   @media (min-width: 64rem) {
+    .not-found__nav {
+      container: chemins / inline-size;
+    }
+  }
+
+  @container chemins (min-width: 36rem) {
     .not-found__links {
-      grid-template-columns: repeat(2, max-content);
-      max-inline-size: none;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      inline-size: max-content;
+      max-inline-size: 100%;
     }
   }
 </style>

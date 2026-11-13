@@ -82,7 +82,7 @@ Dans `src/data/`, une valeur `null` suivie d’un commentaire `// TODO: descript
 
 Pour une démonstration sans surlignage, copiez `.env.example` en `.env` et mettez `PUBLIC_SHOW_TODOS=false`, puis relancez `npm run dev` ou `npm run build`. Le texte provisoire reste, sans fond jaune ni infobulle, dans un simple `<span>` que les lecteurs d’écran lisent comme du texte ordinaire.
 
-Le même fichier `.env` accepte `SITE_URL`, l’adresse publique du site, à renseigner avant la mise en ligne : chaque page indexable déclare alors son adresse complète (lien canonique). Sans elle, les pages n’en déclarent aucune.
+Le même fichier `.env` accepte `SITE_URL`, l’adresse publique du site, à renseigner avant la mise en ligne : chaque page indexable déclare alors son adresse complète (lien canonique), l’image de partage reçoit son adresse complète et le plan du site `sitemap.xml` est produit. Sans elle, les pages n’en déclarent aucune et le plan du site n’est pas écrit.
 
 ## Polices, logo et icônes
 

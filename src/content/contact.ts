@@ -86,7 +86,7 @@ export const contactPage: ContactPageCopy = {
   },
 
   social: {
-    title: 'Nous suivre',
+    title: 'Tutoriels vidéo',
     // Au futur tant qu’aucune vidéo n’est en ligne (voir src/content/tutoriels.ts),
     // au présent ensuite : « Nos tutoriels vidéo sont publiés sur… ».
     text: 'Nos tutoriels vidéo seront publiés sur YouTube et sur PeerTube, une plateforme vidéo libre.',

@@ -2,12 +2,14 @@
 /**
  * Page « Contact et équipe » (/contact/).
  *
- * Textes : src/content/contact.ts. Coordonnées, zone d'intervention, réseaux
- * sociaux et équipe : src/data/entreprise.ts. Pas de formulaire de contact :
- * pour commander, le bouton mène au formulaire de commande.
+ * Textes : src/content/contact.ts. Coordonnées, zone d'intervention et
+ * équipe : src/data/entreprise.ts. Pas de formulaire de contact : pour
+ * commander, le bouton mène au formulaire de commande.
  *
  * La phrase sur la zone d'intervention (« Nous intervenons de… ») est écrite
- * sous la carte, par ZoneMap : elle n'est pas répétée à côté.
+ * sous la carte, par ZoneMap : elle n'est pas répétée à côté. De même, les
+ * réseaux sociaux ne sont listés qu'une fois, dans le pied de page : « Nous
+ * suivre » renvoie seulement vers les tutoriels.
  */
 import ZoneMap from '../../components/carte/ZoneMap.astro';
 import ContactMethods from '../../components/contact/ContactMethods.astro';
@@ -15,7 +17,6 @@ import FounderCard from '../../components/contact/FounderCard.astro';
 import Fact from '../../components/Fact.astro';
 import Icon from '../../components/Icon.astro';
 import PageIntro from '../../components/PageIntro.astro';
-import SocialLinks from '../../components/SocialLinks.astro';
 import { contactPage as copy } from '../../content/contact';
 import { company } from '../../data/entreprise';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -40,13 +41,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       </p>
 
       <div class="follow">
-        <div class="follow__text">
-          <h3 class="kicker follow__title">{copy.social.title}</h3>
-          <p>
-            {copy.social.text} <a href={copy.social.link.href}>{copy.social.link.label}</a>
-          </p>
-        </div>
-        <SocialLinks layout="row" />
+        <h3 class="kicker follow__title">{copy.social.title}</h3>
+        <p>
+          {copy.social.text} <a href={copy.social.link.href}>{copy.social.link.label}</a>
+        </p>
       </div>
     </div>
   </section>
@@ -149,33 +147,22 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     transform: translateY(0.2em);
   }
 
-  /* ---------- Réseaux sociaux (fin de « Nous joindre ») ---------- */
+  /* ---------- Tutoriels vidéo (fin de « Nous joindre ») ----------
+     Les réseaux sociaux sont dans le pied de page, juste en dessous. */
 
   .follow {
     display: grid;
-    gap: var(--space-m);
+    gap: var(--space-2xs);
     margin-block-start: var(--space-xl);
     padding-block-start: var(--space-l);
     border-block-start: var(--rule-width) solid var(--line);
   }
 
-  @media (min-width: 64rem) {
-    .follow {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-      align-items: center;
-      gap: var(--space-2xl);
-    }
-  }
-
-  .follow__text > * {
+  .follow > * {
     margin: 0;
   }
 
-  .follow__text > * + * {
-    margin-block-start: var(--space-2xs);
-  }
-
-  .follow__text p {
+  .follow p {
     max-width: var(--measure);
     color: var(--text-muted);
   }

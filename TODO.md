@@ -3,7 +3,11 @@
 Ce fichier est produit par `npm run todos` : ne le modifiez pas à la main.
 Chaque ligne donne le numéro de ligne dans le fichier source, ce qui manque, puis le texte provisoire affiché sur le site.
 
-Total : 54 informations manquantes dans 15 fichiers.
+Total : 55 informations manquantes dans 16 fichiers.
+
+## src/components/SocialLinks.astro
+
+- L23 - Adresses des pages et chaînes de HAKO sur les réseaux sociaux - [liens à venir]
 
 ## src/content/commande.ts
 

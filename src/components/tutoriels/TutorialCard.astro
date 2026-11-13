@@ -1,13 +1,16 @@
 ---
 /**
- * Carte d'un tutoriel : vignette, titre (h2), courte description et liens
- * vers la vidéo sur YouTube et sur PeerTube. Un tutoriel pas encore prêt
- * (soon: true) porte l'étiquette « Bientôt » et n'a pas de liens.
+ * Carte d'un tutoriel : vignette, titre (h2), courte description et un lien
+ * par vidéo en ligne (YouTube, PeerTube). Une vidéo dont l'adresse est encore
+ * inconnue n'a pas de ligne (voir videos.ts). Sans aucune vidéo en ligne, ou
+ * pour un tutoriel pas encore prêt (soon: true), la carte porte l'étiquette
+ * « Bientôt » et n'a pas de liens.
  * Textes : src/content/tutoriels.ts, clé items.
  */
 import Illustration from '../Illustration.astro';
 import Prose from '../texte/Prose.astro';
 import VideoLink from './VideoLink.astro';
+import { isComingSoon, onlineVideos } from './videos';
 import { tutoriels, type Platform, type Tutorial } from '../../content/tutoriels';
 
 interface Props {
@@ -18,11 +21,12 @@ const { tutorial } = Astro.props;
 const { labels } = tutoriels;
 const titleId = `tutoriel-${tutorial.slug}`;
 const platforms = Object.keys(labels.platforms) as Platform[];
-const videos = tutorial.videos;
+const videos = onlineVideos(tutorial, platforms);
+const soon = isComingSoon(tutorial, platforms);
 ---
 
 <article
-  class:list={['tutorial', { 'tutorial--soon': tutorial.soon }]}
+  class:list={['tutorial', { 'tutorial--soon': soon }]}
   id={tutorial.slug}
   aria-labelledby={titleId}
 >
@@ -32,7 +36,7 @@ const videos = tutorial.videos;
   <div class="tutorial__body">
     <h2 class="tutorial__title" id={titleId}>
       <span>{tutorial.title}</span>{' '}
-      {tutorial.soon && (
+      {soon && (
         <span class="tutorial__badge">
           <span class="visually-hidden">(</span>
           {labels.soon}
@@ -41,11 +45,11 @@ const videos = tutorial.videos;
       )}
     </h2>
     <Prose paragraphs={tutorial.text} />
-    {videos && (
+    {videos.length > 0 && (
       <ul class="tutorial__videos">
-        {platforms.map((platform) => (
+        {videos.map((video) => (
           <li>
-            <VideoLink platform={platform} url={videos[platform]} title={tutorial.title} />
+            <VideoLink platform={video.platform} url={video.url} title={tutorial.title} />
           </li>
         ))}
       </ul>

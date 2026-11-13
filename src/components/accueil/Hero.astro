@@ -163,9 +163,12 @@ import { company } from '../../data/entreprise';
       text-wrap: balance;
     }
 
-    /* Tablette : l'image reste sous le texte, sans dépasser 36rem de large. */
+    /* Tablette : l'image reste sous le texte, sans dépasser 36rem de large,
+       centrée (sinon un quart vide à droite). Plus large, elle remplit sa
+       colonne : le centrage n'y change rien. */
     .hero__grid :global(.hero-visual) {
       inline-size: min(100%, 36rem);
+      justify-self: center;
     }
   }
 

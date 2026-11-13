@@ -48,7 +48,7 @@ Tous sont dessinés à partir de `hako-kanji.svg` : un kanji chocolat sur fond c
 
 `public/manifest.webmanifest` déclare le nom HAKO, la langue française, l’adresse de départ `/`, l’affichage dans le navigateur, le crème comme couleur de fond et de thème, et ces trois icônes.
 
-`public/og/hako-og.png` est l’image de partage (Open Graph), 1 200 × 630 px, moins de 5 ko : le logo `reseaux` centré sur fond crème, haut de 391 px (62 % de l’image), sans autre texte. Le centre reste lisible si un réseau recadre l’image en carré.
+`public/og/hako-og.png` est l’image de partage (Open Graph), 1 200 × 630 px, moins de 5 ko : le logo `reseaux` centré sur fond crème, haut de 391 px (62 % de l’image), sans autre texte. Le centre reste lisible si un réseau recadre l’image en carré. Les balises Open Graph de `src/layouts/BaseLayout.astro` la déclarent dans chaque page, avec sa taille et un texte de remplacement, à une adresse complète : seulement quand l’adresse du site est connue (`SITE_URL`). Une image d’une autre taille demande de changer aussi `og:image:width` et `og:image:height` (`tests/builds.spec.ts` le vérifie).
 
 Les PNG sont réduits à une palette de 32 à 64 couleurs (deux teintes et leurs bords lissés suffisent), d’où des fichiers de 1 à 5 ko.
 

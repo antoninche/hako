@@ -7,7 +7,7 @@
  */
 
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { cpSync, existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 
 import { repoRoot } from './settings.mjs';
@@ -36,6 +36,29 @@ export function readRepoFile(relative) {
  */
 export function pathExists(absolute) {
   return existsSync(absolute);
+}
+
+/**
+ * Copie un dossier du dépôt (par exemple un site construit) à la place d'un
+ * autre, vidé d'abord.
+ * @param {string} from chemin relatif à la racine
+ * @param {string} to chemin relatif à la racine
+ */
+export function copyRepoDir(from, to) {
+  rmSync(repoPath(to), { recursive: true, force: true });
+  cpSync(repoPath(from), repoPath(to), { recursive: true });
+}
+
+/**
+ * Largeur et hauteur d'une image PNG du dépôt, lues dans son en-tête (IHDR).
+ * @param {string} relative chemin relatif à la racine
+ * @returns {{ width: number, height: number }}
+ */
+export function pngSize(relative) {
+  const bytes = readFileSync(repoPath(relative));
+  if (bytes.toString('latin1', 12, 16) !== 'IHDR')
+    throw new Error(`${relative} : pas une image PNG`);
+  return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) };
 }
 
 /**

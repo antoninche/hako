@@ -1,10 +1,12 @@
 /**
- * Pages La box, Notre engagement, Tutoriels et 404 : ce que leurs textes
- * promettent, vérifié dans la page construite.
+ * Pages La box, Notre engagement, Tutoriels, Contact et 404, et réseaux
+ * sociaux du pied de page : ce que leurs textes promettent, vérifié dans la
+ * page construite.
  *
  * - Une information manquante s'affiche en repère jaune, jamais en lien mort.
  * - Les tutoriels n'intègrent aucune vidéo : de simples liens, une fois les
- *   adresses connues.
+ *   adresses connues ; avant, la carte dit « Bientôt », sans ligne de lien.
+ * - Les réseaux sociaux sans adresse : nom sans lien et un seul repère jaune.
  * - Les liens vers d'autres sites gardent leur flèche sur la même ligne que
  *   le texte, même sur un écran étroit.
  * - Les faits partagés (src/data/faits.ts) se lisent avec les mêmes mots et
@@ -13,9 +15,10 @@
 
 import { expect, test, type Page } from '@playwright/test';
 
+import { tutoriels } from '../src/content/tutoriels';
 import { company } from '../src/data/entreprise';
 import { backupCopy, moverOffers, remoteAccess } from '../src/data/faits';
-import { isTodo } from '../src/lib/todo';
+import { isTodo, type Maybe } from '../src/lib/todo';
 import { MOBILE } from './routes';
 
 /** Toutes les espaces (insécables ou non) deviennent une espace simple. */
@@ -45,34 +48,112 @@ for (const path of pages) {
   });
 }
 
-test('/tutoriels/ : aucun lecteur intégré, la carte « Bientôt » sans lien', async ({ page }) => {
+test('/tutoriels/ : aucun lecteur intégré, aucune ligne « [lien à venir] »', async ({ page }) => {
   await page.goto('/tutoriels/');
   const main = page.locator('main');
   await expect(main.locator('iframe, video, audio, object, embed')).toHaveCount(0);
-  await expect(main.locator('article.tutorial')).toHaveCount(4);
+  await expect(main.locator('article.tutorial')).toHaveCount(tutoriels.items.length);
+  // Une adresse de vidéo inconnue n'affiche rien dans sa fiche : elle reste listée
+  // dans TODO.md. (Les chaînes, plus bas, gardent leur repère « [lien à venir] ».)
+  await expect(main.locator('article.tutorial').getByText('[lien à venir]')).toHaveCount(0);
 
-  const soon = main.locator('article.tutorial--soon');
-  await expect(soon).toHaveCount(1);
-  await expect(soon.locator('a')).toHaveCount(0);
-  // La copie de secours n'est pas disponible : le tutoriel le dit avec un repère jaune.
-  await expect(soon.locator('mark.todo')).toHaveCount(1);
+  // La copie de secours n'est pas disponible : le tutoriel annoncé le dit avec un repère jaune.
+  for (const item of tutoriels.items.filter((tutorial) => 'soon' in tutorial && tutorial.soon)) {
+    await expect(main.locator(`article#${item.slug} mark.todo`)).toHaveCount(1);
+  }
 });
 
-test('/tutoriels/ : une adresse de vidéo connue devient un lien nommé', async ({ page }) => {
+test('/tutoriels/ : « Bientôt » sans vidéo en ligne, sinon un lien nommé par vidéo', async ({
+  page,
+}) => {
   await page.goto('/tutoriels/');
-  // Chaque vidéo est soit un repère jaune (adresse inconnue), soit un lien
-  // dont le nom accessible cite la plateforme et le tutoriel.
-  const cards = page.locator('main article.tutorial:not(.tutorial--soon)');
-  for (const card of await cards.all()) {
-    const title = (await card.locator('h2').innerText()).trim();
-    const links = card.locator('a.video');
-    const pending = card.locator('.video--todo mark.todo');
-    expect((await links.count()) + (await pending.count()), title).toBe(2);
-    for (const link of await links.all()) {
-      await expect(link).toHaveAttribute('href', /^https:\/\//);
-      await expect(link).toHaveAccessibleName(new RegExp(`(YouTube|PeerTube).*${literal(title)}`));
+  for (const item of tutoriels.items) {
+    const card = page.locator(`main article#${item.slug}`);
+    const videos: Readonly<Record<string, Maybe<string>>> = 'videos' in item ? item.videos : {};
+    const urls = Object.values(videos).filter((url): url is string => !isTodo(url));
+    const badge = card.locator('.tutorial__badge');
+    if (urls.length === 0 || ('soon' in item && item.soon)) {
+      // Pas encore de vidéo : l'étiquette « Bientôt », et aucun lien.
+      await expect(card, item.title).toHaveClass(/\btutorial--soon\b/);
+      await expect(badge, item.title).toContainText(tutoriels.labels.soon);
+      await expect(card.locator('a'), item.title).toHaveCount(0);
+    } else {
+      // Un lien par adresse connue, nommé avec la plateforme et le tutoriel.
+      await expect(badge, item.title).toHaveCount(0);
+      const links = card.locator('a.video');
+      expect(
+        await links.evaluateAll((all) => all.map((link) => link.getAttribute('href'))),
+      ).toEqual(urls);
+      for (const link of await links.all()) {
+        await expect(link).toHaveAccessibleName(
+          new RegExp(`(YouTube|PeerTube).*${literal(item.title)}`),
+        );
+      }
     }
   }
+});
+
+test('pied de page : réseaux sans adresse affichés sans lien, avec un seul repère jaune', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const footer = page.locator('footer.site-footer');
+  const known = company.social.flatMap((network) => (isTodo(network.url) ? [] : [network.url]));
+  await expect(footer.locator('.social-links li')).toHaveCount(company.social.length);
+  for (const network of company.social) {
+    await expect(footer.locator('.social-links')).toContainText(network.name);
+  }
+  expect(
+    await footer
+      .locator('.social-links a')
+      .evaluateAll((all) => all.map((a) => a.getAttribute('href'))),
+  ).toEqual(known);
+  // Aucun repère par réseau : un seul, après la liste, tant qu'une adresse manque.
+  await expect(footer.locator('.social-links mark.todo')).toHaveCount(0);
+  const marker = footer.locator(
+    'mark.todo[data-todo="Adresses des pages et chaînes de HAKO sur les réseaux sociaux"]',
+  );
+  await expect(marker).toHaveCount(known.length < company.social.length ? 1 : 0);
+});
+
+test('/contact/ : les réseaux sociaux ne sont listés qu’une fois, dans le pied de page', async ({
+  page,
+}) => {
+  await page.goto('/contact/');
+  await expect(page.locator('.social-links')).toHaveCount(1);
+  await expect(page.locator('main .social-links')).toHaveCount(0);
+  // « Tutoriels vidéo » garde son texte et son lien vers les tutoriels.
+  await expect(page.locator('main a[href="/tutoriels/"]').first()).toBeVisible();
+});
+
+test('/engagement/ à 390 px : « Pour aller plus loin », liens l’un sous l’autre, même largeur', async ({
+  page,
+}) => {
+  await page.setViewportSize(MOBILE);
+  await page.goto('/engagement/');
+  const boxes = await page.locator('.next__links a').evaluateAll((links) =>
+    links.map((link) => {
+      const box = link.getBoundingClientRect();
+      return { x: Math.round(box.x), width: Math.round(box.width) };
+    }),
+  );
+  expect(boxes.length).toBeGreaterThan(1);
+  expect(new Set(boxes.map((box) => box.x)).size, 'même bord gauche').toBe(1);
+  expect(new Set(boxes.map((box) => box.width)).size, 'même largeur').toBe(1);
+});
+
+test('page 404 à 1440 px : quatre chemins en deux colonnes égales', async ({ page }) => {
+  await page.goto('/cette-page-n-existe-pas/');
+  const boxes = await page.locator('.not-found__links a').evaluateAll((links) =>
+    links.map((link) => {
+      const box = link.getBoundingClientRect();
+      return { x: Math.round(box.x), y: Math.round(box.y), width: Math.round(box.width) };
+    }),
+  );
+  expect(boxes).toHaveLength(4);
+  expect(new Set(boxes.map((box) => box.x)).size, 'deux colonnes').toBe(2);
+  expect(new Set(boxes.map((box) => box.y)).size, 'deux rangées').toBe(2);
+  expect(new Set(boxes.map((box) => box.width)).size, 'même largeur').toBe(1);
 });
 
 test.describe('Écran étroit', () => {

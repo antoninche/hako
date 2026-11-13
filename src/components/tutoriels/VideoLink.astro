@@ -1,20 +1,19 @@
 ---
 /**
- * Lien vers une vidéo sur YouTube ou sur PeerTube.
+ * Lien vers une vidéo sur YouTube ou sur PeerTube. Aucune vidéo n'est
+ * intégrée dans la page.
  *
- * Tant que l'adresse est inconnue (todo(…) dans src/content/tutoriels.ts),
- * on affiche le nom de la plateforme et un repère jaune, sans lien : jamais
- * de lien mort. Aucune vidéo n'est intégrée dans la page.
+ * La carte du tutoriel ne l'affiche que pour une adresse connue : tant
+ * qu'elle manque (todo(…) dans src/content/tutoriels.ts), pas de ligne du
+ * tout, donc jamais de lien mort (voir videos.ts).
  */
 import PeerTubeIcon from '../../assets/icons/social/peertube.svg';
 import YouTubeIcon from '../../assets/icons/social/youtube.svg';
 import { tutoriels, type Platform } from '../../content/tutoriels';
-import { isTodo, type Maybe } from '../../lib/todo';
-import Todo from '../Todo.astro';
 
 interface Props {
   platform: Platform;
-  url: Maybe<string>;
+  url: string;
   /** Titre du tutoriel, ajouté au lien pour les lecteurs d'écran. */
   title: string;
 }
@@ -25,26 +24,15 @@ const name = labels.platforms[platform];
 const Icon = platform === 'youtube' ? YouTubeIcon : PeerTubeIcon;
 ---
 
-{isTodo(url) ? (
-  <span class="video video--todo">
-    <span class="video__icon" aria-hidden="true">
-      <Icon />
-    </span>
-    <span class="video__label">
-      {labels.watchOn} {name}&nbsp;: <Todo what={url.todo}>{url.placeholder}</Todo>
-    </span>
+<a class="video" href={url}>
+  <span class="video__icon" aria-hidden="true">
+    <Icon />
   </span>
-) : (
-  <a class="video" href={url}>
-    <span class="video__icon" aria-hidden="true">
-      <Icon />
-    </span>
-    <span class="video__label">
-      {labels.watchOn} {name}
-      <span class="visually-hidden">&nbsp;: {title}</span>
-    </span>
-  </a>
-)}
+  <span class="video__label">
+    {labels.watchOn} {name}
+    <span class="visually-hidden">&nbsp;: {title}</span>
+  </span>
+</a>
 
 <style>
   .video {
@@ -52,17 +40,14 @@ const Icon = platform === 'youtube' ? YouTubeIcon : PeerTubeIcon;
     align-items: center;
     gap: var(--space-2xs);
     min-block-size: var(--target-min);
+    padding-inline: var(--space-s);
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: var(--radius);
     font-family: var(--font-ui);
     font-size: var(--step--1);
     font-weight: 700;
     letter-spacing: var(--tracking-ui);
     line-height: 1.3;
-  }
-
-  a.video {
-    padding-inline: var(--space-s);
-    border: var(--rule-width) solid var(--line-strong);
-    border-radius: var(--radius);
     color: var(--text);
     text-decoration: none;
     transition:
@@ -70,13 +55,9 @@ const Icon = platform === 'youtube' ? YouTubeIcon : PeerTubeIcon;
       box-shadow var(--dur-1) var(--ease-out);
   }
 
-  a.video:hover {
+  .video:hover {
     border-color: var(--text);
     box-shadow: inset 0 0 0 var(--rule-width) var(--text);
-  }
-
-  .video--todo {
-    color: var(--text-muted);
   }
 
   .video__icon {
@@ -91,7 +72,6 @@ const Icon = platform === 'youtube' ? YouTubeIcon : PeerTubeIcon;
     block-size: 100%;
   }
 
-  /* Libellé et repère jaune restent un seul bloc de texte, aligné après l'icône. */
   .video__label {
     min-inline-size: 0;
   }

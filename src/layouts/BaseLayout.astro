@@ -17,6 +17,7 @@ import Footer from '../components/Footer.astro';
 import FontPreloads from '../components/FontPreloads.astro';
 import Header from '../components/Header.astro';
 import { company } from '../data/entreprise';
+import { frenchTypography } from '../lib/typography';
 
 interface Props {
   /** Titre de la page, sans le nom du site. Sans titre : page d'accueil. */
@@ -38,6 +39,14 @@ const fullTitle = title
 
 // Adresse canonique : seulement si SITE_URL est connue (voir astro.config.mjs).
 const canonical = !noindex && Astro.site ? new URL(Astro.url.pathname, Astro.site) : undefined;
+
+// Aperçu d'un lien partagé (réseaux sociaux, messageries) : balises Open Graph.
+// L'image doit avoir une adresse complète : seulement si SITE_URL est connue.
+// public/og/hako-og.png mesure 1200 × 630 px (tests/builds.spec.ts le vérifie).
+const shareImage = Astro.site ? new URL('/og/hako-og.png', Astro.site) : undefined;
+const shareImageAlt = frenchTypography(
+  'Le logo de HAKO : le kanji 箱, « boîte » en japonais, au-dessus du mot HAKO.',
+);
 ---
 
 <!doctype html>
@@ -45,10 +54,28 @@ const canonical = !noindex && Astro.site ? new URL(Astro.url.pathname, Astro.sit
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {/* Même règle que l'en-tête Referrer-Policy de scripts/serve-prod.mjs, pour
+        les hébergeurs qui n'envoient pas d'en-têtes (GitHub Pages). */}
+    <meta name="referrer" content="same-origin" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex" />}
     {canonical && <link rel="canonical" href={canonical} />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={company.name} />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    {shareImage && (
+      <>
+        <meta property="og:image" content={shareImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={shareImageAlt} />
+      </>
+    )}
+    <meta name="twitter:card" content="summary_large_image" />
     <FontPreloads />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

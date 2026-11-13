@@ -36,7 +36,7 @@ const maxCapacity = Math.max(...pricing.storage.map((option) => capacityOf(optio
     <div class="storage__options">
       <ul class="storage__list" aria-label={copy.listLabel}>
         {pricing.storage.map((option) => (
-          <li class:list={['storage__item', option.extraEur === 0 && 'storage__item--included']}>
+          <li class="storage__item">
             <span class="storage__meter" aria-hidden="true">
               {Array.from({ length: maxCapacity }, (_, index) => (
                 <span
@@ -105,6 +105,9 @@ const maxCapacity = Math.max(...pricing.storage.map((option) => capacityOf(optio
     list-style: none;
   }
 
+  /* Les trois cartes ont le même contour : ce sont des informations, pas des
+     choix à cliquer (le choix se fait à la commande). « Compris » est le seul
+     repère de la capacité comprise. */
   .storage__item {
     display: flex;
     flex-wrap: wrap;
@@ -113,10 +116,6 @@ const maxCapacity = Math.max(...pricing.storage.map((option) => capacityOf(optio
     padding: var(--space-s);
     border: var(--rule-width) solid var(--line);
     border-radius: var(--radius);
-  }
-
-  .storage__item--included {
-    border-color: var(--line-strong);
   }
 
   .storage__meter {

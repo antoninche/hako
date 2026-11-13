@@ -4,9 +4,13 @@
  * surgissante : 1. la box (offre et stockage, total en direct),
  * 2. les coordonnées, 3. le récapitulatif et l'envoi.
  *
- * Sans JavaScript, les trois étapes restent lisibles l'une sous l'autre, sans
- * leurs boutons, et une note explique comment commander autrement. Avec
- * JavaScript (order-form.ts), une seule étape s'affiche à la fois.
+ * Sans JavaScript, les étapes 1 et 2 restent lisibles l'une sous l'autre, sans
+ * leurs boutons ; l'étape 3 (récapitulatif et envoi) est masquée, et une note
+ * explique comment commander autrement. Avec JavaScript (order-form.ts), une
+ * seule étape s'affiche à la fois.
+ *
+ * La confirmation montre le symbole « info » pour un envoi de démonstration,
+ * et la coche seulement pour une demande reçue (data-status="received").
  *
  * Les montants affichés en direct sont calculés ici, au moment de la
  * construction du site, pour chaque combinaison offre + stockage (gabarits
@@ -449,7 +453,8 @@ const stepLabel = (step: StepNumber) => copy.stepOf.replace('{n}', String(step))
     data-confirmation
     hidden
   >
-    <Glyph name="check" class="confirmation__icon" />
+    <Glyph name="info" class="confirmation__icon confirmation__icon--demo" />
+    <Glyph name="check" class="confirmation__icon confirmation__icon--received" />
     <h2 class="confirmation__title" id="confirmation-titre" tabindex="-1">
       {copy.confirmation.title}
     </h2>
@@ -508,9 +513,12 @@ const stepLabel = (step: StepNumber) => copy.stepOf.replace('{n}', String(step))
 
   /* ---------- Indicateur d'étapes ---------- */
 
+  /* Étapes calées en haut : un intitulé sur deux lignes (« Vos coordonnées »
+     sur téléphone) ne décale pas les autres, qui gardent la même ligne. */
   .steps {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -999,7 +1007,25 @@ const stepLabel = (step: StepNumber) => copy.stepOf.replace('{n}', String(step))
   .confirmation :global(.confirmation__icon) {
     inline-size: 2.5rem;
     block-size: 2.5rem;
+  }
+
+  /* Démonstration : rien n'est parti, le symbole « info » et non la coche.
+     La coche ne s'affiche que pour une demande reçue par un vrai service. */
+  .confirmation :global(.confirmation__icon--demo) {
+    color: var(--text-muted);
+  }
+
+  .confirmation :global(.confirmation__icon--received) {
+    display: none;
     color: var(--success);
+  }
+
+  .confirmation[data-status='received'] :global(.confirmation__icon--demo) {
+    display: none;
+  }
+
+  .confirmation[data-status='received'] :global(.confirmation__icon--received) {
+    display: inline-block;
   }
 
   .confirmation__title {
@@ -1038,15 +1064,16 @@ const stepLabel = (step: StepNumber) => copy.stepOf.replace('{n}', String(step))
   }
 
   /* ---------- Sans JavaScript ----------
-   * Les trois étapes restent lisibles l'une sous l'autre ; ce qui ne
-   * fonctionne qu'avec JavaScript (indicateur d'étapes, total en direct,
-   * récapitulatif, boutons des étapes, y compris l'envoi) est masqué. La
-   * note du haut dit comment commander sans JavaScript. */
+   * Les étapes 1 et 2 restent lisibles l'une sous l'autre ; ce qui ne
+   * fonctionne qu'avec JavaScript est masqué : l'indicateur d'étapes, le
+   * total en direct, les boutons des étapes et toute l'étape 3
+   * (récapitulatif, consentements et envoi). La note du haut dit comment
+   * commander sans JavaScript ; la notice « Vos données » reste en dessous. */
   @media (scripting: none) {
     .steps,
     .total,
-    .recap,
-    .step__actions {
+    .step__actions,
+    .step[data-step='3'] {
       display: none;
     }
   }

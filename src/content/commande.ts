@@ -67,7 +67,7 @@ export const commandePage = {
   },
   /** Note affichée seulement quand JavaScript est désactivé. */
   noscript: [
-    'Ce formulaire a besoin de JavaScript pour calculer votre total et préparer votre demande. Sans JavaScript, vous pouvez lire les trois étapes ci-dessous, mais pas envoyer votre demande. Pour commander, écrivez-nous à ',
+    'Ce formulaire a besoin de JavaScript pour calculer votre total et préparer votre demande. Sans JavaScript, vous pouvez lire les deux premières étapes ci-dessous, mais pas envoyer votre demande. Pour commander, écrivez-nous à ',
     email,
     ' ou appelez le ',
     phone,

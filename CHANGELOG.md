@@ -10,6 +10,7 @@ Les modifications notables du site sont notées ici, de la plus récente à la p
 - Dessins « papier découpé » sur toutes les pages (21 fichiers), avec leur générateur dans `design/illustrations/` (`npm run illustrations:build`, `illustrations:check`, `illustrations:render`) et `docs/illustrations.md`.
 - Couleur `--perle` (RAL 1013), sans rôle de texte.
 - Crédits de three.js et du décodeur meshoptimizer, avec le texte de leur licence servi par le site.
+- Balises de partage (Open Graph) sur chaque page, `robots.txt` et plan du site `sitemap.xml` (quand l’adresse publique est connue).
 
 ### Modifié
 
@@ -17,6 +18,7 @@ Les modifications notables du site sont notées ici, de la plus récente à la p
 - Carte de la zone au style des dessins.
 - Réponses de l’équipe : engagement de deux ans pour Hako Pro, mises à jour de sécurité pendant cinq ans, renouvelables, pour Hako Home, intervention hors garantie à 100 € pour les deux offres, liens LinkedIn et présentations de l’équipe, pas d’accès depuis l’extérieur de la maison (choix de sécurité), hébergement provisoire chez GitHub Pages dans les mentions légales et la politique de confidentialité.
 - Textes relus sur toutes les pages : le prix et la zone dès le premier écran de l’accueil et des offres, « hors garantie » à côté du service après-vente payant, le conseil de garder une autre copie de ses photos tant que la copie de secours n’existe pas, des formules creuses retirées.
+- Finitions : un seul repère jaune pour les réseaux sociaux tant que leurs adresses manquent, tutoriels sans lignes vides avant la mise en ligne des vidéos, formulaire de commande lisible sans JavaScript, confirmation de démonstration avec un symbole d’information, tuiles de stockage qui ne ressemblent plus à des boutons, alignements sur l’accueil, Notre engagement et la page 404.
 - Page « La box » : le kanji est décrit sur le couvercle et le mot HAKO sur un côté, et le ventilateur avec le conseil de laisser de l’air autour de la box.
 
 ## [0.1.0] - 2026-11-12
