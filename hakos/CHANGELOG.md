@@ -6,6 +6,8 @@ Les versions de HakOS (MaBox OS jusqu'au Lot 0) ont suivi les lots du projet jus
 
 ### Modifié
 
+- Image compressée par xz au niveau 9 au lieu de 6 (COMPRESSION_LEVEL de config/commun.conf) : elle tient sous 2 Gio, la limite d'un fichier de release GitHub. Publiée dans la release HakOS 1.0.0 (étiquette hakos-v1.0.0).
+- Code de HakOS dans le dossier hakos/ du dépôt public antoninche/hako, sous licence GPL-3.0-or-later, avec un README de présentation et le manuel (docs/manuel.md).
 - Page de la HAKO reconstruite depuis hako-site 0.4.2 (commit 4fcd7dd, SITE_URL=https://antoninche.github.io/hako) : elle donne les adresses http://hako-photos.local et http://hako-fichiers.local, sans les ports 2283 et 8080, et l'adresse e-mail de contact.
 - Adresse du site public : https://antoninche.github.io/hako (HAKO_SITE_URL de versions.env, liens de la page d'état et de la page d'arrêt).
 
