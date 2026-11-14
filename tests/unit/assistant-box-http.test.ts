@@ -13,6 +13,8 @@
  *   (423), création arrêtée pendant le suivi.
  * - Création des comptes : avancement suivi chaque seconde, réponses manquées
  *   tolérées un temps, fin quand la HAKO est installée.
+ * - Signe de vie : une demande d'état toutes les 30 s tant que la page a un
+ *   jeton, arrêtée une fois la HAKO installée.
  *
  * Lancement : node --test tests/unit/
  */
@@ -49,16 +51,31 @@ interface Call {
   readonly body: unknown;
 }
 
+/** Une répétition demandée par l'accès (signes de vie) : déclenchée à la main. */
+interface Beat {
+  readonly ms: number;
+  readonly fn: () => void;
+  stopped: boolean;
+}
+
 /** HAKO simulée : chaque requête passe par handler ; les requêtes sont notées. */
 function fakeBox(
   handler: (call: Call) => Answer | Promise<Answer>,
   timings: Partial<BoxHttpTimings> = {},
-): { box: BoxHttpAccess; calls: Call[] } {
+): { box: BoxHttpAccess; calls: Call[]; beats: Beat[] } {
   const calls: Call[] = [];
+  const beats: Beat[] = [];
   const box = new BoxHttpAccess({
     loginDomain: LOGIN_DOMAIN,
     timings,
     wait: () => Promise.resolve(),
+    every: (ms, fn) => {
+      const beat: Beat = { ms, fn, stopped: false };
+      beats.push(beat);
+      return () => {
+        beat.stopped = true;
+      };
+    },
     fetch: async (url, init) => {
       const call: Call = {
         url,
@@ -74,7 +91,7 @@ function fakeBox(
       });
     },
   });
-  return { box, calls };
+  return { box, calls, beats };
 }
 
 /** Rejet avec ce code. */
@@ -150,6 +167,51 @@ describe('requêtes', () => {
     const { box, calls } = fakeBox(() => ({ status: 200, body: { result: 'ok' } }));
     await assert.rejects(box.checkSheet('a'.repeat(MAX_BODY_BYTES)), rejectedWith('unexpected'));
     assert.equal(calls.length, 0);
+  });
+});
+
+describe('signe de vie', () => {
+  it('rien sans jeton ; une demande d’état toutes les 30 s, avec le jeton, une fois la main reçue', async () => {
+    const { box, calls, beats } = fakeBox((call) =>
+      call.url.endsWith('register')
+        ? registered(['helene@hako.local'])
+        : { status: 200, body: { phase: 'registered', busy: false } },
+    );
+    await box.status();
+    assert.equal(beats.length, 0);
+    await box.register(['Hélène']);
+    await box.register(['Hélène']);
+    assert.equal(beats.length, 1);
+    assert.equal(beats[0]?.ms, 30_000);
+    beats[0]?.fn();
+    await new Promise((resolve) => setImmediate(resolve));
+    const last = calls.at(-1);
+    assert.equal(last?.url, `${API_BASE}status`);
+    assert.equal(last?.init.method, 'GET');
+    assert.equal(last?.headers.get(SESSION_HEADER), TOKEN);
+  });
+
+  it('la main reçue par la fiche donne aussi des signes de vie', async () => {
+    const { box, beats } = fakeBox(() => ({ status: 200, body: { result: 'ok', token: TOKEN } }));
+    await box.checkSheet(PASSWORDS[0] ?? '');
+    assert.equal(beats.length, 1);
+  });
+
+  it('arrêtés une fois la HAKO installée ; une erreur n’arrête rien', async () => {
+    let installed = false;
+    const { box, beats } = fakeBox((call) => {
+      if (call.url.endsWith('register')) return registered(['helene@hako.local']);
+      if (!installed) return { status: 502, body: {} };
+      return { status: 200, body: { phase: 'installed', busy: false } };
+    });
+    await box.register(['Hélène']);
+    beats[0]?.fn();
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(beats[0]?.stopped, false);
+    installed = true;
+    beats[0]?.fn();
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(beats[0]?.stopped, true);
   });
 });
 

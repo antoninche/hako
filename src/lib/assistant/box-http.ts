@@ -23,6 +23,10 @@
  *   appareil sans session) reste dans la mémoire de cet objet, et part dans
  *   l'en-tête SESSION_HEADER. Rien n'est gardé sur l'appareil ; la page
  *   rechargée n'a plus la main (écran « installation en cours »).
+ * - Signe de vie : tant qu'il a un jeton, cet objet redemande l'état toutes
+ *   les 30 secondes (timings.heartbeat). La HAKO lâche la main 2 minutes
+ *   après le dernier signe de vie (page fermée) : un autre appareil peut
+ *   alors recommencer (décision 9 du lot 5 de HakOS).
  * - Délais : chaque requête a le sien (timings.request) ; au-delà, la HAKO
  *   est injoignable. Pendant la création des comptes, quelques réponses
  *   manquées de suite sont tolérées (Wi-Fi qui hésite), puis la création
@@ -76,6 +80,8 @@ export interface BoxHttpTimings {
   readonly pollFailures: number;
   /** Durée au-delà de laquelle une création qui n'en finit pas est dite arrêtée. */
   readonly creation: number;
+  /** Entre deux signes de vie (demandes d'état) de la page qui a la main. */
+  readonly heartbeat: number;
 }
 
 export const BOX_HTTP_TIMINGS: BoxHttpTimings = Object.freeze({
@@ -83,6 +89,7 @@ export const BOX_HTTP_TIMINGS: BoxHttpTimings = Object.freeze({
   poll: 1_000,
   pollFailures: 10,
   creation: 30 * 60_000,
+  heartbeat: 30_000,
 });
 
 type Fetch = (input: string, init: RequestInit) => Promise<Response>;
@@ -97,6 +104,11 @@ export interface BoxHttpOptions {
   readonly wait?: (ms: number) => Promise<void>;
   /** Heure, en millisecondes : Date.now par défaut. */
   readonly now?: () => number;
+  /**
+   * Répète fn toutes les ms millisecondes et rend de quoi arrêter :
+   * setInterval par défaut ; les tests le remplacent.
+   */
+  readonly every?: (ms: number, fn: () => void) => () => void;
 }
 
 /** Réponse de la HAKO : code HTTP, et corps JSON s'il se lit. */
@@ -109,6 +121,13 @@ const sleep = (ms: number): Promise<void> =>
   new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+
+const repeat = (ms: number, fn: () => void): (() => void) => {
+  const timer = setInterval(fn, ms);
+  return () => {
+    clearInterval(timer);
+  };
+};
 
 const fail = (code: BoxErrorCode, cause?: unknown): BoxAccessError =>
   new BoxAccessError(code, cause === undefined ? undefined : { cause });
@@ -168,8 +187,13 @@ export class BoxHttpAccess implements BoxAccess {
   readonly #fetch: Fetch;
   readonly #wait: (ms: number) => Promise<void>;
   readonly #now: () => number;
+  readonly #every: (ms: number, fn: () => void) => () => void;
   /** Jeton de la session de cet appareil, dans la mémoire de la page seulement. */
   #token: string | null = null;
+  /** Arrête les signes de vie ; null tant qu'il n'y en a pas. */
+  #stopHeartbeat: (() => void) | null = null;
+  /** Un signe de vie attend encore sa réponse. */
+  #beating = false;
 
   constructor(options: BoxHttpOptions) {
     this.#loginDomain = options.loginDomain;
@@ -177,6 +201,33 @@ export class BoxHttpAccess implements BoxAccess {
     this.#fetch = options.fetch ?? ((input, init) => fetch(input, init));
     this.#wait = options.wait ?? sleep;
     this.#now = options.now ?? (() => Date.now());
+    this.#every = options.every ?? repeat;
+  }
+
+  /** Garde le jeton ; les signes de vie durent tant qu'il y en a un. */
+  #setToken(token: string | null): void {
+    this.#token = token;
+    if (token === null) {
+      this.#stopHeartbeat?.();
+      this.#stopHeartbeat = null;
+    } else {
+      this.#stopHeartbeat ??= this.#every(this.#timings.heartbeat, () => {
+        void this.#beat();
+      });
+    }
+  }
+
+  /** Un signe de vie : une demande d'état, avec le jeton. Ses erreurs sont sans suite. */
+  async #beat(): Promise<void> {
+    if (this.#token === null || this.#beating) return;
+    this.#beating = true;
+    try {
+      await this.status();
+    } catch {
+      // La page verra le problème à sa prochaine demande.
+    } finally {
+      this.#beating = false;
+    }
   }
 
   async status(): Promise<BoxStatus> {
@@ -195,7 +246,7 @@ export class BoxHttpAccess implements BoxAccess {
     if (!BOX_PHASES.includes(phase as BoxPhase) || typeof busy !== 'boolean') {
       throw fail('unexpected');
     }
-    if (phase === 'installed') this.#token = null;
+    if (phase === 'installed') this.#setToken(null);
     if (phase !== 'creating' || data['progress'] === undefined) {
       return { phase: phase as BoxPhase, busy };
     }
@@ -235,7 +286,7 @@ export class BoxHttpAccess implements BoxAccess {
         password: item['password'],
       });
     });
-    this.#token = token;
+    this.#setToken(token);
     return Object.freeze(accounts);
   }
 
@@ -250,7 +301,7 @@ export class BoxHttpAccess implements BoxAccess {
       throw fail('unexpected');
     }
     // La fiche sert de preuve : un appareil sans session reçoit la main.
-    if (result === 'ok' && typeof token === 'string') this.#token = token;
+    if (result === 'ok' && typeof token === 'string') this.#setToken(token);
     return result;
   }
 

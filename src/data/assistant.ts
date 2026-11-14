@@ -89,12 +89,13 @@ export const duplicateExample = {
 } as const;
 
 /**
- * Une seule installation à la fois : sans activité pendant ce nombre de
- * minutes, la HAKO laisse un autre appareil recommencer (conception du lot 5
- * de HakOS, validée le 14 novembre 2026). Un redémarrage de la HAKO le
- * permet aussitôt.
+ * Une seule installation à la fois : la page qui a la main donne signe de
+ * vie toutes les 30 secondes ; sans signe de vie pendant ce nombre de
+ * minutes (page fermée, appareil éteint), la HAKO laisse un autre appareil
+ * recommencer (décision 9 du lot 5 de HakOS, 14 novembre 2026). Un
+ * redémarrage de la HAKO le permet aussitôt.
  */
-export const SESSION_IDLE_MINUTES = 30;
+export const SESSION_IDLE_MINUTES = 2;
 
 /* ---------- Démonstration ---------- */
 

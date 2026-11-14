@@ -1527,9 +1527,9 @@ export const assistant = {
           'Votre HAKO ne peut pas recommencer : l’installation est encore ouverte ailleurs. Débranchez le bloc de la prise électrique, attendez 10 secondes, puis rebranchez-le : la HAKO redémarre, et oublie l’installation commencée. Appuyez ensuite de nouveau sur « Recommencer l’installation ».',
         ],
         [
-          'Si personne ne se sert plus de l’autre appareil, vous pouvez aussi attendre : au bout de ',
+          'Si la page n’est plus ouverte sur l’autre appareil, vous pouvez aussi attendre : au bout de ',
           `${SESSION_IDLE_MINUTES}\u00a0minutes`,
-          ' sans activité, votre HAKO laisse recommencer.',
+          ' après sa fermeture, votre HAKO laisse recommencer.',
         ],
       ],
     } satisfies ElsewhereScreen,

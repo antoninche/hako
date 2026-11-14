@@ -394,7 +394,7 @@ test('installation en cours ailleurs : « Recommencer » refusé tant que l’au
     await button(page, screens.people.next).click();
     await expect(title(page, 'installation-en-cours')).toBeFocused();
     await expect(page.locator('[data-resume-refused]')).toBeVisible();
-    // L'autre session tombe (30 minutes, ou HAKO redémarrée) : on recommence.
+    // L'autre session tombe (2 minutes sans signe de vie, ou HAKO redémarrée) : on recommence.
     box.locked = false;
     await button(page, states.elsewhere.restart).click();
     await page.locator('[data-person-input]').first().fill('Léa');
