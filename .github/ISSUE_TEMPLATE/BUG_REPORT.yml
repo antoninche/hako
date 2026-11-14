@@ -1,7 +1,7 @@
 # Formulaire « Signaler un problème » : la partie touchée (site, HakOS ou box),
 # ce qui se passe, comment le reproduire. Les failles de sécurité passent par
 # SECURITY.md, jamais par une issue publique.
-name: 🐛 Signaler un problème
+name: Signaler un problème
 description: Quelque chose ne marche pas sur le site, dans HakOS ou sur la box.
 labels: ['bug']
 body:

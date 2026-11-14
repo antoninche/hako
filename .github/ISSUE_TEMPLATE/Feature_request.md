@@ -1,5 +1,5 @@
 ---
-name: 🚀 Proposer une idée
+name: Proposer une idée
 about: Une amélioration du site, de HakOS ou de la box
 labels: enhancement
 ---

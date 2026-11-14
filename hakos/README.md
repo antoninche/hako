@@ -15,7 +15,7 @@ L'image est construite avec pi-gen, l'outil officiel de Raspberry Pi, sur un Mac
 
 Ce dossier reprend le dépôt de travail de HakOS, avec son historique, dans le dépôt antoninche/hako : sa présentation générale est dans le [README du dépôt](../README.md), et le site de HAKO, avec la page que la box affiche pour sa première installation, dans [site/](../site/). Les images prêtes à graver sont publiées dans la release [HakOS 1.0.0](https://github.com/antoninche/hako/releases/tag/hakos-v1.0.0).
 
-## Ce que contient la box 📦
+## Ce que contient la box
 
 Toutes les versions sont figées dans [versions.env](versions.env) ; les images Docker le sont aussi par leur empreinte quand elles en ont une. Elles sont enregistrées dans l'image système et chargées au premier démarrage : chez le client, la box ne télécharge rien.
 
@@ -39,38 +39,38 @@ Deux profils sont construits à partir des mêmes fichiers :
 
 L'image dev ne doit jamais être installée chez un client, et elle n'est pas publiée.
 
-## Premier démarrage 🔌
+## Premier démarrage
 
 Au premier démarrage, la box agrandit sa partition, puis le service `hakos-premier-demarrage` fait, une seule fois :
 
-1. 🛡️ **Garde-fous du Pi 5.** Il note la version de l'EEPROM et vérifie que le noyau utilise des pages mémoire de 4 Kio ; sinon, il s'arrête et affiche une page d'arrêt sur http://hako.local.
-2. 🔑 **Secrets propres à la box.** Identifiant de machine, clés SSH et mots de passe des bases de données sont tirés au hasard, dans des fichiers `.env` lisibles par root seul. Deux box gravées avec la même image ne partagent aucun secret.
-3. 🧠 **Mémoire.** La recherche intelligente d'Immich est activée à partir de 7 Gio de mémoire (Pi 5 de 8 Go), coupée en dessous (Pi 5 de 4 Go).
-4. 🐳 **Applications.** Il charge les 7 images Docker depuis leurs archives, puis les supprime ; il démarre le pare-feu, la page de la HAKO, Immich et Nextcloud, et attend qu'ils soient en bonne santé.
-5. ☁️ **Nextcloud.** Il l'installe sans intervention et supprime son compte technique.
-6. ✅ **Fin.** Il écrit une fiche technique sans secret, puis pose le marqueur `/opt/box/.initialized`, seulement si tout a réussi.
+1. **Garde-fous du Pi 5.** Il note la version de l'EEPROM et vérifie que le noyau utilise des pages mémoire de 4 Kio ; sinon, il s'arrête et affiche une page d'arrêt sur http://hako.local.
+2. **Secrets propres à la box.** Identifiant de machine, clés SSH et mots de passe des bases de données sont tirés au hasard, dans des fichiers `.env` lisibles par root seul. Deux box gravées avec la même image ne partagent aucun secret.
+3. **Mémoire.** La recherche intelligente d'Immich est activée à partir de 7 Gio de mémoire (Pi 5 de 8 Go), coupée en dessous (Pi 5 de 4 Go).
+4. **Applications.** Il charge les 7 images Docker depuis leurs archives, puis les supprime ; il démarre le pare-feu, la page de la HAKO, Immich et Nextcloud, et attend qu'ils soient en bonne santé.
+5. **Nextcloud.** Il l'installe sans intervention et supprime son compte technique.
+6. **Fin.** Il écrit une fiche technique sans secret, puis pose le marqueur `/opt/box/.initialized`, seulement si tout a réussi.
 
 Dans la machine virtuelle, l'image prod a fait tout cela en 90 à 93 secondes. Sur le Pi 5, la durée reste à mesurer.
 
-## La première installation 👋
+## La première installation
 
 Branchée au réseau de la maison, la box affiche sa propre page à http://hako.local : la page de la HAKO, construite depuis le site, dans ce dépôt. La première personne qui l'ouvre commence l'installation :
 
-- 👪 **Les prénoms** : la famille donne ses prénoms ;
-- 🔑 **Les comptes** : la box crée un compte pour chacun dans Immich et dans Nextcloud, avec un mot de passe de quatre mots et un nombre, tiré par la box ;
-- 🖨️ **La fiche de secours** : la page fait imprimer une fiche de secours avec les mots de passe ;
-- 💤 **La fin** : l'assistant (`hakos-assistant`, une API locale en Python, sans dépendance) s'arrête ensuite et se masque.
+- **Les prénoms** : la famille donne ses prénoms ;
+- **Les comptes** : la box crée un compte pour chacun dans Immich et dans Nextcloud, avec un mot de passe de quatre mots et un nombre, tiré par la box ;
+- **La fiche de secours** : la page fait imprimer une fiche de secours avec les mots de passe ;
+- **La fin** : l'assistant (`hakos-assistant`, une API locale en Python, sans dépendance) s'arrête ensuite et se masque.
 
 D'ici là, Immich et Nextcloud restent fermés au réseau : personne ne peut y prendre un compte administrateur. Une fois la box installée, http://hako.local devient la page d'état.
 
-## Pare-feu et « zéro accès » 🔒
+## Pare-feu et « zéro accès »
 
-- 🧱 **Pare-feu.** Le service `hakos-parefeu` (nftables) démarre avant Docker. Il n'accepte de connexion TCP que depuis les adresses IPv4 privées, celles du réseau de la maison, et rien en IPv6 hors ce qu'il faut au réseau lui-même. Les ports des photos (2283) et des fichiers (8080) restent fermés jusqu'à la fin de l'installation.
-- 🌐 **Aucun accès depuis l'extérieur.** La box n'ouvre aucun port vers internet : les données ne quittent pas la maison. La contrepartie : on ne peut pas y accéder hors de chez soi.
-- 🔐 **Mots de passe.** Immich n'accepte que 10 essais de mot de passe par minute et par adresse.
-- 🙈 **« Zéro accès ».** L'image prod ne laisse aucune porte d'entrée à l'équipe : SSH masqué, compte verrouillé, aucune clé, mot de passe console tiré au hasard puis jeté. Les mots de passe des comptes sont créés par la box, chez le client, et personne d'autre ne les a, pas même nous.
+- **Pare-feu.** Le service `hakos-parefeu` (nftables) démarre avant Docker. Il n'accepte de connexion TCP que depuis les adresses IPv4 privées, celles du réseau de la maison, et rien en IPv6 hors ce qu'il faut au réseau lui-même. Les ports des photos (2283) et des fichiers (8080) restent fermés jusqu'à la fin de l'installation.
+- **Aucun accès depuis l'extérieur.** La box n'ouvre aucun port vers internet : les données ne quittent pas la maison. La contrepartie : on ne peut pas y accéder hors de chez soi.
+- **Mots de passe.** Immich n'accepte que 10 essais de mot de passe par minute et par adresse.
+- **« Zéro accès ».** L'image prod ne laisse aucune porte d'entrée à l'équipe : SSH masqué, compte verrouillé, aucune clé, mot de passe console tiré au hasard puis jeté. Les mots de passe des comptes sont créés par la box, chez le client, et personne d'autre ne les a, pas même nous.
 
-## Les noms 🏷️
+## Les noms
 
 | Adresse                    | Ce qu'elle ouvre                                              |
 | -------------------------- | ------------------------------------------------------------- |
@@ -80,7 +80,7 @@ D'ici là, Immich et Nextcloud restent fermés au réseau : personne ne peut y p
 
 Les noms sont annoncés sur le réseau de la maison par avahi (service `hakos-noms`), puis nginx dirige chaque nom vers sa page ou son application, sur le port 80. Une deuxième box sur le même réseau prend `hako-2.local`, `hako-2-photos.local` et `hako-2-fichiers.local`. Les ports 2283 (Immich) et 8080 (Nextcloud) restent ouverts au réseau de la maison après l'installation, en secours, par le nom ou l'adresse IP de la box.
 
-## La page d'état 📊
+## La page d'état
 
 Après l'installation, http://hako.local montre les boutons « Mes photos » et « Mes fichiers », puis l'état de la box : espace utilisé, nombre de photos et de vidéos, durée depuis l'allumage, température et ralentissements, et la copie de secours, pas encore disponible. Le service `hakos-etat` écrit cet état chaque minute ; la page le lit en JSON, sans aucun secret, à http://hako.local/api/etat. Les mises à jour y sont annoncées « bientôt ».
 
@@ -91,7 +91,7 @@ Après l'installation, http://hako.local montre les boutons « Mes photos » et 
 
 Captures prises avec l'image prod de HakOS 2026.11.1, dans une machine virtuelle, avec des données d'exemple.
 
-## Architecture 🧩
+## Architecture
 
 ```mermaid
 flowchart LR
@@ -125,7 +125,7 @@ flowchart LR
     equipe -. "aucun accès (prod)" .-x hako
 ```
 
-## Construire 🏗️
+## Construire
 
 Il faut un Mac Apple Silicon (la construction est native, en arm64), Colima, docker, le greffon docker compose, xz, git et curl, et environ 20 Gio libres. Le dépôt doit être dans un chemin sans espace, hors OneDrive ou iCloud.
 
@@ -151,7 +151,7 @@ colima stop
 
 L'image arrive dans deploy/, avec SHA256SUMS et le journal de construction. pi-gen est récupéré à la révision figée dans pi-gen/ ; local/, images/, pi-gen/ et deploy/ ne sont jamais versionnés. Le détail (construction, gravure d'un SSD, test sur la box, Wi-Fi) est dans [docs/manuel.md](docs/manuel.md).
 
-## Tester dans une machine virtuelle 🧪
+## Tester dans une machine virtuelle
 
 Sans Raspberry Pi, `scripts/essai-vm.sh` installe une box neuve dans la VM Colima, à partir d'une image construite, et lance le vrai premier démarrage par systemd, comme sur un Pi 5 de 4 Go :
 
@@ -164,31 +164,31 @@ colima ssh -- sudo "$PWD/scripts/essai-vm.sh" defaire
 
 Le test affiche une ligne « OK » ou « ÉCHEC » par contrôle et finit par un bilan. Avec `--assistant 8`, il fait aussi toute la première installation pour huit personnes. `HAKOS_PAGE_OCTETS=16384` simule un noyau à pages de 16 Kio : le premier démarrage doit alors s'arrêter et servir la page d'arrêt.
 
-## Limites ⚠️
+## Limites
 
 HakOS n'a jamais tourné sur un vrai Raspberry Pi 5. Ce qui ne peut pas se vérifier sans lui :
 
-- 💽 **Démarrage** : le démarrage sur le SSD (NVMe), la version réelle de l'EEPROM et sa mise à jour par rpi-eeprom-update ;
-- 🐧 **Noyau** : le noyau réellement chargé (kernel8.img, pages de 4 Kio), et la page d'arrêt sur un vrai noyau à pages de 16 Kio ;
-- 🌡️ **Température** : la température et les ralentissements réels (la VM reçoit 48,3 °C d'exemple), et le flux d'air du boîtier ;
-- 📱 **Noms** : la résolution de hako-photos.local et hako-fichiers.local sur iPhone, Android, Mac et Windows (avec et sans Bonjour), et celle d'une deuxième box ;
-- ⏱️ **Durées** : la durée du premier démarrage sur le Pi, et le comptage des photos sur une grosse photothèque.
+- **Démarrage** : le démarrage sur le SSD (NVMe), la version réelle de l'EEPROM et sa mise à jour par rpi-eeprom-update ;
+- **Noyau** : le noyau réellement chargé (kernel8.img, pages de 4 Kio), et la page d'arrêt sur un vrai noyau à pages de 16 Kio ;
+- **Température** : la température et les ralentissements réels (la VM reçoit 48,3 °C d'exemple), et le flux d'air du boîtier ;
+- **Noms** : la résolution de hako-photos.local et hako-fichiers.local sur iPhone, Android, Mac et Windows (avec et sans Bonjour), et celle d'une deuxième box ;
+- **Durées** : la durée du premier démarrage sur le Pi, et le comptage des photos sur une grosse photothèque.
 
 Autres limites, connues :
 
-- 🔓 **Adresses en http**, sans chiffrement : à la maison, mots de passe, photos et fichiers circulent en clair sur le réseau local.
-- 💾 **Pas de sauvegarde** pour l'instant : une panne du SSD perd les photos et les fichiers. Nous conseillons de garder une autre copie des photos les plus précieuses.
-- 🏁 **Première installation** : la première personne qui ouvre http://hako.local la commence ; un autre appareil du réseau de la maison pourrait passer avant la famille.
-- 💿 **cloud-init est gardé** : qui a le SSD en main peut faire lancer des commandes au démarrage, et lire les données, le disque n'étant pas chiffré.
+- **Adresses en http**, sans chiffrement : à la maison, mots de passe, photos et fichiers circulent en clair sur le réseau local.
+- **Pas de sauvegarde** pour l'instant : une panne du SSD perd les photos et les fichiers. Nous conseillons de garder une autre copie des photos les plus précieuses.
+- **Première installation** : la première personne qui ouvre http://hako.local la commence ; un autre appareil du réseau de la maison pourrait passer avant la famille.
+- **cloud-init est gardé** : qui a le SSD en main peut faire lancer des commandes au démarrage, et lire les données, le disque n'étant pas chiffré.
 
 Prévu, pas encore fait :
 
-- [ ] 🔄 **Mises à jour à la demande** : aujourd'hui, une nouvelle version d'Immich ou de Nextcloud demande une nouvelle image, et regraver le SSD efface les données. La box saura qu'une nouvelle version existe, et la responsable la lancera avec son mot de passe.
-- [ ] 👥 **« Gérer ma HAKO »** : depuis http://hako.local, ajouter une personne, lui donner un nouveau mot de passe ou la retirer. Aujourd'hui, ces gestes se font à la main dans Immich et Nextcloud.
-- [ ] 📶 **Wi-Fi et bouton de la box** : choisir le Wi-Fi de la maison depuis la page de la HAKO ; un appui sur le bouton de la box pour commencer l'installation, ou pour donner un nouveau mot de passe à la responsable, box en main. Aujourd'hui, une box prod ne rejoint un Wi-Fi que s'il est écrit sur le SSD avant le premier démarrage, ce qui n'a pas encore été essayé ([docs/manuel.md](docs/manuel.md)).
-- [ ] 💾 **Copie de secours** des données.
+- [ ] **Mises à jour à la demande** : aujourd'hui, une nouvelle version d'Immich ou de Nextcloud demande une nouvelle image, et regraver le SSD efface les données. La box saura qu'une nouvelle version existe, et la responsable la lancera avec son mot de passe.
+- [ ] **« Gérer ma HAKO »** : depuis http://hako.local, ajouter une personne, lui donner un nouveau mot de passe ou la retirer. Aujourd'hui, ces gestes se font à la main dans Immich et Nextcloud.
+- [ ] **Wi-Fi et bouton de la box** : choisir le Wi-Fi de la maison depuis la page de la HAKO ; un appui sur le bouton de la box pour commencer l'installation, ou pour donner un nouveau mot de passe à la responsable, box en main. Aujourd'hui, une box prod ne rejoint un Wi-Fi que s'il est écrit sur le SSD avant le premier démarrage, ce qui n'a pas encore été essayé ([docs/manuel.md](docs/manuel.md)).
+- [ ] **Copie de secours** des données.
 
-## Organisation du dossier 🗂️
+## Organisation du dossier
 
 | Dossier ou fichier                 | Contenu                                                                                                                                                                                                           |
 | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -203,7 +203,7 @@ Prévu, pas encore fait :
 | [captures/](captures/)             | captures d'écran de ce README                                                                                                                                                                                     |
 | [CHANGELOG.md](CHANGELOG.md)       | journal des versions                                                                                                                                                                                              |
 
-## Licence 📜
+## Licence
 
 Le code de HakOS est distribué sous licence GNU GPL, version 3 ou toute version ultérieure (GPL-3.0-or-later), dont le texte est dans [LICENSE](LICENSE). Elle permet de le réutiliser, de le modifier et de le redistribuer, à condition que les copies, modifiées ou non, restent sous la même licence, avec leur code source.
 

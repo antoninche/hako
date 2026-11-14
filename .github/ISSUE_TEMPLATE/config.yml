@@ -2,9 +2,9 @@
 # sécurité et les questions personnelles passent par ces liens.
 blank_issues_enabled: false
 contact_links:
-  - name: 🚨 Signaler une faille de sécurité
+  - name: Signaler une faille de sécurité
     url: https://github.com/antoninche/hako/security/policy
     about: Signalez-nous une faille en privé (signalement privé de GitHub ou e-mail), pour la corriger avant qu'elle soit connue de tous.
-  - name: ✉️ Nous écrire
+  - name: Nous écrire
     url: mailto:antonin.chenavaz@etu.univ-amu.fr
     about: Une question sur la box, une commande ou une installation ? Écrivez-nous à antonin.chenavaz@etu.univ-amu.fr.
