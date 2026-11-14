@@ -3,7 +3,7 @@
  * (voir Assistant.astro), le même en démonstration et, plus tard, sur la
  * vraie HAKO. Seul change l'accès à la HAKO, choisi par le <script> de la
  * page (createAccess) : la HAKO simulée sur le site, l'API locale de la HAKO
- * sur la HAKO (lot 3).
+ * sur la HAKO (lot 5 de HakOS).
  *
  * - La machine à états (src/lib/assistant/machine.ts) dit quel écran
  *   montrer et quoi demander à la HAKO ; ce script affiche, et fait les

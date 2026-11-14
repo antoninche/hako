@@ -150,7 +150,7 @@ export const pending: AssistantPendingFacts = withFrenchTypography<AssistantPend
     'Durée de la création des comptes (Immich puis Nextcloud) sur une HAKO de série, pour une personne et pour huit (par exemple « environ deux minutes »)',
     '[durée à mesurer]',
   ),
-  // Adresses fixées par la spécification de MaBox OS : une fois la première
+  // Adresses fixées par la spécification de HakOS : une fois la première
   // installation terminée, le nginx de la HAKO relaie :2283 vers Immich et
   // :8080 vers Nextcloud (pare-feu ouvert seulement après l’installation).
   photosAddress: `http://${BOX_HOST}:2283`,

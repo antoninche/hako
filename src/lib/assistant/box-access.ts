@@ -8,9 +8,9 @@
  * - en démonstration, sur le site (/installer/demonstration/) : la HAKO
  *   simulée de demo-box.ts, qui travaille dans la mémoire de la page. Rien ne
  *   quitte le navigateur ;
- * - sur la vraie HAKO (lot 3 de MaBox OS) : un accès qui appellera l'API
+ * - sur la vraie HAKO (lot 5 de HakOS) : un accès qui appellera l'API
  *   locale de la HAKO, servie par la HAKO elle-même. Il n'existe pas encore :
- *   ses adresses et ses réponses restent à définir avec le lot 3. Il ne devra
+ *   ses adresses et ses réponses restent à définir avec le lot 5. Il ne devra
  *   jamais entrer dans le JavaScript du site public.
  *
  * Ce que la HAKO garantit, quel que soit l'accès :
@@ -22,7 +22,7 @@
  * - createAccounts() reprend sans doublon après une coupure : ce qui est déjà
  *   fait reste fait.
  *
- * Reste à fournir pour la vraie HAKO (relecture finale, avant le lot 3) :
+ * Reste à fournir pour la vraie HAKO (relecture finale, avant le lot 5) :
  * - l'accès réel et ses tests (même origine, délais, erreurs unreachable,
  *   interrupted et unexpected), jamais importé par le site ;
  * - deux phases de plus : « registered » (mots de passe remis, comptes pas
