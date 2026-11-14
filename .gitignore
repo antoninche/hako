@@ -1,0 +1,14 @@
+# Règles communes à tout le dépôt. Chaque partie a les siennes :
+# site/.gitignore pour le site, hakos/.gitignore pour HakOS.
+
+# Variables d'environnement locales (jamais versionnées)
+.env
+.env.*
+!.env.example
+
+# Fichiers de travail
+.DS_Store
+*.log
+.tmp/
+__pycache__/
+*.pyc

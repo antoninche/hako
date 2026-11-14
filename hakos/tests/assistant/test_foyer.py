@@ -1,7 +1,8 @@
 """Prénoms, identifiants et mots de passe : mêmes résultats que la page de la HAKO.
 
-cas-household.json vient de src/lib/assistant/household.ts (dépôt hako-site, commit de
-HAKO_SITE_COMMIT) : checkPeople(liste, 40), cleanFirstName et assignLogins(…, '@hako.local').
+cas-household.json vient de src/lib/assistant/household.ts (dossier site/ de antoninche/hako,
+commit de HAKO_SITE_COMMIT) : checkPeople(liste, 40), cleanFirstName et assignLogins(…,
+'@hako.local').
 """
 
 import json

@@ -509,8 +509,8 @@ interface AccesBox {
 - **Freebox**, pare-feu IPv6 désactivé par défaut, d'après un ticket et des forums de 2019 et 2020 : https://dev.freebox.fr/bugs/task/27268
 - **Dépôts locaux, lus sans rien modifier** :
   - ~/Code/mabox-os/docs/lot0-faisabilite.md
-  - ~/Code/hako-site/docs/hebergement.md
-  - ~/Code/hako-site/tests/privacy.spec.ts
-  - ~/Code/hako-site/src/content/faq/acces-a-mes-photos.mdx
-  - ~/Code/hako-site/src/content/faq/branchement.mdx
-  - ~/Code/hako-site/.github/workflows/apercu.yml
+  - site/docs/hebergement.md
+  - site/tests/privacy.spec.ts
+  - site/src/content/faq/acces-a-mes-photos.mdx
+  - site/src/content/faq/branchement.mdx
+  - .github/workflows/apercu.yml (racine de antoninche/hako)

@@ -1,15 +1,15 @@
 # Aperçu du site sur GitHub Pages : https://antoninche.github.io/hako/
-# À chaque envoi sur main, le site est construit puis publié. Il est servi
-# dans le sous-dossier /hako/ : l'étape « sous-dossier » réécrit les adresses
-# (voir scripts/deploy/sous-dossier.mjs). Les actions sont fixées par leur
+# À chaque envoi sur main qui touche le site (dossier site/), le site est
+# construit puis publié. Il est servi dans le sous-dossier /hako/ : l'étape
+# « sous-dossier » réécrit les adresses (voir site/scripts/deploy/sous-dossier.mjs). Les actions sont fixées par leur
 # empreinte de commit, la version lisible est en commentaire.
 name: Aperçu en ligne
 
 on:
   push:
     branches: [main]
-    # Un envoi qui ne touche que HakOS (hakos/) ne republie pas le site.
-    paths-ignore: ['hakos/**']
+    # Un envoi qui ne touche que HakOS (hakos/) ou la racine ne republie pas le site.
+    paths: ['site/**', '.github/workflows/apercu.yml']
   workflow_dispatch:
 
 permissions:
@@ -30,12 +30,16 @@ jobs:
       # Le site en ligne garde le texte provisoire des informations manquantes,
       # sans le surlignage jaune (src/components/Todo.astro).
       PUBLIC_SHOW_TODOS: 'false'
+    defaults:
+      run:
+        working-directory: site
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version-file: .nvmrc
+          node-version-file: site/.nvmrc
           cache: npm
+          cache-dependency-path: site/package-lock.json
       - run: npm ci
       - run: npm run build
       - run: npm run check:dist
@@ -44,7 +48,7 @@ jobs:
       - run: node scripts/deploy/sous-dossier.mjs dist /hako/ --site "$SITE_URL"
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
-          path: dist
+          path: site/dist
 
   publier:
     needs: construire

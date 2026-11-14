@@ -40,7 +40,7 @@ La carte Raspberry Pi 5 n’est pas du matériel libre. Sa documentation officie
 
 ## Ce qui reste à préciser
 
-La page d’accueil de la box (http://hako.local) est notre propre travail, sous licence GNU GPL v3 ou version ultérieure (GPL-3.0-or-later, décision des fondateurs du 14/11). La recette qui fabrique le système de la box est elle aussi notre travail : elle sera publiée dans le dossier `hakos/` du dépôt antoninche/hako ; tant que ce dossier n’est pas en ligne, son lien reste signalé en jaune sur la page « La box » et recensé dans TODO.md. Le site ne dit pas que tous les logiciels de la box sont libres : il nomme ceux qui le sont (Immich, Nextcloud, Docker et Raspberry Pi OS).
+La page d’accueil de la box (http://hako.local) est notre propre travail, sous licence GNU GPL v3 ou version ultérieure (GPL-3.0-or-later, décision des fondateurs du 14/11). La recette qui fabrique le système de la box est elle aussi notre travail : elle est publiée dans le dossier `hakos/` du dépôt antoninche/hako, sous la même licence, et la page « La box » y renvoie. Le site ne dit pas que tous les logiciels de la box sont libres : il nomme ceux qui le sont (Immich, Nextcloud, Docker et Raspberry Pi OS).
 
 ## Refaire les vérifications
 

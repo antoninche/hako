@@ -233,7 +233,7 @@ else
 fi
 if cmp -s <(cd "$boite/home/assistant" && find . -type f -print0 | sort -z | xargs -0 sha256sum) \
 	<(cd "$RACINE/rootfs/opt/box/home/assistant" && find . -type f ! -name .DS_Store -print0 | sort -z | xargs -0 sha256sum); then
-	ok "page de la HAKO identique à celle du dépôt (commit $(valeur HAKO_SITE_COMMIT "$boite/versions.env" | cut -c 1-7) de hako-site)"
+	ok "page de la HAKO identique à celle du dépôt (commit $(valeur HAKO_SITE_COMMIT "$boite/versions.env" | cut -c 1-7) du dossier site/)"
 else
 	echec "page de la HAKO (/opt/box/home/assistant) différente de celle du dépôt"
 fi

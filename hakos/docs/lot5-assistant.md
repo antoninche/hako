@@ -21,7 +21,7 @@
 - **Pare-feu (décisions 1 et 7)** : table `inet hakos` seule (Docker intact). Rien n'entre en IPv6 sauf ICMPv6, DHCPv6 et mDNS ; TCP entrant depuis les IPv4 privées seulement ; 2283 et 8080 fermés avant l'installation ; 12283 toujours fermé au réseau. Redémarrer `hakos-parefeu` redémarre Docker (`Requires`).
 - **Frein d'Immich (décision 1)** : `limit_req` de nginx, 10 par minute et par adresse (10 d'un coup, puis un toutes les 6 s, 429 au-delà) sur `/api/auth/login`, `change-password`, `session/unlock` et `pin-code`.
 - **Liste de mots (décision 2)** : liste française de diceware utilisée par Tails (CC0), réduite à 4 096 mots ; provenance et filtres dans `docs/liste-de-mots.md`. Relecture par deux personnes : à faire.
-- **Page de la HAKO (décisions 8 et 10)** : `rootfs/opt/box/home/assistant/`, construite depuis hako-site au commit `HAKO_SITE_COMMIT` de `versions.env`, `SITE_URL=https://antoninche.github.io/hako`. Pour la remonter : reconstruire dans un clone à un autre commit (`npm ci && SITE_URL=… npm run build:box`), recopier `dist-box/`, changer `HAKO_SITE_COMMIT`.
+- **Page de la HAKO (décisions 8 et 10)** : `rootfs/opt/box/home/assistant/`, construite depuis le dossier site/ de antoninche/hako au commit `HAKO_SITE_COMMIT` de `versions.env`, `SITE_URL=https://antoninche.github.io/hako`. Pour la remonter : reconstruire dans un clone à un autre commit (`cd site && npm ci && SITE_URL=… npm run build:box`), recopier `site/dist-box/`, changer `HAKO_SITE_COMMIT`.
 - **Hors lot** : décision 4 (bouton de la box), sous-lot 5.5 (Wi-Fi), « Gérer ma HAKO » (lot 6).
 
 ### Essais du 14 novembre (VM Colima, Ubuntu 24.04 arm64, 4 Go simulés)
@@ -82,7 +82,7 @@ Base `http://hako.local/api/installation/`, JSON de 16 Kio au plus, clés de `bo
 
 ## 3. La page de la box
 
-- **Dans hako-site** : une entrée à part, `npm run build:box`, qui produit une seule page avec `<Assistant mode="box">` et l'accès réel. Un test vérifie que cet accès n'entre pas dans le site public.
+- **Dans le dossier site/ de antoninche/hako** : une entrée à part, `npm run build:box`, qui produit une seule page avec `<Assistant mode="box">` et l'accès réel. Un test vérifie que cet accès n'entre pas dans le site public.
 - **Dans mabox-os** : `versions.env` fige `HAKO_SITE_COMMIT`. `make assistant` construit ce commit sur le Mac, dans un conteneur node figé, et range l'archive et sa somme SHA-256 dans `images/`. L'image la copie dans `/opt/box/assistant/page/`, et `verifier-image` contrôle la somme.
 
 ## 4. Mots de passe

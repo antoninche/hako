@@ -14,7 +14,7 @@ SITE_URL=https://antoninche.github.io/hako npm run build:box
 - Les informations encore manquantes gardent leur texte provisoire, sans surlignage.
 - L’accès réel (`src/lib/assistant/box-http.ts`) n’entre jamais dans le site public : `tests/unit/assistant-script.test.ts` échoue si son adresse ou son en-tête de session apparaît dans `dist/`.
 
-HakOS construit cette page à partir d’un commit figé de ce dépôt (`HAKO_SITE_COMMIT`), et copie `dist-box/` dans son image.
+HakOS (dossier `hakos/` du dépôt) construit cette page à partir d’un commit figé du dépôt (`HAKO_SITE_COMMIT` de `hakos/versions.env`), et copie `site/dist-box/` dans son image.
 
 ## En-têtes à envoyer
 

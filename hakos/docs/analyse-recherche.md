@@ -307,7 +307,7 @@ Niveaux de confiance :
   - La directive `upgrade-insecure-requests` du site ne fait pas passer en HTTPS les navigations vers un autre site, sauf les envois de formulaire.
   - Chrome 154 (octobre 2026) demande l'accord de l'utilisateur avant d'ouvrir une page en HTTP. Il n'affiche pas cet avertissement pour les noms non uniques (.local), les IP locales et les noms sans point.
   - Chrome, Safari, Firefox et Edge essaient d'abord HTTPS puis reviennent à HTTP.
-  - La politique de sécurité du site est décrite dans ~/Code/hako-site/docs/hebergement.md.
+  - La politique de sécurité du site est décrite dans site/docs/hebergement.md (dossier site/ de antoninche/hako).
 - Sources :
   - https://www.w3.org/TR/upgrade-insecure-requests/
   - https://chromium.googlesource.com/chromium/src/+/main/docs/security/ask-before-http/ask-before-http-adoption-guide.md

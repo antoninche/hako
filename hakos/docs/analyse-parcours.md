@@ -7,7 +7,7 @@ Parcours et textes exacts : le guide public (/installer/), l’assistant de prem
 - {prenom}, {n}, {numero}… : valeurs remplies par la page, comme « {n} » dans src/content/commande.ts.
 - [TODO: …] : information non confirmée, à transcrire avec todo(…). Récapitulatif en partie 6.
 - [TODO: coordonnées du support] : reprendre company.email et company.phone (src/data/entreprise.ts), déjà en attente.
-- Les chemins src/… sont ceux du dépôt du site (~/Code/hako-site).
+- Les chemins src/… sont ceux du dossier site/ de antoninche/hako.
 - Typographie : apostrophe ’ partout. Les espaces avant « : », « ; », « ! », « ? », « » » et après « « » sont des espaces ordinaires. À la transcription, envelopper l’objet exporté dans withFrenchTypography() (src/lib/typography.ts), comme dans src/data/entreprise.ts : la fonction les rend insécables. Vérification faite : il ne manque aucune de ces espaces (621 en tout), et le texte qui sort de la fonction est conforme.
 - Vocabulaire : « box internet » désigne celle de l’opérateur ; « la box » ou « votre box HAKO » désigne la nôtre. Ne jamais écrire « box » seul quand il peut s’agir des deux.
 - Découpage proposé de src/content/installation.ts : guide, assistant, fiche, demonstration, carte. La démonstration et la vraie box affichent les mêmes textes d’assistant : les garder dans un seul fichier, partagé avec le dépôt de la box.

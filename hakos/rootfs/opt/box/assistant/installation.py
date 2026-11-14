@@ -1,7 +1,7 @@
 """Où en est la première installation : phases, session de l'appareil qui a la main, essais.
 
-Contrat de la page de la HAKO : docs/page-box.md du dépôt hako-site. Tout vit dans la mémoire du
-processus : les mots de passe, le jeton (seulement son empreinte), le compteur d'essais faux.
+Contrat de la page de la HAKO : docs/page-box.md du dossier site/ de antoninche/hako. Tout vit
+dans la mémoire du processus : les mots de passe, le jeton (seulement son empreinte), le compteur d'essais faux.
 Un redémarrage remet la HAKO en « ready » (ou « preparing ») : la page tire alors de nouveaux
 mots de passe, et la création met à jour les comptes déjà créés.
 

@@ -23,8 +23,6 @@ export default defineConfig([
     'test-results/',
     // Jeux d'essai des scripts : volontairement fautifs.
     'tests/fixtures/',
-    // HakOS, le système de la box : ses propres contrôles (make -C hakos lint).
-    'hakos/',
   ]),
 
   js.configs.recommended,

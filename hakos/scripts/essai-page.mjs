@@ -4,9 +4,10 @@
  * (VM Colima après « scripts/essai-vm.sh installer », port 80 redirigé vers le Mac par Colima).
  * Elle crée les comptes de deux personnes d'essai.
  *
- *   node scripts/essai-page.mjs [http://127.0.0.1] [~/Code/hako-site]
+ *   node scripts/essai-page.mjs [http://127.0.0.1] [DOSSIER_DU_SITE]
  *
- * Playwright vient du dépôt hako-site (ses node_modules). Parcours :
+ * Playwright vient du dossier site/ de antoninche/hako (ses node_modules, après « npm ci ») ;
+ * par défaut, ../../site à partir de ce script. Parcours :
  *  1. appareil A : prénoms, mots de passe affichés, puis page fermée avant la création ;
  *  2. appareil B : « installation en cours » ; « Recommencer » refusé tant que A n'a pas
  *     dépassé 2 minutes sans signe de vie, puis accepté : nouveaux mots de passe ;
@@ -16,11 +17,12 @@
  * Ni violation de CSP, ni erreur, ni requête ailleurs que sur la box. Aucun mot de passe affiché.
  */
 import { createRequire } from 'node:module';
-import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const BASE = process.argv[2] ?? 'http://127.0.0.1';
-const SITE = process.argv[3] ?? path.join(os.homedir(), 'Code', 'hako-site');
+const SITE =
+  process.argv[3] ?? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'site');
 const { chromium } = createRequire(path.join(SITE, 'package.json'))('playwright');
 
 let reussis = 0;

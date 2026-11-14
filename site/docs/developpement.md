@@ -1,8 +1,8 @@
 # Développement du site
 
-Comment installer, construire, tester et modifier le site de HAKO. La présentation du projet est dans le [README](../README.md).
+Comment installer, construire, tester et modifier le site de HAKO. La présentation du site est dans son [README](../README.md), celle du projet dans le [README du dépôt](../../README.md). Toutes les commandes se lancent dans le dossier `site/` du dépôt.
 
-Aperçu en ligne : https://antoninche.github.io/hako/. Il est reconstruit et publié à chaque envoi sur la branche `main` (`.github/workflows/apercu.yml`). Comme il est servi dans le sous-dossier `/hako/`, l'étape `scripts/deploy/sous-dossier.mjs` réécrit les adresses du site construit ; avec un nom de domaine propre, on publie `dist/` tel quel.
+Aperçu en ligne : https://antoninche.github.io/hako/. Il est reconstruit et publié à chaque envoi sur la branche `main` qui touche `site/` (`.github/workflows/apercu.yml`, à la racine du dépôt). Comme il est servi dans le sous-dossier `/hako/`, l'étape `scripts/deploy/sous-dossier.mjs` réécrit les adresses du site construit ; avec un nom de domaine propre, on publie `dist/` tel quel.
 
 ## Prérequis
 
@@ -14,6 +14,7 @@ Aperçu en ligne : https://antoninche.github.io/hako/. Il est reconstruit et pub
 ## Installation
 
 ```sh
+cd site
 npm ci
 npm run dev
 ```
@@ -102,10 +103,10 @@ Les licences de tous les éléments tiers sont réunies dans [docs/licences.md](
 
 La page `/charte/` (http://localhost:4321/charte/ avec `npm run dev`) est une page interne : elle n’est liée nulle part et demande aux moteurs de recherche de ne pas l’indexer. Elle montre les couleurs et leurs contrastes, les surfaces, la typographie, les boutons, le logo et les icônes, avec les valeurs de `src/styles/tokens.css` relues à chaque construction. Les règles d’usage et les composants sont décrits dans [docs/brand.md](brand.md).
 
-## Organisation du dépôt
+## Organisation du dossier site/
 
 ```text
-hako-site/
+site/
 ├── box/              page servie par la HAKO pour sa première installation (npm run build:box,
 │                     docs/page-box.md)
 ├── brand/            PNG d’origine du logo
@@ -128,7 +129,6 @@ hako-site/
 ├── tests/            tests Playwright et jeux d’essai des scripts
 ├── CHANGELOG.md      journal des modifications
 ├── LICENSE           licence MIT du code
-├── NOTICE            marque, logo, dessins, photos et textes réservés
 ├── TODO.md           informations manquantes (produit par npm run todos)
 ├── astro.config.mjs
 ├── astro.box.config.mjs  configuration de la page de la HAKO

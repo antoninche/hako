@@ -1,8 +1,8 @@
 """Les personnes de la maison : prénoms, identifiants et mots de passe.
 
-Mêmes règles que la page de la HAKO (src/lib/assistant/household.ts du dépôt hako-site, au
-commit HAKO_SITE_COMMIT de versions.env) : la page refuse une réponse dont les prénoms ou les
-identifiants diffèrent des siens. Toute modification se fait des deux côtés.
+Mêmes règles que la page de la HAKO (src/lib/assistant/household.ts du dossier site/ de
+antoninche/hako, au commit HAKO_SITE_COMMIT de versions.env) : la page refuse une réponse dont les
+prénoms ou les identifiants diffèrent des siens. Toute modification se fait des deux côtés.
 
 - prénom : lettres (accents compris), séparées au besoin par une espace, un trait d'union ou une
   apostrophe ; espaces en trop retirées ; 40 caractères au plus ;

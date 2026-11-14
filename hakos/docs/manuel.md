@@ -115,7 +115,7 @@ colima ssh -- sudo env HAKOS_ESSAI=1 HAKOS_MEMOIRE_KIO=4000000 /opt/box/test-sur
 colima ssh -- sudo ~/Code/hako/hakos/scripts/essai-vm.sh defaire
 ```
 
-Dans un vrai navigateur (Chromium de Playwright, pris dans ~/Code/hako-site), après « installer » : `node scripts/essai-page.mjs`.
+Dans un vrai navigateur (Chromium de Playwright, pris dans le dossier site/ de antoninche/hako, après `npm ci`), après « installer » : `node scripts/essai-page.mjs`.
 
 ## Rejoindre un Wi-Fi sur place
 

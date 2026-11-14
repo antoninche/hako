@@ -94,7 +94,7 @@ Le site n’utilise pas les autres décodeurs de Three.js. Draco (`DRACOLoader`)
 Pour l’instant, le site est publié sur GitHub Pages, dans le sous-dossier `/hako/` (https://antoninche.github.io/hako/). Une fois le nom de domaine acheté :
 
 1. Dans les réglages Pages du dépôt sur GitHub, indiquer le nom de domaine, puis créer chez le registraire les enregistrements DNS donnés par la documentation de GitHub ; activer HTTPS dès que le certificat est prêt.
-2. Dans `.github/workflows/apercu.yml`, mettre `SITE_URL` à l’adresse du domaine (par exemple `https://exemple.fr`) et retirer l’étape `scripts/deploy/sous-dossier.mjs` : le site est alors servi à la racine, tel qu’il est construit, et `robots.txt` devient utile.
+2. Dans `.github/workflows/apercu.yml` (à la racine du dépôt), mettre `SITE_URL` à l’adresse du domaine (par exemple `https://exemple.fr`) et retirer l’étape `scripts/deploy/sous-dossier.mjs` : le site est alors servi à la racine, tel qu’il est construit, et `robots.txt` devient utile.
 3. Dans `src/data/entreprise.ts`, renseigner le nom de domaine et l’adresse e-mail sur ce domaine.
 4. Si l’hébergeur change, mettre à jour les mentions légales et la politique de confidentialité (`src/content/legal/`).
 5. Refaire les contrôles de la partie suivante.
