@@ -10,7 +10,8 @@
 #   3. recherche de secrets dans les fichiers suivis par git ou à suivre (non ignorés) : fichiers .env,
 #      clés privées, mots de passe en clair (CLÉ=valeur ou clé YAML dont le nom contient PASSWORD,
 #      PASS, SECRET ou TOKEN, avec une valeur littérale) ;
-#   4. tests unitaires de l'assistant de première installation (tests/assistant, python3).
+#   4. tests unitaires de l'assistant de première installation (tests/assistant) et du socle
+#      (tests/socle : noms des applications, page d'état), python3.
 # Une ligne « OK … » ou « ÉCHEC … » par contrôle, puis un bilan. Code de sortie 1 si un contrôle échoue.
 # Compatible avec le bash 3.2 de macOS.
 set -euo pipefail
@@ -171,8 +172,17 @@ else
 	printf '%s\n' "$sortie" | tail -20
 	echec "assistant : tests unitaires en échec (ci-dessus)"
 fi
+if ! command -v python3 >/dev/null 2>&1; then
+	echec "python3 introuvable : tests du socle non lancés"
+elif sortie="$(cd "$RACINE/tests/socle" && python3 -B -m unittest -q 2>&1)"; then
+	ok "socle : tests unitaires des noms et de la page d'état ($(sed -n 's/^Ran \([0-9]*\) tests.*/\1/p' <<<"$sortie") tests)"
+else
+	printf '%s\n' "$sortie" | tail -20
+	echec "socle : tests unitaires en échec (ci-dessus)"
+fi
 if python3 -B -c 'import ast, sys; [ast.parse(open(f, encoding="utf-8").read(), f) for f in sys.argv[1:]]' \
-	"$RACINE/scripts/essai-assistant.py" "$RACINE"/rootfs/opt/box/assistant/*.py 2>/dev/null; then
+	"$RACINE/scripts/essai-assistant.py" "$RACINE"/rootfs/opt/box/assistant/*.py \
+	"$RACINE"/rootfs/opt/box/noms/*.py "$RACINE"/rootfs/opt/box/etat/*.py 2>/dev/null; then
 	ok "assistant : syntaxe Python des scripts de la box"
 else
 	echec "assistant : erreur de syntaxe Python (python3 -m py_compile pour le détail)"

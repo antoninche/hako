@@ -9,12 +9,20 @@
 #   HAKOS_ESSAI=1      essai hors box : ni machine-id, ni clés SSH, rien dans /etc ;
 #                      la fiche d'installation va dans $HAKOS_BOITE au lieu de /root
 #   HAKOS_MEMOIRE_KIO  mémoire à prendre en compte, en kio, à la place de MemTotal
+#   HAKOS_PAGE_OCTETS  taille des pages mémoire à prendre en compte, à la place de getconf PAGESIZE
 #   HAKOS_DELAI_SANTE  délai d'attente des services, en secondes (défaut 900)
+#   HAKOS_ETAT         état de l'installation (défaut /var/lib/hakos), comme pour lib/phase.sh
 
 HAKOS_BOITE=${HAKOS_BOITE:-/opt/box}
 HAKOS_ESSAI=${HAKOS_ESSAI:-0}
 HAKOS_DELAI_SANTE=${HAKOS_DELAI_SANTE:-900}
 HAKOS_MEMOIRE_KIO=${HAKOS_MEMOIRE_KIO:-}
+HAKOS_PAGE_OCTETS=${HAKOS_PAGE_OCTETS:-}
+HAKOS_ETAT=${HAKOS_ETAT:-/var/lib/hakos}
+
+# Taille des pages mémoire attendue : 4 Kio, noyau kernel8.img (config.txt, section [pi5]). Le
+# noyau du Pi 5 à pages de 16 Kio (kernel_2712.img) fait planter la base d'Immich (jemalloc).
+HAKOS_PAGE_ATTENDUE=4096
 
 # Dossiers des projets docker compose, dans l'ordre de démarrage.
 HAKOS_SERVICES=(home immich nextcloud)

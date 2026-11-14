@@ -72,6 +72,92 @@ verifier_conditions() {
 	PROFIL=$(lire_profil)
 }
 
+# taille_page : taille des pages mémoire en octets, HAKOS_PAGE_OCTETS pour un essai.
+taille_page() {
+	local octets=$HAKOS_PAGE_OCTETS
+	[ -n "$octets" ] || octets=$(getconf PAGESIZE 2>/dev/null) || octets=""
+	printf '%s\n' "${octets:-illisible}"
+}
+
+# journaliser_eeprom : version du chargeur de démarrage (EEPROM du Pi 5) dans le journal, par
+# rpi-eeprom-update (version en place et version livrée avec l'image), sinon par vcgencmd.
+# Le démarrage sur SSD NVMe demande un EEPROM du 6/12/2023 ou plus récent ; celui de juin 2024
+# démarre sur la carte M.2 HAT+ sans réglage. rpi-eeprom-update.service installe au démarrage la
+# version livrée si elle est plus récente. Rien n'est bloquant ici : la box a déjà démarré.
+journaliser_eeprom() {
+	local sortie ligne date_en_place=""
+	sortie=$(rpi-eeprom-update 2>&1 </dev/null) || true
+	if [[ $sortie == *CURRENT:* ]]; then
+		while IFS= read -r ligne; do
+			ligne=${ligne#"${ligne%%[![:space:]]*}"}
+			case $ligne in
+				BOOTLOADER:* | CURRENT:* | LATEST:*) journal "  EEPROM : $ligne" ;;
+			esac
+			if [[ $ligne =~ ^CURRENT:.*\(([0-9]+)\)$ ]] && [ -z "$date_en_place" ]; then
+				date_en_place=${BASH_REMATCH[1]}
+			fi
+		done <<<"$sortie"
+	elif sortie=$(vcgencmd bootloader_version 2>/dev/null </dev/null) && [ -n "$sortie" ]; then
+		journal "  EEPROM : ${sortie%%$'\n'*}"
+		[[ $sortie =~ timestamp\ ([0-9]+) ]] && date_en_place=${BASH_REMATCH[1]}
+	else
+		journal "  EEPROM : version illisible (rpi-eeprom-update et vcgencmd absents : ce n'est pas un Raspberry Pi)"
+		return 0
+	fi
+	# 1717200000 : 1er juin 2024.
+	if [[ $date_en_place =~ ^[0-9]+$ ]] && [ "$date_en_place" -lt 1717200000 ]; then
+		journal "  attention : EEPROM antérieur à juin 2024 ; rpi-eeprom-update.service le mettra à jour au prochain démarrage"
+	fi
+}
+
+# arreter_box RAISON TEXTE : le premier démarrage refuse le matériel. Marqueur $HAKOS_ETAT/arret,
+# pare-feu fermé, et seule la page d'arrêt sur http://hako.local (nginx de l'accueil, arret.conf),
+# pour que la famille sache quoi faire. Immich et Nextcloud ne démarrent pas. À chaque démarrage,
+# le premier démarrage recommence et lève l'arrêt si le matériel convient.
+arreter_box() {
+	local raison=$1 texte=$2 nginx archive="$HAKOS_BOITE/images/nginx.tar" sortie
+	journal "  ARRÊT : $texte"
+	if [ "$(id -u)" -ne 0 ]; then
+		journal "  essai sans root : pas de page d'arrêt"
+		echec "$texte"
+	fi
+	install -d -m 755 "$HAKOS_ETAT"
+	printf '%s\n' "$raison" >"$HAKOS_ETAT/arret"
+	chmod 644 "$HAKOS_ETAT/arret"
+	creer_env home
+	nginx=$(lire_valeur "$HAKOS_BOITE/versions.env" NGINX_IMAGE) || nginx=""
+	if [ -n "$nginx" ] && ! docker image inspect "$nginx" >/dev/null 2>&1 </dev/null && [ -f "$archive" ]; then
+		# L'archive reste en place : le vrai chargement (étape 4) la supprimera.
+		sortie=$(docker load -i "$archive" 2>&1 </dev/null) || journal "  attention : docker load de nginx a échoué : $sortie"
+	fi
+	if (cd -- "$HAKOS_BOITE/home" && docker compose up -d </dev/null) >/dev/null 2>&1; then
+		"$HAKOS_BOITE/lib/phase.sh" recharger || true
+		journal "  page d'arrêt servie sur le port 80 (http://hako.local)"
+	else
+		journal "  attention : nginx de l'accueil n'a pas démarré, pas de page d'arrêt"
+	fi
+	echec "$texte"
+}
+
+# verifier_materiel : garde-fous du Pi 5. Version de l'EEPROM dans le journal ; pages mémoire de
+# 4 Kio, sinon arrêt avec la page d'arrêt. Un arrêt précédent est levé si tout va bien.
+verifier_materiel() {
+	local pages
+	journaliser_eeprom
+	pages=$(taille_page)
+	if [ "$pages" != "$HAKOS_PAGE_ATTENDUE" ]; then
+		arreter_box pages "pages mémoire de $pages octets au lieu de $HAKOS_PAGE_ATTENDUE : noyau à pages de 16 Kio (kernel_2712.img) au lieu de kernel8.img. Il faut « kernel=kernel8.img » dans la section [pi5] de /boot/firmware/config.txt ; Immich et Nextcloud ne démarrent pas."
+	fi
+	journal "  pages mémoire de $pages octets, comme attendu (noyau kernel8.img sur Pi 5)"
+	if [ -e "$HAKOS_ETAT/arret" ]; then
+		if [ "$(id -u)" -eq 0 ]; then
+			rm -f -- "$HAKOS_ETAT/arret"
+			"$HAKOS_BOITE/lib/phase.sh" recharger || true
+		fi
+		journal "  arrêt précédent levé : le matériel convient maintenant"
+	fi
+}
+
 # Étape 1 : machine-id propre à la box ; clés d'hôte SSH en profil dev.
 # Raspberry Pi OS crée les clés au premier démarrage (regenerate_ssh_host_keys.service,
 # paquet raspberrypi-sys-mods, qui lance ssh-keygen -A) : ici, seulement un filet de sécurité.
@@ -339,6 +425,24 @@ occ_nextcloud() {
 	docker exec -u www-data "$id" php occ --no-interaction --no-ansi "$@" </dev/null
 }
 
+# nextcloud_mandataire : Nextcloud fait confiance au nginx de l'accueil, qui le sert sous le nom
+# hako-fichiers.local. nginx joint 127.0.0.1:8080 ; Docker relaie alors la connexion depuis la
+# passerelle du réseau du projet (hakos-nextcloud_default). Cette passerelle, et elle seule, est
+# un mandataire de confiance : Nextcloud lit l'adresse de l'appareil dans X-Forwarded-For, et son
+# frein des mots de passe vise le bon appareil. Les appareils qui passent par le port 8080 gardent
+# leur propre adresse (Docker la conserve) et ne peuvent pas se faire passer pour un autre.
+nextcloud_mandataire() {
+	local passerelle
+	passerelle=$(docker network inspect --format '{{range .IPAM.Config}}{{.Gateway}} {{end}}' hakos-nextcloud_default 2>/dev/null </dev/null) || passerelle=""
+	passerelle=${passerelle%% *}
+	[[ $passerelle =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || echec "passerelle du réseau hakos-nextcloud_default illisible : mandataire de Nextcloud impossible à régler."
+	occ_nextcloud config:system:set trusted_proxies 0 --value="$passerelle" >/dev/null ||
+		echec "réglage trusted_proxies de Nextcloud impossible."
+	occ_nextcloud config:system:set forwarded_for_headers 0 --value=HTTP_X_FORWARDED_FOR >/dev/null ||
+		echec "réglage forwarded_for_headers de Nextcloud impossible."
+	journal "  Nextcloud : nginx de l'accueil reconnu comme mandataire (passerelle $passerelle)"
+}
+
 # Étape 6 : Nextcloud installé sans compte. L'administrateur technique de l'étape 3 est supprimé :
 # les comptes de la famille viennent de l'assistant (occ suffit). Nextcloud ne contacte pas
 # internet pour juger des mots de passe. Les lignes NEXTCLOUD_ADMIN_* quittent le .env et le
@@ -355,6 +459,7 @@ nextcloud_sans_compte() {
 	fi
 	occ_nextcloud config:system:set has_internet_connection --type=boolean --value=false >/dev/null ||
 		echec "réglage has_internet_connection de Nextcloud impossible."
+	nextcloud_mandataire
 	if grep -q '^NEXTCLOUD_ADMIN_' "$env"; then
 		provisoire=$(mktemp "$env.XXXXXX") || echec "impossible d'écrire dans $HAKOS_BOITE/nextcloud"
 		grep -v '^NEXTCLOUD_ADMIN_' "$env" >"$provisoire" || true
@@ -411,9 +516,10 @@ ecrire_fiche() {
 		Nextcloud                   : $nextcloud
 
 		Adresses, depuis un appareil branché sur le même réseau
-		  Accueil                   : http://$nom.local
-		  Photos (Immich)           : http://$nom.local:2283
-		  Fichiers (Nextcloud)      : http://$nom.local:8080
+		  Accueil et état de la box : http://$nom.local
+		  Photos (Immich)           : http://$nom-photos.local   (secours : http://$nom.local:2283)
+		  Fichiers (Nextcloud)      : http://$nom-fichiers.local (secours : http://$nom.local:8080)
+		  Une deuxième box sur le même réseau prend le nom $nom-2 : http://$nom-2.local, etc.
 
 		Comptes des personnes de la maison
 		  Créés par la page de la HAKO : http://$nom.local (assistant de première installation).

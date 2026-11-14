@@ -1,6 +1,27 @@
 # Journal des modifications
 
-Les versions de HakOS (MaBox OS jusqu'au Lot 0) suivent les lots du projet.
+Les versions de HakOS (MaBox OS jusqu'au Lot 0) ont suivi les lots du projet jusqu'au Lot 5. Depuis 2026.11.1, elles portent un numéro AAAA.MM.n (HAKOS_VERSION de versions.env), affiché sur la page d'état.
+
+## [2026.11.1] - 2026-11-14
+
+### Ajouté
+
+- Garde-fous du Pi 5 : make verifier-image contrôle aussi les arbres de périphériques du Pi 5 et les overlays sur bootfs, et rpi-eeprom (images du BCM2712, rpi-eeprom-update activé). Le premier démarrage écrit la version de l'EEPROM dans son journal et s'arrête si les pages mémoire ne font pas 4 Kio : marqueur /var/lib/hakos/arret, ports fermés, page d'arrêt sur http://hako.local (home/site/arret.html, nginx arret.conf), levée seule au démarrage suivant si le noyau est corrigé.
+- Noms des applications : hako-photos.local (Immich) et hako-fichiers.local (Nextcloud), hako-2-… pour une deuxième box, annoncés par avahi (service hakos-noms, avahi-publish, paquet avahi-utils) et servis par le nginx de l'accueil sur le port 80, après l'installation seulement (home/nginx/noms.conf). Le frein des mots de passe d'Immich est commun au nom et au port 2283 (home/nginx/mandataire-immich.conf). Nextcloud reconnaît nginx comme mandataire (trusted_proxies, X-Forwarded-For).
+- Page d'état sur http://hako.local, d'après la maquette validée le 14/11 : applications par leur nom, disque, nombre de photos et vidéos, durée depuis l'allumage, température et ralentissements (vcgencmd), copie de secours, mises à jour « bientôt ». Données dans /api/etat, un JSON sans secret écrit chaque minute par hakos-etat (etat/etat.py, hakos-etat.timer) dans /run/hakos-etat.
+- scripts/essai-vm.sh installer IMAGE : essai dans la VM avec /opt/box, archives et unités tirés d'une image construite. Tests unitaires tests/socle (make lint).
+
+### Modifié
+
+- Nextcloud : domaines de confiance hako.local, hako-2.local, hako-fichiers.local, hako-2-fichiers.local, et l'adresse IPv4 de la box tenue à jour par hakos-noms (http://<adresse IP>:8080 marche en secours).
+- Fiche d'installation : adresses par les noms, ports en secours. Ports 2283 et 8080 gardés, ouverts au réseau de la maison après l'installation.
+- test-sur-boitier.sh, essai-assistant.py, verifier-image.sh : contrôles des noms, de la page d'état et des garde-fous du Pi 5.
+- Disque inchangé : partitions bootfs et rootfs ; les partitions système A et B sont reportées avec les mises à jour.
+
+### Problèmes connus
+
+- Rien n'a tourné sur un Pi 5 : noms vus des téléphones et des PC, EEPROM, vcgencmd, page d'arrêt sur un vrai noyau à 16 Kio restent à essayer (docs/socle-pi5.md).
+- La page de la HAKO (hako-site, commit HAKO_SITE_COMMIT) affiche encore les adresses avec les ports 2283 et 8080.
 
 ## [Lot 5] - 2026-11-14
 

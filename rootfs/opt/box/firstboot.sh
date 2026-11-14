@@ -3,7 +3,9 @@
 # Lancé une seule fois par hakos-premier-demarrage.service, tant que /opt/box/.initialized
 # n'existe pas. Sortie dans le journal : journalctl -u hakos-premier-demarrage
 #
-#   1. machine-id propre à la box ; clés d'hôte SSH en profil dev
+#   1. garde-fous du Pi 5 : version de l'EEPROM dans le journal ; pages mémoire de 4 Kio, sinon
+#      arrêt, avec une page qui l'explique sur http://hako.local ; machine-id propre à la box ;
+#      clés d'hôte SSH en profil dev
 #   2. apprentissage automatique d'Immich selon la mémoire (7 Gio)
 #   3. secrets : un .env par service (0600, root), jamais affiché
 #   4. docker load des archives de /opt/box/images, supprimées une fois chargées
@@ -16,7 +18,8 @@
 #
 # Relance sûre après un échec : les .env présents sont gardés, seules les archives restantes
 # sont chargées, docker compose est relancé. Commande : systemctl start hakos-premier-demarrage
-# Variables d'essai (HAKOS_BOITE, HAKOS_ESSAI, HAKOS_MEMOIRE_KIO, HAKOS_DELAI_SANTE) : lib/commun.sh
+# Variables d'essai (HAKOS_BOITE, HAKOS_ESSAI, HAKOS_MEMOIRE_KIO, HAKOS_PAGE_OCTETS,
+# HAKOS_DELAI_SANTE, HAKOS_ETAT) : lib/commun.sh
 set -euo pipefail
 umask 077
 
@@ -38,7 +41,8 @@ if [ "$HAKOS_ESSAI" = 1 ]; then
 	journal "Mode essai : rien n'est modifié dans /etc, la fiche va dans $HAKOS_BOITE."
 fi
 
-etape 1 "identité du système"
+etape 1 "matériel et identité du système"
+verifier_materiel
 identite_systeme
 
 etape 2 "mémoire et apprentissage automatique"

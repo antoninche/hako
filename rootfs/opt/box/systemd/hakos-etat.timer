@@ -1,0 +1,13 @@
+# HakOS : état de la box chaque minute (hakos-etat.service), dès 20 s après le démarrage.
+# Installé dans /etc/systemd/system et activé par stage-box/03.
+
+[Unit]
+Description=HakOS : état de la box chaque minute
+
+[Timer]
+OnBootSec=20s
+OnUnitActiveSec=1min
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target

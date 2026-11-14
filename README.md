@@ -2,9 +2,11 @@
 
 HakOS est le système de la box HAKO : une image Raspberry Pi OS Lite (Debian 13 trixie, arm64) pour Raspberry Pi 5, qui démarre sur SSD. L'image est construite avec pi-gen, l'outil officiel de Raspberry Pi, à la révision figée dans versions.env. Elle contient trois services, en conteneurs Docker :
 
-- la page d'accueil, http://hako.local (nginx, port 80), avec deux boutons : « Mes photos » et « Mes fichiers » ;
-- Immich, pour les photos, sur le port 2283 (nginx devant Immich, qui n'écoute que sur 127.0.0.1:12283) ;
-- Nextcloud, pour les fichiers, sur le port 8080.
+- la page d'état de la HAKO, http://hako.local (nginx, port 80) : les boutons « Mes photos » et « Mes fichiers », l'état de la box (disque, nombre de photos, durée depuis l'allumage, température et ralentissements, copie de secours) et la place des mises à jour, « bientôt » ;
+- Immich, pour les photos, à http://hako-photos.local (nginx devant Immich, qui n'écoute que sur 127.0.0.1:12283) ;
+- Nextcloud, pour les fichiers, à http://hako-fichiers.local.
+
+Ces deux noms sont annoncés par avahi (service hakos-noms) ; une deuxième box sur le même réseau prend hako-2.local, hako-2-photos.local et hako-2-fichiers.local. Les ports 2283 (Immich) et 8080 (Nextcloud) restent ouverts au réseau de la maison, en secours, par le nom ou l'adresse IP de la box. Détails, garde-fous du Pi 5 compris : docs/socle-pi5.md.
 
 Rien n'est téléchargé chez le client : les images Docker sont livrées dans l'image système et chargées au premier démarrage. Chaque box tire alors ses propres secrets (mots de passe des bases de données), démarre les services et écrit sa fiche d'installation. Deux box gravées avec la même image ne partagent aucun secret.
 
@@ -109,8 +111,10 @@ Avec l'image prod, personne ne peut se connecter : le test se fait depuis le Mac
 
 ```sh
 curl -s http://hako.local/ | grep -c 'Mes photos'                    # 1
-curl -s http://hako.local:2283/api/server/ping; echo                 # {"res":"pong"}
-curl -sL -o /dev/null -w '%{http_code}\n' http://hako.local:8080/    # 200
+curl -s http://hako.local/api/etat; echo                             # état de la box, en JSON, sans secret
+curl -s http://hako-photos.local/api/server/ping; echo               # {"res":"pong"}, après l'installation
+curl -sL -o /dev/null -w '%{http_code}\n' http://hako-fichiers.local/ # 200, après l'installation
+curl -s http://hako.local:2283/api/server/ping; echo                 # {"res":"pong"} (secours)
 nc -z -G 5 hako.local 22; echo "code=$?"                             # code=1 : port 22 fermé
 ```
 
@@ -122,10 +126,10 @@ Assistant de première installation, sur une box neuve de test seulement (il cr�
 sudo /opt/box/test-sur-boitier.sh --assistant 8 --coupure   # 8 personnes, création coupée puis reprise
 ```
 
-Sans box, dans la VM Colima (premier démarrage réel par systemd, images déjà dans Docker) :
+Sans box, dans la VM Colima (premier démarrage réel par systemd ; avahi-daemon et avahi-utils installés dans la VM). Sans argument, /opt/box vient du dépôt et les images doivent déjà être dans Docker ; avec une image construite, /opt/box, ses archives et les unités viennent de l'image :
 
 ```sh
-colima ssh -- sudo ~/Code/mabox-os/scripts/essai-vm.sh installer
+colima ssh -- sudo ~/Code/mabox-os/scripts/essai-vm.sh installer   # ou : installer ~/Code/mabox-os/deploy/image_….img.xz
 colima ssh -- sudo env HAKOS_ESSAI=1 HAKOS_MEMOIRE_KIO=4000000 /opt/box/test-sur-boitier.sh --assistant 1
 colima ssh -- sudo ~/Code/mabox-os/scripts/essai-vm.sh defaire
 ```
@@ -176,8 +180,10 @@ C'est le format netplan v2 de l'exemple commenté que Raspberry Pi met dans ce m
 - Mises à jour automatiques limitées aux correctifs de sécurité de Debian (unattended-upgrades). Les paquets Raspberry Pi (noyau, firmware) et ceux de Docker ne changent qu'avec une nouvelle image HakOS.
 - Pas de mise à jour des images Docker : Immich, Nextcloud, Postgres, Valkey et nginx restent aux versions de versions.env. Une box prod n'a aujourd'hui aucun moyen de recevoir une nouvelle version, et regraver le SSD efface les données.
 - Sous 7 Gio de mémoire (Pi 5 de 4 Go), l'apprentissage automatique d'Immich est coupé par un fichier de configuration (IMMICH_CONFIG_FILE) : d'après la documentation d'Immich, les réglages ne sont alors plus modifiables dans l'interface web.
-- Nextcloud n'accepte que hako.local (et localhost) : ouvert par l'adresse IP de la box, il refuse la page (« domaine non approuvé »).
-- Deux box sur le même réseau : la seconde répond à hako-2.local (avahi), alors que sa fiche d'installation indique hako.local.
+- Nextcloud accepte hako.local, hako-2.local, hako-fichiers.local, hako-2-fichiers.local et l'adresse IPv4 de la box (tenue à jour par hakos-noms). Une troisième box (hako-3) n'aurait que ses noms en .local et son adresse IP.
+- Deux box sur le même réseau : la seconde répond à hako-2.local, hako-2-photos.local et hako-2-fichiers.local (avahi), alors que sa fiche d'installation indique les noms de la première.
+- La page de la HAKO (assistant, construite depuis hako-site au commit HAKO_SITE_COMMIT) affiche encore les adresses http://hako.local:2283 et :8080 : elles marchent, en secours, jusqu'à la reconstruction de la page avec les nouveaux noms.
+- Les noms hako-photos.local et hako-fichiers.local ne sont pas encore essayés sur de vrais téléphones et ordinateurs (seulement dans la VM, par avahi).
 - En prod, la fiche /root/fiche-installation.txt n'est lisible par personne : la box n'a ni SSH ni compte ouvert.
 - cloud-init est gardé : qui a le SSD en main peut, par les fichiers de bootfs, faire lancer des commandes en root au démarrage. Il pourrait aussi lire les données, le disque n'étant pas chiffré.
 
@@ -191,10 +197,13 @@ stage-box/           étape pi-gen maison : système, Docker, applications, prem
 rootfs/opt/box/      contenu de /opt/box : fichiers compose, modèles d'environnement (env.modele),
                      page d'accueil et page de la HAKO (home/assistant), configuration nginx
                      (home/nginx), firstboot.sh et sa bibliothèque, assistant/ (API locale en
-                     Python, liste de mots), parefeu/ (nftables), unités systemd
+                     Python, liste de mots), noms/ (hakos-noms : noms des applications), etat/
+                     (hakos-etat : état de la box pour la page d'état), parefeu/ (nftables),
+                     unités systemd
 scripts/             construction, images Docker, qualité, vérification de l'image, test sur la box,
                      gravure ; scripts du Lot 0
 tests/assistant/     tests unitaires de l'assistant (make lint)
+tests/socle/         tests unitaires des noms et de la page d'état (make lint)
 docs/                notes de lot
 images/              archives des images Docker (ignorées par git)
 local/               clés publiques et mot de passe de test (ignorés par git)
