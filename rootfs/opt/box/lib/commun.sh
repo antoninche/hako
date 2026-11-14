@@ -1,7 +1,7 @@
 # shellcheck shell=bash
 # shellcheck disable=SC2034  # les variables HAKOS_* servent aux scripts qui chargent ce fichier
 #
-# HakoS : réglages et fonctions communes aux scripts de la box (premier démarrage, contrôles).
+# HakOS : réglages et fonctions communes aux scripts de la box (premier démarrage, contrôles).
 # À charger avec « . /opt/box/lib/commun.sh » : ce fichier ne lance rien par lui-même.
 #
 # Variables d'essai, toutes facultatives :

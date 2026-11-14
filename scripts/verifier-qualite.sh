@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Contrôles qualité du dépôt HakoS (make lint). Ne construit rien et ne lance aucune pile.
+# Contrôles qualité du dépôt HakOS (make lint). Ne construit rien et ne lance aucune pile.
 #   1. shellcheck (image Docker koalaman/shellcheck:v0.11.0) sur tous les scripts shell, hors pi-gen/ :
 #      fichiers .sh, fichiers à shebang sh ou bash, fichiers marqués « # shellcheck shell= » ;
 #   2. « docker compose config -q » sur chaque fichier compose, avec un .env provisoire écrit dans un

@@ -1,4 +1,4 @@
-# HakoS : annonce de hako.local sur le réseau local (déjà présent dans Lite, gardé explicitement)
+# HakOS : annonce de hako.local sur le réseau local (déjà présent dans Lite, gardé explicitement)
 avahi-daemon
 # Correctifs de sécurité de Debian appliqués seuls (origine limitée par files/52hakos-securite)
 unattended-upgrades

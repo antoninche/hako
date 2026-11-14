@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Prépare les archives des images Docker livrées dans HakoS, dans le dossier images/.
+# Prépare les archives des images Docker livrées dans HakOS, dans le dossier images/.
 #
 # Pour chaque image de versions.env, sur le Mac (moteur Docker de Colima) :
 #   - la récupère pour linux/arm64 si elle manque, par son empreinte quand versions.env en donne une ;

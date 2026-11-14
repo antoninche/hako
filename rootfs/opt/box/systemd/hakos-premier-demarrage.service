@@ -1,11 +1,11 @@
-# HakoS : premier démarrage de la box (secrets, images Docker, services, fiche d'installation).
+# HakOS : premier démarrage de la box (secrets, images Docker, services, fiche d'installation).
 # Installé dans /etc/systemd/system et activé par stage-box/03-premier-demarrage.
 # Ne tourne plus une fois /opt/box/.initialized créé.
 # Journal : journalctl -u hakos-premier-demarrage
 # Relance après un échec : systemctl start hakos-premier-demarrage
 
 [Unit]
-Description=HakoS : premier démarrage de la box
+Description=HakOS : premier démarrage de la box
 After=docker.service network-online.target
 Requires=docker.service
 Wants=network-online.target

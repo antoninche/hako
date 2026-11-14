@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Test de fumée de HakoS, sur la box, après le premier démarrage. En root :
+# Test de fumée de HakOS, sur la box, après le premier démarrage. En root :
 #   sudo /opt/box/test-sur-boitier.sh
 # Une ligne « OK … » ou « ÉCHEC … » par contrôle, puis un bilan. Code de sortie 1 si un contrôle
 # échoue. Le script ne modifie rien et n'affiche jamais la valeur d'un secret.
@@ -90,7 +90,7 @@ lire_page() {
 	corps="${sortie%$'\n'*}"
 }
 
-echo "Test de HakoS dans $BOITE : profil ${profil:-inconnu}, mémoire $memoire_kio Kio$([ "$ESSAI" = 1 ] && echo ', essai')."
+echo "Test de HakOS dans $BOITE : profil ${profil:-inconnu}, mémoire $memoire_kio Kio$([ "$ESSAI" = 1 ] && echo ', essai')."
 
 # --- Fichiers de la box ---
 

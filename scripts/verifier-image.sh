@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Vérifie une image HakoS construite, sans la démarrer. À lancer sur le Mac :
+# Vérifie une image HakOS construite, sans la démarrer. À lancer sur le Mac :
 #   scripts/verifier-image.sh [deploy/image_AAAA-MM-JJ-hakos-PROFIL.img.xz]
 #   make verifier-image [IMAGE=deploy/image_AAAA-MM-JJ-hakos-PROFIL.img.xz]
 #
@@ -38,7 +38,7 @@ if [ "${1:-}" != "--dans-la-vm" ]; then
 				recente="$candidate"
 			fi
 		done
-		[ -n "$recente" ] || erreur "aucune image HakoS dans deploy/ : la construire (make build-dev ou make build-prod) ou donner son chemin."
+		[ -n "$recente" ] || erreur "aucune image HakOS dans deploy/ : la construire (make build-dev ou make build-prod) ou donner son chemin."
 		echo "Image la plus récente de deploy/ : ${recente#"$RACINE"/}"
 		set -- "$recente"
 	fi

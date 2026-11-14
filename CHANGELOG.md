@@ -1,6 +1,6 @@
 # Journal des modifications
 
-Les versions de HakoS (MaBox OS jusqu'au Lot 0) suivent les lots du projet.
+Les versions de HakOS (MaBox OS jusqu'au Lot 0) suivent les lots du projet.
 
 ## [Lot 4] - 2026-11-13
 
@@ -12,11 +12,11 @@ Les versions de HakoS (MaBox OS jusqu'au Lot 0) suivent les lots du projet.
 
 ### Modifié
 
-- README.md : réécrit pour HakoS (prérequis, construction, vérification, gravure, test sur la box, Wi-Fi sur place, limites connues, organisation).
+- README.md : réécrit pour HakOS (prérequis, construction, vérification, gravure, test sur la box, Wi-Fi sur place, limites connues, organisation).
 
 ### Problèmes connus
 
-- Aucune image HakoS n'a encore été construite ni démarrée sur un Pi 5 : la procédure de docs/lots-1-a-4.md reste à dérouler, image dev puis image prod.
+- Aucune image HakOS n'a encore été construite ni démarrée sur un Pi 5 : la procédure de docs/lots-1-a-4.md reste à dérouler, image dev puis image prod.
 - scripts/verifier-image.sh n'a tourné que sur l'image du Lot 0 (mécanique validée : décompression, montage, contrôles, nettoyage).
 - Le premier démarrage et scripts/test-sur-boitier.sh ont tourné dans la VM Colima, en essai, avec les vraies images chargées depuis leurs archives : 19 contrôles réussis sans apprentissage automatique, 20 avec (docs/lots-1-a-4.md, « Essai dans la VM Colima »). Rien n'a encore tourné sur une box.
 - Le Wi-Fi d'une box prod par le fichier network-config de bootfs n'est pas vérifié.
@@ -47,7 +47,7 @@ Les versions de HakoS (MaBox OS jusqu'au Lot 0) suivent les lots du projet.
 
 ### Ajouté
 
-- config/commun.conf, config/dev.conf, config/prod.conf : configuration pi-gen de HakoS (IMG_NAME=hakos), nom d'hôte hako, compte hako jamais renommé, fr_FR.UTF-8, clavier fr, fuseau Europe/Paris, WPA_COUNTRY=FR, cloud-init gardé ; dev avec SSH par clé seulement, prod sans SSH.
+- config/commun.conf, config/dev.conf, config/prod.conf : configuration pi-gen de HakOS (IMG_NAME=hakos), nom d'hôte hako, compte hako jamais renommé, fr_FR.UTF-8, clavier fr, fuseau Europe/Paris, WPA_COUNTRY=FR, cloud-init gardé ; dev avec SSH par clé seulement, prod sans SSH.
 - stage-box : étape pi-gen maison. prerun.sh ; EXPORT_IMAGE (image_AAAA-MM-JJ-hakos-dev.img.xz ou -prod) ; 00-systeme : /opt/box/profil, /etc/ssh/sshd_config.d/10-hakos.conf, unattended-upgrades limité à l'origine Debian-Security (52hakos-securite), noyau kernel8.img à pages de 4 Kio sur Pi 5, `cgroup_enable=memory cgroup_memory=1` dans cmdline.txt, avahi activé, rpi-connect-lite purgé ; en prod, ssh.service, ssh.socket et sshswitch.service masqués et compte hako verrouillé ; 99-nettoyage : caches apt vidés avant l'export.
 - scripts/construire.sh (make build-dev, make build-prod) : construction par le build Docker de pi-gen avec la méthode du Lot 0 (config dans local/pigen.conf, montée en lecture seule puis effacée), montages en lecture seule de stage-box/, rootfs/, images/, scripts/ et versions.env, une archive par image figée exigée, mot de passe prod tiré au hasard et jeté, SHA256SUMS et journal dans deploy/.
 - scripts/verifier-qualite.sh (make lint) : shellcheck sur tous les scripts, `docker compose config -q` sur chaque fichier compose avec un .env provisoire, recherche de secrets dans les fichiers suivis ou à suivre.

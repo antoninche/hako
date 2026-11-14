@@ -1,5 +1,5 @@
 #!/bin/bash
-# HakoS : premier démarrage de la box.
+# HakOS : premier démarrage de la box.
 # Lancé une seule fois par hakos-premier-demarrage.service, tant que /opt/box/.initialized
 # n'existe pas. Sortie dans le journal : journalctl -u hakos-premier-demarrage
 #
@@ -30,7 +30,7 @@ trap fin_premier_demarrage EXIT
 debut=$(date +%s)
 
 verifier_conditions
-journal "HakoS : premier démarrage (dossier $HAKOS_BOITE, profil $PROFIL)."
+journal "HakOS : premier démarrage (dossier $HAKOS_BOITE, profil $PROFIL)."
 if [ "$HAKOS_ESSAI" = 1 ]; then
 	journal "Mode essai : rien n'est modifié dans /etc, la fiche va dans $HAKOS_BOITE."
 fi

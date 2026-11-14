@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Construit l'image HakoS d'un profil avec le build Docker officiel de pi-gen.
+# Construit l'image HakOS d'un profil avec le build Docker officiel de pi-gen.
 # Usage : scripts/construire.sh dev|prod   (ou make build-dev, make build-prod)
 #
 # Méthode du Lot 0 (scripts/construire-stock.sh) : la config complète est écrite dans
@@ -55,7 +55,7 @@ mkdir -p "$RACINE/deploy"
 JOURNAL="$RACINE/deploy/hakos-$PROFIL-construction-$(date +%Y%m%d-%H%M%S).log"
 exec > >(tee -a "$JOURNAL") 2>&1
 echo "Journal : $JOURNAL"
-echo "Construction de HakoS, profil $PROFIL."
+echo "Construction de HakOS, profil $PROFIL."
 
 "$RACINE/scripts/verifier-hote.sh"
 "$RACINE/scripts/recuperer-pigen.sh"

@@ -1,8 +1,8 @@
-# Lots 1 à 4 : HakoS
+# Lots 1 à 4 : HakOS
 
-MaBox OS devient HakoS, le système de la box HAKO. Les lots 1 à 4 ajoutent à l'image Lite du Lot 0 une étape pi-gen maison, stage-box, qui livre une box complète : Docker, Immich, Nextcloud, une page d'accueil et un premier démarrage qui rend chaque box unique. Cette note donne le contenu de l'image, les décisions prises et la procédure de test sur le Pi 5. Elle décrit l'état au 13 novembre 2026.
+MaBox OS devient HakOS, le système de la box HAKO. Les lots 1 à 4 ajoutent à l'image Lite du Lot 0 une étape pi-gen maison, stage-box, qui livre une box complète : Docker, Immich, Nextcloud, une page d'accueil et un premier démarrage qui rend chaque box unique. Cette note donne le contenu de l'image, les décisions prises et la procédure de test sur le Pi 5. Elle décrit l'état au 13 novembre 2026.
 
-Au moment de l'écrire, aucune image HakoS n'a encore été construite ni démarrée : tout ce qui touche à la box est à vérifier avec la procédure plus bas. La liste est à la fin, dans « Reste à vérifier ». Le premier démarrage, lui, a déjà tourné pour de vrai dans la VM Colima, avec les vraies images Docker (« Essai dans la VM Colima »).
+Au moment de l'écrire, aucune image HakOS n'a encore été construite ni démarrée : tout ce qui touche à la box est à vérifier avec la procédure plus bas. La liste est à la fin, dans « Reste à vérifier ». Le premier démarrage, lui, a déjà tourné pour de vrai dans la VM Colima, avec les vraies images Docker (« Essai dans la VM Colima »).
 
 ## Contenu de l'image
 
@@ -23,7 +23,7 @@ Tous les fichiers venus du Mac sont copiés avec `install -o root -g root` : vus
 
 ### Nom, compte et adresse
 
-Le système s'appelle HakoS (IMG_NAME=hakos, PI_GEN_RELEASE="HakoS"). Toutes les box s'appellent hako et répondent à http://hako.local, l'adresse du guide d'installation du site. Le compte s'appelle hako (FIRST_USER_NAME), et il n'est jamais renommé au premier démarrage (DISABLE_FIRST_BOOT_USER_RENAME=1).
+Le système s'appelle HakOS (IMG_NAME=hakos, PI_GEN_RELEASE="HakOS"). Toutes les box s'appellent hako et répondent à http://hako.local, l'adresse du guide d'installation du site. Le compte s'appelle hako (FIRST_USER_NAME), et il n'est jamais renommé au premier démarrage (DISABLE_FIRST_BOOT_USER_RENAME=1).
 
 Deux box sur le même réseau : avahi donne à la seconde le nom hako-2.local. Les boutons de la page d'accueil passent par /photos et /fichiers, qui renvoient vers le nom ou l'adresse IP que le navigateur a utilisé : ils marchent aussi avec hako-2.local ou une adresse IP. La fiche d'installation, elle, indique toujours hako.local.
 
@@ -58,7 +58,7 @@ Les clés d'hôte SSH ne sont pas dans l'image : regenerate_ssh_host_keys.servic
 
 ### Mises à jour
 
-unattended-upgrades est installé et activé (debconf enable_auto_updates, d'où /etc/apt/apt.conf.d/20auto-upgrades). Le fichier 52hakos-securite vide la liste d'origines de Debian (`#clear`), qui accepte aussi les mises à jour de la version stable, et n'autorise que l'origine Debian-Security. Les dépôts Raspberry Pi (noyau, firmware) et Docker ne sont pas mis à jour seuls ; les images Docker des applications non plus. Ils changent avec une nouvelle image HakoS, donc avec une nouvelle gravure, qui efface les données. rpi-eeprom-update reste actif, comme au Lot 0 : au démarrage, il peut réécrire un bootloader plus ancien que celui que livre l'image.
+unattended-upgrades est installé et activé (debconf enable_auto_updates, d'où /etc/apt/apt.conf.d/20auto-upgrades). Le fichier 52hakos-securite vide la liste d'origines de Debian (`#clear`), qui accepte aussi les mises à jour de la version stable, et n'autorise que l'origine Debian-Security. Les dépôts Raspberry Pi (noyau, firmware) et Docker ne sont pas mis à jour seuls ; les images Docker des applications non plus. Ils changent avec une nouvelle image HakOS, donc avec une nouvelle gravure, qui efface les données. rpi-eeprom-update reste actif, comme au Lot 0 : au démarrage, il peut réécrire un bootloader plus ancien que celui que livre l'image.
 
 ### Apprentissage automatique d'Immich
 
@@ -177,7 +177,7 @@ ssh-keygen -R hako.local; ssh -i ~/.ssh/mabox-dev -o IdentitiesOnly=yes hako@hak
 sudo journalctl -b -u hakos-premier-demarrage -o cat -n all -f
 ```
 
-ssh annonce une clé inconnue : noter l'empreinte et répondre yes. L'invite `hako@hako:~ $` s'affiche sans mot de passe ; sudo demande ensuite le mot de passe console (local/mot-de-passe-dev). Le journal montre « HakoS : premier démarrage (dossier /opt/box, profil dev). », les étapes « Étape 1/7 » à « Étape 7/7 », puis « Premier démarrage réussi en … : /opt/box/.initialized créé. ». Noter la durée, puis Ctrl-C. En cas d'échec, le journal finit par « Erreur : premier démarrage interrompu à l'étape … » et nomme le conteneur en cause ; `sudo docker logs NOM` en donne la raison.
+ssh annonce une clé inconnue : noter l'empreinte et répondre yes. L'invite `hako@hako:~ $` s'affiche sans mot de passe ; sudo demande ensuite le mot de passe console (local/mot-de-passe-dev). Le journal montre « HakOS : premier démarrage (dossier /opt/box, profil dev). », les étapes « Étape 1/7 » à « Étape 7/7 », puis « Premier démarrage réussi en … : /opt/box/.initialized créé. ». Noter la durée, puis Ctrl-C. En cas d'échec, le journal finit par « Erreur : premier démarrage interrompu à l'étape … » et nomme le conteneur en cause ; `sudo docker logs NOM` en donne la raison.
 
 Étape 5 : test de fumée.
 
@@ -188,7 +188,7 @@ sudo /opt/box/test-sur-boitier.sh; echo "code=$?"
 Sortie attendue sur un Pi 5 de 4 Go (l'ordre des conteneurs d'un même projet peut varier) :
 
 ```text
-Test de HakoS dans /opt/box : profil dev, mémoire NNNNNNN Kio.
+Test de HakOS dans /opt/box : profil dev, mémoire NNNNNNN Kio.
 OK     premier démarrage terminé (/opt/box/.initialized présent)
 OK     archives d'images supprimées (/opt/box/images)
 OK     /opt/box/home/.env en 0600, propriété de root
@@ -283,7 +283,7 @@ Sortie attendue : machine-id, empreintes des deux .env et identifiant d'installa
 
 ## Reste à vérifier
 
-- Aucune image HakoS n'est encore construite : `make build-dev`, `make build-prod` et `make verifier-image` restent à dérouler, ainsi que la place disque qu'ils demandent.
+- Aucune image HakOS n'est encore construite : `make build-dev`, `make build-prod` et `make verifier-image` restent à dérouler, ainsi que la place disque qu'ils demandent.
 - Sur la box : démarrage du Pi 5 sur kernel8.img avec initramfs8 et agrandissement de la partition, cgroup memory, durée du premier démarrage, apprentissage automatique actif ou coupé selon la mémoire, installateur de Nextcloud, persistance après redémarrage.
 - Le Wi-Fi débloqué grâce à WPA_COUNTRY=FR, et la connexion Wi-Fi d'une box prod par network-config.
 - Les points restés ouverts au Lot 0 : test de démarrage sur SSD, version du bootloader et BOOT_ORDER, gravure d'un vrai SSD par scripts/flasher-ssd.sh.

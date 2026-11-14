@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 #
-# HakoS : étapes du premier démarrage, appelées dans l'ordre par /opt/box/firstboot.sh.
+# HakOS : étapes du premier démarrage, appelées dans l'ordre par /opt/box/firstboot.sh.
 # À charger après lib/commun.sh. Chaque fonction s'arrête par « echec » au premier problème.
 
 ETAPE="vérifications"
@@ -350,7 +350,7 @@ ecrire_fiche() {
 	fi
 	provisoire=$(mktemp "$fiche.XXXXXX") || echec "impossible d'écrire la fiche $fiche"
 	cat >"$provisoire" <<-FICHE
-		HakoS : fiche d'installation
+		HakOS : fiche d'installation
 		============================
 
 		Nom de la box               : $nom
@@ -373,7 +373,7 @@ ecrire_fiche() {
 		  Tant que ces comptes n'existent pas, n'importe quel appareil du réseau peut les créer.
 
 		À FAIRE (lot sauvegarde) : clé de récupération
-		  Emplacement réservé. Cette version de HakoS ne crée aucune clé de récupération.
+		  Emplacement réservé. Cette version de HakOS ne crée aucune clé de récupération.
 	FICHE
 	chmod 600 "$provisoire"
 	if [ "$(id -u)" -eq 0 ]; then

@@ -1,5 +1,5 @@
 #!/bin/bash
-# stage-box, étape 03 : premier démarrage de HakoS.
+# stage-box, étape 03 : premier démarrage de HakOS.
 # L'étape 02 a déjà copié rootfs/opt/box dans l'image (firstboot.sh, lib/, systemd/…).
 # Celle-ci installe l'unité hakos-premier-demarrage.service dans /etc/systemd/system, l'active,
 # puis vérifie que l'image contient ce dont le premier démarrage a besoin, et aucun secret

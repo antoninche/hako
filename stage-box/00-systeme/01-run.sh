@@ -1,5 +1,5 @@
 #!/bin/bash
-# HakoS, étape 00-systeme : règles système des deux profils, puis verrouillage en prod.
+# HakOS, étape 00-systeme : règles système des deux profils, puis verrouillage en prod.
 # Lancé par build.sh de pi-gen dans le conteneur, depuis ce dossier ; ROOTFS_DIR est le système
 # de l'étape maison. Les fichiers viennent du Mac par virtiofs (UID 501) : copie avec install -o root.
 set -euo pipefail
@@ -49,7 +49,7 @@ CONFIG_TXT="${ROOTFS_DIR}/boot/firmware/config.txt"
 if ! grep -q '^kernel=kernel8\.img$' "$CONFIG_TXT"; then
 	cat >>"$CONFIG_TXT" <<-'EOF'
 
-		# HakoS : sur Pi 5, noyau à pages mémoire de 4 Kio (kernel8.img) au lieu du noyau à pages
+		# HakOS : sur Pi 5, noyau à pages mémoire de 4 Kio (kernel8.img) au lieu du noyau à pages
 		# de 16 Kio (kernel_2712.img), par prudence pour les images Docker (jemalloc, Postgres,
 		# Immich), prévues pour des pages de 4 Kio. Avec auto_initramfs=1, le firmware charge
 		# alors initramfs8, créé à l'export comme initramfs_2712.

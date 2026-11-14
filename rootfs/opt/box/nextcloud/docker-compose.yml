@@ -9,7 +9,7 @@
 # servi à l'ouvrir (trusted_domains). Ouvert par http://hako.local:8080, Nextcloud refusera
 # ensuite l'adresse IP de la box, et inversement. L'image n'applique NEXTCLOUD_TRUSTED_DOMAINS
 # qu'après une installation automatique (NEXTCLOUD_ADMIN_USER et NEXTCLOUD_ADMIN_PASSWORD),
-# que HakoS ne fait pas : la variable est posée pour le jour où elle servira.
+# que HakOS ne fait pas : la variable est posée pour le jour où elle servira.
 #
 # Le fichier .env de ce dossier est écrit au premier démarrage (mode 600). Les chemins de données
 # sont relatifs à ce dossier : ./html (Nextcloud, sa configuration et les fichiers dans

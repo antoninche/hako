@@ -1,4 +1,4 @@
-# HakoS : commandes du dépôt. « make » seul affiche l'aide.
+# HakOS : commandes du dépôt. « make » seul affiche l'aide.
 # Les cibles appellent les scripts de scripts/. Aucune ne touche à local/ (clés et mots de passe).
 
 RACINE := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
@@ -8,7 +8,7 @@ IMAGE ?=
 .PHONY: aide images build build-dev build-prod lint verifier-image clean
 
 aide:
-	@echo "HakoS : construction de l'image système de la box HAKO."
+	@echo "HakOS : construction de l'image système de la box HAKO."
 	@echo ""
 	@echo "  make images          télécharge les images Docker figées (arm64) et les enregistre dans images/"
 	@echo "  make build-dev       construit l'image de l'équipe (SSH par clé), dans deploy/"

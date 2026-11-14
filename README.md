@@ -1,6 +1,6 @@
-# HakoS
+# HakOS
 
-HakoS est le système de la box HAKO : une image Raspberry Pi OS Lite (Debian 13 trixie, arm64) pour Raspberry Pi 5, qui démarre sur SSD. L'image est construite avec pi-gen, l'outil officiel de Raspberry Pi, à la révision figée dans versions.env. Elle contient trois services, en conteneurs Docker :
+HakOS est le système de la box HAKO : une image Raspberry Pi OS Lite (Debian 13 trixie, arm64) pour Raspberry Pi 5, qui démarre sur SSD. L'image est construite avec pi-gen, l'outil officiel de Raspberry Pi, à la révision figée dans versions.env. Elle contient trois services, en conteneurs Docker :
 
 - la page d'accueil, http://hako.local (nginx, port 80), avec deux boutons : « Mes photos » et « Mes fichiers » ;
 - Immich, pour les photos, sur le port 2283 ;
@@ -75,7 +75,7 @@ make verifier-image IMAGE=deploy/image_AAAA-MM-JJ-hakos-prod.img.xz
 
 `make lint` (scripts/verifier-qualite.sh) passe shellcheck sur tous les scripts, `docker compose config -q` sur chaque fichier compose (avec un .env provisoire et de faux secrets) et cherche les secrets dans les fichiers suivis ou à suivre : fichiers .env, clés privées, mots de passe en clair.
 
-`make verifier-image` (scripts/verifier-image.sh) contrôle une image sans la démarrer. Dans la VM Colima, l'image est décompressée dans un dossier temporaire, attachée en lecture seule et ses partitions sont montées en lecture seule. Le script vérifie notamment le nom d'hôte, /opt/box (scripts, versions.env, une archive par image figée), les services activés, Docker, SSH selon le profil, les mises à jour automatiques, config.txt et cmdline.txt, l'absence de .env, de clé privée et de toute trace de local/. Il affiche une ligne « OK » ou « ÉCHEC » par contrôle, puis un bilan, et défait tout à la fin, même en cas d'échec. Il a fallu une minute pour l'image du Lot 0 (2,9 Gio décompressée) ; une image HakoS est plus grosse.
+`make verifier-image` (scripts/verifier-image.sh) contrôle une image sans la démarrer. Dans la VM Colima, l'image est décompressée dans un dossier temporaire, attachée en lecture seule et ses partitions sont montées en lecture seule. Le script vérifie notamment le nom d'hôte, /opt/box (scripts, versions.env, une archive par image figée), les services activés, Docker, SSH selon le profil, les mises à jour automatiques, config.txt et cmdline.txt, l'absence de .env, de clé privée et de toute trace de local/. Il affiche une ligne « OK » ou « ÉCHEC » par contrôle, puis un bilan, et défait tout à la fin, même en cas d'échec. Il a fallu une minute pour l'image du Lot 0 (2,9 Gio décompressée) ; une image HakOS est plus grosse.
 
 ## Graver un SSD
 
@@ -154,7 +154,7 @@ C'est le format netplan v2 de l'exemple commenté que Raspberry Pi met dans ce m
 - Comptes administrateurs : la première personne qui ouvre Immich (port 2283) ou l'installateur de Nextcloud (port 8080) en devient l'administrateur. Les créer tout de suite, pendant l'installation, avant de laisser la box sur le réseau.
 - Adresses en http, sans chiffrement : à la maison, mots de passe, photos et fichiers circulent en clair sur le réseau local.
 - Pas de sauvegarde : une panne du SSD perd photos et fichiers. La fiche d'installation garde la place de la future clé de récupération.
-- Mises à jour automatiques limitées aux correctifs de sécurité de Debian (unattended-upgrades). Les paquets Raspberry Pi (noyau, firmware) et ceux de Docker ne changent qu'avec une nouvelle image HakoS.
+- Mises à jour automatiques limitées aux correctifs de sécurité de Debian (unattended-upgrades). Les paquets Raspberry Pi (noyau, firmware) et ceux de Docker ne changent qu'avec une nouvelle image HakOS.
 - Pas de mise à jour des images Docker : Immich, Nextcloud, Postgres, Valkey et nginx restent aux versions de versions.env. Une box prod n'a aujourd'hui aucun moyen de recevoir une nouvelle version, et regraver le SSD efface les données.
 - Sous 7 Gio de mémoire (Pi 5 de 4 Go), l'apprentissage automatique d'Immich est coupé par un fichier de configuration (IMMICH_CONFIG_FILE) : d'après la documentation d'Immich, les réglages ne sont alors plus modifiables dans l'interface web.
 - Nextcloud ne retient que l'adresse qui a servi à l'installer : installé par http://hako.local:8080, il refuse ensuite l'adresse IP de la box, et inversement.
