@@ -4,7 +4,7 @@ Ce document recense ce que le site emprunte à d’autres : les fichiers envoyé
 
 Vérifications faites le 12 novembre 2026. Ce relevé n’a pas été relu par un juriste.
 
-Le code du site lui-même (gabarits, styles, scripts, tests) est sous licence MIT ([LICENSE](../LICENSE)), décision des fondateurs du 14 novembre 2026. Elle ne couvre ni le nom HAKO, ni le logo, ni la marque en kanji 箱, ni les dessins, les photos et les textes du site, qui restent réservés ([NOTICE](../NOTICE)).
+Le code du site lui-même (gabarits, styles, scripts, tests) est sous licence MIT ([LICENSE](../LICENSE)), décision des fondateurs du 14 novembre 2026. Elle ne couvre ni le nom HAKO, ni le logo, ni la marque en kanji 箱, ni les dessins, les photos et les textes du site, qui restent réservés ([NOTICE](../../NOTICE)).
 
 ## Fichiers envoyés aux visiteurs
 

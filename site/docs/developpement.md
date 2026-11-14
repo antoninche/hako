@@ -23,27 +23,28 @@ npm run dev
 
 ## Commandes
 
-| Commande                       | Rôle                                                                                                             |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| `npm run dev`                  | serveur de développement sur http://localhost:4321, mis à jour à chaque modification                             |
-| `npm run build`                | construit le site statique dans `dist/`                                                                          |
-| `npm run build:box`            | construit la page servie par la HAKO pour sa première installation dans `dist-box/` (demande `SITE_URL`)         |
-| `npm run preview`              | sert `dist/` sur http://localhost:4321, comme en production                                                      |
-| `npm run check`                | vérifie les types TypeScript et les composants Astro (`astro check`)                                             |
-| `npm run lint`                 | enchaîne `astro check`, ESLint (règles d’accessibilité comprises) et la vérification de mise en forme (Prettier) |
-| `npm run format`               | remet en forme tous les fichiers avec Prettier                                                                   |
-| `npm run todos`                | écrit la liste des informations manquantes dans `TODO.md`                                                        |
-| `npm run contrast`             | recalcule le contraste de chaque couple texte/fond du CSS et échoue sous 4,5:1                                   |
-| `npm run check:dist`           | contrôle `dist/` : aucune ressource d’un autre site, aucun script ni style en ligne, ni cookie ni stockage local |
-| `npm test`                     | construit le site, le sert sur le port 4321 et lance tous les tests dans Chromium                                |
-| `npm run screenshots`          | prend seulement les captures d’écran de chaque page, dans `qa/screenshots/`                                      |
-| `npm run screenshots:readme`   | refait les captures du README dans `images/`, à 1440 px, sur le site construit comme en ligne                    |
-| `npm run fonts:build`          | reconstruit les polices à partir de leurs sources officielles (demande uv)                                       |
-| `npm run logo:build`           | revectorise le logo et refait le favicon, les icônes, le manifeste et l’image de partage (demande potrace)       |
-| `npm run prototype:images`     | refait les images du prototype de `src/assets/prototype/` à partir des captures de `design/prototype/`           |
-| `npm run illustrations:build`  | refait les dessins de `src/assets/illustrations/` à partir de leurs sources (`design/illustrations/`)            |
-| `npm run illustrations:check`  | vérifie les couleurs et la structure de chaque dessin                                                            |
-| `npm run illustrations:render` | enregistre une image PNG de chaque dessin, pour les regarder (dans `design/illustrations/renders/`)              |
+| Commande                       | Rôle                                                                                                                                                   |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `npm run dev`                  | serveur de développement sur http://localhost:4321, mis à jour à chaque modification                                                                   |
+| `npm run build`                | construit le site statique dans `dist/`                                                                                                                |
+| `npm run build:box`            | construit la page servie par la HAKO pour sa première installation dans `dist-box/` (demande `SITE_URL`)                                               |
+| `npm run preview`              | sert `dist/` sur http://localhost:4321, comme en production                                                                                            |
+| `npm run check`                | vérifie les types TypeScript et les composants Astro (`astro check`)                                                                                   |
+| `npm run lint`                 | enchaîne `astro check`, ESLint (règles d’accessibilité comprises) et la vérification de mise en forme (Prettier)                                       |
+| `npm run format`               | remet en forme tous les fichiers avec Prettier                                                                                                         |
+| `npm run todos`                | écrit la liste des informations manquantes dans `TODO.md`                                                                                              |
+| `npm run contrast`             | recalcule le contraste de chaque couple texte/fond du CSS et échoue sous 4,5:1                                                                         |
+| `npm run check:dist`           | contrôle `dist/` : aucune ressource d’un autre site, aucun script ni style en ligne, ni cookie ni stockage local                                       |
+| `npm test`                     | construit le site, le sert sur le port 4321 et lance tous les tests dans Chromium                                                                      |
+| `npm run screenshots`          | prend seulement les captures d’écran de chaque page, dans `qa/screenshots/`                                                                            |
+| `npm run screenshots:readme`   | refait les captures du README du site dans `images/`, à 1440 px, sur le site construit comme en ligne                                                  |
+| `npm run social-preview`       | refait l’image de partage du dépôt sur GitHub, `.github/assets/social-preview.png` (1280 × 640 px), à envoyer dans Settings → General → Social preview |
+| `npm run fonts:build`          | reconstruit les polices à partir de leurs sources officielles (demande uv)                                                                             |
+| `npm run logo:build`           | revectorise le logo et refait le favicon, les icônes, le manifeste et l’image de partage (demande potrace)                                             |
+| `npm run prototype:images`     | refait les images du prototype de `src/assets/prototype/` à partir des captures de `design/prototype/`                                                 |
+| `npm run illustrations:build`  | refait les dessins de `src/assets/illustrations/` à partir de leurs sources (`design/illustrations/`)                                                  |
+| `npm run illustrations:check`  | vérifie les couleurs et la structure de chaque dessin                                                                                                  |
+| `npm run illustrations:render` | enregistre une image PNG de chaque dessin, pour les regarder (dans `design/illustrations/renders/`)                                                    |
 
 Les tests vérifient que chaque page s’affiche sans erreur, que la page 404 répond, que chaque lien interne mène à une page ou un fichier qui existe, qu’aucune requête ne quitte la machine et qu’aucun cookie n’est déposé (à 390 et 1440 px de large), l’accessibilité avec axe (WCAG 2.2 AA), le lien d’évitement, le menu au clavier, des cibles tactiles de 44 × 44 px dans l’en-tête et le pied de page, le surlignage des informations manquantes, l’affichage avec moins d’animations, et trois constructions à part (dans `.tmp/tests/`) : la démonstration avec `PUBLIC_SHOW_TODOS=false`, l’adresse canonique avec `SITE_URL`, et la page de la HAKO (`npm run build:box`), parcourue sous les en-têtes de la HAKO avec une API locale simulée. Les captures sont faites à 390 et 1440 px ; `CAPTURE_WIDTHS=360,768,1024 npm run screenshots` en ajoute d’autres. Si un serveur tourne déjà sur le port 4321, Playwright le réutilise sans reconstruire le site : arrêtez-le avant de lancer les tests. Pour construire ailleurs que dans `dist/` : `PW_OUT_DIR=.tmp/dist-essai PW_PORT=4410 npm test`.
 
