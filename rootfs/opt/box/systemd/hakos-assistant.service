@@ -1,0 +1,57 @@
+# HakOS : assistant de première installation, l'API locale de la page de la HAKO.
+# Sert /api/installation/ sur /run/hakos-assistant/api.sock, derrière le nginx de l'accueil.
+# Mots de passe tirés et gardés en mémoire seulement (ni disque, ni journal, ni ligne de commande),
+# oubliés une fois les comptes créés. Le service s'arrête alors ; phase.sh le masque.
+# Groupe docker pour occ et le rechargement de nginx (ce qui vaut root) ; CAP_NET_ADMIN pour
+# ouvrir les ports à la fin. Le durcissement protège des accidents, pas d'un attaquant.
+# Journal : journalctl -u hakos-assistant (jamais de prénom, d'identifiant ni de mot de passe).
+# Installé dans /usr/lib/systemd/system (et non /etc) : « systemctl mask » doit pouvoir le masquer.
+
+[Unit]
+Description=HakOS : assistant de première installation
+After=docker.service hakos-parefeu.service
+Wants=docker.service
+Requires=hakos-parefeu.service
+ConditionPathExists=!/var/lib/hakos/installee
+
+[Service]
+Type=simple
+User=hakos-assistant
+Group=hakos-assistant
+SupplementaryGroups=docker
+ExecStart=/usr/bin/python3 -B -E -s /opt/box/assistant/assistant.py
+ExecStopPost=+/opt/box/lib/phase.sh fin
+Restart=on-failure
+RestartSec=3
+Environment=HOME=/run/hakos-assistant DOCKER_CONFIG=/run/hakos-assistant/docker
+UMask=0077
+AmbientCapabilities=CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_ADMIN
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/hakos /run/hakos-assistant
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+IPAddressDeny=any
+IPAddressAllow=localhost
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+MemorySwapMax=0
+LimitCORE=0
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

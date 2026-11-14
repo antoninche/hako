@@ -19,6 +19,9 @@ HAKOS_MEMOIRE_KIO=${HAKOS_MEMOIRE_KIO:-}
 # Dossiers des projets docker compose, dans l'ordre de démarrage.
 HAKOS_SERVICES=(home immich nextcloud)
 
+# Administrateur technique de Nextcloud : il ne sert qu'à son installation, au premier démarrage.
+HAKOS_NC_TECHNIQUE=hakos-installation
+
 # Apprentissage automatique d'Immich : actif à partir de 7 Gio de MemTotal (7 × 1024 × 1024 kio).
 HAKOS_SEUIL_ML_KIO=7340032
 HAKOS_LIGNE_ML="COMPOSE_PROFILES=ml"

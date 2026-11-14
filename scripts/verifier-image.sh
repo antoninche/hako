@@ -202,13 +202,45 @@ else
 fi
 
 droits=""
-for script in firstboot.sh test-sur-boitier.sh; do
+for script in firstboot.sh test-sur-boitier.sh essai-assistant.py lib/phase.sh assistant/assistant.py; do
 	droits="$droits $(stat -c '%a' "$boite/$script" 2>/dev/null || echo absent)"
 done
-if [ "$droits" = " 755 755" ]; then
-	ok "firstboot.sh et test-sur-boitier.sh exécutables (0755)"
+if [ "$droits" = " 755 755 755 755 755" ]; then
+	ok "firstboot.sh, test-sur-boitier.sh, essai-assistant.py, lib/phase.sh et assistant/assistant.py exécutables (0755)"
 else
-	echec "droits de firstboot.sh et test-sur-boitier.sh :$droits (attendu 755)"
+	echec "droits de firstboot.sh, test-sur-boitier.sh, essai-assistant.py, lib/phase.sh, assistant/assistant.py :$droits (attendu 755)"
+fi
+
+# --- Assistant de première installation (lot 5) ---
+
+manque=""
+for chemin in assistant/assistant.py assistant/comptes.py assistant/foyer.py assistant/installation.py \
+	parefeu/hakos.nft home/nginx/defaut.conf home/nginx/accueil.conf home/nginx/assistant.conf \
+	home/nginx/photos.conf home/nginx/entetes-page.conf home/assistant/index.html; do
+	[ -s "$boite/$chemin" ] || manque="$manque $chemin"
+done
+mots="$(grep -cE '^[a-z]{4,8}$' "$boite/assistant/mots.txt" 2>/dev/null || echo 0)"
+if [ -z "$manque" ] && [ "$mots" = 4096 ] && [ "$(sort -u "$boite/assistant/mots.txt" | wc -l)" = 4096 ]; then
+	ok "assistant complet : service, pare-feu, nginx, page de la HAKO, liste de 4 096 mots distincts"
+else
+	echec "assistant incomplet : manque${manque:- rien}, liste de mots : $mots mot(s) valable(s) sur 4096"
+fi
+if cmp -s <(cd "$boite/home/assistant" && find . -type f -print0 | sort -z | xargs -0 sha256sum) \
+	<(cd "$RACINE/rootfs/opt/box/home/assistant" && find . -type f ! -name .DS_Store -print0 | sort -z | xargs -0 sha256sum); then
+	ok "page de la HAKO identique à celle du dépôt (commit $(valeur HAKO_SITE_COMMIT "$boite/versions.env" | cut -c 1-7) de hako-site)"
+else
+	echec "page de la HAKO (/opt/box/home/assistant) différente de celle du dépôt"
+fi
+if grep -q "^127.0.0.1:12283:2283" <(sed -n "s/^ *- '\(.*\)'$/\1/p" "$boite/immich/docker-compose.yml") &&
+	grep -q '^    network_mode: host$' "$boite/home/docker-compose.yml"; then
+	ok "Immich publié sur 127.0.0.1:12283 seulement, nginx de l'accueil sur le réseau de la box"
+else
+	echec "ports : Immich pas limité à 127.0.0.1:12283, ou nginx de l'accueil hors du réseau de la box"
+fi
+if [ ! -e "$R/var/lib/hakos/installee" ]; then
+	ok "aucun marqueur d'installation (/var/lib/hakos/installee)"
+else
+	echec "/var/lib/hakos/installee est dans l'image : l'assistant ne tournerait jamais, les ports seraient ouverts"
 fi
 
 etranger="$(find "$boite" \( ! -uid 0 -o ! -gid 0 \) -print 2>/dev/null | head -n 3 || true)"
@@ -280,15 +312,29 @@ if [ -f "$R/etc/systemd/system/hakos-premier-demarrage.service" ] && [ -z "$inac
 else
 	echec "unité absente de /etc/systemd/system ou non activée (multi-user.target.wants) :${inactives:- hakos-premier-demarrage.service}"
 fi
+if [ -f "$R/etc/systemd/system/hakos-parefeu.service" ] && [ -f "$R/usr/lib/systemd/system/hakos-assistant.service" ] &&
+	[ -n "$(lien "$voulus/hakos-parefeu.service")" ] && [ -n "$(lien "$voulus/hakos-assistant.service")" ] &&
+	[ -n "$(lien "$R/etc/systemd/system/docker.service.requires/hakos-parefeu.service")" ] &&
+	[ -f "$R/etc/tmpfiles.d/hakos.conf" ]; then
+	ok "hakos-parefeu (requis par docker) et hakos-assistant activés, dossiers de l'assistant (tmpfiles.d)"
+else
+	echec "hakos-parefeu, hakos-assistant ou /etc/tmpfiles.d/hakos.conf absent ou non activé"
+fi
+compte="$(grep '^hakos-assistant:' "$R/etc/passwd" 2>/dev/null | cut -d: -f7)"
+if [ "$compte" = /usr/sbin/nologin ] && grep -Eq '^docker:[^:]*:[0-9]+:(.*,)?hakos-assistant(,|$)' "$R/etc/group"; then
+	ok "utilisateur hakos-assistant : sans connexion, dans le groupe docker"
+else
+	echec "utilisateur hakos-assistant absent, avec un shell (« $compte »), ou hors du groupe docker"
+fi
 
 etat_paquet() {
 	dpkg-query --admindir="$R/var/lib/dpkg" -W -f='${db:Status-Status}' "$1" 2>/dev/null || echo absent
 }
-etats="$(etat_paquet docker-ce) $(etat_paquet docker-compose-plugin)"
-if [ "$etats" = "installed installed" ]; then
-	ok "paquets docker-ce et docker-compose-plugin installés"
+etats="$(etat_paquet docker-ce) $(etat_paquet docker-compose-plugin) $(etat_paquet nftables) $(etat_paquet python3)"
+if [ "$etats" = "installed installed installed installed" ]; then
+	ok "paquets docker-ce, docker-compose-plugin, nftables et python3 installés"
 else
-	echec "docker-ce et docker-compose-plugin : $etats"
+	echec "docker-ce, docker-compose-plugin, nftables et python3 : $etats"
 fi
 connect="$(etat_paquet rpi-connect-lite)"
 case "$connect" in

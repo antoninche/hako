@@ -2,7 +2,15 @@
 # Test de fumée de HakOS, sur la box, après le premier démarrage. En root :
 #   sudo /opt/box/test-sur-boitier.sh
 # Une ligne « OK … » ou « ÉCHEC … » par contrôle, puis un bilan. Code de sortie 1 si un contrôle
-# échoue. Le script ne modifie rien et n'affiche jamais la valeur d'un secret.
+# échoue. Le script ne modifie rien et n'affiche jamais la valeur d'un secret. Les contrôles de
+# l'assistant de première installation suivent l'état de la box (/var/lib/hakos/installee) :
+# avant, ports 2283 et 8080 fermés et page de la HAKO sur le port 80 ; après, l'accueil.
+#
+# Essai de bout en bout de l'assistant, sur une box NEUVE seulement (il crée des comptes d'essai ;
+# regraver la box ensuite) :
+#   sudo /opt/box/test-sur-boitier.sh --assistant N [--coupure]
+# N = 1 ou 8 personnes ; --coupure tue le service au milieu de la création, puis la reprend.
+# Détail : /opt/box/essai-assistant.py. Les contrôles habituels suivent, sur la box installée.
 #
 # Variables d'essai, les mêmes que pour /opt/box/firstboot.sh :
 #   HAKOS_BOITE        dossier de la box (défaut : /opt/box)
@@ -16,6 +24,32 @@ set -euo pipefail
 
 BOITE="${HAKOS_BOITE:-/opt/box}"
 ESSAI="${HAKOS_ESSAI:-0}"
+ETAT="${HAKOS_ETAT:-/var/lib/hakos}"
+PERSONNES=""
+COUPURE=""
+while [ $# -gt 0 ]; do
+	case "$1" in
+		--assistant)
+			PERSONNES="${2:-}"
+			shift 2 || true
+			;;
+		--coupure)
+			COUPURE=--coupure
+			shift
+			;;
+		*)
+			echo "Erreur : option inconnue « $1 ». Usage : $0 [--assistant 1|8 [--coupure]]" >&2
+			exit 1
+			;;
+	esac
+done
+case "$PERSONNES" in
+	"" | 1 | 8) ;;
+	*)
+		echo "Erreur : --assistant attend 1 ou 8 (personnes)." >&2
+		exit 1
+		;;
+esac
 SEUIL_ML_KIO=7340032 # 7 Gio : seuil du premier démarrage pour l'apprentissage automatique
 CONFIG_SANS_ML=/usr/src/app/hakos/immich-sans-ml.json
 SERVICES="home immich nextcloud"
@@ -91,6 +125,19 @@ lire_page() {
 }
 
 echo "Test de HakOS dans $BOITE : profil ${profil:-inconnu}, mémoire $memoire_kio Kio$([ "$ESSAI" = 1 ] && echo ', essai')."
+
+# --- Essai de bout en bout de l'assistant (option --assistant) ---
+
+if [ -n "$PERSONNES" ]; then
+	if [ -e "$ETAT/installee" ]; then
+		echec "essai de l'assistant impossible : la box est déjà installée ($ETAT/installee)"
+	elif python3 "$BOITE/essai-assistant.py" --personnes "$PERSONNES" $COUPURE; then
+		ok "essai de bout en bout de l'assistant : $PERSONNES personne(s)${COUPURE:+, création coupée puis reprise}"
+	else
+		echec "essai de bout en bout de l'assistant : détail ci-dessus"
+	fi
+	echo
+fi
 
 # --- Fichiers de la box ---
 
@@ -270,22 +317,117 @@ else
 	fi
 fi
 
-if lire_page http://localhost/ && [ "$code" = 200 ] && [[ "$corps" == *"Mes photos"* ]]; then
-	ok "page d'accueil http://localhost/ : répond, contient « Mes photos »"
+if [ -e "$ETAT/installee" ]; then
+	if lire_page http://localhost/ && [ "$code" = 200 ] && [[ "$corps" == *"Mes photos"* ]]; then
+		ok "page d'accueil http://localhost/ : répond, contient « Mes photos »"
+	else
+		echec "page d'accueil http://localhost/ : code « ${code:-aucune réponse} », « Mes photos » introuvable"
+	fi
+elif lire_page http://127.0.0.1/ && [ "$code" = 200 ] && [[ "$corps" == *noindex* ]] && [[ "$corps" == *_astro/* ]]; then
+	ok "page de la HAKO (première installation) sur http://127.0.0.1/ : répond"
 else
-	echec "page d'accueil http://localhost/ : code « ${code:-aucune réponse} », « Mes photos » introuvable"
+	echec "page de la HAKO sur http://127.0.0.1/ : code « ${code:-aucune réponse} » ou page inattendue"
 fi
 if lire_page http://localhost:2283/api/server/ping && [ "$code" = 200 ] && [[ "$corps" == *pong* ]]; then
 	ok "Immich http://localhost:2283/api/server/ping : pong"
 else
 	echec "Immich http://localhost:2283/api/server/ping : code « ${code:-aucune réponse} », pas de pong"
 fi
-# Avant l'installation, Nextcloud affiche son assistant (200) ; après, la page de connexion. Un 400
-# (« domaine non approuvé ») prouve aussi que Nextcloud répond.
+# Nextcloud s'installe seul au premier démarrage : page de connexion. Un 400 (« domaine non
+# approuvé ») prouve aussi que Nextcloud répond.
 if lire_page http://localhost:8080/ && [[ "$code" =~ ^[234][0-9][0-9]$ ]] && [[ "$corps" == *Nextcloud* ]]; then
 	ok "Nextcloud http://localhost:8080/ : répond (code $code), contient « Nextcloud »"
 else
 	echec "Nextcloud http://localhost:8080/ : code « ${code:-aucune réponse} », « Nextcloud » introuvable"
+fi
+
+# --- Assistant de première installation : pare-feu, page du port 80, API, service ---
+
+if [ -e "$ETAT/installee" ]; then
+	installee=1
+	echo "Box installée ($ETAT/installee) : comptes créés par l'assistant."
+else
+	installee=0
+	echo "Box pas encore installée : l'assistant attend la famille."
+fi
+
+if ! nft list table inet hakos >/dev/null 2>&1; then
+	echec "pare-feu : table inet hakos absente (systemctl status hakos-parefeu)"
+else
+	fermes="$(nft list set inet hakos ports_fermes 2>/dev/null | tr -d '\n\t ' || true)"
+	if [ "$installee" = 1 ] && [[ "$fermes" != *elements* ]]; then
+		ok "pare-feu chargé : ports 2283 et 8080 ouverts au réseau de la maison (box installée)"
+	elif [ "$installee" = 0 ] && [[ "$fermes" == *"2283,8080"* ]]; then
+		ok "pare-feu chargé : ports 2283 et 8080 fermés au réseau tant que la box n'est pas installée"
+	else
+		echec "pare-feu : ensemble ports_fermes « $fermes » pour une box $([ "$installee" = 1 ] && echo installée || echo 'pas installée')"
+	fi
+	if nft list chain inet hakos entree 2>/dev/null | grep -q 'meta nfproto ipv6 drop'; then
+		ok "pare-feu : rien n'entre en IPv6, TCP entrant depuis les IPv4 privées seulement"
+	else
+		echec "pare-feu : règle IPv6 absente de la chaîne entree"
+	fi
+fi
+if [ "$(systemctl is-enabled hakos-parefeu.service 2>/dev/null || true)" = enabled ] &&
+	[ "$(systemctl is-active hakos-parefeu.service 2>/dev/null || true)" = active ]; then
+	ok "unité hakos-parefeu activée et active"
+else
+	echec "unité hakos-parefeu : $(systemctl is-enabled hakos-parefeu.service 2>/dev/null || true), $(systemctl is-active hakos-parefeu.service 2>/dev/null || true)"
+fi
+
+ecoutes="$(ss -Hltn 2>/dev/null | awk '{print $4}' || true)"
+if grep -qx '127.0.0.1:12283' <<<"$ecoutes" && ! grep -Eq '^(0\.0\.0\.0|\[::\]|\*):12283$' <<<"$ecoutes" &&
+	! grep -Eq '^(\[::\]|\*):(80|2283)$' <<<"$ecoutes"; then
+	ok "Immich publié sur 127.0.0.1:12283 seulement ; 80 et 2283 servis par nginx, en IPv4"
+else
+	echec "écoutes inattendues : $(grep -E ':(80|2283|12283)$' <<<"$ecoutes" | tr '\n' ' ')"
+fi
+
+statut="$(curl -sS --max-time 10 -H 'Host: hako.local' http://127.0.0.1/api/installation/status 2>/dev/null || true)"
+entetes="$(curl -sS --max-time 10 -o /dev/null -D - -H 'Host: hako.local' http://127.0.0.1/api/installation/status 2>/dev/null | tr -d '\r' || true)"
+if [ "$installee" = 1 ]; then
+	attendu_statut='{"phase":"installed","busy":false}'
+	if [ "$statut" = "$attendu_statut" ]; then
+		ok "API : $statut (réponse fixe de nginx)"
+	else
+		echec "API : « $statut », attendu $attendu_statut"
+	fi
+elif [[ "$statut" =~ ^\{\"phase\":\"(preparing|ready|registered|creating)\" ]]; then
+	ok "API de l'assistant : phase ${BASH_REMATCH[1]}"
+else
+	echec "API de l'assistant : « ${statut:-aucune réponse} »"
+fi
+if grep -qi "^content-security-policy: default-src 'self'.*connect-src 'self'.*form-action 'none'" <<<"$entetes" &&
+	grep -qi '^cache-control: no-store' <<<"$entetes" && grep -qi '^referrer-policy: no-referrer' <<<"$entetes"; then
+	ok "API : en-têtes de la page de la HAKO (CSP, no-store, no-referrer)"
+else
+	echec "API : en-têtes de la page de la HAKO absents"
+fi
+etranger="$(curl -sS --max-time 10 -o /dev/null -w '%{http_code}' -H 'Host: exemple.fr' http://127.0.0.1/api/installation/status 2>/dev/null || true)"
+if [ "$installee" = 1 ] || [ "$etranger" = 403 ]; then
+	ok "API : refuse un autre nom que celui de la box$([ "$installee" = 1 ] && echo ' (sans objet : service arrêté)')"
+else
+	echec "API : Host « exemple.fr » accepté (code $etranger)"
+fi
+
+assistant_actif="$(systemctl is-active hakos-assistant.service 2>/dev/null || true)"
+assistant_unite="$(systemctl is-enabled hakos-assistant.service 2>/dev/null || true)"
+if [ "$installee" = 1 ] && [ "$assistant_actif" != active ] && [ "$assistant_unite" = masked ]; then
+	ok "assistant arrêté et masqué (box installée)"
+elif [ "$installee" = 0 ] && [ "$assistant_actif" = active ] && [ "$assistant_unite" = enabled ]; then
+	ok "assistant actif (hakos-assistant), en attente de la famille"
+else
+	echec "assistant : $assistant_actif, $assistant_unite, pour une box $([ "$installee" = 1 ] && echo installée || echo 'pas installée')"
+fi
+if id -nG hakos-assistant 2>/dev/null | tr ' ' '\n' | grep -qx docker && [ "$(stat -c '%U %a' "$ETAT" 2>/dev/null)" = "hakos-assistant 755" ]; then
+	ok "utilisateur hakos-assistant (groupe docker), $ETAT à lui"
+else
+	echec "utilisateur hakos-assistant ou dossier $ETAT absents ou mal réglés"
+fi
+if grep -q '^NEXTCLOUD_ADMIN_' "$BOITE/nextcloud/.env" 2>/dev/null; then
+	echec "Nextcloud : lignes NEXTCLOUD_ADMIN_* encore dans $BOITE/nextcloud/.env"
+else
+	ok "Nextcloud : plus de compte technique dans .env"
 fi
 
 # --- Système (pas en essai) ---

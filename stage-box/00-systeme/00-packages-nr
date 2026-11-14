@@ -2,3 +2,7 @@
 avahi-daemon
 # Correctifs de sécurité de Debian appliqués seuls (origine limitée par files/52hakos-securite)
 unattended-upgrades
+# Pare-feu de la box (lib/phase.sh, parefeu/hakos.nft) : nft
+nftables
+# Assistant de première installation (/opt/box/assistant), bibliothèque standard seulement
+python3

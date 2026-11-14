@@ -3,6 +3,7 @@
 #   rootfs/opt/box/             → /opt/box/ (dossiers 0755, fichiers 0644, scripts 0755)
 #   versions.env                → /opt/box/versions.env
 #   scripts/test-sur-boitier.sh → /opt/box/test-sur-boitier.sh (0755)
+#   scripts/essai-assistant.py  → /opt/box/essai-assistant.py (0755), pour test-sur-boitier.sh --assistant
 #   images/*.tar                → /opt/box/images/, chargées puis effacées au premier démarrage
 # Le dépôt est monté en lecture seule depuis le Mac et virtiofs garde l'UID 501 : chaque fichier
 # est donc recopié avec « install -o root -g root ».
@@ -14,8 +15,9 @@ set -euo pipefail
 SOURCE="$HAKOS_RACINE/rootfs/opt/box"
 BOITE="$ROOTFS_DIR/opt/box"
 TEST="$HAKOS_RACINE/scripts/test-sur-boitier.sh"
+ESSAI_ASSISTANT="$HAKOS_RACINE/scripts/essai-assistant.py"
 
-for chemin in "$SOURCE" "$HAKOS_RACINE/versions.env" "$TEST" "$HAKOS_RACINE/images"; do
+for chemin in "$SOURCE" "$HAKOS_RACINE/versions.env" "$TEST" "$ESSAI_ASSISTANT" "$HAKOS_RACINE/images"; do
 	if [ ! -e "$chemin" ]; then
 		echo "Erreur : $chemin introuvable dans le conteneur pi-gen (fichier absent ou montage manquant)." >&2
 		exit 1
@@ -35,11 +37,11 @@ if [ -n "$intrus" ]; then
 fi
 
 install -d -o root -g root -m 0755 "$BOITE" "$BOITE/images"
-find "$SOURCE" -mindepth 1 -type d -print0 | while IFS= read -r -d '' dossier; do
+find "$SOURCE" -mindepth 1 -type d ! -name __pycache__ -print0 | while IFS= read -r -d '' dossier; do
 	install -d -o root -g root -m 0755 "$BOITE/${dossier#"$SOURCE"/}"
 done
-# Les fichiers de macOS (.DS_Store, ._*) restent sur le Mac.
-find "$SOURCE" -type f ! -name .DS_Store ! -name '._*' -print0 | while IFS= read -r -d '' fichier; do
+# Les fichiers de macOS (.DS_Store, ._*) et les caches de Python restent sur le Mac.
+find "$SOURCE" -type f ! -name .DS_Store ! -name '._*' ! -name '*.pyc' ! -path '*/__pycache__/*' -print0 | while IFS= read -r -d '' fichier; do
 	relatif="${fichier#"$SOURCE"/}"
 	if [[ "$relatif" == *.sh ]] || [ -x "$fichier" ]; then
 		mode=0755
@@ -51,6 +53,7 @@ done
 
 install -o root -g root -m 0644 "$HAKOS_RACINE/versions.env" "$BOITE/versions.env"
 install -o root -g root -m 0755 "$TEST" "$BOITE/test-sur-boitier.sh"
+install -o root -g root -m 0755 "$ESSAI_ASSISTANT" "$BOITE/essai-assistant.py"
 
 for archive in "$HAKOS_RACINE"/images/*.tar; do
 	install -o root -g root -m 0644 "$archive" "$BOITE/images/"

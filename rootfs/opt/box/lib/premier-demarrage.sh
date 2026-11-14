@@ -12,7 +12,7 @@ LIGNES_ML=()
 # etape N TITRE : annonce une étape dans le journal.
 etape() {
 	ETAPE=$2
-	journal "Étape $1/7 : $2"
+	journal "Étape $1/8 : $2"
 }
 
 # fin_premier_demarrage : appelée à la sortie du script (trap EXIT), explique un échec.
@@ -191,15 +191,20 @@ creer_env() {
 	journal "  $(libelle "$service") : .env créé, $secrets secret(s) tiré(s) au hasard"
 }
 
-# Étape 3 : un .env par service ; celui d'Immich reçoit en plus le choix de l'étape 2.
+# Étape 3 : un .env par service ; celui d'Immich reçoit en plus le choix de l'étape 2, celui de
+# Nextcloud un administrateur technique, pour que Nextcloud s'installe seul au premier lancement,
+# sans installateur web. L'étape 6 supprime ce compte et retire ces lignes.
 creer_secrets() {
-	local service
+	local service secret
 	for service in "${HAKOS_SERVICES[@]}"; do
-		if [ "$service" = immich ]; then
-			creer_env "$service" "${LIGNES_ML[@]}"
-		else
-			creer_env "$service"
-		fi
+		case $service in
+			immich) creer_env "$service" "${LIGNES_ML[@]}" ;;
+			nextcloud)
+				secret=$(openssl rand -hex 24) || echec "openssl rand a échoué."
+				creer_env "$service" "NEXTCLOUD_ADMIN_USER=$HAKOS_NC_TECHNIQUE" "NEXTCLOUD_ADMIN_PASSWORD=$secret"
+				;;
+			*) creer_env "$service" ;;
+		esac
 	done
 }
 
@@ -310,17 +315,60 @@ demarrer_projet() {
 	attendre_projet "$service" "$echeance"
 }
 
-# Étape 5 : démarre les projets dans l'ordre (accueil, Immich, Nextcloud). Le délai
+# Étape 5 : pare-feu et page du port 80 (lib/phase.sh, déjà lancé au démarrage par
+# hakos-parefeu.service), puis les projets dans l'ordre (accueil, Immich, Nextcloud). Le délai
 # HAKOS_DELAI_SANTE vaut pour l'ensemble, ce qui reste sous les 30 min de l'unité systemd.
 demarrer_services() {
 	local service echeance
+	if [ "$(id -u)" -eq 0 ]; then
+		"$HAKOS_BOITE/lib/phase.sh" appliquer || echec "pare-feu ou page du port 80 impossible à appliquer (lib/phase.sh)."
+	else
+		journal "  essai sans root : pare-feu non chargé"
+	fi
 	echeance=$(($(date +%s) + HAKOS_DELAI_SANTE))
 	for service in "${HAKOS_SERVICES[@]}"; do
 		demarrer_projet "$service" "$echeance"
 	done
 }
 
-# Étape 6 : fiche d'installation (0600) : /root/fiche-installation.txt, ou
+# occ_nextcloud ARGUMENT… : occ dans le conteneur de Nextcloud, en www-data.
+occ_nextcloud() {
+	local id
+	id=$(cd -- "$HAKOS_BOITE/nextcloud" && docker compose ps -q nextcloud </dev/null) || return 1
+	[ -n "$id" ] || return 1
+	docker exec -u www-data "$id" php occ --no-interaction --no-ansi "$@" </dev/null
+}
+
+# Étape 6 : Nextcloud installé sans compte. L'administrateur technique de l'étape 3 est supprimé :
+# les comptes de la famille viennent de l'assistant (occ suffit). Nextcloud ne contacte pas
+# internet pour juger des mots de passe. Les lignes NEXTCLOUD_ADMIN_* quittent le .env et le
+# conteneur est recréé sans elles. Se rejoue sans dommage après un échec.
+nextcloud_sans_compte() {
+	local env="$HAKOS_BOITE/nextcloud/.env" provisoire statut
+	statut=$(occ_nextcloud status --output=json) || echec "occ status a échoué : Nextcloud ne répond pas."
+	[[ $statut == *'"installed":true'* ]] || echec "Nextcloud ne s'est pas installé seul (occ status : installed ≠ true)."
+	if occ_nextcloud user:info "$HAKOS_NC_TECHNIQUE" >/dev/null 2>&1; then
+		occ_nextcloud user:delete "$HAKOS_NC_TECHNIQUE" >/dev/null || echec "suppression du compte technique de Nextcloud impossible."
+		journal "  Nextcloud : compte technique supprimé"
+	else
+		journal "  Nextcloud : aucun compte technique"
+	fi
+	occ_nextcloud config:system:set has_internet_connection --type=boolean --value=false >/dev/null ||
+		echec "réglage has_internet_connection de Nextcloud impossible."
+	if grep -q '^NEXTCLOUD_ADMIN_' "$env"; then
+		provisoire=$(mktemp "$env.XXXXXX") || echec "impossible d'écrire dans $HAKOS_BOITE/nextcloud"
+		grep -v '^NEXTCLOUD_ADMIN_' "$env" >"$provisoire" || true
+		chmod 600 "$provisoire"
+		if [ "$(id -u)" -eq 0 ]; then
+			chown root:root "$provisoire"
+		fi
+		mv -f "$provisoire" "$env"
+		journal "  Nextcloud : lignes NEXTCLOUD_ADMIN_* retirées du .env, conteneur recréé"
+		demarrer_projet nextcloud "$(($(date +%s) + HAKOS_DELAI_SANTE))"
+	fi
+}
+
+# Étape 7 : fiche d'installation (0600) : /root/fiche-installation.txt, ou
 # $HAKOS_BOITE/fiche-installation.txt en essai. Elle ne contient aucun secret.
 ecrire_fiche() {
 	local fiche nom identifiant="" quand immich nextcloud ml provisoire
@@ -367,10 +415,9 @@ ecrire_fiche() {
 		  Photos (Immich)           : http://$nom.local:2283
 		  Fichiers (Nextcloud)      : http://$nom.local:8080
 
-		À faire tout de suite
-		  Créer le compte administrateur d'Immich : http://$nom.local:2283
-		  Créer le compte administrateur de Nextcloud : http://$nom.local:8080
-		  Tant que ces comptes n'existent pas, n'importe quel appareil du réseau peut les créer.
+		Comptes des personnes de la maison
+		  Créés par la page de la HAKO : http://$nom.local (assistant de première installation).
+		  D'ici là, les ports des photos et des fichiers restent fermés au réseau.
 
 		À FAIRE (lot sauvegarde) : clé de récupération
 		  Emplacement réservé. Cette version de HakOS ne crée aucune clé de récupération.

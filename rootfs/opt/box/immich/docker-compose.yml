@@ -9,7 +9,9 @@
 #     (COMPOSE_PROFILES=ml dans .env) si la box a au moins 7 Gio de mémoire ;
 #   - ./config monté dans immich-server : sans le profil « ml », IMMICH_CONFIG_FILE y désigne
 #     immich-sans-ml.json, qui coupe l'apprentissage automatique ;
-#   - cache des modèles dans ./model-cache au lieu d'un volume nommé.
+#   - cache des modèles dans ./model-cache au lieu d'un volume nommé ;
+#   - port publié sur 127.0.0.1:12283 seulement : le nginx de l'accueil sert le port 2283 au
+#     réseau de la maison et freine les essais de mot de passe (home/nginx/photos.conf).
 # Le fichier .env de ce dossier est écrit au premier démarrage (mode 600). Les chemins de données
 # sont relatifs à ce dossier : ./library (photos), ./postgres (base), ./model-cache.
 name: hakos-immich
@@ -27,7 +29,7 @@ services:
     env_file:
       - .env
     ports:
-      - '2283:2283'
+      - '127.0.0.1:12283:2283'
     depends_on:
       - redis
       - database

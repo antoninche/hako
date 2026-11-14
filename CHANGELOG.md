@@ -2,6 +2,28 @@
 
 Les versions de HakOS (MaBox OS jusqu'au Lot 0) suivent les lots du projet.
 
+## [Lot 5] - 2026-11-14
+
+### Ajouté
+
+- Assistant de première installation : service hakos-assistant (rootfs/opt/box/assistant, Python, bibliothèque standard), API locale /api/installation/ (status, register, check, accounts) sur un socket Unix derrière le nginx de l'accueil, au contrat de docs/page-box.md du dépôt hako-site. Mots de passe en mémoire seulement, une installation à la fois (verrou de 2 min sans signe de vie), fiche qui donne la main, 10 essais faux, création des comptes en tâche de fond qui se rejoue sans doublon (Immich par son API, Nextcloud par occ). Le service s'arrête et se masque une fois la box installée.
+- Page de la HAKO (rootfs/opt/box/home/assistant), construite depuis hako-site au commit HAKO_SITE_COMMIT de versions.env.
+- Pare-feu nftables (hakos-parefeu.service, lib/phase.sh, parefeu/hakos.nft), requis par Docker : ports 2283 et 8080 fermés jusqu'à l'installation, rien en IPv6, TCP entrant depuis les IPv4 privées seulement.
+- Frein des mots de passe d'Immich : nginx sert le port 2283 (Immich sur 127.0.0.1:12283), 10 essais par minute et par adresse.
+- Liste de 4 096 mots (docs/liste-de-mots.md), tests unitaires (tests/assistant, dans make lint), scripts/essai-assistant.py (test-sur-boitier.sh --assistant N [--coupure]), scripts/essai-vm.sh et scripts/essai-page.mjs.
+
+### Modifié
+
+- Premier démarrage en 8 étapes : Nextcloud s'installe seul avec un administrateur technique, supprimé ensuite (plus d'installateur web) ; pare-feu appliqué avant les services ; fiche d'installation mise à jour.
+- nginx de l'accueil sur le réseau de la box (IPv4), configuration dans home/nginx/ ; port 80 : page de la HAKO avant l'installation, accueil après.
+- test-sur-boitier.sh, verifier-image.sh, verifier-qualite.sh et stage-box : contrôles et installation de l'assistant (utilisateur hakos-assistant, paquets nftables et python3).
+
+### Problèmes connus
+
+- Rien n'a encore tourné sur un Pi 5 ni sur l'image prod gravée : essais dans la VM Colima seulement (docs/lot5-assistant.md, partie 8).
+- La reprise d'Immich après une coupure passe par sa base (empreinte bcrypt) : liée à Immich v3.4.1.
+- Liste de mots à relire par deux personnes. Décision 4 (bouton de la box) et Wi-Fi (5.5) pas faits.
+
 ## [Lot 4] - 2026-11-13
 
 ### Ajouté
