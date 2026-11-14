@@ -9,7 +9,8 @@
 #      Une variable non définie compte comme une erreur ;
 #   3. recherche de secrets dans les fichiers suivis par git ou à suivre (non ignorés) : fichiers .env,
 #      clés privées, mots de passe en clair (CLÉ=valeur ou clé YAML dont le nom contient PASSWORD,
-#      PASS, SECRET ou TOKEN, avec une valeur littérale).
+#      PASS, SECRET ou TOKEN, avec une valeur littérale) ;
+#   4. tests unitaires de l'assistant de première installation (tests/assistant, python3).
 # Une ligne « OK … » ou « ÉCHEC … » par contrôle, puis un bilan. Code de sortie 1 si un contrôle échoue.
 # Compatible avec le bash 3.2 de macOS.
 set -euo pipefail
@@ -158,6 +159,23 @@ if [ -z "$lignes" ]; then
 	ok "secrets : aucun mot de passe en clair"
 else
 	echec "secrets : mot de passe en clair possible (contenu non affiché) : $(printf '%s' "$lignes" | tr '\n' ' ')"
+fi
+
+# 4. Assistant de première installation : tests unitaires de Python (bibliothèque standard, sans
+#    réseau ni Docker), et syntaxe du script d'essai sur la box.
+if ! command -v python3 >/dev/null 2>&1; then
+	echec "python3 introuvable : tests de l'assistant non lancés"
+elif sortie="$(cd "$RACINE/tests/assistant" && python3 -B -m unittest -q 2>&1)"; then
+	ok "assistant : tests unitaires ($(sed -n 's/^Ran \([0-9]*\) tests.*/\1/p' <<<"$sortie") tests)"
+else
+	printf '%s\n' "$sortie" | tail -20
+	echec "assistant : tests unitaires en échec (ci-dessus)"
+fi
+if python3 -B -c 'import ast, sys; [ast.parse(open(f, encoding="utf-8").read(), f) for f in sys.argv[1:]]' \
+	"$RACINE/scripts/essai-assistant.py" "$RACINE"/rootfs/opt/box/assistant/*.py 2>/dev/null; then
+	ok "assistant : syntaxe Python des scripts de la box"
+else
+	echec "assistant : erreur de syntaxe Python (python3 -m py_compile pour le détail)"
 fi
 
 if [ "$echecs" -eq 0 ]; then

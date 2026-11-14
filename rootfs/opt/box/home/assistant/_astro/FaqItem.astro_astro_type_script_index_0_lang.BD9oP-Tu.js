@@ -1,0 +1,1 @@
+function e(){let e;try{e=decodeURIComponent(window.location.hash.slice(1))}catch{return}if(!e)return;let t=document.getElementById(e)?.closest(`details`);t&&!t.open&&(t.open=!0)}e(),window.addEventListener(`hashchange`,e);

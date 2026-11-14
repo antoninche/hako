@@ -1,15 +1,16 @@
 # Nextcloud (fichiers) : image officielle nextcloud:<version>-apache et sa base Postgres.
 # Documentation de l'image : https://github.com/nextcloud/docker (README).
 #
-# Aucun compte administrateur n'est créé d'avance : la personne le crée dans l'installateur web
-# (http://hako.local:8080). Les variables POSTGRES_* du fichier .env règlent déjà la base :
-# l'installateur ne la demande pas (autoconfig.php de l'image).
+# Installation sans installateur web : au premier démarrage, le .env reçoit en plus un
+# administrateur technique (NEXTCLOUD_ADMIN_USER et NEXTCLOUD_ADMIN_PASSWORD, tiré au hasard) ;
+# l'image installe alors Nextcloud avant de démarrer Apache, avec la base des variables POSTGRES_*
+# et le domaine de confiance NEXTCLOUD_TRUSTED_DOMAINS. Le premier démarrage supprime ensuite ce
+# compte, retire ces lignes et recrée le conteneur. Les comptes de la famille viennent de
+# l'assistant de première installation (occ user:add, mot de passe par l'environnement).
+# Le port 8080 reste fermé au réseau (pare-feu) tant que ces comptes n'existent pas.
 #
-# Domaines de confiance : l'installateur web retient le seul nom ou la seule adresse IP qui a
-# servi à l'ouvrir (trusted_domains). Ouvert par http://hako.local:8080, Nextcloud refusera
-# ensuite l'adresse IP de la box, et inversement. L'image n'applique NEXTCLOUD_TRUSTED_DOMAINS
-# qu'après une installation automatique (NEXTCLOUD_ADMIN_USER et NEXTCLOUD_ADMIN_PASSWORD),
-# que HakOS ne fait pas : la variable est posée pour le jour où elle servira.
+# Domaines de confiance : hako.local (et localhost). Ouvert par l'adresse IP de la box,
+# Nextcloud refuse la page (« domaine non approuvé »).
 #
 # Le fichier .env de ce dossier est écrit au premier démarrage (mode 600). Les chemins de données
 # sont relatifs à ce dossier : ./html (Nextcloud, sa configuration et les fichiers dans

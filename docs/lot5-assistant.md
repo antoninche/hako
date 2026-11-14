@@ -1,6 +1,44 @@
-# HakOS, lot 5 : l'assistant de première installation (conception)
+# HakOS, lot 5 : l'assistant de première installation
 
-14 novembre 2026. Branche `lot-5` (`~/Code/mabox-os-lot5`). Pas de code de production : des essais (`spikes/`) et cette conception, à valider par les fondateurs.
+14 novembre 2026. Conception et essais (phase 1, parties « Résultats des essais » à 7), validés par les fondateurs (décisions 1 à 10), puis réalisation (partie 8, en tête).
+
+## 8. Réalisation (phase 2)
+
+### Ce qui tourne sur la box
+
+| Pièce | Où | Rôle |
+|---|---|---|
+| `hakos-parefeu.service` | `/etc/systemd/system`, requis par `docker.service` | `lib/phase.sh appliquer` avant Docker : charge `parefeu/hakos.nft`, choisit la page du port 80 |
+| `hakos-premier-demarrage.service` | idem | 8 étapes ; Nextcloud s'installe seul (administrateur technique), qui est supprimé à l'étape 6 |
+| `hakos-assistant.service` | `/usr/lib/systemd/system` (pour pouvoir le masquer) | API locale (`assistant/*.py`, Python, bibliothèque standard), socket `/run/hakos-assistant/api.sock` |
+| nginx de l'accueil | conteneur, réseau de la box (`network_mode: host`), IPv4 | port 80 : `assistant.conf` puis `accueil.conf` (choix dans `/var/lib/hakos/accueil/phase.conf`) ; port 2283 : Immich (`photos.conf`) |
+| État | `/var/lib/hakos/installee` | fait foi pour le pare-feu, la page du port 80 et le service ; aucun secret |
+
+- **Phases et session** (`installation.py`) : comme la partie 2, tout en mémoire. Verrou (décision 9) : toute requête qui porte le jeton est un signe de vie, la page en donne un toutes les 30 s ; après 2 min sans signe de vie, un autre appareil peut recommencer. Un `check` réussi donne la session ; 10 essais faux, puis 423 jusqu'au redémarrage ou à un nouveau `register`.
+- **Comptes** (`comptes.py`) : Immich par son API (127.0.0.1:12283), Nextcloud par `occ` (mot de passe dans l'environnement de `docker exec`). Chaque étape se rejoue : comptes en trop supprimés (adresse Immich libérée d'abord), comptes existants mis à jour, création des autres. Identifiants et prénoms identiques à `household.ts` (`tests/assistant/cas-household.json`, tiré du code du site).
+- **Reprise après une coupure (écart à la partie 1)** : pas de clé d'API d'Immich sur le disque. Si Immich a déjà son administrateur, l'assistant calcule l'empreinte bcrypt du nouveau mot de passe de la responsable dans le conteneur d'Immich (module `bcrypt` d'Immich, mot de passe dans l'environnement) et la pose dans sa base par `psql` (entrée standard). Aucun secret n'est jamais écrit, et aucune fenêtre où une coupure bloquerait la box (entre l'inscription et l'enregistrement d'une clé). `immich-admin reset-admin-password` a été essayé : il attend un terminal et ne finit pas. Lié à Immich v3.4.1 (table `user`, colonnes `password`, `isAdmin`, `deletedAt`) : à revoir si l'assistant doit tourner avec une autre version.
+- **Fin** : marqueur `installee`, `phase.conf` vers l'accueil, nginx rechargé (`docker kill --signal HUP`), ports ouverts (`nft flush set`), mots de passe oubliés ; 10 s plus tard le service s'arrête, `phase.sh fin` (root, `ExecStopPost=+`) refait tout depuis le marqueur et masque le service. Ensuite, nginx répond lui-même `{"phase":"installed","busy":false}` à `GET /api/installation/status` et `409 wrong_phase` aux autres routes.
+- **Pare-feu (décisions 1 et 7)** : table `inet hakos` seule (Docker intact). Rien n'entre en IPv6 sauf ICMPv6, DHCPv6 et mDNS ; TCP entrant depuis les IPv4 privées seulement ; 2283 et 8080 fermés avant l'installation ; 12283 toujours fermé au réseau. Redémarrer `hakos-parefeu` redémarre Docker (`Requires`).
+- **Frein d'Immich (décision 1)** : `limit_req` de nginx, 10 par minute et par adresse (10 d'un coup, puis un toutes les 6 s, 429 au-delà) sur `/api/auth/login`, `change-password`, `session/unlock` et `pin-code`.
+- **Liste de mots (décision 2)** : liste française de diceware utilisée par Tails (CC0), réduite à 4 096 mots ; provenance et filtres dans `docs/liste-de-mots.md`. Relecture par deux personnes : à faire.
+- **Page de la HAKO (décisions 8 et 10)** : `rootfs/opt/box/home/assistant/`, construite depuis hako-site au commit `HAKO_SITE_COMMIT` de `versions.env`, `SITE_URL=https://hako-box.github.io`. Pour la remonter : reconstruire dans un clone à un autre commit (`npm ci && SITE_URL=… npm run build:box`), recopier `dist-box/`, changer `HAKO_SITE_COMMIT`.
+- **Hors lot** : décision 4 (bouton de la box), sous-lot 5.5 (Wi-Fi), « Gérer ma HAKO » (lot 6).
+
+### Essais du 14 novembre (VM Colima, Ubuntu 24.04 arm64, 4 Go simulés)
+
+`scripts/essai-vm.sh installer` puis le vrai premier démarrage par systemd, sur une box neuve à chaque fois (images déjà dans Docker).
+
+| Essai | Résultat |
+|---|---|
+| Premier démarrage | 65 à 71 s (sans chargement des archives) |
+| `test-sur-boitier.sh --assistant 1` | 42 contrôles de l'essai + 30 de la box, 0 échec ; comptes créés en 1,2 s |
+| `--assistant 8` | 56 + 30, 0 échec ; comptes créés en 5,3 s |
+| `--assistant 8 --coupure` (service tué au milieu des fichiers, nouveaux mots de passe, reprise) | 61 + 30, 0 échec ; 9,9 s en tout, reprise en 4,2 s ; anciens mots de passe refusés, aucun compte en trop |
+| Reprise avec d'autres prénoms (responsable changée, une personne retirée, une ajoutée) | 15 contrôles, 0 échec (essai ponctuel, non scripté) |
+| Navigateur (`scripts/essai-page.mjs`, Chromium) : page fermée, « Recommencer » refusé puis accepté après 2 min, fiche qui donne la main, signe de vie, création, accueil | 17 contrôles, 0 échec ; création en 2,3 s ; ni violation de CSP ni requête ailleurs |
+| Redémarrage simulé de la box installée (pare-feu rechargé, nginx relancé) | 29 contrôles, 0 échec |
+
+Chaque essai vérifie aussi : voisin simulé (IPv4 privée, IPv4 publique, IPv6), inscription d'un administrateur Immich impossible depuis le réseau avant la fin, journal sans prénom, identifiant, mot de passe ni jeton, aucun mot de passe sur le disque, frein d'Immich (10 × 401 puis 429). Reste : le Pi 5 (P3), Safari et Firefox, l'image prod gravée.
 
 ## Résultats des essais
 

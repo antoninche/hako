@@ -23,3 +23,5 @@ id_ecdsa*
 
 # Système
 .DS_Store
+# Python (tests de l'assistant, essais)
+__pycache__/

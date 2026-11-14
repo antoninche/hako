@@ -7,9 +7,12 @@
 #   2. apprentissage automatique d'Immich selon la mémoire (7 Gio)
 #   3. secrets : un .env par service (0600, root), jamais affiché
 #   4. docker load des archives de /opt/box/images, supprimées une fois chargées
-#   5. docker compose up -d : accueil, Immich, Nextcloud, puis attente de leur santé
-#   6. fiche d'installation /root/fiche-installation.txt (0600)
-#   7. /opt/box/.initialized, seulement si tout a réussi
+#   5. pare-feu (lib/phase.sh), puis docker compose up -d : accueil, Immich, Nextcloud, et
+#      attente de leur santé
+#   6. Nextcloud sans compte : administrateur technique supprimé, .env nettoyé
+#   7. fiche d'installation /root/fiche-installation.txt (0600)
+#   8. /opt/box/.initialized, seulement si tout a réussi : l'assistant de première installation
+#      (hakos-assistant) laisse alors la famille créer ses comptes
 #
 # Relance sûre après un échec : les .env présents sont gardés, seules les archives restantes
 # sont chargées, docker compose est relancé. Commande : systemctl start hakos-premier-demarrage
@@ -50,10 +53,13 @@ charger_images
 etape 5 "services"
 demarrer_services
 
-etape 6 "fiche d'installation"
+etape 6 "Nextcloud sans compte"
+nextcloud_sans_compte
+
+etape 7 "fiche d'installation"
 ecrire_fiche
 
-etape 7 "fin"
+etape 8 "fin"
 touch "$HAKOS_BOITE/.initialized"
 duree=$(($(date +%s) - debut))
 journal "Premier démarrage réussi en $((duree / 60)) min $((duree % 60)) s : $HAKOS_BOITE/.initialized créé."
