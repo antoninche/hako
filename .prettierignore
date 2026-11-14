@@ -19,3 +19,6 @@ public/
 
 # Jeux d'essai des scripts : leurs numéros de ligne sont vérifiés
 tests/fixtures/
+
+# HakOS, le système de la box : ses propres contrôles (make -C hakos lint)
+hakos/

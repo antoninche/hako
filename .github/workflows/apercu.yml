@@ -8,6 +8,8 @@ name: Aperçu en ligne
 on:
   push:
     branches: [main]
+    # Un envoi qui ne touche que HakOS (hakos/) ne republie pas le site.
+    paths-ignore: ['hakos/**']
   workflow_dispatch:
 
 permissions:

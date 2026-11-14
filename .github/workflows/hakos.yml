@@ -1,0 +1,25 @@
+# Contrôles de HakOS, le système de la box (dossier hakos/), à chaque changement
+# de ce dossier : make lint, c'est-à-dire shellcheck sur tous les scripts,
+# docker compose config sur chaque fichier compose, recherche de secrets, puis
+# tests unitaires de l'API locale (tests/assistant) et du socle (tests/socle).
+# L'image elle-même se construit sur un Mac (hakos/README.md). Les actions sont
+# fixées par leur empreinte de commit, la version lisible est en commentaire.
+name: HakOS
+
+on:
+  push:
+    branches: [main]
+    paths: ['hakos/**', '.github/workflows/hakos.yml']
+  pull_request:
+    paths: ['hakos/**', '.github/workflows/hakos.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  controles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: make -C hakos lint
