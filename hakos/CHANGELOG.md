@@ -2,6 +2,18 @@
 
 Les versions de HakOS (MaBox OS jusqu'au Lot 0) ont suivi les lots du projet jusqu'au Lot 5. Depuis 2026.11.1, elles portent un numéro AAAA.MM.n (HAKOS_VERSION de versions.env), affiché sur la page d'état.
 
+## [Non publié]
+
+### Modifié
+
+- Le site est dans le dossier `site/` du dépôt antoninche/hako : `scripts/essai-page.mjs` le trouve à partir de son propre emplacement (`../../site`), et « dépôt hako-site » devient « dossier site/ de antoninche/hako » dans les commentaires, la documentation, les tests et versions.env, dont la ligne de construction de la page de la HAKO (`cd site && npm ci && SITE_URL=https://antoninche.github.io/hako npm run build:box`). HAKO_SITE_COMMIT ne change pas.
+- README : badges, accroche, capture de la page d'état et titres avec emoji, au même format que les autres README du dépôt ; contenu inchangé.
+- Licences au format REUSE (REUSE.toml à la racine du dépôt) : hakos/ en GPL-3.0-or-later, polices en OFL-1.1, logo réservé, page de la HAKO en MIT comme le site.
+
+### Problèmes connus
+
+- L'image de la release HakOS 1.0.0 n'est pas reconstruite : son /opt/box/versions.env et quelques commentaires de /opt/box (assistant, nginx) diffèrent maintenant de ce dossier, et `make verifier-image` sur cette image signale un versions.env différent. Pour la vérifier, prendre hakos/ au commit 3091332.
+
 ## [2026.11.2] - 2026-11-14
 
 ### Modifié

@@ -75,7 +75,7 @@ try {
     route.request().url().startsWith('data:') ? route.continue() : route.abort(),
   );
   await page.setContent(html, { waitUntil: 'load' });
-  await page.evaluate(() => document.fonts.ready);
+  await page.evaluate('document.fonts.ready.then(() => true)');
   await mkdir(path.dirname(SORTIE), { recursive: true });
   await page.screenshot({ path: SORTIE, type: 'png' });
   console.log(`Image de partage : ${path.relative(path.resolve(repoRoot, '..'), SORTIE)}`);

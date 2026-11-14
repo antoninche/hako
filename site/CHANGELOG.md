@@ -2,6 +2,19 @@
 
 Les modifications notables du site sont notées ici, de la plus récente à la plus ancienne. Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et les numéros de version suivent la [gestion sémantique de version](https://semver.org/lang/fr/).
 
+## [0.4.3] - 2026-11-14
+
+### Modifié
+
+- Le site passe dans `site/` : sources, tests, scripts, documentation, captures, logo d’origine, configuration, journal et licence MIT sont déplacés dans le dossier `site/` du dépôt antoninche/hako, avec leur historique. Les commandes se lancent dans `site/`.
+- Aperçu en ligne : le workflow travaille dans `site/` (version de Node et cache npm lus dans `site/`, artefact `site/dist`) et ne republie le site que si `site/` ou le workflow changent.
+- README propre au site (`site/README.md`) ; le README du dépôt présente tout le projet.
+- ESLint, Prettier et TypeScript n’ont plus à écarter `hakos/`, qui n’est plus dans le dossier du site.
+
+### Ajouté
+
+- `npm run social-preview` : image de partage du dépôt sur GitHub, `.github/assets/social-preview.png` (1280 × 640 px).
+
 ## [0.4.2] - 2026-11-14
 
 ### Modifié
