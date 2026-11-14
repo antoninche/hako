@@ -6,7 +6,7 @@ HAKO est une box qui garde les photos et les fichiers d'une famille chez elle, �
 
 Aujourd'hui, les photos d'une famille vivent souvent chez Google ou chez Apple, avec un abonnement à payer chaque mois pour y garder l'accès. Depuis 2018, le Cloud Act donne aux autorités américaines accès aux données détenues par les entreprises américaines, où qu'elles soient stockées. Les solutions qu'on garde chez soi, comme un NAS, sont à configurer soi-même. HAKO veut offrir les deux : les données à la maison, et rien à configurer.
 
-Nous sommes trois étudiants d'Aix-Marseille, et HAKO est notre projet pour le 36h Chrono 2026 de Pépite Provence. Le site est en ligne sur [antoninche.github.io/hako](https://antoninche.github.io/hako/). Ce dépôt réunit le site, la page que la box affiche pour sa première installation et, bientôt, HakOS, le système de la box.
+Nous sommes trois étudiants d'Aix-Marseille, et HAKO est notre projet pour le 36h Chrono 2026 de Pépite Provence. Le site est en ligne sur [antoninche.github.io/hako](https://antoninche.github.io/hako/). Ce dépôt réunit le site, la page que la box affiche pour sa première installation et [HakOS](hakos/), le système de la box.
 
 ## Comment ça marche
 
@@ -44,7 +44,7 @@ Nous écrire : [antonin.chenavaz@etu.univ-amu.fr](mailto:antonin.chenavaz@etu.un
 
 Treize pages, plus la page 404 : accueil, offres, la box, notre engagement, questions fréquentes, tutoriels, guide d'installation en huit étapes, démonstration de la première installation, commande, contact, conditions générales de vente, mentions légales et données personnelles.
 
-- Site statique construit avec Astro 7 et TypeScript en mode strict, publié par GitHub Pages à chaque envoi sur `main`.
+- Site statique construit avec Astro 7 et TypeScript en mode strict, publié par GitHub Pages à chaque envoi sur `main` qui touche le site.
 - Aucun cookie, aucun stockage local, aucune mesure d'audience, aucune ressource externe : les polices, le logo et les icônes sont servis par le site.
 - Aucun script ni style en ligne : chaque page tient sous une politique de sécurité du contenu (CSP) stricte, `default-src 'self'`, que les tests vérifient à 390 et 1440 px. GitHub Pages n'envoie pas cet en-tête ; l'hébergement définitif l'enverra ([docs/hebergement.md](docs/hebergement.md)).
 - Accessibilité visée WCAG 2.2 niveau AA, contrôlée avec axe-core, à 390 et 1440 px de large ; contraste d'au moins 4,5:1 pour chaque couple texte et fond, cibles tactiles de 44 px, menu au clavier, moins d'animations sur demande.
@@ -74,6 +74,7 @@ flowchart LR
     subgraph depot["Dépôt antoninche/hako"]
         site["Site<br/>Astro, TypeScript"]
         boxpage["Page de la HAKO<br/>box/"]
+        hakosdir["HakOS<br/>hakos/"]
     end
     pages[("GitHub Pages<br/>antoninche.github.io/hako")]
     subgraph maison["Réseau de la maison"]
@@ -89,6 +90,7 @@ flowchart LR
 
     site -- "npm run build" --> pages
     boxpage -- "npm run build:box" --> accueil
+    hakosdir -- "make build-prod" --> hako
     appareils --> nginx
     nginx --> accueil
     nginx --> immich
@@ -103,7 +105,8 @@ Le site public et la box ne se parlent pas. La page de la box est construite dep
 HakOS est une image Raspberry Pi OS Lite (Debian 13, arm64) pour Raspberry Pi 5, qui démarre sur le SSD. Immich et Nextcloud sont livrés dans l'image : rien n'est téléchargé chez le client, et chaque box tire ses propres secrets à son premier démarrage.
 
 - Construit et testé dans des machines virtuelles ; pas encore démarré sur un vrai Raspberry Pi 5.
-- Son code rejoint ce dépôt dans le dossier `hakos/`, sous licence GPL-3.0-or-later : voir [hakos/README.md](hakos/README.md).
+- Son code est dans le dossier [hakos/](hakos/), avec son historique, sous licence GPL-3.0-or-later : ce qu'il contient, comment le construire et le tester, et ses limites, dans [hakos/README.md](hakos/README.md).
+- L'image prête à graver est publiée dans la release [HakOS 1.0.0](https://github.com/antoninche/hako/releases/tag/hakos-v1.0.0), avec ses sommes SHA-256.
 
 ## Feuille de route
 
@@ -115,20 +118,21 @@ HakOS est une image Raspberry Pi OS Lite (Debian 13, arm64) pour Raspberry Pi 5,
 
 ## Organisation du dépôt
 
-| Dossier              | Contenu                                                                                        |
-| -------------------- | ---------------------------------------------------------------------------------------------- |
-| [src/](src/)         | Pages, textes (`content/`), informations de l'entreprise et prix (`data/`), composants, styles |
-| [box/](box/)         | Page de la HAKO pour sa première installation ([docs/page-box.md](docs/page-box.md))           |
-| [public/](public/)   | Fichiers servis tels quels : polices et leurs licences, logo, icônes, image de partage         |
-| [design/](design/)   | Captures du prototype 3D et sources des dessins                                                |
-| [brand/](brand/)     | PNG d'origine du logo                                                                          |
-| [scripts/](scripts/) | Contrôles (informations manquantes, contraste, site construit), polices, logo, page de la HAKO |
-| [tests/](tests/)     | Tests Playwright et tests unitaires                                                            |
-| [docs/](docs/)       | Développement, charte graphique, hébergement, page de la HAKO, licences                        |
-| [images/](images/)   | Bannière et captures d'écran de ce README                                                      |
+| Dossier              | Contenu                                                                                         |
+| -------------------- | ----------------------------------------------------------------------------------------------- |
+| [src/](src/)         | Pages, textes (`content/`), informations de l'entreprise et prix (`data/`), composants, styles  |
+| [box/](box/)         | Page de la HAKO pour sa première installation ([docs/page-box.md](docs/page-box.md))            |
+| [hakos/](hakos/)     | HakOS, le système de la box, sous licence GPL-3.0-or-later ([hakos/README.md](hakos/README.md)) |
+| [public/](public/)   | Fichiers servis tels quels : polices et leurs licences, logo, icônes, image de partage          |
+| [design/](design/)   | Captures du prototype 3D et sources des dessins                                                 |
+| [brand/](brand/)     | PNG d'origine du logo                                                                           |
+| [scripts/](scripts/) | Contrôles (informations manquantes, contraste, site construit), polices, logo, page de la HAKO  |
+| [tests/](tests/)     | Tests Playwright et tests unitaires                                                             |
+| [docs/](docs/)       | Développement, charte graphique, hébergement, page de la HAKO, licences                         |
+| [images/](images/)   | Bannière et captures d'écran de ce README                                                       |
 
 ## Licence
 
-Le code du site est distribué sous licence [MIT](LICENSE). Elle permet de le réutiliser, de le modifier et de le redistribuer, à condition de garder la mention de copyright et la licence.
+Le code du site est distribué sous licence [MIT](LICENSE). Le code de HakOS, dans [hakos/](hakos/), est sous licence GNU GPL version 3 ou ultérieure ([hakos/LICENSE](hakos/LICENSE)). Elle permet de le réutiliser, de le modifier et de le redistribuer, à condition de garder la mention de copyright et la licence.
 
 Elle ne donne aucun droit sur le nom HAKO, son logo, la marque en kanji 箱, les dessins, les photos ni les textes du site : ils restent réservés (voir [NOTICE](NOTICE)). Les polices Fraunces, Atkinson Hyperlegible Next et D-DIN sont sous licence SIL Open Font License 1.1, jointe dans [public/fonts/](public/fonts/), et les autres éléments tiers sont listés avec leur licence dans [docs/licences.md](docs/licences.md). Immich et Nextcloud gardent leur propre licence (GNU AGPL v3).
