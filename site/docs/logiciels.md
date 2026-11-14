@@ -20,7 +20,11 @@ Les textes affichés sur le site sont dans `src/content/la-box.ts`. Si un logici
 
 Immich : le fichier `LICENSE` de la branche `main` contient le texte « GNU AFFERO GENERAL PUBLIC LICENSE, Version 3, 19 November 2007 », que l’API GitHub identifie comme `AGPL-3.0`. Le fichier `server/package.json` déclare `"license": "GNU Affero General Public License version 3"` et le README affiche le badge « License: AGPLv3 ». Dernière version publiée le jour de la vérification : v3.4.1, le 11 novembre 2026. Le site officiel indiqué par le dépôt est https://immich.app (réponse 200).
 
+<!-- REUSE-IgnoreStart -->
+
 Nextcloud Server : le fichier `COPYING` de la branche `master` contient la GNU AGPL v3. Le README précise : « All contributions to this repository from June 16, 2016, and onward are considered to be licensed under the AGPLv3 or any later version. » Les fichiers portent l’en-tête `SPDX-License-Identifier: AGPL-3.0-or-later` (par exemple `lib/base.php`). Le dossier `LICENSES/` réunit aussi les licences des éléments tiers inclus dans le dépôt. Le site https://nextcloud.com/fr/ répond 200.
+
+<!-- REUSE-IgnoreEnd -->
 
 Applications Agenda et Contacts de Nextcloud (fonctions de Hako Pro) : `nextcloud/calendar` contient la GNU AGPL v3 dans `COPYING` et déclare `<licence>agpl</licence>` dans `appinfo/info.xml` ; `nextcloud/contacts` déclare `<licence>AGPL-3.0-or-later</licence>`.
 

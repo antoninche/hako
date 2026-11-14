@@ -1,0 +1,14 @@
+HAKO : éléments réservés (tous droits réservés)
+
+Copyright 2026 Antonin Chenavaz, Maxime Pollaud, Martin Dugail
+
+Les fichiers marqués LicenseRef-HAKO-Reserve ne sont couverts par aucune
+licence libre : ni la licence MIT du site, ni la GNU GPL de HakOS. Ce sont
+le nom et la marque HAKO, le logo et la marque en kanji 箱 sous toutes leurs
+formes, les photos et les portraits de l'équipe, les images du prototype de
+la box, les dessins, les captures d'écran et les textes du site, comme le
+détaille le fichier NOTICE à la racine du dépôt.
+
+Ils ne peuvent être ni réutilisés, ni modifiés, ni utilisés pour désigner un
+autre produit, service ou site sans l'accord écrit des auteurs. Pour toute
+demande : antonin.chenavaz@etu.univ-amu.fr.

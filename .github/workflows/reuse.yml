@@ -1,0 +1,22 @@
+# Licences : chaque fichier du dépôt doit avoir une licence et un titulaire du
+# droit d'auteur (REUSE.toml, textes dans LICENSES/). Contrôle léger, à chaque
+# envoi sur main et à chaque demande de fusion. reuse est figé à sa version ;
+# l'action est fixée par son empreinte de commit, la version lisible est en
+# commentaire.
+name: REUSE
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  licences:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: pipx run --spec 'reuse[charset-normalizer]==6.3.0' reuse lint
