@@ -1,220 +1,201 @@
 # HakOS
 
-HakOS est le système de la box HAKO : une image Raspberry Pi OS Lite (Debian 13 trixie, arm64) pour Raspberry Pi 5, qui démarre sur SSD. L'image est construite avec pi-gen, l'outil officiel de Raspberry Pi, à la révision figée dans versions.env. Elle contient trois services, en conteneurs Docker :
+HakOS est le système de la box HAKO : une image Raspberry Pi OS Lite (Debian 13 « trixie », arm64) pour Raspberry Pi 5, qui démarre sur un SSD. Il fait tourner Immich pour les photos et Nextcloud pour les fichiers, à la maison : rien n'est téléchargé chez le client, aucun port n'est ouvert vers internet, et l'équipe n'a aucun accès à la box.
 
-- la page d'état de la HAKO, http://hako.local (nginx, port 80) : les boutons « Mes photos » et « Mes fichiers », l'état de la box (disque, nombre de photos, durée depuis l'allumage, température et ralentissements, copie de secours) et la place des mises à jour, « bientôt » ;
-- Immich, pour les photos, à http://hako-photos.local (nginx devant Immich, qui n'écoute que sur 127.0.0.1:12283) ;
-- Nextcloud, pour les fichiers, à http://hako-fichiers.local.
+L'image est construite avec pi-gen, l'outil officiel de Raspberry Pi, sur un Mac Apple Silicon, dans une machine virtuelle Linux (Colima). Elle a été essayée dans des machines virtuelles seulement, jamais sur un vrai Raspberry Pi 5 : voir [Limites](#limites).
 
-Ces deux noms sont annoncés par avahi (service hakos-noms) ; une deuxième box sur le même réseau prend hako-2.local, hako-2-photos.local et hako-2-fichiers.local. Les ports 2283 (Immich) et 8080 (Nextcloud) restent ouverts au réseau de la maison, en secours, par le nom ou l'adresse IP de la box. Détails, garde-fous du Pi 5 compris : docs/socle-pi5.md.
+Ce dossier reprend le dépôt de travail de HakOS, avec son historique. Le site de HAKO et la page que la box affiche pour sa première installation sont à la racine du dépôt ([README](../README.md)). Les images prêtes à graver sont publiées dans la release [HakOS 1.0.0](https://github.com/antoninche/hako/releases/tag/hakos-v1.0.0).
 
-Rien n'est téléchargé chez le client : les images Docker sont livrées dans l'image système et chargées au premier démarrage. Chaque box tire alors ses propres secrets (mots de passe des bases de données), démarre les services et écrit sa fiche d'installation. Deux box gravées avec la même image ne partagent aucun secret.
+## Ce que contient la box
 
-Avant sa première installation, la box sert sur http://hako.local la page de la HAKO (assistant de première installation, construite depuis le dépôt hako-site) : la famille donne ses prénoms, reçoit ses mots de passe, fait sa fiche de secours, et la box crée les comptes dans Immich et Nextcloud. D'ici là, les ports 2283 et 8080 restent fermés au réseau : personne ne peut prendre un compte administrateur. Détails : docs/lot5-assistant.md.
+Toutes les versions sont figées dans [versions.env](versions.env) ; les images Docker le sont aussi par leur empreinte quand elles en ont une. Elles sont enregistrées dans l'image système et chargées au premier démarrage : chez le client, la box ne télécharge rien.
 
-Deux profils, construits à partir des mêmes fichiers :
+| Élément                                    | Rôle                                                  | Version figée                                                   |
+| ------------------------------------------ | ----------------------------------------------------- | --------------------------------------------------------------- |
+| Raspberry Pi OS Lite, construit par pi-gen | le système                                            | Debian 13 « trixie », arm64 ; pi-gen, branche arm64, `c0d2c9f2` |
+| Immich                                     | les photos, à http://hako-photos.local                | v3.4.1, avec Postgres 14 (VectorChord 0.4.3) et Valkey 9        |
+| Nextcloud                                  | les fichiers, à http://hako-fichiers.local            | 34.0.5-apache, avec postgres:17.12-alpine                       |
+| nginx                                      | page de la HAKO, page d'état, entrée des applications | 1.31.8-alpine                                                   |
+| Page de la HAKO                            | la première installation, sur http://hako.local       | construite depuis ce dépôt au commit `4fcd7dd` (site 0.4.2)     |
+| HakOS                                      | version affichée sur la page d'état                   | 2026.11.2                                                       |
 
-| Profil | Pour | Accès à la box |
-| --- | --- | --- |
-| dev | l'équipe | SSH par clé seulement (clés de l'équipe), compte hako avec un mot de passe console |
-| prod | les clients | aucun : SSH masqué, compte hako verrouillé, aucune clé (promesse « zéro accès ») |
+Docker Engine et son greffon compose viennent du dépôt officiel de Docker pour Debian 13, le jour de la construction. Ensuite, seuls les correctifs de sécurité de Debian s'installent d'eux-mêmes : ni Docker, ni Immich, ni Nextcloud ne changent de version seuls.
 
-L'image dev ne doit jamais être installée chez un client.
+Deux profils sont construits à partir des mêmes fichiers :
 
-## Prérequis
+| Profil | Pour        | Accès à la box                                                                       |
+| ------ | ----------- | ------------------------------------------------------------------------------------ |
+| dev    | l'équipe    | SSH par clé seulement (clés de l'équipe), compte `hako` avec un mot de passe console |
+| prod   | les clients | aucun : SSH masqué, compte `hako` verrouillé, aucune clé (« zéro accès »)            |
 
-- Un Mac Apple Silicon : la construction est native (arm64), sans émulation.
-- Colima, docker, le greffon docker compose, xz, git et curl.
-- Un clone du dépôt dans un chemin sans espace, hors OneDrive ou iCloud, par exemple ~/Code/mabox-os.
-- Pour le profil dev, le fichier local/cles-ssh-dev.pub : une clé publique SSH par ligne, une par membre de l'équipe. Le dossier local/ n'est jamais versionné.
+L'image dev ne doit jamais être installée chez un client, et elle n'est pas publiée.
+
+## Premier démarrage
+
+Au premier démarrage, la box agrandit sa partition, puis le service `hakos-premier-demarrage` fait, une seule fois :
+
+1. **Garde-fous du Pi 5.** Il note la version de l'EEPROM et vérifie que le noyau utilise des pages mémoire de 4 Kio ; sinon, il s'arrête et affiche une page d'arrêt sur http://hako.local.
+2. **Secrets propres à la box.** Identifiant de machine, clés SSH et mots de passe des bases de données sont tirés au hasard, dans des fichiers `.env` lisibles par root seul. Deux box gravées avec la même image ne partagent aucun secret.
+3. **Mémoire.** La recherche intelligente d'Immich est activée à partir de 7 Gio de mémoire (Pi 5 de 8 Go), coupée en dessous (Pi 5 de 4 Go).
+4. **Applications.** Il charge les 7 images Docker depuis leurs archives, puis les supprime ; il démarre le pare-feu, la page de la HAKO, Immich et Nextcloud, et attend qu'ils soient en bonne santé.
+5. **Nextcloud.** Il l'installe sans intervention et supprime son compte technique.
+6. **Fin.** Il écrit une fiche technique sans secret, puis pose le marqueur `/opt/box/.initialized`, seulement si tout a réussi.
+
+Dans la machine virtuelle, l'image prod a fait tout cela en 90 à 93 secondes. Sur le Pi 5, la durée reste à mesurer.
+
+## La première installation
+
+Branchée au réseau de la maison, la box affiche sa propre page à http://hako.local : la page de la HAKO, construite depuis le site, dans ce dépôt. La première personne qui l'ouvre commence l'installation :
+
+- la famille donne ses prénoms ;
+- la box crée un compte pour chacun dans Immich et dans Nextcloud, avec un mot de passe de quatre mots et un nombre, tiré par la box ;
+- la page fait imprimer une fiche de secours avec les mots de passe ;
+- l'assistant (`hakos-assistant`, une API locale en Python, sans dépendance) s'arrête ensuite et se masque.
+
+D'ici là, Immich et Nextcloud restent fermés au réseau : personne ne peut y prendre un compte administrateur. Une fois la box installée, http://hako.local devient la page d'état.
+
+## Pare-feu et « zéro accès »
+
+- **Pare-feu.** Le service `hakos-parefeu` (nftables) démarre avant Docker. Il n'accepte de connexion TCP que depuis les adresses IPv4 privées, celles du réseau de la maison, et rien en IPv6 hors ce qu'il faut au réseau lui-même. Les ports des photos (2283) et des fichiers (8080) restent fermés jusqu'à la fin de l'installation.
+- **Aucun accès depuis l'extérieur.** La box n'ouvre aucun port vers internet : les données ne quittent pas la maison. La contrepartie : on ne peut pas y accéder hors de chez soi.
+- **Mots de passe.** Immich n'accepte que 10 essais de mot de passe par minute et par adresse.
+- **« Zéro accès ».** L'image prod ne laisse aucune porte d'entrée à l'équipe : SSH masqué, compte verrouillé, aucune clé, mot de passe console tiré au hasard puis jeté. Les mots de passe des comptes sont créés par la box, chez le client, et personne d'autre ne les a, pas même nous.
+
+## Les noms
+
+| Adresse                    | Ce qu'elle ouvre                                              |
+| -------------------------- | ------------------------------------------------------------- |
+| http://hako.local          | la page de la HAKO avant l'installation, la page d'état après |
+| http://hako-photos.local   | Immich, les photos                                            |
+| http://hako-fichiers.local | Nextcloud, les fichiers                                       |
+
+Les noms sont annoncés sur le réseau de la maison par avahi (service `hakos-noms`), puis nginx dirige chaque nom vers sa page ou son application, sur le port 80. Une deuxième box sur le même réseau prend `hako-2.local`, `hako-2-photos.local` et `hako-2-fichiers.local`. Les ports 2283 (Immich) et 8080 (Nextcloud) restent ouverts au réseau de la maison après l'installation, en secours, par le nom ou l'adresse IP de la box.
+
+## La page d'état
+
+Après l'installation, http://hako.local montre les boutons « Mes photos » et « Mes fichiers », puis l'état de la box : espace utilisé, nombre de photos et de vidéos, durée depuis l'allumage, température et ralentissements, et la copie de secours, pas encore disponible. Le service `hakos-etat` écrit cet état chaque minute ; la page le lit en JSON, sans aucun secret, à http://hako.local/api/etat. Les mises à jour y sont annoncées « bientôt ».
+
+|                                                                         |                                            |                                                    |
+| ----------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------- |
+| ![Page d'état de la HAKO sur http://hako.local](captures/page-etat.png) | ![Immich, les photos](captures/immich.png) | ![Nextcloud, les fichiers](captures/nextcloud.png) |
+| La page d'état, sur http://hako.local.                                  | Immich, sur http://hako-photos.local.      | Nextcloud, sur http://hako-fichiers.local.         |
+
+Captures prises avec l'image prod de HakOS 2026.11.1, dans une machine virtuelle, avec des données d'exemple.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph maison["Réseau de la maison"]
+        appareils["Téléphones et ordinateurs<br/>de la famille"]
+        subgraph hako["HAKO : Raspberry Pi 5, SSD, HakOS"]
+            avahi["avahi, hakos-noms<br/>noms en .local"]
+            parefeu["Pare-feu nftables<br/>réseau de la maison seulement"]
+            nginx["nginx, port 80"]
+            assistant["hako.local avant l'installation<br/>page de la HAKO, hakos-assistant"]
+            etat["hako.local ensuite<br/>page d'état, hakos-etat"]
+            immich["hako-photos.local<br/>Immich, Postgres, Valkey"]
+            nextcloud["hako-fichiers.local<br/>Nextcloud, Postgres"]
+            ssd[("SSD<br/>photos et fichiers")]
+        end
+    end
+    internet(("Internet"))
+    equipe["Équipe HAKO"]
+
+    appareils -. "noms" .-> avahi
+    appareils --> parefeu --> nginx
+    nginx --> assistant
+    nginx --> etat
+    nginx --> immich
+    nginx --> nextcloud
+    assistant -- "crée les comptes" --> immich
+    assistant -- "crée les comptes" --> nextcloud
+    immich --> ssd
+    nextcloud --> ssd
+    internet -. "aucun port ouvert" .-x parefeu
+    equipe -. "aucun accès (prod)" .-x hako
+```
+
+## Construire
+
+Il faut un Mac Apple Silicon (la construction est native, en arm64), Colima, docker, le greffon docker compose, xz, git et curl, et environ 20 Gio libres. Le dépôt doit être dans un chemin sans espace, hors OneDrive ou iCloud.
 
 ```sh
 brew install colima docker docker-compose xz
 colima start --vm-type vz --arch aarch64 --cpu 6 --memory 8 --disk 60 --mount-type virtiofs
-docker compose version
+cd hakos
+make lint            # contrôles : shellcheck, fichiers compose, secrets, tests unitaires
+make images          # les 7 images Docker figées, en arm64, dans images/ (1,4 Gio)
+make build-prod      # image des clients, dans deploy/
+make verifier-image  # contrôle l'image la plus récente de deploy/, sans la démarrer
+colima stop
 ```
 
-Homebrew explique comment déclarer le greffon compose (`cliPluginsExtraDirs` dans ~/.docker/config.json) : `docker compose version` doit répondre. Une VM Colima déjà créée se règle à l'arrêt : `colima stop`, puis `colima start --cpu 6 --memory 8 --disk 60`. Son disque peut grandir, jamais rétrécir (sauf `colima delete --data`, qui efface toutes les images Docker).
+| Commande              | Ce qu'elle fait                                                                                                                   |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `make lint`           | shellcheck, `docker compose config` sur chaque fichier compose, recherche de secrets, tests unitaires de l'API locale et du socle |
+| `make images`         | récupère les images Docker de versions.env, vérifie leur empreinte et les enregistre dans images/                                 |
+| `make build-prod`     | construit l'image des clients (`make build` fait la même chose)                                                                   |
+| `make build-dev`      | construit l'image de l'équipe ; il faut d'abord ses clés publiques SSH dans local/cles-ssh-dev.pub                                |
+| `make verifier-image` | monte l'image en lecture seule dans la VM, fait une trentaine de contrôles, puis défait tout                                      |
+| `make clean`          | supprime deploy/ et images/ après confirmation, jamais local/                                                                     |
 
-scripts/verifier-hote.sh contrôle la machine en lecture seule : architecture, outils, moteur Docker, place libre (20 Gio sur le Mac, 15 Gio dans la VM), périphériques loop et accès réseau. La construction le relance d'elle-même.
+L'image arrive dans deploy/, avec SHA256SUMS et le journal de construction. pi-gen est récupéré à la révision figée dans pi-gen/ ; local/, images/, pi-gen/ et deploy/ ne sont jamais versionnés. Le détail (construction, gravure d'un SSD, test sur la box, Wi-Fi) est dans [docs/manuel.md](docs/manuel.md).
 
-## Construire
+## Tester dans une machine virtuelle
+
+Sans Raspberry Pi, `scripts/essai-vm.sh` installe une box neuve dans la VM Colima, à partir d'une image construite, et lance le vrai premier démarrage par systemd, comme sur un Pi 5 de 4 Go :
 
 ```sh
-ssh-keygen -t ed25519 -f ~/.ssh/mabox-dev       # clé de l'équipe, si elle n'existe pas encore
-mkdir -p -m 700 local
-cat ~/.ssh/mabox-dev.pub >> local/cles-ssh-dev.pub
-make images        # les 7 images Docker figées, en arm64, dans images/ (1,4 Gio)
-make build-dev     # image de l'équipe
-make build-prod    # image des clients (make build fait la même chose)
+colima ssh -- sudo apt-get install -y avahi-daemon avahi-utils   # une fois, pour les noms en .local
+colima ssh -- sudo "$PWD/scripts/essai-vm.sh" installer "$PWD/deploy/image_AAAA-MM-JJ-hakos-prod.img.xz"
+colima ssh -- sudo env HAKOS_ESSAI=1 HAKOS_MEMOIRE_KIO=4000000 /opt/box/test-sur-boitier.sh --assistant 8
+colima ssh -- sudo "$PWD/scripts/essai-vm.sh" defaire
 ```
 
-`make images` (scripts/recuperer-images.sh) récupère chaque image de versions.env pour linux/arm64, par son empreinte quand versions.env en donne une, vérifie l'étiquette et l'architecture, puis l'enregistre avec `docker save` dans images/. Une archive à jour n'est pas refaite.
+Le test affiche une ligne « OK » ou « ÉCHEC » par contrôle et finit par un bilan. Avec `--assistant 8`, il fait aussi toute la première installation pour huit personnes. `HAKOS_PAGE_OCTETS=16384` simule un noyau à pages de 16 Kio : le premier démarrage doit alors s'arrêter et servir la page d'arrêt.
 
-`make build-dev` et `make build-prod` lancent scripts/construire.sh, qui reprend la méthode du Lot 0 : la config complète est écrite dans local/pigen.conf (mode 600), montée en lecture seule dans le conteneur de pi-gen, puis effacée à la fin, même en cas d'échec. Aucun secret n'entre dans l'image Docker de pi-gen. En dev, le mot de passe console du compte hako est lu dans local/mot-de-passe-dev (tiré au hasard s'il manque) ; en prod, il est tiré au hasard et jeté. Les images arrivent dans deploy/, avec SHA256SUMS et un journal :
+## Limites
 
-```text
-deploy/image_AAAA-MM-JJ-hakos-dev.img.xz
-deploy/image_AAAA-MM-JJ-hakos-prod.img.xz
-deploy/SHA256SUMS
-deploy/hakos-PROFIL-construction-AAAAMMJJ-HHMMSS.log
-```
+HakOS n'a jamais tourné sur un vrai Raspberry Pi 5. Ce qui ne peut pas se vérifier sans lui :
 
-Après un échec, le conteneur pigen_work reste pour le diagnostic (`docker logs pigen_work`). Le supprimer avant de relancer, puis rendre la place au Mac :
+- le démarrage sur le SSD (NVMe), la version réelle de l'EEPROM et sa mise à jour par rpi-eeprom-update ;
+- le noyau réellement chargé (kernel8.img, pages de 4 Kio), et la page d'arrêt sur un vrai noyau à pages de 16 Kio ;
+- la température et les ralentissements réels (la VM reçoit 48,3 °C d'exemple), et le flux d'air du boîtier ;
+- la résolution de hako-photos.local et hako-fichiers.local sur iPhone, Android, Mac et Windows (avec et sans Bonjour), et celle d'une deuxième box ;
+- la durée du premier démarrage sur le Pi, et le comptage des photos sur une grosse photothèque.
 
-```sh
-docker rm -v pigen_work
-colima ssh -- sudo fstrim -a
-```
+Autres limites, connues :
 
-`make clean` supprime deploy/ et images/ après confirmation ; il ne touche jamais à local/.
+- **Adresses en http**, sans chiffrement : à la maison, mots de passe, photos et fichiers circulent en clair sur le réseau local.
+- **Pas de sauvegarde** pour l'instant : une panne du SSD perd les photos et les fichiers. Nous conseillons de garder une autre copie des photos les plus précieuses.
+- **Première installation** : la première personne qui ouvre http://hako.local la commence ; un autre appareil du réseau de la maison pourrait passer avant la famille.
+- **cloud-init est gardé** : qui a le SSD en main peut faire lancer des commandes au démarrage, et lire les données, le disque n'étant pas chiffré.
 
-## Vérifier
+Prévu, pas encore fait :
 
-```sh
-make lint
-make verifier-image                                            # la plus récente de deploy/
-make verifier-image IMAGE=deploy/image_AAAA-MM-JJ-hakos-prod.img.xz
-```
+- [ ] **Mises à jour à la demande** : aujourd'hui, une nouvelle version d'Immich ou de Nextcloud demande une nouvelle image, et regraver le SSD efface les données. La box saura qu'une nouvelle version existe, et la responsable la lancera avec son mot de passe.
+- [ ] **« Gérer ma HAKO »** : depuis http://hako.local, ajouter une personne, lui donner un nouveau mot de passe ou la retirer. Aujourd'hui, ces gestes se font à la main dans Immich et Nextcloud.
+- [ ] **Wi-Fi et bouton de la box** : choisir le Wi-Fi de la maison depuis la page de la HAKO ; un appui sur le bouton de la box pour commencer l'installation, ou pour donner un nouveau mot de passe à la responsable, box en main. Aujourd'hui, une box prod ne rejoint un Wi-Fi que s'il est écrit sur le SSD avant le premier démarrage, ce qui n'a pas encore été essayé ([docs/manuel.md](docs/manuel.md)).
+- [ ] Une copie de secours des données.
 
-`make lint` (scripts/verifier-qualite.sh) passe shellcheck sur tous les scripts, `docker compose config -q` sur chaque fichier compose (avec un .env provisoire et de faux secrets) et cherche les secrets dans les fichiers suivis ou à suivre : fichiers .env, clés privées, mots de passe en clair.
+## Organisation du dossier
 
-`make verifier-image` (scripts/verifier-image.sh) contrôle une image sans la démarrer. Dans la VM Colima, l'image est décompressée dans un dossier temporaire, attachée en lecture seule et ses partitions sont montées en lecture seule. Le script vérifie notamment le nom d'hôte, /opt/box (scripts, versions.env, une archive par image figée), les services activés, Docker, SSH selon le profil, les mises à jour automatiques, config.txt et cmdline.txt, l'absence de .env, de clé privée et de toute trace de local/. Il affiche une ligne « OK » ou « ÉCHEC » par contrôle, puis un bilan, et défait tout à la fin, même en cas d'échec. Il a fallu une minute pour l'image du Lot 0 (2,9 Gio décompressée) ; une image HakOS est plus grosse.
+| Dossier ou fichier                 | Contenu                                                                                                                                                                                                           |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Makefile](Makefile)               | les commandes : `make images`, `build-prod`, `build-dev`, `lint`, `verifier-image`, `clean`                                                                                                                       |
+| [versions.env](versions.env)       | toutes les versions figées                                                                                                                                                                                        |
+| [config/](config/)                 | configuration de pi-gen, commune et par profil                                                                                                                                                                    |
+| [stage-box/](stage-box/)           | étape pi-gen de HakOS : système, Docker, applications, premier démarrage, nettoyage                                                                                                                               |
+| [rootfs/opt/box/](rootfs/opt/box/) | ce que la box contient dans /opt/box : fichiers compose, nginx, page de la HAKO, page d'état, premier démarrage, API locale (`assistant/`), noms (`noms/`), état (`etat/`), pare-feu (`parefeu/`), unités systemd |
+| [scripts/](scripts/)               | construction, images Docker, qualité, vérification d'une image, essai dans la VM, test sur la box, gravure d'un SSD                                                                                               |
+| [tests/](tests/)                   | tests unitaires de l'API locale (`assistant/`) et du socle (`socle/`)                                                                                                                                             |
+| [docs/](docs/)                     | manuel, notes de conception et d'essais de chaque étape                                                                                                                                                           |
+| [captures/](captures/)             | captures d'écran de ce README                                                                                                                                                                                     |
+| [CHANGELOG.md](CHANGELOG.md)       | journal des versions                                                                                                                                                                                              |
 
-## Graver un SSD
+## Licence
 
-```sh
-diskutil list external physical    # avant, puis après avoir branché le SSD
-scripts/flasher-ssd.sh --simulation deploy/image_AAAA-MM-JJ-hakos-prod.img.xz diskN
-scripts/flasher-ssd.sh deploy/image_AAAA-MM-JJ-hakos-prod.img.xz diskN
-```
+Le code de HakOS est distribué sous licence GNU GPL, version 3 ou toute version ultérieure (GPL-3.0-or-later), dont le texte est dans [LICENSE](LICENSE). Elle permet de le réutiliser, de le modifier et de le redistribuer, à condition que les copies, modifiées ou non, restent sous la même licence, avec leur code source.
 
-Le script efface tout le disque diskN. Il vérifie l'empreinte de l'image et le disque (externe, physique, sans partition Apple, distinct du disque du Mac), demande de retaper diskN, écrit l'image, la relit en entier et éjecte le SSD. Raspberry Pi Imager 2.x convient aussi, en « Utiliser image personnalisée », sans aucune personnalisation. Ne jamais fabriquer une box en clonant un SSD déjà démarré : graver toujours le .img.xz.
-
-## Tester sur la box
-
-Pi 5 éteint : SSD en place, aucune microSD, câble Ethernet vers le réseau du Mac, alimentation officielle 27 W. Au premier démarrage, la box agrandit sa partition, puis le service hakos-premier-demarrage tire les secrets, charge les images Docker, démarre l'accueil, Immich et Nextcloud, attend qu'ils soient en bonne santé, écrit la fiche d'installation et enfin /opt/box/.initialized. Dans la VM Colima, il a pris un peu plus d'une minute (docs/lots-1-a-4.md, « Essai dans la VM Colima ») ; sur le Pi, sa durée reste à mesurer. Il abandonne si les services ne sont pas prêts au bout de 15 min. Ne pas couper le courant pendant ce temps.
-
-Avec l'image dev :
-
-```sh
-ssh-keygen -R hako.local
-ssh -i ~/.ssh/mabox-dev -o IdentitiesOnly=yes hako@hako.local
-sudo journalctl -b -u hakos-premier-demarrage -o cat -n all -f   # suivi, Ctrl-C pour quitter
-sudo /opt/box/test-sur-boitier.sh                                # une ligne OK ou ÉCHEC par contrôle
-sudo cat /root/fiche-installation.txt                            # fiche d'installation, sans secret
-```
-
-sudo demande le mot de passe console, celui de local/mot-de-passe-dev. Le test finit par « Bilan : … aucun échec. » et rend le code 0 ; au moindre échec, il rend le code 1.
-
-Avec l'image prod, personne ne peut se connecter : le test se fait depuis le Mac, par le réseau.
-
-```sh
-curl -s http://hako.local/ | grep -c 'Mes photos'                    # 1
-curl -s http://hako.local/api/etat; echo                             # état de la box, en JSON, sans secret
-curl -s http://hako-photos.local/api/server/ping; echo               # {"res":"pong"}, après l'installation
-curl -sL -o /dev/null -w '%{http_code}\n' http://hako-fichiers.local/ # 200, après l'installation
-curl -s http://hako.local:2283/api/server/ping; echo                 # {"res":"pong"} (secours)
-nc -z -G 5 hako.local 22; echo "code=$?"                             # code=1 : port 22 fermé
-```
-
-La procédure complète, commande par commande avec les sorties attendues, est dans docs/lots-1-a-4.md.
-
-Assistant de première installation, sur une box neuve de test seulement (il crée des comptes d'essai ; regraver ensuite) :
-
-```sh
-sudo /opt/box/test-sur-boitier.sh --assistant 8 --coupure   # 8 personnes, création coupée puis reprise
-```
-
-Sans box, dans la VM Colima (premier démarrage réel par systemd ; avahi-daemon et avahi-utils installés dans la VM). Sans argument, /opt/box vient du dépôt et les images doivent déjà être dans Docker ; avec une image construite, /opt/box, ses archives et les unités viennent de l'image :
-
-```sh
-colima ssh -- sudo ~/Code/mabox-os/scripts/essai-vm.sh installer   # ou : installer ~/Code/mabox-os/deploy/image_….img.xz
-colima ssh -- sudo env HAKOS_ESSAI=1 HAKOS_MEMOIRE_KIO=4000000 /opt/box/test-sur-boitier.sh --assistant 1
-colima ssh -- sudo ~/Code/mabox-os/scripts/essai-vm.sh defaire
-```
-
-Dans un vrai navigateur (Chromium de Playwright, pris dans ~/Code/hako-site), après « installer » : `node scripts/essai-page.mjs`.
-
-## Rejoindre un Wi-Fi sur place
-
-L'Ethernet reste la connexion conseillée. L'image ne connaît aucun réseau Wi-Fi ; la radio est réglée pour la France (WPA_COUNTRY=FR).
-
-Avec l'image dev, en SSH, pendant que la box est encore branchée en Ethernet :
-
-```sh
-LC_ALL=C nmcli radio wifi                        # enabled ; sinon : sudo nmcli radio wifi on
-sudo nmcli --ask device wifi connect "Nom du réseau"
-hostname -I                                      # une adresse de plus : celle du Wi-Fi
-```
-
-nmcli demande le mot de passe du Wi-Fi sans l'afficher. Débrancher ensuite l'Ethernet : hako.local répond par le Wi-Fi.
-
-Avec l'image prod, sans SSH, le Wi-Fi se donne avant le premier démarrage, dans le fichier network-config de la partition bootfs : cloud-init le lit à ce premier démarrage seulement. Après la gravure, rebrancher le SSD au Mac ; le volume « bootfs » apparaît. Ouvrir /Volumes/bootfs/network-config dans un éditeur de texte brut, garder les lignes de commentaire et ajouter à la fin, en indentant avec des espaces, jamais des tabulations :
-
-```yaml
-network:
-  version: 2
-  ethernets:
-    eth0:
-      dhcp4: true
-      optional: true
-  wifis:
-    wlan0:
-      dhcp4: true
-      optional: true
-      regulatory-domain: FR
-      access-points:
-        "Nom du réseau":
-          password: "<mot de passe du Wi-Fi>"
-```
-
-C'est le format netplan v2 de l'exemple commenté que Raspberry Pi met dans ce même fichier. Ne toucher à aucun autre fichier de bootfs, puis éjecter le SSD. Ce chemin n'est pas encore vérifié sur une box : l'essayer d'abord avec une image dev. Le mot de passe du Wi-Fi reste lisible en clair sur bootfs.
-
-## Limites connues
-
-- Première installation : la première personne qui ouvre http://hako.local commence l'installation (décision du 13/11 : ni code ni carte). Un autre appareil voit « installation en cours » ; il prend la main avec le mot de passe de la personne responsable, ou recommence 2 minutes après la fermeture de la page qui avait la main.
-- Liste de mots des mots de passe : la relecture par deux personnes reste à faire (docs/liste-de-mots.md).
-- Adresses en http, sans chiffrement : à la maison, mots de passe, photos et fichiers circulent en clair sur le réseau local.
-- Pas de sauvegarde : une panne du SSD perd photos et fichiers. La fiche d'installation garde la place de la future clé de récupération.
-- Mises à jour automatiques limitées aux correctifs de sécurité de Debian (unattended-upgrades). Les paquets Raspberry Pi (noyau, firmware) et ceux de Docker ne changent qu'avec une nouvelle image HakOS.
-- Pas de mise à jour des images Docker : Immich, Nextcloud, Postgres, Valkey et nginx restent aux versions de versions.env. Une box prod n'a aujourd'hui aucun moyen de recevoir une nouvelle version, et regraver le SSD efface les données.
-- Sous 7 Gio de mémoire (Pi 5 de 4 Go), l'apprentissage automatique d'Immich est coupé par un fichier de configuration (IMMICH_CONFIG_FILE) : d'après la documentation d'Immich, les réglages ne sont alors plus modifiables dans l'interface web.
-- Nextcloud accepte hako.local, hako-2.local, hako-fichiers.local, hako-2-fichiers.local et l'adresse IPv4 de la box (tenue à jour par hakos-noms). Une troisième box (hako-3) n'aurait que ses noms en .local et son adresse IP.
-- Deux box sur le même réseau : la seconde répond à hako-2.local, hako-2-photos.local et hako-2-fichiers.local (avahi), alors que sa fiche d'installation indique les noms de la première.
-- Les noms hako-photos.local et hako-fichiers.local ne sont pas encore essayés sur de vrais téléphones et ordinateurs (seulement dans la VM, par avahi).
-- En prod, la fiche /root/fiche-installation.txt n'est lisible par personne : la box n'a ni SSH ni compte ouvert.
-- cloud-init est gardé : qui a le SSD en main peut, par les fichiers de bootfs, faire lancer des commandes en root au démarrage. Il pourrait aussi lire les données, le disque n'étant pas chiffré.
-
-## Organisation
-
-```text
-Makefile             make images, build-dev, build-prod, lint, verifier-image, clean
-versions.env         toutes les versions figées : pi-gen, Immich, Nextcloud, Postgres, Valkey, nginx
-config/              configuration pi-gen : commun.conf, dev.conf, prod.conf (stock.conf : Lot 0)
-stage-box/           étape pi-gen maison : système, Docker, applications, premier démarrage, nettoyage
-rootfs/opt/box/      contenu de /opt/box : fichiers compose, modèles d'environnement (env.modele),
-                     page d'accueil et page de la HAKO (home/assistant), configuration nginx
-                     (home/nginx), firstboot.sh et sa bibliothèque, assistant/ (API locale en
-                     Python, liste de mots), noms/ (hakos-noms : noms des applications), etat/
-                     (hakos-etat : état de la box pour la page d'état), parefeu/ (nftables),
-                     unités systemd
-scripts/             construction, images Docker, qualité, vérification de l'image, test sur la box,
-                     gravure ; scripts du Lot 0
-tests/assistant/     tests unitaires de l'assistant (make lint)
-tests/socle/         tests unitaires des noms et de la page d'état (make lint)
-docs/                notes de lot
-images/              archives des images Docker (ignorées par git)
-local/               clés publiques et mot de passe de test (ignorés par git)
-pi-gen/, deploy/     copie de pi-gen et images produites (ignorées par git)
-```
-
-Sur la box : /opt/box/{home,immich,nextcloud,images,lib,assistant,parefeu}/, /opt/box/firstboot.sh, /opt/box/versions.env, /opt/box/profil, /opt/box/test-sur-boitier.sh, /opt/box/essai-assistant.py, les unités hakos-parefeu et hakos-premier-demarrage (/etc/systemd/system) et hakos-assistant (/usr/lib/systemd/system), l'utilisateur hakos-assistant et l'état de l'installation dans /var/lib/hakos. Les données restent dans le dossier de chaque service : immich/library et immich/postgres, nextcloud/html et nextcloud/db.
-
-## Documentation
-
-- docs/lot5-assistant.md : assistant de première installation (lot 5) : conception, réalisation, essais.
-- docs/liste-de-mots.md : provenance et filtrage de la liste de mots des mots de passe.
-- docs/lots-1-a-4.md : décisions des lots 1 à 4 et procédure de test sur le Pi 5.
-- docs/lot0-faisabilite.md : construction sur Mac, pièges, gravure, conditions côté Pi (Lot 0).
-- CHANGELOG.md : historique par lot.
+Les logiciels livrés dans l'image gardent leur propre licence : Immich et Nextcloud sont sous GNU AGPL v3, Raspberry Pi OS et pi-gen sous les leurs. Le nom HAKO, son logo et la marque en kanji 箱 restent réservés (voir [NOTICE](../NOTICE)).
