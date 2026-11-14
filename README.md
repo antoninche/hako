@@ -1,136 +1,132 @@
-# Site de HAKO
+# HAKO
 
-HAKO est une jeune entreprise de Provence. Elle installe chez ses clients, familles et petites entreprises, une petite box qui garde leurs photos et leurs fichiers chez eux, puis les forme et les accompagne. Ce dépôt contient son site web, construit avec Astro en pages statiques. Le site ne dépose aucun cookie et ne charge rien depuis un autre site : polices, logo et icônes sont servis par le site lui-même, et les tests le vérifient à chaque lancement.
+![HAKO : vos souvenirs restent à la maison. Une box par foyer, installée chez vous, sans abonnement.](images/banniere-1512x256.png)
 
-Aperçu en ligne : https://antoninche.github.io/hako/. Il est reconstruit et publié à chaque envoi sur la branche `main` (`.github/workflows/apercu.yml`). Comme il est servi dans le sous-dossier `/hako/`, l'étape `scripts/deploy/sous-dossier.mjs` réécrit les adresses du site construit ; avec un nom de domaine propre, on publie `dist/` tel quel.
+HAKO est une box qui garde les photos et les fichiers d'une famille chez elle, à la maison. Nous l'installons nous-mêmes chez nos clients, de Salon-de-Provence à Toulon, et nous leur apprenons à s'en servir sur place. Elle s'achète une fois, sans abonnement. Hako (箱) veut dire « boîte » en japonais.
 
-## Prérequis
+Aujourd'hui, les photos d'une famille vivent souvent chez Google ou chez Apple, avec un abonnement à payer chaque mois pour y garder l'accès. Depuis 2018, le Cloud Act donne aux autorités américaines accès aux données détenues par les entreprises américaines, où qu'elles soient stockées. Les solutions qu'on garde chez soi, comme un NAS, sont à configurer soi-même. HAKO veut offrir les deux : les données à la maison, et rien à configurer.
 
-- Node.js 22.23.4 ou plus récent, avec npm. Le projet est testé avec Node 26.8.2 (le fichier `.nvmrc` indique la version 26).
-- Pour les tests, le navigateur Chromium de Playwright, à installer une fois avec `npx playwright install chromium` (sous Linux, ajouter `--with-deps`).
-- Seulement pour régénérer les polices : [uv](https://docs.astral.sh/uv/), qui installe à part Python et les outils de polices.
-- Seulement pour régénérer le logo : [potrace](https://potrace.sourceforge.net/) 1.16 (`brew install potrace` sous macOS, `apt install potrace` sous Debian ou Ubuntu).
+Nous sommes trois étudiants d'Aix-Marseille, et HAKO est notre projet pour le 36h Chrono 2026 de Pépite Provence. Le site est en ligne sur [antoninche.github.io/hako](https://antoninche.github.io/hako/). Ce dépôt réunit le site, la page que la box affiche pour sa première installation et, bientôt, HakOS, le système de la box.
 
-## Installation
+## Comment ça marche
 
-```sh
-npm ci
-npm run dev
+- **La box.** Un Raspberry Pi 5 avec un SSD de 1 To (environ 300 000 photos), dans une coque imprimée en 3D, assemblée et vérifiée à la main en Provence. Au repos, elle consomme environ 3 W.
+- **Des logiciels libres.** Immich pour les photos et Nextcloud pour les fichiers, l'équivalent de Google Photos et de Google Drive.
+- **L'installation.** Dans notre zone, de Salon-de-Provence à Toulon en passant par Aix-en-Provence et Marseille, nous venons installer la box et former la famille sur place. Le « déménageur » aide à rapatrier les photos et les fichiers depuis Google Photos ou iCloud ; la famille se connecte elle-même à son compte, nous ne voyons jamais ses identifiants.
+- **La première installation.** Branchée au réseau de la maison, la box affiche sa propre page à http://hako.local. La famille y donne ses prénoms, la box crée un compte et un mot de passe pour chacun, et la page fait imprimer une fiche de secours. Les photos s'ouvrent ensuite à http://hako-photos.local et les fichiers à http://hako-fichiers.local.
+- **Aucun accès depuis l'extérieur.** Aucun port n'est ouvert vers internet : les données ne quittent pas la maison. La contrepartie : on ne peut pas y accéder hors de chez soi.
+- **« Zéro accès ».** Le système installé chez les clients ne laisse aucune porte d'entrée à l'équipe : SSH désactivé, compte verrouillé, aucune clé. Les mots de passe sont créés par la box, chez le client, et personne d'autre ne les a, pas même nous.
+
+## Les offres
+
+| Offre     | Pour                    | Prix                    | Ensuite                                                                                                          |
+| --------- | ----------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Hako Home | les familles            | 750 € TTC, achat unique | sans abonnement ; mises à jour de sécurité pendant 5 ans, renouvelables                                          |
+| Hako Pro  | les petites entreprises | 1 000 € TTC             | 25 € TTC par mois, engagement de 2 ans : assistance prioritaire (réponse sous 48 h), mises à jour et maintenance |
+
+- 1 To de stockage compris ; 2 To pour 200 € de plus, 4 To pour 400 € de plus.
+- Dans notre zone, l'installation chez le client et la formation sur place sont comprises dans les deux offres, comme le déménageur.
+- Hors garantie, une intervention du service après-vente coûte 100 € TTC.
+- La box se paie en une seule fois, par virement, avant l'installation : le paiement en ligne n'est pas encore possible.
+- Hako Pro ajoute des comptes pour toute l'équipe avec des droits par dossier, un agenda et des contacts partagés, et un bilan de santé de la box chaque mois. Sa maintenance à distance passe par un tunnel chiffré (WireGuard), mis en place seulement si le client la demande. Elle ouvrira après le lancement de Hako Home.
+
+## L'équipe
+
+| Fondateur                                                                   | Rôle                        | Formation                                                |
+| --------------------------------------------------------------------------- | --------------------------- | -------------------------------------------------------- |
+| [Antonin Chenavaz](https://www.linkedin.com/in/antonin-chenavaz-9b9215421/) | Logiciel et système         | Licence MPCI, Aix-Marseille Université                   |
+| [Maxime Pollaud](https://www.linkedin.com/in/maxime-pollaud-488a77397/)     | Commerce et relation client | BUT Techniques de commercialisation, IUT d'Aix-Marseille |
+| [Martin Dugail](https://www.linkedin.com/in/martin-dugail-15a5a742b/)       | Design et finance           | Licence MPCI, Aix-Marseille Université                   |
+
+## Le site
+
+Treize pages, plus la page 404 : accueil, offres, la box, notre engagement, questions fréquentes, tutoriels, guide d'installation en huit étapes, démonstration de la première installation, commande, contact, conditions générales de vente, mentions légales et données personnelles.
+
+- Site statique construit avec Astro 7 et TypeScript en mode strict, publié par GitHub Pages à chaque envoi sur `main`.
+- Aucun cookie, aucun stockage local, aucune mesure d'audience, aucune ressource externe : les polices, le logo et les icônes sont servis par le site.
+- Aucun script ni style en ligne : chaque page tient sous une politique de sécurité du contenu (CSP) stricte, `default-src 'self'`, que les tests vérifient à 390 et 1440 px. GitHub Pages n'envoie pas cet en-tête ; l'hébergement définitif l'enverra ([docs/hebergement.md](docs/hebergement.md)).
+- Accessibilité visée WCAG 2.2 niveau AA, contrôlée avec axe-core, à 390 et 1440 px de large ; contraste d'au moins 4,5:1 pour chaque couple texte et fond, cibles tactiles de 44 px, menu au clavier, moins d'animations sur demande.
+- 237 tests unitaires et 429 tests Playwright dans Chromium : chaque page, chaque lien interne, aucune requête hors du site, aucun cookie, la politique de sécurité et tout le parcours de la démonstration.
+- Une vue 3D de la box avec three.js, chargée seulement quand elle approche de l'écran, avec une image fixe à la place si les animations sont réduites ou sans WebGL.
+- Une information encore inconnue (adresse e-mail, durée à mesurer…) garde un texte provisoire, et `npm run todos` en tient la liste dans [TODO.md](TODO.md).
+- La page de la box est construite à part (`npm run build:box`), avec les mêmes composants que la démonstration, et copiée dans l'image de HakOS.
+
+![Page d'accueil](images/accueil.png)
+
+|                                                              |                                                                                      |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| ![Les deux offres, Hako Home et Hako Pro](images/offres.png) | ![Guide d'installation, étape « La page de la HAKO »](images/guide-installation.png) |
+| Les deux offres, avec leur prix.                             | Le guide d'installation, une étape à la fois.                                        |
+
+|                                                                                                    |                                                                                               |                                                                                             |
+| -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| ![Démonstration : écran d'accueil de la première installation](images/demonstration-bienvenue.png) | ![Démonstration : les mots de passe créés par la box](images/demonstration-mots-de-passe.png) | ![Démonstration : c'est prêt, les adresses des applications](images/demonstration-pret.png) |
+| La démonstration de la première installation, telle que la box l'affiche.                          | Les mots de passe, créés par la box (ici, ceux de la démonstration).                          | La fin : les adresses des photos et des fichiers.                                           |
+
+Installer le site, le construire, le tester et le modifier : [docs/developpement.md](docs/developpement.md).
+
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph depot["Dépôt antoninche/hako"]
+        site["Site<br/>Astro, TypeScript"]
+        boxpage["Page de la HAKO<br/>box/"]
+    end
+    pages[("GitHub Pages<br/>antoninche.github.io/hako")]
+    subgraph maison["Réseau de la maison"]
+        appareils["Téléphones et ordinateurs<br/>de la famille"]
+        subgraph hako["HAKO : Raspberry Pi 5, SSD, HakOS"]
+            nginx["nginx, port 80"]
+            accueil["hako.local<br/>première installation, puis accueil"]
+            immich["hako-photos.local<br/>Immich"]
+            nextcloud["hako-fichiers.local<br/>Nextcloud"]
+        end
+    end
+    internet(("Internet"))
+
+    site -- "npm run build" --> pages
+    boxpage -- "npm run build:box" --> accueil
+    appareils --> nginx
+    nginx --> accueil
+    nginx --> immich
+    nginx --> nextcloud
+    internet -. "aucun port ouvert" .-x hako
 ```
 
-`npm ci` installe exactement les versions notées dans `package-lock.json`. Le site s’ouvre ensuite sur http://localhost:4321 et se met à jour à chaque modification. Pour voir le site tel qu’il sera publié : `npm run build`, puis `npm run preview`. Astro 7 n’accepte qu’un serveur de prévisualisation suivi par projet : si `npm run preview` signale qu’un autre tourne déjà, `npx astro preview stop` l’arrête, ou `npx astro preview --ignore-lock` en ouvre un second à côté (c’est ce que font les tests).
+Le site public et la box ne se parlent pas. La page de la box est construite depuis ce dépôt, à un commit figé, puis copiée dans l'image de HakOS : chez le client, elle ne charge rien d'internet. Dans la maison, nginx reçoit les visites et dirige chaque nom vers sa page ou son application.
 
-## Commandes
+## HakOS, le système de la box
 
-| Commande                       | Rôle                                                                                                             |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| `npm run dev`                  | serveur de développement sur http://localhost:4321, mis à jour à chaque modification                             |
-| `npm run build`                | construit le site statique dans `dist/`                                                                          |
-| `npm run build:box`            | construit la page servie par la HAKO pour sa première installation dans `dist-box/` (demande `SITE_URL`)         |
-| `npm run preview`              | sert `dist/` sur http://localhost:4321, comme en production                                                      |
-| `npm run check`                | vérifie les types TypeScript et les composants Astro (`astro check`)                                             |
-| `npm run lint`                 | enchaîne `astro check`, ESLint (règles d’accessibilité comprises) et la vérification de mise en forme (Prettier) |
-| `npm run format`               | remet en forme tous les fichiers avec Prettier                                                                   |
-| `npm run todos`                | écrit la liste des informations manquantes dans `TODO.md`                                                        |
-| `npm run contrast`             | recalcule le contraste de chaque couple texte/fond du CSS et échoue sous 4,5:1                                   |
-| `npm run check:dist`           | contrôle `dist/` : aucune ressource d’un autre site, aucun script ni style en ligne, ni cookie ni stockage local |
-| `npm test`                     | construit le site, le sert sur le port 4321 et lance tous les tests dans Chromium                                |
-| `npm run screenshots`          | prend seulement les captures d’écran de chaque page, dans `qa/screenshots/`                                      |
-| `npm run fonts:build`          | reconstruit les polices à partir de leurs sources officielles (demande uv)                                       |
-| `npm run logo:build`           | revectorise le logo et refait le favicon, les icônes, le manifeste et l’image de partage (demande potrace)       |
-| `npm run prototype:images`     | refait les images du prototype de `src/assets/prototype/` à partir des captures de `design/prototype/`           |
-| `npm run illustrations:build`  | refait les dessins de `src/assets/illustrations/` à partir de leurs sources (`design/illustrations/`)            |
-| `npm run illustrations:check`  | vérifie les couleurs et la structure de chaque dessin                                                            |
-| `npm run illustrations:render` | enregistre une image PNG de chaque dessin, pour les regarder (dans `design/illustrations/renders/`)              |
+HakOS est une image Raspberry Pi OS Lite (Debian 13, arm64) pour Raspberry Pi 5, qui démarre sur le SSD. Immich et Nextcloud sont livrés dans l'image : rien n'est téléchargé chez le client, et chaque box tire ses propres secrets à son premier démarrage.
 
-Les tests vérifient que chaque page s’affiche sans erreur, que la page 404 répond, que chaque lien interne mène à une page ou un fichier qui existe, qu’aucune requête ne quitte la machine et qu’aucun cookie n’est déposé (à 390 et 1440 px de large), l’accessibilité avec axe (WCAG 2.2 AA), le lien d’évitement, le menu au clavier, des cibles tactiles de 44 × 44 px dans l’en-tête et le pied de page, le surlignage des informations manquantes, l’affichage avec moins d’animations, et trois constructions à part (dans `.tmp/tests/`) : la démonstration avec `PUBLIC_SHOW_TODOS=false`, l’adresse canonique avec `SITE_URL`, et la page de la HAKO (`npm run build:box`), parcourue sous les en-têtes de la HAKO avec une API locale simulée. Les captures sont faites à 390 et 1440 px ; `CAPTURE_WIDTHS=360,768,1024 npm run screenshots` en ajoute d’autres. Si un serveur tourne déjà sur le port 4321, Playwright le réutilise sans reconstruire le site : arrêtez-le avant de lancer les tests. Pour construire ailleurs que dans `dist/` : `PW_OUT_DIR=.tmp/dist-essai PW_PORT=4410 npm test`.
+- Construit et testé dans des machines virtuelles ; pas encore démarré sur un vrai Raspberry Pi 5.
+- Son code rejoint ce dépôt dans le dossier `hakos/`, sous licence GPL-3.0-or-later : voir [hakos/README.md](hakos/README.md).
 
-## Modifier les textes et les informations
+## Feuille de route
 
-Les informations de l’entreprise sont rassemblées dans `src/data/`, les textes des pages dans `src/content/`, avec le titre et le résumé de chaque page (onglet du navigateur, moteurs de recherche). Les composants ne contiennent que des mots de structure (« Menu », « Plan du site », « Nous suivre », « Crédits »…) ; seule la charte interne `/charte/` garde ses textes d’exemple dans sa page.
-
-- `entreprise.ts` : nom, accroche, promesse, e-mail, téléphone, nom de domaine, réseaux sociaux, zone d’intervention, équipe et phrases du pied de page.
-- `tarifs.ts` : tous les prix et les options de stockage (voir [docs/commande.md](docs/commande.md)).
-- `faits.ts` : les faits que plusieurs pages reprennent (accès depuis l’extérieur, copie de secours, déménageur, paiement, garantie), écrits une seule fois.
-- `navigation.ts` : liens de l’en-tête, du plan du site et des pages légales.
-- `credits.ts` : auteurs et licences des polices et des icônes, affichés dans les mentions légales.
-- `types.ts` : forme des informations de `entreprise.ts` (à changer seulement pour un nouveau genre d’information).
-
-Les prix, les pourcentages et les nombres s’écrivent avec `src/lib/format.ts` (`formatEur()`, `formatPercent()`…), le seul fichier qui appelle `Intl` : « 1 000 € » s’écrit partout de la même façon, avec des espaces insécables.
-
-Dans `entreprise.ts` et `credits.ts`, on peut écrire des espaces ordinaires : les espaces insécables avant « : » et à l’intérieur des guillemets « » sont posées automatiquement (`src/lib/typography.ts`). Pour l’apostrophe, on écrit ’ ; un texte qui contient l’apostrophe droite (') s’entoure de guillemets doubles ("quelqu'un"), sinon la construction échoue. Les autres règles de typographie et de ton sont dans [docs/brand.md](docs/brand.md).
-
-Une information encore inconnue s’écrit avec l’outil `todo()` de `src/lib/todo.ts`, qui reçoit ce qui manque puis le texte provisoire affiché entre crochets. Quand l’information arrive, on remplace tout l’appel par la valeur :
-
-```ts
-phone: todo('Numéro de téléphone de contact', '[numéro de téléphone]'),
-// devient
-phone: '04 00 00 00 00',
-```
-
-Chaque fichier de `src/pages/` est une page, dont l’adresse suit le nom du fichier et finit par « / » (`offres.astro` donne `/offres/`). Une page utilise le gabarit `BaseLayout` ; une page intérieure s’ouvre avec `PageIntro`, qui pose son titre (exemple dans [docs/brand.md](docs/brand.md)). Chaque nouvelle page s’ajoute aussi dans `tests/routes.ts`, pour que les tests et les captures la couvrent.
-
-## Informations manquantes (TODO)
-
-Tant qu’une information manque, le site affiche son texte provisoire surligné en jaune. Elle se déclare de deux façons :
-
-- dans `src/data/`, avec `todo('ce qui manque', '[texte provisoire]')`, puis `<Fact value={company.phone} />` dans la page (avec `link="email"`, `"phone"` ou `"url"`, la valeur devient un lien une fois connue) ;
-- directement dans une page, avec `<Todo what="Durée des mises à jour de sécurité">[durée]</Todo>`.
-
-Dans `src/data/`, une valeur `null` suivie d’un commentaire `// TODO: description` compte aussi.
-
-`npm run todos` parcourt `src/` et écrit `TODO.md` : chaque information manquante y figure avec son fichier, son numéro de ligne, ce qui manque et le texte provisoire. Ce qui est en commentaire ou calculé n’est pas compté ; les exemples de la page `/charte/` n’y figurent donc pas. Le fichier ne contient aucune date ; il se met à jour en relançant la commande, jamais à la main. `npm run todos -- --check` vérifie qu’il est à jour sans le réécrire.
-
-Pour une démonstration sans surlignage, copiez `.env.example` en `.env` et mettez `PUBLIC_SHOW_TODOS=false`, puis relancez `npm run dev` ou `npm run build`. Le texte provisoire reste, sans fond jaune ni infobulle, dans un simple `<span>` que les lecteurs d’écran lisent comme du texte ordinaire.
-
-Le même fichier `.env` accepte `SITE_URL`, l’adresse publique du site, à renseigner avant la mise en ligne : chaque page indexable déclare alors son adresse complète (lien canonique), l’image de partage reçoit son adresse complète et le plan du site `sitemap.xml` est produit. Sans elle, les pages n’en déclarent aucune et le plan du site n’est pas écrit.
-
-## Polices, logo et icônes
-
-Les trois polices, Fraunces pour les titres, Atkinson Hyperlegible Next pour le texte et D-DIN pour l’interface, sont servies depuis `public/fonts/`, chacune avec sa licence. `npm run fonts:build` les produit à partir des sources officielles de leurs créateurs : voir [docs/fonts.md](docs/fonts.md).
-
-Le logo vient des trois PNG fournis dans `brand/`. `npm run logo:build` les vectorise et en tire les SVG de `src/assets/brand/` et `public/brand/`, le favicon, les icônes d’application, le manifeste et l’image de partage : voir [docs/logo.md](docs/logo.md). Les icônes des réseaux sociaux viennent de Simple Icons et de Bootstrap Icons : voir [docs/icons.md](docs/icons.md). Tous ces fichiers sont produits par les deux commandes : une retouche à la main serait perdue à la construction suivante.
-
-Les images du prototype (l’ouverture de l’accueil et la galerie de la page « La box ») sont des captures du modèle 3D de la box, faites par l’équipe et rangées dans `design/prototype/`. `npm run prototype:images` les nettoie (pointeur de la souris, trace de l’interface), les convertit en sRGB et les cadre ; Astro en tire les versions AVIF et WebP. Leurs textes sont dans `src/content/prototype.ts` ; chaque légende dit que ce sont des images de synthèse.
-
-Les dessins du site sont produits par un générateur versionné dans `design/illustrations/` : voir [docs/illustrations.md](docs/illustrations.md).
-
-Les licences de tous les éléments tiers sont réunies dans [docs/licences.md](docs/licences.md). Sur le site, la rubrique « Crédits » de la page des mentions légales cite les auteurs des polices et des icônes, avec un lien vers chaque licence (`src/data/credits.ts`).
-
-## Charte graphique
-
-La page `/charte/` (http://localhost:4321/charte/ avec `npm run dev`) est une page interne : elle n’est liée nulle part et demande aux moteurs de recherche de ne pas l’indexer. Elle montre les couleurs et leurs contrastes, les surfaces, la typographie, les boutons, le logo et les icônes, avec les valeurs de `src/styles/tokens.css` relues à chaque construction. Les règles d’usage et les composants sont décrits dans [docs/brand.md](docs/brand.md).
+- [ ] Premier démarrage de HakOS sur un vrai Raspberry Pi 5, et mesures (durée de l'installation, consommation).
+- [ ] Mises à jour à la demande : la box saura qu'une nouvelle version existe, et la responsable la lancera avec son mot de passe.
+- [ ] « Gérer ma HAKO » : depuis http://hako.local, ajouter une personne, lui donner un nouveau mot de passe ou la retirer. Aujourd'hui, ces gestes se font à la main dans Immich et Nextcloud.
+- [ ] Une copie de secours des données. En attendant, nous conseillons de garder une autre copie des photos les plus précieuses.
+- [ ] Hors de notre zone : envoyer la box, que la famille installe elle-même avec le guide pas à pas.
 
 ## Organisation du dépôt
 
-```text
-hako-site/
-├── box/              page servie par la HAKO pour sa première installation (npm run build:box,
-│                     docs/page-box.md)
-├── brand/            PNG d’origine du logo
-├── design/           captures du prototype (prototype/) et sources des dessins (illustrations/)
-├── docs/             charte graphique, polices, logo, icônes, licences
-├── public/           fichiers servis tels quels : polices et licences, favicon,
-│                     icônes, manifeste, image de partage, logo en fichiers autonomes,
-│                     licence de Bootstrap Icons (licences/)
-├── qa/logo/          images de contrôle de la vectorisation du logo
-├── scripts/          commandes todos, contrast et check:dist, polices (fonts/), logo (logo/)
-├── src/
-│   ├── assets/       logo SVG et icônes des réseaux sociaux
-│   ├── components/   en-tête, pied de page, logo, icônes, informations manquantes…
-│   ├── data/         textes et informations de l’entreprise, liens du site
-│   ├── layouts/      gabarit commun à toutes les pages
-│   ├── lib/          outils todo() et typographie française
-│   ├── pages/        une page par fichier
-│   └── styles/       jetons de design, polices, styles de base
-├── tests/            tests Playwright et jeux d’essai des scripts
-├── CHANGELOG.md      journal des modifications
-├── TODO.md           informations manquantes (produit par npm run todos)
-├── astro.config.mjs
-├── astro.box.config.mjs  configuration de la page de la HAKO
-├── eslint.config.js
-├── playwright.config.ts
-└── package.json
-```
+| Dossier              | Contenu                                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------------------- |
+| [src/](src/)         | Pages, textes (`content/`), informations de l'entreprise et prix (`data/`), composants, styles |
+| [box/](box/)         | Page de la HAKO pour sa première installation ([docs/page-box.md](docs/page-box.md))           |
+| [public/](public/)   | Fichiers servis tels quels : polices et leurs licences, logo, icônes, image de partage         |
+| [design/](design/)   | Captures du prototype 3D et sources des dessins                                                |
+| [brand/](brand/)     | PNG d'origine du logo                                                                          |
+| [scripts/](scripts/) | Contrôles (informations manquantes, contraste, site construit), polices, logo, page de la HAKO |
+| [tests/](tests/)     | Tests Playwright et tests unitaires                                                            |
+| [docs/](docs/)       | Développement, charte graphique, hébergement, page de la HAKO, licences                        |
+| [images/](images/)   | Bannière et captures d'écran de ce README                                                      |
 
-Les commandes produisent aussi des dossiers qui ne sont pas versionnés : `dist/` (site construit), `dist-box/` (page de la HAKO), `qa/screenshots/` (captures), `test-results/` (résultats des tests), `.cache/` (téléchargements des polices) et `.tmp/` (essais).
+## Licence
+
+Le code du site est distribué sous licence [MIT](LICENSE). Elle permet de le réutiliser, de le modifier et de le redistribuer, à condition de garder la mention de copyright et la licence.
+
+Elle ne donne aucun droit sur le nom HAKO, son logo, la marque en kanji 箱, les dessins, les photos ni les textes du site : ils restent réservés (voir [NOTICE](NOTICE)). Les polices Fraunces, Atkinson Hyperlegible Next et D-DIN sont sous licence SIL Open Font License 1.1, jointe dans [public/fonts/](public/fonts/), et les autres éléments tiers sont listés avec leur licence dans [docs/licences.md](docs/licences.md). Immich et Nextcloud gardent leur propre licence (GNU AGPL v3).

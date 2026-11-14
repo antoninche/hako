@@ -1,0 +1,27 @@
+HAKO
+Copyright 2026 Antonin Chenavaz, Maxime Pollaud, Martin Dugail
+
+Le code de ce dépôt est distribué sous licence MIT (fichier LICENSE).
+
+Cette licence ne porte pas sur les éléments suivants, qui restent réservés
+(tous droits réservés) :
+
+- le nom et la marque HAKO ;
+- le logo et la marque en kanji 箱, sous toutes leurs formes : fichiers
+  d'origine (brand/), versions vectorisées (src/assets/brand/, public/brand/),
+  favicon, icônes d'application, image de partage (public/og/) et bannière
+  (images/banniere-1512x256.png) ;
+- les dessins du site (src/assets/illustrations/ et leurs sources dans
+  design/illustrations/) ;
+- les images et les photos : prototype de la box (design/prototype/,
+  src/assets/prototype/) et captures d'écran (images/) ;
+- les textes du site (src/content/, et les phrases de src/data/) et de sa
+  documentation.
+
+Ces éléments ne peuvent être ni réutilisés, ni modifiés, ni utilisés pour
+désigner un autre produit, service ou site sans l'accord écrit des auteurs.
+
+Les polices servies avec le site (public/fonts/) restent sous leur propre
+licence, la SIL Open Font License 1.1, jointe dans le dossier de chacune.
+Les icônes, three.js et les autres éléments tiers restent sous la licence de
+leurs auteurs : voir docs/licences.md.

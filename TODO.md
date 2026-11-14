@@ -81,10 +81,10 @@ Total : 79 informations manquantes dans 17 fichiers.
 
 ## src/data/assistant.ts
 
-- L153 - Durée de la première installation sur la page de la HAKO, de « Commencer » à « C’est prêt », impression de la fiche comprise, mesurée sur une HAKO de série avec quatre personnes (par exemple « environ 15 minutes ») - [durée à mesurer]
-- L157 - Durée de la création des comptes (Immich puis Nextcloud) sur une HAKO de série, pour une personne et pour huit (par exemple « environ deux minutes ») - [durée à mesurer]
-- L173 - Geste pour enregistrer la fiche de secours en PDF depuis la fenêtre d’impression d’un iPhone ou d’un iPad à jour (écarter deux doigts sur l’aperçu, puis le bouton de partage et « Enregistrer dans Fichiers » ?), à vérifier sur un appareil - [geste à vérifier]
-- L177 - Gestes sur Android après « Enregistrer au format PDF », dans la fenêtre d’impression de Chrome (toucher le rond « PDF », puis « Enregistrer » ?), et dossier où se range le fichier (« Téléchargements », ouvert par l’application « Fichiers » ?), à vérifier sur un Android 12 d’entrée de gamme. Texte qui suit « Ensuite : » - [gestes à vérifier]
+- L154 - Durée de la première installation sur la page de la HAKO, de « Commencer » à « C’est prêt », impression de la fiche comprise, mesurée sur une HAKO de série avec quatre personnes (par exemple « environ 15 minutes ») - [durée à mesurer]
+- L158 - Durée de la création des comptes (Immich puis Nextcloud) sur une HAKO de série, pour une personne et pour huit (par exemple « environ deux minutes ») - [durée à mesurer]
+- L176 - Geste pour enregistrer la fiche de secours en PDF depuis la fenêtre d’impression d’un iPhone ou d’un iPad à jour (écarter deux doigts sur l’aperçu, puis le bouton de partage et « Enregistrer dans Fichiers » ?), à vérifier sur un appareil - [geste à vérifier]
+- L180 - Gestes sur Android après « Enregistrer au format PDF », dans la fenêtre d’impression de Chrome (toucher le rond « PDF », puis « Enregistrer » ?), et dossier où se range le fichier (« Téléchargements », ouvert par l’application « Fichiers » ?), à vérifier sur un Android 12 d’entrée de gamme. Texte qui suit « Ensuite : » - [gestes à vérifier]
 
 ## src/data/entreprise.ts
 

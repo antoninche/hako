@@ -17,6 +17,9 @@ export default defineConfig({
   testDir: './tests',
   // Les tests unitaires (node --test, npm run test:unit) ne sont pas pour Playwright.
   testIgnore: ['**/unit/**'],
+  // Les captures du README (images/, versionnées) ne se refont qu'à la demande :
+  // npm run screenshots:readme.
+  ...(process.env.README_CAPTURES ? {} : { grepInvert: /@readme/ }),
   outputDir: resultsDir,
   fullyParallel: true,
   forbidOnly: isCI,
