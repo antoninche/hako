@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "build:box": "node scripts/box/build.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "lint": "astro check && eslint . && prettier --check . && node scripts/model/check.mjs",

@@ -272,10 +272,10 @@ export const toConfirm: PendingFacts = withFrenchTypography<PendingFacts>({
     'Reprise de la préparation si la HAKO est débranchée pendant son premier démarrage : reprend-elle seule, faut-il faire quelque chose ?',
     '[à vérifier]',
   ),
-  resumeInstall: todo(
-    'Première installation interrompue (page fermée, appareil en veille) avant la fiche de secours : comment la reprendre ?',
-    '[procédure à venir]',
-  ),
+  // Décision du lot 5 de HakOS (14 novembre 2026) : retaper le mot de passe
+  // de la personne responsable, sinon recommencer ; jamais de réaffichage.
+  resumeInstall:
+    'la page affiche « Une installation est déjà en cours ». Si vous avez déjà votre fiche de secours, tapez le mot de passe de la personne responsable : l’installation continue. Sinon, appuyez sur « Recommencer l’installation » : votre HAKO crée de nouveaux mots de passe pour tout le monde',
   lostSheet: todo(
     'Procédure si la personne responsable perd la fiche de secours ou oublie son mot de passe, sans accès de l’équipe à la HAKO (une autre personne reçoit un nouveau mot de passe de la personne responsable : voir resetPassword). Repris par la page de la HAKO après « Vous avez perdu la fiche de secours ? »',
     '[procédure à venir]',

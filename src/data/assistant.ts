@@ -88,6 +88,14 @@ export const duplicateExample = {
   login: `camille2${LOGIN_DOMAIN}`,
 } as const;
 
+/**
+ * Une seule installation à la fois : sans activité pendant ce nombre de
+ * minutes, la HAKO laisse un autre appareil recommencer (conception du lot 5
+ * de HakOS, validée le 14 novembre 2026). Un redémarrage de la HAKO le
+ * permet aussitôt.
+ */
+export const SESSION_IDLE_MINUTES = 30;
+
 /* ---------- Démonstration ---------- */
 
 /**
@@ -155,14 +163,13 @@ export const pending: AssistantPendingFacts = withFrenchTypography<AssistantPend
   // :8080 vers Nextcloud (pare-feu ouvert seulement après l’installation).
   photosAddress: `http://${BOX_HOST}:2283`,
   filesAddress: `http://${BOX_HOST}:8080`,
-  afterStop: todo(
-    'Création des comptes interrompue (HAKO débranchée ou redémarrée) : les mots de passe de la fiche de secours restent-ils valables, ou la HAKO en tire-t-elle de nouveaux, avec une fiche à refaire ? Texte qui suit « Ce que devient votre fiche : »',
-    '[à confirmer]',
-  ),
-  closedDuringCreation: todo(
-    'Page de la HAKO fermée pendant la création des comptes : la création continue-t-elle, et que montre http://hako.local quand on le rouvre ? Texte qui suit « Ce qui se passe ensuite : »',
-    '[à confirmer]',
-  ),
+  // Décisions du lot 5 de HakOS (14 novembre 2026) : après une coupure de
+  // courant, nouveaux mots de passe pour tout le monde et nouvelle fiche ;
+  // page fermée pendant la création, la création continue.
+  afterStop:
+    'si votre HAKO a redémarré, elle a oublié les mots de passe. Elle en crée de nouveaux pour tout le monde, la page vous les montre, et vous refaites votre fiche. Sinon, votre fiche reste bonne',
+  closedDuringCreation:
+    'votre HAKO continue la création sans elle, et la page rouverte vous en montre la fin',
   iosPdf: todo(
     'Geste pour enregistrer la fiche de secours en PDF depuis la fenêtre d’impression d’un iPhone ou d’un iPad à jour (écarter deux doigts sur l’aperçu, puis le bouton de partage et « Enregistrer dans Fichiers » ?), à vérifier sur un appareil',
     '[geste à vérifier]',

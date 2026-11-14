@@ -1,0 +1,400 @@
+---
+/**
+ * Écran « Une installation est déjà en cours », hors du parcours : la page de
+ * la HAKO rouverte avant la création des comptes, ou un deuxième appareil
+ * pendant l'installation. Une seule installation à la fois, et jamais les
+ * mots de passe affichés une deuxième fois.
+ *
+ * Même dessin que les autres écrans d'attente et d'erreur (StateScreen) : ce
+ * qui se passe, « Que faire », puis le mot de passe de la personne
+ * responsable, recopié de la fiche (même champ que l'écran « Vérifiez votre
+ * fiche », CheckScreen). Une fois reconnu, l'installation continue sur cet
+ * appareil : « Créer les comptes ». Sinon, « Recommencer l’installation » ramène aux
+ * prénoms, avec de nouveaux mots de passe ; si un autre appareil a encore la
+ * main, la HAKO refuse, et l'écran dit comment faire.
+ *
+ * Caché sans JavaScript (attribut hidden) : seul le script sait quand le
+ * montrer (assistant-ui.ts), qui lit ses textes dans les attributs data-*.
+ * Textes : src/content/assistant.ts, clés states.elsewhere et screens.check.
+ */
+import DemoNote from './DemoNote.astro';
+import Glyph from '../commande/Glyph.astro';
+import GuideText from '../installation/GuideText.astro';
+import Icon from '../Icon.astro';
+import ScreenNav from './ScreenNav.astro';
+import { assistant } from '../../content/assistant';
+import { viewAnchor } from '../../lib/assistant/machine.ts';
+
+interface Props {
+  demo: boolean;
+}
+
+const { demo } = Astro.props;
+const screen = assistant.states.elsewhere;
+const { check } = assistant.screens;
+const { common } = assistant;
+const anchor = viewAnchor('elsewhere');
+const titleId = `${anchor}-titre`;
+---
+
+<section
+  class="state surface-sable"
+  id={anchor}
+  data-screen="elsewhere"
+  aria-labelledby={titleId}
+  hidden
+>
+  <Icon name="laptop" class="state__icon" />
+  <h2 class="state__title" id={titleId} tabindex="-1">
+    {screen.title}
+  </h2>
+  {screen.text.map((sentence) => (
+    <p class="state__text">
+      <GuideText parts={sentence} />
+    </p>
+  ))}
+  <h3 class="state__subtitle" id={`${anchor}-que-faire`}>
+    {common.problemFix}
+  </h3>
+  <ol class="state__fix" aria-labelledby={`${anchor}-que-faire`}>
+    {screen.fix.map((sentence) => (
+      <li>
+        <GuideText parts={sentence} />
+      </li>
+    ))}
+  </ol>
+
+  <form
+    class="resume-form"
+    id="reprise-formulaire"
+    method="post"
+    novalidate
+    aria-labelledby={titleId}
+    data-resume-form
+    data-msg-empty={screen.errors.empty}
+    data-msg-wrong={screen.errors.wrong}
+    data-msg-again={screen.errors.again}
+    data-msg-blocked={screen.errors.blocked}
+    data-msg-uppercase={check.errors.uppercase}
+    data-msg-space={check.errors.space}
+    data-msg-character={check.errors.character}
+  >
+    <div class="resume-field">
+      <label class="resume-field__label" for="reprise-mot-de-passe">
+        {screen.field.label}
+      </label>
+      <p class="resume-field__hint" id="reprise-aide">
+        {screen.field.hint}
+      </p>
+      <p class="resume-field__error" id="reprise-erreur" data-resume-error hidden>
+        <Glyph name="alert" class="resume-field__error-icon" />
+        <span>
+          <span class="visually-hidden">{common.errors.prefix}</span>
+          <span data-error-text></span>
+        </span>
+      </p>
+      <input
+        class="resume-field__control"
+        id="reprise-mot-de-passe"
+        type="password"
+        autocomplete="off"
+        autocapitalize="none"
+        autocorrect="off"
+        spellcheck="false"
+        aria-describedby="reprise-aide"
+        data-resume-input
+      />
+    </div>
+
+    <div class="resume-show">
+      <input class="resume-show__input" type="checkbox" id="reprise-afficher" data-resume-show />
+      <label class="resume-show__label" for="reprise-afficher">
+        {check.show}
+      </label>
+    </div>
+
+    <div class="resume-form__actions">
+      <button type="submit" class="btn btn--primary" data-resume-submit data-busy-text={check.busy}>
+        <span data-label>{check.submit}</span>
+      </button>
+    </div>
+    {demo && (
+      <DemoNote text={assistant.demo.check.note}>
+        <button type="button" class="btn btn--secondary" data-action="fill-resume-password">
+          {assistant.demo.check.fill}
+        </button>
+      </DemoNote>
+    )}
+  </form>
+
+  <p class="resume-success" data-resume-success hidden>
+    <Glyph name="check" class="resume-success__icon" />
+    <span>{screen.success}</span>
+  </p>
+
+  <div class="resume-refused" data-resume-refused hidden>
+    <Glyph name="alert" class="resume-refused__icon" />
+    <div>
+      {screen.refused.map((sentence) => (
+        <p>
+          <GuideText parts={sentence} />
+        </p>
+      ))}
+    </div>
+  </div>
+
+  <div class="resume-nav">
+    <ScreenNav>
+      <button
+        type="button"
+        class="btn btn--primary screen-nav__main"
+        data-action="create"
+        data-resume-create
+        hidden
+      >
+        <span>{check.create}</span>
+        <Icon name="arrow-right" />
+      </button>
+      <button type="button" class="btn btn--secondary" data-action="start-over" data-resume-restart>
+        <span>{screen.restart}</span>
+      </button>
+    </ScreenNav>
+  </div>
+</section>
+
+<style>
+  /* ---------- Comme les autres écrans d'attente (StateScreen) ---------- */
+  .state {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+    padding: clamp(var(--space-m), 5vw, var(--space-xl));
+    border-radius: var(--radius);
+  }
+
+  .state > p {
+    margin: 0;
+  }
+
+  .state :global(.state__icon) {
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    color: var(--text-muted);
+  }
+
+  .state__title {
+    margin: 0;
+    font-size: var(--step-3);
+    scroll-margin-top: var(--space-s);
+  }
+
+  .state__title:focus {
+    outline: none;
+  }
+
+  .state__title:focus-visible {
+    outline: var(--focus-width) solid var(--focus);
+    outline-offset: var(--focus-offset);
+  }
+
+  .state__text {
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  .state__subtitle {
+    margin: var(--space-xs) 0 0;
+    font-family: var(--font-ui);
+    font-size: var(--step-0);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    color: var(--text-muted);
+  }
+
+  .state__fix {
+    display: grid;
+    gap: var(--space-2xs);
+    margin: 0;
+    padding-inline-start: 1.5em;
+    list-style: decimal;
+  }
+
+  .state__fix li {
+    max-inline-size: var(--measure);
+  }
+
+  .state__fix li::marker {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Le champ (comme l'écran « Vérifiez votre fiche ») ---------- */
+  .resume-form {
+    display: grid;
+    gap: var(--space-m);
+    inline-size: 100%;
+    max-inline-size: var(--measure);
+    margin-block-start: var(--space-s);
+  }
+
+  .resume-field {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .resume-field__label {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: var(--tracking-ui);
+    line-height: 1.3;
+  }
+
+  .resume-field__hint {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+
+  .resume-field__error {
+    display: flex;
+    gap: var(--space-2xs);
+    align-items: flex-start;
+    margin: var(--space-3xs) 0 0;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .resume-field__error :global(.resume-field__error-icon) {
+    margin-block-start: 0.1em;
+    color: var(--link);
+  }
+
+  .resume-field__control {
+    inline-size: 100%;
+    min-block-size: 3.25rem;
+    margin-block-start: var(--space-3xs);
+    padding: 0.625rem 0.875rem;
+    border: var(--rule-width) solid var(--line-strong);
+    border-radius: var(--radius-s);
+    font: inherit;
+    font-size: var(--step-1);
+    letter-spacing: 0.03em;
+    color: var(--text);
+    background-color: var(--surface);
+    transition:
+      border-color var(--dur-1) var(--ease-out),
+      box-shadow var(--dur-1) var(--ease-out);
+  }
+
+  .resume-field__control:hover {
+    border-color: var(--text);
+  }
+
+  .resume-field__control:focus-visible {
+    outline: var(--focus-width) solid var(--focus);
+    outline-offset: 1px;
+    border-color: var(--text);
+  }
+
+  .resume-field__control[aria-invalid='true'] {
+    border-color: var(--link);
+    box-shadow: inset 0 0 0 1px var(--link);
+  }
+
+  @media (max-width: 29.99rem) {
+    .resume-field__control {
+      font-size: var(--step-0);
+      letter-spacing: 0.02em;
+    }
+  }
+
+  /* « Afficher ce que je tape » : toute la rangée coche la case. */
+  .resume-show {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-xs);
+    align-items: start;
+    min-block-size: var(--target-min);
+    padding-block: var(--space-2xs);
+  }
+
+  .resume-show__input {
+    position: relative;
+    z-index: 1;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    margin: 0.1rem 0 0;
+    accent-color: var(--text);
+  }
+
+  .resume-show__input:focus-visible {
+    outline: var(--focus-width) solid var(--focus);
+    outline-offset: var(--focus-offset);
+  }
+
+  .resume-show__label {
+    cursor: pointer;
+  }
+
+  .resume-show__label::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .resume-form__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+  }
+
+  /* ---------- Fiche reconnue, ou « Recommencer l’installation » refusé ---------- */
+  .resume-success,
+  .resume-refused {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: flex-start;
+    max-inline-size: var(--measure);
+    margin: var(--space-xs) 0 0;
+    padding: var(--space-s) var(--space-m);
+    border: var(--rule-width) solid var(--line);
+    border-radius: var(--radius);
+    background-color: var(--surface);
+  }
+
+  .resume-success {
+    border-inline-start: 3px solid var(--success);
+    font-size: var(--step-1);
+    font-weight: 700;
+    line-height: 1.5;
+  }
+
+  .resume-success :global(.resume-success__icon) {
+    margin-block-start: 0.2em;
+    color: var(--success);
+  }
+
+  .resume-refused {
+    border-inline-start: 3px solid var(--link);
+  }
+
+  .resume-refused :global(.resume-refused__icon) {
+    margin-block-start: 0.2em;
+    color: var(--link);
+  }
+
+  .resume-refused p {
+    margin: 0;
+  }
+
+  .resume-refused p + p {
+    margin-block-start: var(--space-2xs);
+  }
+
+  .resume-nav {
+    inline-size: 100%;
+    margin-block-start: var(--space-s);
+  }
+</style>

@@ -17,6 +17,7 @@ export const IGNORED_DIRECTORIES = new Set([
   '.git',
   '.tmp',
   'dist',
+  'dist-box',
   'node_modules',
   'playwright-report',
   'test-results',

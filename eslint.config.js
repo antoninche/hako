@@ -15,6 +15,7 @@ export default defineConfig([
     '.tmp/',
     'blob-report/',
     'dist/',
+    'dist-box/',
     'node_modules/',
     'playwright-report/',
     'public/',

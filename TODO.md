@@ -3,7 +3,7 @@
 Ce fichier est produit par `npm run todos` : ne le modifiez pas à la main.
 Chaque ligne donne le numéro de ligne dans le fichier source, ce qui manque, puis le texte provisoire affiché sur le site.
 
-Total : 82 informations manquantes dans 17 fichiers.
+Total : 79 informations manquantes dans 17 fichiers.
 
 ## src/components/SocialLinks.astro
 
@@ -81,12 +81,10 @@ Total : 82 informations manquantes dans 17 fichiers.
 
 ## src/data/assistant.ts
 
-- L145 - Durée de la première installation sur la page de la HAKO, de « Commencer » à « C’est prêt », impression de la fiche comprise, mesurée sur une HAKO de série avec quatre personnes (par exemple « environ 15 minutes ») - [durée à mesurer]
-- L149 - Durée de la création des comptes (Immich puis Nextcloud) sur une HAKO de série, pour une personne et pour huit (par exemple « environ deux minutes ») - [durée à mesurer]
-- L158 - Création des comptes interrompue (HAKO débranchée ou redémarrée) : les mots de passe de la fiche de secours restent-ils valables, ou la HAKO en tire-t-elle de nouveaux, avec une fiche à refaire ? Texte qui suit « Ce que devient votre fiche : » - [à confirmer]
-- L162 - Page de la HAKO fermée pendant la création des comptes : la création continue-t-elle, et que montre http://hako.local quand on le rouvre ? Texte qui suit « Ce qui se passe ensuite : » - [à confirmer]
-- L166 - Geste pour enregistrer la fiche de secours en PDF depuis la fenêtre d’impression d’un iPhone ou d’un iPad à jour (écarter deux doigts sur l’aperçu, puis le bouton de partage et « Enregistrer dans Fichiers » ?), à vérifier sur un appareil - [geste à vérifier]
-- L170 - Gestes sur Android après « Enregistrer au format PDF », dans la fenêtre d’impression de Chrome (toucher le rond « PDF », puis « Enregistrer » ?), et dossier où se range le fichier (« Téléchargements », ouvert par l’application « Fichiers » ?), à vérifier sur un Android 12 d’entrée de gamme. Texte qui suit « Ensuite : » - [gestes à vérifier]
+- L153 - Durée de la première installation sur la page de la HAKO, de « Commencer » à « C’est prêt », impression de la fiche comprise, mesurée sur une HAKO de série avec quatre personnes (par exemple « environ 15 minutes ») - [durée à mesurer]
+- L157 - Durée de la création des comptes (Immich puis Nextcloud) sur une HAKO de série, pour une personne et pour huit (par exemple « environ deux minutes ») - [durée à mesurer]
+- L173 - Geste pour enregistrer la fiche de secours en PDF depuis la fenêtre d’impression d’un iPhone ou d’un iPad à jour (écarter deux doigts sur l’aperçu, puis le bouton de partage et « Enregistrer dans Fichiers » ?), à vérifier sur un appareil - [geste à vérifier]
+- L177 - Gestes sur Android après « Enregistrer au format PDF », dans la fenêtre d’impression de Chrome (toucher le rond « PDF », puis « Enregistrer » ?), et dossier où se range le fichier (« Téléchargements », ouvert par l’application « Fichiers » ?), à vérifier sur un Android 12 d’entrée de gamme. Texte qui suit « Ensuite : » - [gestes à vérifier]
 
 ## src/data/entreprise.ts
 
@@ -118,7 +116,6 @@ Total : 82 informations manquantes dans 17 fichiers.
 - L263 - Voyant de la HAKO sur le boîtier de série : visible ou non, emplacement, et ce qu’il montre une fois branchée. Sur le prototype : un petit point sur le petit côté, à côté du bouton rond ; sur un Raspberry Pi 5 nu, rouge à la mise sous tension, puis vert fixe en marche, rouge après un arrêt ; clignotements = signal de panne - [un petit point à côté du bouton rond, rouge juste après le branchement, puis vert : à confirmer]
 - L267 - Petit bouton rond du boîtier (bouton d’alimentation du Raspberry Pi 5) : reste-t-il accessible sur le boîtier de série, et l’image garde-t-elle son réglage d’origine (un appui éteint la HAKO, un nouvel appui la rallume) ? - [à confirmer]
 - L271 - Reprise de la préparation si la HAKO est débranchée pendant son premier démarrage : reprend-elle seule, faut-il faire quelque chose ? - [à vérifier]
-- L275 - Première installation interrompue (page fermée, appareil en veille) avant la fiche de secours : comment la reprendre ? - [procédure à venir]
 - L279 - Procédure si la personne responsable perd la fiche de secours ou oublie son mot de passe, sans accès de l’équipe à la HAKO (une autre personne reçoit un nouveau mot de passe de la personne responsable : voir resetPassword). Repris par la page de la HAKO après « Vous avez perdu la fiche de secours ? » - [procédure à venir]
 - L283 - Gestes exacts, sur la version figée de la HAKO, pour que la personne responsable donne un nouveau mot de passe à une personne de la maison : dans Immich (Administration, Utilisateurs) puis dans Nextcloud (Comptes). Repris par le guide et par la fiche de secours, après « peut lui en donner un nouveau » - [gestes à confirmer]
 - L287 - Ajouter une personne de la maison après la première installation : procédure (où, par qui, d’où vient son mot de passe, fiche à compléter) - [procédure à venir]

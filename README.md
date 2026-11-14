@@ -26,6 +26,7 @@ npm run dev
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
 | `npm run dev`                  | serveur de développement sur http://localhost:4321, mis à jour à chaque modification                             |
 | `npm run build`                | construit le site statique dans `dist/`                                                                          |
+| `npm run build:box`            | construit la page servie par la HAKO pour sa première installation dans `dist-box/` (demande `SITE_URL`)         |
 | `npm run preview`              | sert `dist/` sur http://localhost:4321, comme en production                                                      |
 | `npm run check`                | vérifie les types TypeScript et les composants Astro (`astro check`)                                             |
 | `npm run lint`                 | enchaîne `astro check`, ESLint (règles d’accessibilité comprises) et la vérification de mise en forme (Prettier) |
@@ -42,7 +43,7 @@ npm run dev
 | `npm run illustrations:check`  | vérifie les couleurs et la structure de chaque dessin                                                            |
 | `npm run illustrations:render` | enregistre une image PNG de chaque dessin, pour les regarder (dans `design/illustrations/renders/`)              |
 
-Les tests vérifient que chaque page s’affiche sans erreur, que la page 404 répond, que chaque lien interne mène à une page ou un fichier qui existe, qu’aucune requête ne quitte la machine et qu’aucun cookie n’est déposé (à 390 et 1440 px de large), l’accessibilité avec axe (WCAG 2.2 AA), le lien d’évitement, le menu au clavier, des cibles tactiles de 44 × 44 px dans l’en-tête et le pied de page, le surlignage des informations manquantes, l’affichage avec moins d’animations, et deux constructions à part (dans `.tmp/tests/`) : la démonstration avec `PUBLIC_SHOW_TODOS=false` et l’adresse canonique avec `SITE_URL`. Les captures sont faites à 390 et 1440 px ; `CAPTURE_WIDTHS=360,768,1024 npm run screenshots` en ajoute d’autres. Si un serveur tourne déjà sur le port 4321, Playwright le réutilise sans reconstruire le site : arrêtez-le avant de lancer les tests. Pour construire ailleurs que dans `dist/` : `PW_OUT_DIR=.tmp/dist-essai PW_PORT=4410 npm test`.
+Les tests vérifient que chaque page s’affiche sans erreur, que la page 404 répond, que chaque lien interne mène à une page ou un fichier qui existe, qu’aucune requête ne quitte la machine et qu’aucun cookie n’est déposé (à 390 et 1440 px de large), l’accessibilité avec axe (WCAG 2.2 AA), le lien d’évitement, le menu au clavier, des cibles tactiles de 44 × 44 px dans l’en-tête et le pied de page, le surlignage des informations manquantes, l’affichage avec moins d’animations, et trois constructions à part (dans `.tmp/tests/`) : la démonstration avec `PUBLIC_SHOW_TODOS=false`, l’adresse canonique avec `SITE_URL`, et la page de la HAKO (`npm run build:box`), parcourue sous les en-têtes de la HAKO avec une API locale simulée. Les captures sont faites à 390 et 1440 px ; `CAPTURE_WIDTHS=360,768,1024 npm run screenshots` en ajoute d’autres. Si un serveur tourne déjà sur le port 4321, Playwright le réutilise sans reconstruire le site : arrêtez-le avant de lancer les tests. Pour construire ailleurs que dans `dist/` : `PW_OUT_DIR=.tmp/dist-essai PW_PORT=4410 npm test`.
 
 ## Modifier les textes et les informations
 
@@ -104,6 +105,8 @@ La page `/charte/` (http://localhost:4321/charte/ avec `npm run dev`) est une pa
 
 ```text
 hako-site/
+├── box/              page servie par la HAKO pour sa première installation (npm run build:box,
+│                     docs/page-box.md)
 ├── brand/            PNG d’origine du logo
 ├── design/           captures du prototype (prototype/) et sources des dessins (illustrations/)
 ├── docs/             charte graphique, polices, logo, icônes, licences
@@ -124,9 +127,10 @@ hako-site/
 ├── CHANGELOG.md      journal des modifications
 ├── TODO.md           informations manquantes (produit par npm run todos)
 ├── astro.config.mjs
+├── astro.box.config.mjs  configuration de la page de la HAKO
 ├── eslint.config.js
 ├── playwright.config.ts
 └── package.json
 ```
 
-Les commandes produisent aussi des dossiers qui ne sont pas versionnés : `dist/` (site construit), `qa/screenshots/` (captures), `test-results/` (résultats des tests), `.cache/` (téléchargements des polices) et `.tmp/` (essais).
+Les commandes produisent aussi des dossiers qui ne sont pas versionnés : `dist/` (site construit), `dist-box/` (page de la HAKO), `qa/screenshots/` (captures), `test-results/` (résultats des tests), `.cache/` (téléchargements des polices) et `.tmp/` (essais).

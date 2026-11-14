@@ -13,7 +13,9 @@
  *   prêt » pour retrouver le guide) ; liens d'aide dans un nouvel onglet ;
  *   prénoms refusés ; doublons expliqués ; prénoms modifiés (nouveaux mots de
  *   passe) ; vérification (signes, annonce des refus) ; impression (seule la
- *   fiche, avec EXEMPLE) ; erreurs simulées ; « Recommencer » ; mouvement
+ *   fiche, avec EXEMPLE) ; erreurs simulées (dont la coupure de courant,
+ *   l'installation déjà en cours et la page rouverte pendant la création des
+ *   comptes) ; « Recommencer » ; mouvement
  *   réduit ; axe à chaque écran ; 320 px ; tout le parcours sous la
  *   politique de sécurité de production.
  *
@@ -56,6 +58,7 @@ const STATES = {
   stopped: 'creation-arretee',
   unexpected: 'erreur',
   installed: 'deja-installee',
+  elsewhere: 'installation-en-cours',
 } as const;
 type ViewId = keyof typeof SCREENS | keyof typeof STATES;
 const slugOf = (view: ViewId): string =>
@@ -614,7 +617,7 @@ test.describe('Vérification de la fiche', () => {
 
     // « Afficher ce que je tape ».
     await expect(field).toHaveAttribute('type', 'password');
-    await page.getByLabel(check.show).check();
+    await page.locator('[data-check-form]').getByLabel(check.show).check();
     await expect(field).toHaveAttribute('type', 'text');
 
     for (const attempt of [1, 2, 3]) {
@@ -743,7 +746,9 @@ test.describe('Erreurs simulées', () => {
     return panel;
   };
 
-  test('coupure pendant la création des comptes, puis reprise', async ({ page }) => {
+  test('coupure de courant pendant la création : nouveaux mots de passe, nouvelle fiche', async ({
+    page,
+  }) => {
     await openDemo(page);
     await toPasswords(page, ['Hélène', 'Marc']);
     await toChecked(page);
@@ -756,13 +761,83 @@ test.describe('Erreurs simulées', () => {
     await expect(section(page, 'stopped').locator('.state__fix li')).toHaveCount(
       states.stopped.fix.length,
     );
-    // Les comptes des photos sont faits, et le restent.
+    // Les comptes des photos étaient faits quand la HAKO s'est arrêtée.
     await expect(page.locator('[data-task="photos"]')).toHaveAttribute('data-state', 'done');
     await expect(page.locator('[data-task="files"]')).toHaveAttribute('data-state', 'waiting');
 
+    // Redémarrée, la HAKO a oublié les mots de passe : de nouveaux, pour les
+    // mêmes prénoms, et la fiche à refaire et à vérifier.
     await button(page, states.stopped.action ?? '').click();
+    await expectScreen(page, 'passwords');
+    await expect(page.locator('[data-passwords-renewed]')).toBeVisible();
+    await expect(page.locator('[data-accounts] [data-first-name]')).toHaveText(['Hélène', 'Marc']);
+    await toChecked(page);
+    await button(page, check.create).click();
+    await expect(title(page, 'ready')).toBeFocused({ timeout: 10_000 });
+  });
+
+  test('installation déjà en cours : la fiche donne la main, sans réafficher les mots de passe', async ({
+    page,
+  }) => {
+    const elsewhere = states.elsewhere;
+    await openDemo(page);
+    const panel = await openScenarios(page);
+    await panel.getByRole('button', { name: demo.scenarios.items.elsewhere }).click();
+    await expectScreen(page, 'elsewhere');
+    await expect(page).toHaveURL(/#ecran-installation-en-cours$/);
+    await expect(announcer(page)).toHaveText(demo.reopened);
+    await expect(page.locator('[data-steps]')).toBeHidden();
+    await expect(section(page, 'elsewhere').locator('.state__fix li')).toHaveCount(
+      elsewhere.fix.length,
+    );
+    // Aucun mot de passe nulle part sur la page.
+    await expect(page.locator('[data-accounts] [data-password]')).toHaveCount(0);
+    await expect(page.locator('[data-resume-refused]')).toBeHidden();
+
+    const field = page.getByLabel(elsewhere.field.label);
+    await field.fill('exemple-faux-faux-faux-00');
+    await button(page, check.submit).click();
+    await expect(page.locator('[data-resume-error]')).toContainText(elsewhere.errors.wrong);
+    await expect(field).toHaveAttribute('aria-invalid', 'true');
+
+    await button(page, demo.check.fill).click();
+    await button(page, check.submit).click();
+    await expect(page.locator('[data-resume-success]')).toContainText(elsewhere.success);
+    await expect(button(page, check.create)).toBeFocused();
+    await expect(button(page, elsewhere.restart)).toBeHidden();
+    await button(page, check.create).click();
     await expectScreen(page, 'accounts');
     await expect(title(page, 'ready')).toBeFocused({ timeout: 10_000 });
+  });
+
+  test('installation déjà en cours : « Recommencer » donne de nouveaux mots de passe', async ({
+    page,
+  }) => {
+    await openDemo(page);
+    const panel = await openScenarios(page);
+    await panel.getByRole('button', { name: demo.scenarios.items.elsewhere }).click();
+    await expectScreen(page, 'elsewhere');
+    await button(page, states.elsewhere.restart).click();
+    await expectScreen(page, 'people');
+    await ownerField(page).fill('Léa');
+    await button(page, people.next).click();
+    await expectScreen(page, 'passwords');
+    // La fiche d'une installation commencée ailleurs ne vaut plus.
+    await expect(page.locator('[data-passwords-renewed]')).toBeVisible();
+  });
+
+  test('page rouverte pendant la création des comptes : elle en montre la fin', async ({
+    page,
+  }) => {
+    await openDemo(page);
+    const panel = await openScenarios(page);
+    await panel.getByRole('button', { name: demo.scenarios.items.creating }).click();
+    await expectScreen(page, 'accounts');
+    await expect(page.locator('[data-task="photos"]')).toHaveAttribute('data-state', 'done');
+    await expect(title(page, 'ready')).toBeFocused({ timeout: 10_000 });
+    for (const task of ['photos', 'files', 'finish']) {
+      await expect(page.locator(`[data-task="${task}"]`)).toHaveAttribute('data-state', 'done');
+    }
   });
 
   test('« La création s’est arrêtée » montrée après « C’est prêt » : les comptes restent en cours', async ({
@@ -913,6 +988,11 @@ test.describe('Accessibilité et petits écrans', () => {
     await page.getByRole('button', { name: demo.scenarios.items.unreachable }).click();
     await expectScreen(page, 'unreachable');
     await expectNoSeriousViolations(page, 'HAKO injoignable');
+    await page.getByRole('button', { name: demo.scenarios.items.elsewhere }).click();
+    await expectScreen(page, 'elsewhere');
+    await button(page, check.submit).click();
+    await expect(page.locator('[data-resume-error]')).toBeVisible();
+    await expectNoSeriousViolations(page, 'installation déjà en cours');
   });
 
   test('320 px : aucun écran ne déborde, cibles de 44 px', async ({ page }) => {

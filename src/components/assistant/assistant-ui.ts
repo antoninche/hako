@@ -34,8 +34,13 @@
  * - Impression : window.print() ; la feuille d'impression ne garde que la
  *   fiche de secours. Pendant l'impression, le titre de la page devient le
  *   nom proposé pour le fichier PDF (« Fiche de secours HAKO »).
+ * - Installation déjà en cours (page rouverte, deuxième appareil) : le mot
+ *   de passe de la personne responsable, recopié de la fiche, donne la main ;
+ *   « Recommencer » ramène aux prénoms. La page suit une création des
+ *   comptes déjà commencée jusqu'à la fin.
  * - Démonstration : « Recommencer », prénoms et mot de passe d'exemple,
- *   « Voir un autre écran ».
+ *   « Voir un autre écran » (dont la page rouverte, comme sur un autre
+ *   appareil).
  *
  * Ce script n'écrit aucun texte : il les lit dans la page (attributs data-*,
  * gabarits <template>) et les pose avec textContent. Il ne fait aucune
@@ -43,12 +48,14 @@
  * l'appareil (ni stockage, ni cookie).
  */
 import {
+  SIMULATED_SCENARIOS,
   TASK_IDS,
   errorCode,
   isSimulated,
   type Account,
   type BoxAccess,
   type CreationProgress,
+  type SimulatedScenario,
   type TaskId,
 } from '../../lib/assistant/box-access.ts';
 import {
@@ -64,7 +71,6 @@ import {
   type PersonError,
 } from '../../lib/assistant/household.ts';
 import {
-  STATE_IDS,
   canCreate,
   canShow,
   initial,
@@ -78,7 +84,6 @@ import {
   type AssistantState,
   type Effect,
   type ScreenId,
-  type StateId,
   type ViewId,
 } from '../../lib/assistant/machine.ts';
 import { fillTemplate } from '../../lib/installation/guide-state.ts';
@@ -242,6 +247,17 @@ export function initAssistant(
   const checkSuccess = find<HTMLElement>('[data-check-success]');
   const checkCreate = find<HTMLButtonElement>('[data-check-create]');
 
+  // L'installation déjà en cours : le mot de passe de la personne responsable.
+  const resumeForm = find<HTMLFormElement>('[data-resume-form]');
+  const resumeInput = find<HTMLInputElement>('[data-resume-input]', resumeForm);
+  const resumeError = find<HTMLElement>('[data-resume-error]', resumeForm);
+  const resumeShow = find<HTMLInputElement>('[data-resume-show]', resumeForm);
+  const resumeSubmit = find<HTMLButtonElement>('[data-resume-submit]', resumeForm);
+  const resumeSuccess = find<HTMLElement>('[data-resume-success]');
+  const resumeCreate = find<HTMLButtonElement>('[data-resume-create]');
+  const resumeRestart = find<HTMLButtonElement>('[data-resume-restart]');
+  const resumeRefused = find<HTMLElement>('[data-resume-refused]');
+
   // La création des comptes, et la fin.
   const tasksList = find<HTMLElement>('[data-tasks]');
   const taskItems = new Map<TaskId, HTMLElement>(
@@ -339,7 +355,13 @@ export function initAssistant(
       find<HTMLElement>('[data-step-state]', item).textContent =
         itemState === 'done' ? ` ${doneText}` : '';
     });
-    indicator.hidden = current.view === 'preparing' || current.view === 'installed';
+    // Hors du parcours : HAKO qui se prépare, installée, ou installation en
+    // cours ailleurs (et ses écrans d'erreur).
+    indicator.hidden =
+      current.view === 'preparing' ||
+      current.view === 'installed' ||
+      current.view === 'elsewhere' ||
+      (!isScreen(current.view) && current.resume === 'elsewhere');
   }
 
   /** Bouton qui attend la HAKO : libellé « Un instant… », et aria-disabled. */
@@ -355,7 +377,8 @@ export function initAssistant(
   function renderBusy(current: AssistantState): void {
     setBusy(startButton, current.busy === 'status' && current.view === 'welcome');
     setBusy(peopleSubmit, current.busy === 'register');
-    setBusy(checkSubmit, current.busy === 'check');
+    setBusy(checkSubmit, current.busy === 'check' && current.view === 'check');
+    setBusy(resumeSubmit, current.busy === 'check' && current.view === 'elsewhere');
     for (const button of root.querySelectorAll<HTMLButtonElement>('[data-action="retry"]')) {
       setBusy(button, current.busy !== null && !isScreen(current.view));
     }
@@ -415,15 +438,20 @@ export function initAssistant(
     });
   }
 
-  /** Les mots de passe quittent la page : cartes, fiche et champ de vérification. */
+  /** Les mots de passe quittent la page : cartes, fiche et champs de vérification. */
   function forgetSecrets(): void {
     accountsList.replaceChildren();
     printoutRows.replaceChildren();
     printout.removeAttribute('data-filled');
     printout.dataset['people'] = '0';
-    checkInput.value = '';
-    checkInput.type = 'password';
-    checkShow.checked = false;
+    for (const [input, show] of [
+      [checkInput, checkShow],
+      [resumeInput, resumeShow],
+    ] as const) {
+      input.value = '';
+      input.type = 'password';
+      show.checked = false;
+    }
   }
 
   // ------------------------------------------------------------- vérification
@@ -432,42 +460,88 @@ export function initAssistant(
     return current.accounts?.[0]?.firstName ?? '';
   }
 
-  function renderCheck(before: AssistantState, after: AssistantState): void {
-    const code = after.checkError;
-    const text = find<HTMLElement>('[data-error-text]', checkError);
+  /** Les deux formulaires du mot de passe recopié : vérification de la fiche, installation en cours ailleurs. */
+  interface PasswordForm {
+    readonly view: 'check' | 'elsewhere';
+    readonly form: HTMLFormElement;
+    readonly input: HTMLInputElement;
+    readonly error: HTMLElement;
+    readonly hintId: string;
+    readonly success: HTMLElement;
+    readonly create: HTMLButtonElement;
+  }
+
+  const passwordForms: readonly PasswordForm[] = [
+    {
+      view: 'check',
+      form: checkForm,
+      input: checkInput,
+      error: checkError,
+      hintId: 'verification-aide',
+      success: checkSuccess,
+      create: checkCreate,
+    },
+    {
+      view: 'elsewhere',
+      form: resumeForm,
+      input: resumeInput,
+      error: resumeError,
+      hintId: 'reprise-aide',
+      success: resumeSuccess,
+      create: resumeCreate,
+    },
+  ];
+
+  function renderPasswordForm(
+    form: PasswordForm,
+    before: AssistantState,
+    after: AssistantState,
+  ): void {
+    // Le refus est celui du formulaire de l'écran affiché (ou de celui où l'on reviendra).
+    const here = after.view === form.view || (!isScreen(after.view) && after.resume === form.view);
+    const code = here ? after.checkError : null;
+    const text = find<HTMLElement>('[data-error-text]', form.error);
     if (code) {
       const key = `msg${code.charAt(0).toUpperCase()}${code.slice(1)}`;
-      text.textContent = fillTemplate(checkForm.dataset[key] ?? '', {
+      text.textContent = fillTemplate(form.form.dataset[key] ?? '', {
         de_prenom: ofName(ownerName(after)),
       });
-      checkError.hidden = false;
-      checkInput.setAttribute('aria-invalid', 'true');
-      checkInput.setAttribute('aria-describedby', `${checkError.id} verification-aide`);
+      form.error.hidden = false;
+      form.input.setAttribute('aria-invalid', 'true');
+      form.input.setAttribute('aria-describedby', `${form.error.id} ${form.hintId}`);
     } else {
       text.textContent = '';
-      checkError.hidden = true;
-      checkInput.removeAttribute('aria-invalid');
-      checkInput.setAttribute('aria-describedby', 'verification-aide');
+      form.error.hidden = true;
+      form.input.removeAttribute('aria-invalid');
+      form.input.setAttribute('aria-describedby', form.hintId);
     }
-    checkForm.hidden = after.checked;
-    checkSuccess.hidden = !after.checked;
-    checkCreate.hidden = !after.checked;
-    if (after.view !== 'check') return;
+    form.form.hidden = after.checked;
+    form.success.hidden = !after.checked;
+    form.create.hidden = !after.checked;
+    if (after.view !== form.view) return;
     if (!before.checked && after.checked) {
-      announce(checkSuccess.textContent?.trim());
-      checkCreate.focus();
+      announce(form.success.textContent?.trim());
+      form.create.focus();
     } else if (before.busy === 'check' && after.busy === null && code) {
-      showCheckError();
+      showFormError(form);
     }
+  }
+
+  function renderCheck(before: AssistantState, after: AssistantState): void {
+    for (const form of passwordForms) renderPasswordForm(form, before, after);
+    // Installation en cours ailleurs : « Recommencer » tant que la fiche
+    // n'est pas reconnue ; son refus par la HAKO, s'il y en a un.
+    resumeRestart.hidden = after.checked;
+    resumeRefused.hidden = !after.refused;
   }
 
   /**
    * Refus du mot de passe recopié : le focus va dans le champ. S'il y était
    * déjà (Entrée dans le champ), rien ne serait lu : le message est annoncé.
    */
-  function showCheckError(): void {
-    if (document.activeElement === checkInput) announce(checkError.textContent?.trim());
-    else checkInput.focus();
+  function showFormError(form: PasswordForm): void {
+    if (document.activeElement === form.input) announce(form.error.textContent?.trim());
+    else form.input.focus();
   }
 
   // ------------------------------------------------------------- création des comptes
@@ -500,6 +574,7 @@ export function initAssistant(
     if (!options.fromHistory) pushHash(after.view);
     focusView(after.view);
     if (after.view === 'ready') announce(readyDone);
+    if (after.view === 'elsewhere' && after.refused) announce(resumeRefused.textContent?.trim());
   }
 
   function dispatch(event: AssistantEvent, options: { readonly fromHistory?: boolean } = {}): void {
@@ -533,6 +608,11 @@ export function initAssistant(
       case 'create-accounts':
         box
           .createAccounts((progress) => settle({ type: 'progress', progress }))
+          .then(() => settle({ type: 'created' }), fail);
+        break;
+      case 'follow-creation':
+        box
+          .followCreation((progress) => settle({ type: 'progress', progress }))
           .then(() => settle({ type: 'created' }), fail);
         break;
       case 'forget-secrets':
@@ -732,22 +812,35 @@ export function initAssistant(
 
   // ------------------------------------------------------------- vérification
 
-  checkForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    dispatch({ type: 'submit-check', typed: checkInput.value });
-    // Refus sur l'appareil (champ vide, majuscule, espace, signe) : le champ
-    // reprend le focus, ou le message est annoncé s'il l'avait déjà.
-    if (state.busy === null && state.checkError) showCheckError();
-  });
+  for (const form of passwordForms) {
+    form.form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      dispatch({ type: 'submit-check', typed: form.input.value });
+      // Refus sur l'appareil (champ vide, majuscule, espace, signe) : le champ
+      // reprend le focus, ou le message est annoncé s'il l'avait déjà.
+      if (state.busy === null && state.checkError) showFormError(form);
+    });
+  }
 
-  checkShow.addEventListener('change', () => {
-    checkInput.type = checkShow.checked ? 'text' : 'password';
-  });
+  for (const [input, show] of [
+    [checkInput, checkShow],
+    [resumeInput, resumeShow],
+  ] as const) {
+    show.addEventListener('change', () => {
+      input.type = show.checked ? 'text' : 'password';
+    });
+  }
 
   // ------------------------------------------------------------- démonstration
 
-  function simulate(scenario: StateId): void {
+  function simulate(scenario: SimulatedScenario): void {
     if (!isSimulated(access) || state.busy !== null) return;
+    // Installation commencée ailleurs, création déjà en cours : la page
+    // repart, comme rouverte (ou ouverte sur un autre appareil).
+    if (scenario === 'elsewhere' || scenario === 'creating') {
+      reset(scenario);
+      return;
+    }
     if (scenario === 'stopped') {
       // Fiche vérifiée : la vraie création part, et la HAKO simulée l'arrête
       // en route. Sinon, l'écran seul.
@@ -763,9 +856,11 @@ export function initAssistant(
     dispatch({ type: 'recheck' });
   }
 
-  function restart(): void {
+  /** Tout à zéro, avec un nouvel accès ; en démonstration, la HAKO simulée peut déjà être en cours. */
+  function reset(reopen?: SimulatedScenario): void {
     generation += 1;
     access = createAccess();
+    if (reopen && isSimulated(access)) access.simulate(reopen);
     silence();
     forgetSecrets();
     resetPeople();
@@ -794,8 +889,12 @@ export function initAssistant(
       );
     }
     focusView('welcome');
-    announce(root.dataset['restarted']);
+    announce(reopen ? root.dataset['reopened'] : root.dataset['restarted']);
     for (const effect of start.effects) run(effect);
+  }
+
+  function restart(): void {
+    reset();
   }
 
   // ------------------------------------------------------------- boutons
@@ -845,6 +944,10 @@ export function initAssistant(
       case 'fill-password':
         checkInput.value = state.accounts?.[0]?.password ?? '';
         break;
+      case 'fill-resume-password':
+        // La HAKO simulée a remis les mots de passe d'exemple à « l'autre appareil ».
+        resumeInput.value = facts.examplePasswords[0] ?? '';
+        break;
       case 'print':
         window.print();
         printed.hidden = false;
@@ -855,12 +958,15 @@ export function initAssistant(
       case 'retry':
         dispatch({ type: 'retry' });
         break;
+      case 'start-over':
+        dispatch({ type: 'start-over' });
+        break;
       case 'restart':
         restart();
         break;
       case 'simulate': {
         const scenario = button.dataset['scenario'];
-        const found = STATE_IDS.find((id) => id === scenario);
+        const found = SIMULATED_SCENARIOS.find((id) => id === scenario);
         if (found) simulate(found);
         break;
       }

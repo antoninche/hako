@@ -82,6 +82,7 @@ import {
   FIRST_NAME_MAX_LENGTH,
   LOGIN_DOMAIN,
   MAX_PEOPLE,
+  SESSION_IDLE_MINUTES,
   duplicateExample,
   loginExample,
   pending,
@@ -104,7 +105,11 @@ export type ScreenId =
 export type StepScreenId = Exclude<ScreenId, 'welcome' | 'ready'>;
 
 /** Écrans d’attente et d’erreur, hors du parcours. */
-export type StateId = 'preparing' | 'unreachable' | 'stopped' | 'unexpected' | 'installed';
+export type StateId =
+  'preparing' | 'unreachable' | 'stopped' | 'unexpected' | 'installed' | 'elsewhere';
+
+/** Ce que « Voir un autre écran » sait montrer en démonstration (SIMULATED_SCENARIOS). */
+export type ScenarioId = StateId | 'creating';
 
 /** Morceau de texte : du texte, une information manquante ou un lien. */
 export type Piece = Maybe<string> | Link;
@@ -232,7 +237,8 @@ export interface SheetScreen extends ScreenBase {
 }
 
 /** Raisons de refuser le mot de passe recopié. */
-export type CheckError = 'empty' | 'wrong' | 'uppercase' | 'space' | 'character' | 'again';
+export type CheckError =
+  'empty' | 'wrong' | 'uppercase' | 'space' | 'character' | 'again' | 'blocked';
 
 export interface CheckScreen extends ScreenBase {
   /** Sous le champ : le mot de passe n’est plus affiché, c’est voulu. */
@@ -249,7 +255,10 @@ export interface CheckScreen extends ScreenBase {
   readonly create: string;
   /** Retour à l’écran des mots de passe. */
   readonly review: string;
-  /** « {de_prenom} » : la personne responsable. `again` : après trois essais. */
+  /**
+   * « {de_prenom} » : la personne responsable. `again` : après trois essais ;
+   * `blocked` : la HAKO n’accepte plus aucun essai.
+   */
   readonly errors: Readonly<Record<CheckError, string>>;
   readonly back: string;
 }
@@ -305,6 +314,23 @@ export interface StateScreen {
   readonly fix: readonly Sentence[];
   /** Bouton principal ; sans lui, l’écran montre « Mes photos » et « Mes fichiers ». */
   readonly action?: string;
+}
+
+/**
+ * Écran « Une installation est déjà en cours » : page rouverte, ou deuxième
+ * appareil. Le mot de passe de la personne responsable, recopié de la fiche,
+ * donne la main ; sinon, « Recommencer l’installation ».
+ */
+export interface ElsewhereScreen extends StateScreen {
+  readonly field: { readonly label: string; readonly hint: string };
+  /** Les refus propres à cet écran ; les autres sont ceux de l’écran de vérification. */
+  readonly errors: Readonly<Record<'empty' | 'wrong' | 'again' | 'blocked', string>>;
+  /** Annoncé, puis affiché au-dessus du bouton « Créer les comptes ». */
+  readonly success: string;
+  /** « Recommencer l’installation » (de nouveaux mots de passe pour tout le monde). */
+  readonly restart: string;
+  /** « Recommencer l’installation » refusé : un autre appareil a encore la main. */
+  readonly refused: readonly Sentence[];
 }
 
 /** La fiche de secours (une page A4, en portrait). */
@@ -456,6 +482,11 @@ export const assistant = {
     },
     /** Annoncé aux lecteurs d’écran après « Recommencer ». */
     restarted: 'La démonstration repart du début.',
+    /**
+     * Annoncé quand « Voir un autre écran » rouvre la page (installation
+     * déjà en cours, page rouverte pendant la création).
+     */
+    reopened: 'La page repart, comme si vous veniez de la rouvrir.',
     /** Remplace, en démonstration, le pied de page de la HAKO (common.footer). */
     footer:
       'Démonstration : cette page imite celle de votre HAKO. Chez vous, elle vient de votre HAKO, et ne passe pas par internet.',
@@ -517,14 +548,16 @@ export const assistant = {
     /** Facultatif : montrer les écrans d’attente et d’erreur, par exemple au jury. */
     scenarios: {
       title: 'Voir un autre écran',
-      hint: 'Ce que montre aussi la page de votre HAKO : quand quelque chose bloque, ou une fois installée.',
+      hint: 'Ce que montre aussi la page de votre HAKO : quand quelque chose bloque, quand l’installation est déjà en cours, ou une fois installée.',
       items: {
         preparing: 'Votre HAKO se prépare encore',
         unreachable: 'Votre HAKO ne répond plus',
         stopped: 'La création des comptes s’est arrêtée',
         unexpected: 'Quelque chose s’est mal passé',
         installed: 'Votre HAKO est installée',
-      } satisfies Readonly<Record<StateId, string>>,
+        elsewhere: 'Une installation est déjà en cours',
+        creating: 'La page rouverte pendant la création des comptes',
+      } satisfies Readonly<Record<ScenarioId, string>>,
     },
   },
 
@@ -864,7 +897,7 @@ export const assistant = {
         title: 'Nouveaux mots de passe',
         text: [
           [
-            'Vous avez modifié les prénoms : votre HAKO a créé de nouveaux mots de passe pour tout le monde. Si vous aviez déjà fait une fiche, elle ne vaut plus : déchirez-la, puis refaites-la.',
+            'Votre HAKO a créé de nouveaux mots de passe pour tout le monde : les prénoms ont changé, l’installation a recommencé, ou votre HAKO a redémarré. Si vous aviez déjà fait une fiche, elle ne vaut plus : déchirez-la, puis refaites-la.',
           ],
         ],
       },
@@ -1125,6 +1158,8 @@ export const assistant = {
           'Il y a une lettre accentuée ou un signe (à, é, &…) : un mot de passe n’en a pas. Pour taper un chiffre sur un ordinateur, appuyez en même temps sur la touche Maj et sur la touche du chiffre.',
         again:
           'Votre fiche contient peut-être une erreur de copie. Revoyez vos mots de passe, puis corrigez votre fiche.',
+        blocked:
+          'Trop d’essais faux : votre HAKO n’accepte plus de mot de passe pour cette installation. Débranchez le bloc de la prise électrique, attendez 10 secondes, puis rebranchez-le : la HAKO redémarre. Rechargez ensuite cette page, et recommencez : votre HAKO créera de nouveaux mots de passe.',
       },
       notes: [
         {
@@ -1449,7 +1484,58 @@ export const assistant = {
         ['Vous avez perdu la fiche de secours ? ', toConfirm.lostSheet, '.'],
       ],
     },
-  } satisfies Readonly<Record<StateId, StateScreen>>,
+    /**
+     * Page rouverte avant la création des comptes, ou deuxième appareil
+     * pendant l’installation : une seule installation à la fois, et jamais
+     * les mots de passe affichés une deuxième fois.
+     */
+    elsewhere: {
+      title: 'Une installation est déjà en cours',
+      text: [
+        [
+          'Quelqu’un a déjà commencé la première installation de votre HAKO : sur un autre appareil, ou sur cette page, avant qu’elle ne se ferme. Votre HAKO ne montre les mots de passe qu’une fois : elle ne peut pas les afficher de nouveau ici.',
+        ],
+      ],
+      fix: [
+        ['Vous avez commencé sur un autre appareil, encore ouvert ? Continuez sur celui-là.'],
+        [
+          'Vous avez déjà votre fiche de secours ? Tapez ci-dessous le mot de passe de la personne responsable : l’installation continue sur cet appareil.',
+        ],
+        [
+          'Pas de fiche ? Appuyez sur « Recommencer l’installation » : votre HAKO créera de nouveaux mots de passe pour tout le monde. Une fiche déjà faite ne vaudra plus.',
+        ],
+      ],
+      field: {
+        label: 'Mot de passe de la personne responsable',
+        hint: 'Sur votre fiche, celui de la personne marquée « responsable de la HAKO ». En minuscules, avec les tirets (-), sans espace.',
+      },
+      errors: {
+        empty:
+          'Tapez le mot de passe de la personne responsable, tel qu’il est écrit sur votre fiche.',
+        wrong:
+          'Ce n’est pas ce mot de passe. Comparez avec votre fiche, mot par mot, sans oublier les tirets (-).',
+        again:
+          'Toujours pas. Votre fiche date peut-être d’avant de nouveaux mots de passe : elle ne vaut plus. Dans ce cas, appuyez sur « Recommencer l’installation ».',
+        blocked:
+          'Trop d’essais faux : votre HAKO n’accepte plus de mot de passe pour cette installation. Débranchez le bloc de la prise électrique, attendez 10 secondes, puis rebranchez-le : la HAKO redémarre. Appuyez ensuite sur « Recommencer l’installation ».',
+      },
+      success:
+        'C’est bien ça : l’installation continue sur cet appareil. Appuyez sur « Créer les comptes ».',
+      restart: 'Recommencer l’installation',
+      refused: [
+        [
+          'Votre HAKO ne peut pas recommencer : l’installation est encore ouverte ailleurs. Débranchez le bloc de la prise électrique, attendez 10 secondes, puis rebranchez-le : la HAKO redémarre, et oublie l’installation commencée. Appuyez ensuite de nouveau sur « Recommencer l’installation ».',
+        ],
+        [
+          'Si personne ne se sert plus de l’autre appareil, vous pouvez aussi attendre : au bout de ',
+          `${SESSION_IDLE_MINUTES}\u00a0minutes`,
+          ' sans activité, votre HAKO laisse recommencer.',
+        ],
+      ],
+    } satisfies ElsewhereScreen,
+  } satisfies Readonly<Record<Exclude<StateId, 'elsewhere'>, StateScreen>> & {
+    readonly elsewhere: ElsewhereScreen;
+  },
 
   /* ----- Fiche de secours (A4) ----- */
 

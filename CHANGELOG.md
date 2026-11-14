@@ -2,6 +2,20 @@
 
 Les modifications notables du site sont notées ici, de la plus récente à la plus ancienne. Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et les numéros de version suivent la [gestion sémantique de version](https://semver.org/lang/fr/).
 
+## [Non publié]
+
+### Ajouté
+
+- Page de la HAKO pour sa première installation, servie par la HAKO elle-même (lot 5 de HakOS) : `npm run build:box` la construit à part dans `dist-box/` (une seule page, en français, non indexée, sans ressource d’ailleurs), avec l’adresse du site public donnée par `SITE_URL`. Accès réel à l’API locale de la HAKO (`src/lib/assistant/box-http.ts`) : même origine, délais, erreurs, session en mémoire seulement ; un test échoue s’il entre dans le site public. Contrat de l’API et des en-têtes : [docs/page-box.md](docs/page-box.md).
+- Écran « Une installation est déjà en cours » (page rouverte, deuxième appareil) : le mot de passe de la personne responsable, recopié de la fiche, donne la main ; sinon, « Recommencer l’installation », avec de nouveaux mots de passe, refusé tant qu’un autre appareil a la main.
+- La page suit une création des comptes déjà commencée (page rouverte pendant la création) jusqu’à « C’est prêt ». Après une coupure de courant, elle redemande des comptes pour les mêmes prénoms : nouveaux mots de passe, nouvelle fiche. Message après dix essais faux.
+- Démonstration : « Voir un autre écran » montre aussi l’installation déjà en cours et la page rouverte pendant la création ; la création arrêtée simule une coupure de courant.
+
+### Modifié
+
+- Décisions du lot 5 écrites à la place des informations manquantes : ce que devient la fiche après une création arrêtée, la page fermée pendant la création, la page rouverte avant la fiche (guide et page de la HAKO).
+- « Nouveaux mots de passe » donne toutes les raisons : prénoms modifiés, installation recommencée, HAKO redémarrée.
+
 ## [0.3.1] - 2026-11-13
 
 ### Modifié

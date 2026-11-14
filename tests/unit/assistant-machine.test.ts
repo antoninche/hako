@@ -9,6 +9,11 @@
  *   mots de passe gardés après la création des comptes.
  * - Écrans d'attente et d'erreur : « Réessayer » rejoue ce qui a échoué, puis
  *   revient là où l'on était.
+ * - Phases de la HAKO et cas difficiles (décisions du lot 5) : installation
+ *   en cours ailleurs (page rouverte, deuxième appareil), fiche qui donne la
+ *   main, « Recommencer » accepté ou refusé, création suivie après la page
+ *   rouverte, coupure de courant (nouveaux mots de passe), HAKO qui n'est
+ *   plus où la page la croyait, plus aucun essai accepté.
  * - Ancres des écrans dans l'adresse (#ecran-personnes).
  *
  * Lancement : node --test tests/unit/
@@ -54,7 +59,11 @@ function play(
   return { state, effects };
 }
 
-const ready: AssistantEvent = { type: 'status', status: { phase: 'ready' } };
+const ready: AssistantEvent = { type: 'status', status: { phase: 'ready', busy: false } };
+const status = (
+  phase: 'preparing' | 'ready' | 'registered' | 'creating' | 'installed',
+  busy = false,
+): AssistantEvent => ({ type: 'status', status: { phase, busy } });
 const toPasswords: AssistantEvent[] = [
   ready,
   { type: 'start' },
@@ -81,11 +90,8 @@ describe('ouverture', () => {
 
   it('HAKO prête : l’accueil ; qui se prépare : l’écran d’attente ; déjà installée : son écran', () => {
     assert.equal(play([ready]).state.view, 'welcome');
-    assert.equal(
-      play([{ type: 'status', status: { phase: 'installed' } }]).state.view,
-      'installed',
-    );
-    const preparing = play([{ type: 'status', status: { phase: 'preparing' } }]).state;
+    assert.equal(play([status('installed')]).state.view, 'installed');
+    const preparing = play([status('preparing')]).state;
     assert.equal(preparing.view, 'preparing');
     // « Recharger la page » : la page redemande, puis revient à l'accueil.
     const again = transition(preparing, { type: 'retry' });
@@ -210,8 +216,9 @@ describe('ce qui ne doit jamais arriver', () => {
       { type: 'registered', accounts: ACCOUNTS },
       { type: 'progress', progress: NOTHING_DONE },
       { type: 'failed', code: 'unreachable' },
-      { type: 'status', status: { phase: 'installed' } },
+      status('installed'),
       { type: 'retry' },
+      { type: 'start-over' },
       { type: 'start' },
     ] as const satisfies readonly AssistantEvent[]) {
       const result = transition(passwords, event);
@@ -296,7 +303,7 @@ describe('écrans d’attente et d’erreur', () => {
     assert.equal(failed.view, 'unexpected');
   });
 
-  it('création arrêtée : « Réessayer » la reprend', () => {
+  it('création arrêtée : « Réessayer » demande l’état, puis la reprend', () => {
     const stopped = play([
       ...toChecked,
       { type: 'create' },
@@ -305,8 +312,12 @@ describe('écrans d’attente et d’erreur', () => {
     assert.equal(stopped.view, 'stopped');
     assert.notEqual(stopped.accounts, null, 'la fiche reste celle-ci');
     const retry = transition(stopped, { type: 'retry' });
-    assert.equal(retry.state.view, 'accounts');
-    assert.deepEqual(retry.effects, [{ type: 'create-accounts' }]);
+    assert.equal(retry.state.view, 'stopped');
+    assert.deepEqual(retry.effects, [{ type: 'read-status' }]);
+    // Les mots de passe sont toujours là, et cette page a la main : la création repart.
+    const again = transition(retry.state, status('registered'));
+    assert.equal(again.state.view, 'accounts');
+    assert.deepEqual(again.effects, [{ type: 'create-accounts' }]);
   });
 
   it('démonstration : un écran montré, puis retour là où l’on était', () => {
@@ -321,7 +332,8 @@ describe('écrans d’attente et d’erreur', () => {
     assert.deepEqual(asked.effects, [{ type: 'read-status' }]);
     const lost = transition(asked.state, { type: 'failed', code: 'unreachable' }).state;
     assert.equal(lost.view, 'unreachable');
-    const retried = play([{ type: 'retry' }, ready], lost).state;
+    // Elle répond : mots de passe toujours là, cette page a la main.
+    const retried = play([{ type: 'retry' }, status('registered')], lost).state;
     assert.equal(retried.view, 'passwords');
   });
 });
@@ -353,5 +365,193 @@ describe('indicateur d’étapes et ancres', () => {
     for (const hash of ['', '#', '#contenu', '#ecran-', '#ecran-inconnu', '#%E0%A4%A']) {
       assert.equal(viewFromHash(hash), null, hash);
     }
+  });
+});
+
+describe('phases de la HAKO et cas difficiles', () => {
+  const stopped = play([
+    ...toChecked,
+    { type: 'create' },
+    { type: 'failed', code: 'interrupted' },
+  ]).state;
+  const retried = transition(stopped, { type: 'retry' }).state;
+
+  it('page rouverte ou deuxième appareil : installation en cours ailleurs, sans mots de passe', () => {
+    const { state, effects } = play([status('registered', true)]);
+    assert.equal(state.view, 'elsewhere');
+    assert.equal(state.accounts, null);
+    assert.equal(state.replacing, true);
+    assert.equal(state.refused, false);
+    assert.deepEqual(effects, []);
+    assert.equal(canCreate(state), false);
+    // Aucun écran du parcours qui montrerait des mots de passe.
+    for (const view of ['passwords', 'sheet', 'check', 'accounts', 'ready'] as const) {
+      assert.equal(canShow(state, view), false, view);
+    }
+  });
+
+  it('la fiche donne la main : « Créer les comptes », puis « C’est prêt »', () => {
+    const elsewhere = play([status('registered', true)]).state;
+    // Refus sur l'appareil, sans demande à la HAKO.
+    const local = transition(elsewhere, { type: 'submit-check', typed: '' });
+    assert.equal(local.state.checkError, 'empty');
+    assert.deepEqual(local.effects, []);
+    const asked = transition(elsewhere, { type: 'submit-check', typed: 'tulipe-a-b-c-42' });
+    assert.deepEqual(asked.effects, [{ type: 'check', typed: 'tulipe-a-b-c-42' }]);
+    const checked = transition(asked.state, { type: 'checked', result: 'ok' }).state;
+    assert.equal(checked.view, 'elsewhere');
+    assert.equal(checked.checked, true);
+    assert.ok(canCreate(checked));
+    assert.equal(
+      transition(checked, { type: 'start-over' }).state,
+      checked,
+      'plus de « Recommencer »',
+    );
+    const creating = transition(checked, { type: 'create' });
+    assert.equal(creating.state.view, 'accounts');
+    assert.deepEqual(creating.effects, [{ type: 'create-accounts' }]);
+    const done = transition(creating.state, { type: 'created' });
+    assert.equal(done.state.view, 'ready');
+    assert.equal(done.state.created, true);
+  });
+
+  it('« Recommencer » : les prénoms, puis de nouveaux mots de passe ; la fiche d’avant ne vaut plus', () => {
+    const elsewhere = play([status('registered', true)]).state;
+    const people = transition(elsewhere, { type: 'start-over' }).state;
+    assert.equal(people.view, 'people');
+    const passwords = play(
+      [
+        { type: 'submit-people', firstNames: ['Hélène', 'Marc'] },
+        { type: 'registered', accounts: ACCOUNTS },
+      ],
+      people,
+    ).state;
+    assert.equal(passwords.view, 'passwords');
+    assert.equal(passwords.renewed, true);
+    assert.equal(passwords.replacing, false);
+  });
+
+  it('« Recommencer » refusé : un autre appareil a encore la main', () => {
+    const people = play([status('registered', true), { type: 'start-over' }]).state;
+    const refused = play(
+      [
+        { type: 'submit-people', firstNames: ['Hélène'] },
+        { type: 'failed', code: 'busy' },
+      ],
+      people,
+    ).state;
+    assert.equal(refused.view, 'elsewhere');
+    assert.equal(refused.refused, true);
+    // Deux appareils ouverts en même temps : le second voit l'installation en cours, sans refus.
+    const second = play([
+      ready,
+      { type: 'start' },
+      { type: 'submit-people', firstNames: ['Léa'] },
+      { type: 'failed', code: 'busy' },
+    ]).state;
+    assert.equal(second.view, 'elsewhere');
+    assert.equal(second.refused, false);
+  });
+
+  it('la main passée à un autre appareil : la page oublie ses mots de passe', () => {
+    const atCheck = play([
+      ...toPasswords,
+      { type: 'go', view: 'sheet' },
+      { type: 'go', view: 'check' },
+    ]).state;
+    const lost = play(
+      [
+        { type: 'submit-check', typed: 'exemple-a-b-c-00' },
+        { type: 'failed', code: 'changed' },
+      ],
+      atCheck,
+    );
+    assert.deepEqual(lost.effects.at(-1), { type: 'read-status' });
+    const result = transition(lost.state, status('registered', true));
+    assert.equal(result.state.view, 'elsewhere');
+    assert.equal(result.state.accounts, null);
+    assert.deepEqual(result.effects, [{ type: 'forget-secrets' }]);
+  });
+
+  it('page rouverte pendant la création : la page la suit jusqu’à la fin', () => {
+    const progress = { photos: 'done', files: 'running', finish: 'waiting' } as const;
+    const following = transition(initial().state, {
+      type: 'status',
+      status: { phase: 'creating', busy: true, progress },
+    });
+    assert.equal(following.state.view, 'accounts');
+    assert.equal(following.state.busy, 'create');
+    assert.deepEqual(following.state.progress, progress);
+    assert.deepEqual(following.effects, [{ type: 'follow-creation' }]);
+    const done = transition(following.state, { type: 'created' }).state;
+    assert.equal(done.view, 'ready');
+    assert.equal(stepsDone(done), 5);
+  });
+
+  it('coupure de courant : nouveaux mots de passe pour les mêmes prénoms, fiche à refaire', () => {
+    const renew = transition(retried, ready);
+    assert.deepEqual(renew.effects, [{ type: 'register', firstNames: ['Hélène', 'Marc'] }]);
+    const renewed = transition(renew.state, { type: 'registered', accounts: ACCOUNTS }).state;
+    assert.equal(renewed.view, 'passwords');
+    assert.equal(renewed.renewed, true);
+    assert.equal(renewed.checked, false);
+    assert.equal(canCreate(renewed), false, 'la nouvelle fiche est à vérifier');
+  });
+
+  it('création arrêtée, puis toujours en cours, ou finie', () => {
+    const creating = transition(retried, status('creating'));
+    assert.equal(creating.state.view, 'accounts');
+    assert.deepEqual(creating.effects, [{ type: 'follow-creation' }]);
+    const finished = transition(retried, status('installed'));
+    assert.equal(finished.state.view, 'ready');
+    assert.equal(finished.state.accounts, null);
+    assert.deepEqual(finished.effects, [{ type: 'forget-secrets' }]);
+  });
+
+  it('installée par un autre appareil : la page oublie ses mots de passe', () => {
+    const passwords = play([...toPasswords, { type: 'recheck' }]).state;
+    const result = transition(passwords, status('installed'));
+    assert.equal(result.state.view, 'installed');
+    assert.equal(result.state.accounts, null);
+    assert.deepEqual(result.effects, [{ type: 'forget-secrets' }]);
+  });
+
+  it('HAKO qui n’est plus où la page la croyait : jamais de demande d’état en boucle', () => {
+    const asked = transition(initial().state, { type: 'failed', code: 'changed' });
+    assert.equal(asked.state.view, 'unexpected');
+    assert.deepEqual(asked.effects, []);
+  });
+
+  it('erreur pendant la vérification ailleurs : « Réessayer » ramène à cet écran', () => {
+    const elsewhere = play([status('registered', true)]).state;
+    const lost = play(
+      [
+        { type: 'submit-check', typed: 'tulipe-a-b-c-42' },
+        { type: 'failed', code: 'unreachable' },
+      ],
+      elsewhere,
+    ).state;
+    assert.equal(lost.view, 'unreachable');
+    assert.equal(lost.resume, 'elsewhere');
+    const retry = transition(lost, { type: 'retry' });
+    assert.equal(retry.state.view, 'elsewhere');
+    assert.deepEqual(retry.effects, [{ type: 'check', typed: 'tulipe-a-b-c-42' }]);
+  });
+
+  it('plus aucun essai accepté par la HAKO : son message à lui', () => {
+    const atCheck = play([
+      ...toPasswords,
+      { type: 'go', view: 'sheet' },
+      { type: 'go', view: 'check' },
+    ]).state;
+    const blocked = play(
+      [
+        { type: 'submit-check', typed: 'exemple-x-y-z-00' },
+        { type: 'checked', result: 'blocked' },
+      ],
+      atCheck,
+    ).state;
+    assert.equal(blocked.checkError, 'blocked');
+    assert.equal(blocked.checked, false);
   });
 });

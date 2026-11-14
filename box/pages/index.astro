@@ -1,0 +1,90 @@
+---
+/**
+ * La page de la HAKO pour sa première installation, servie par la HAKO
+ * elle-même, chez la personne (http://hako.local). Construite à part du site
+ * public par `npm run build:box` (scripts/box/build.mjs), dans dist-box/ :
+ * une seule page, que HakOS copie dans son image (docs/page-box.md).
+ *
+ * - La même page que la démonstration du site (Assistant.astro), en mode
+ *   « box » : sans bandeau ni mentions de démonstration. Ses liens vers le
+ *   site (guide, questions fréquentes, contact) portent l'adresse complète
+ *   du site public (SITE_URL, à la construction), et s'ouvrent dans un
+ *   nouvel onglet.
+ * - Les feuilles de style et les polices du site ; ni en-tête ni pied de
+ *   page du site, dont les liens ne mèneraient nulle part sur la HAKO.
+ * - Aucune ressource d'ailleurs, aucun script ni style écrit dans la page :
+ *   compatible avec les en-têtes de la HAKO (BOX_PAGE_HEADERS,
+ *   src/lib/assistant/box-access.ts). Ni indexée, ni transmise en référent.
+ * - Son script choisit l'accès réel à la HAKO (box-http.ts), et fait
+ *   demander confirmation au navigateur avant de quitter la page, tant que
+ *   des mots de passe sont affichés.
+ */
+import '../../src/styles/fonts.css';
+import '../../src/styles/tokens.css';
+import '../../src/styles/global.css';
+
+import { PUBLIC_SHOW_TODOS } from 'astro:env/client';
+import FontPreloads from '../../src/components/FontPreloads.astro';
+import Assistant from '../../src/components/assistant/Assistant.astro';
+import { assistant } from '../../src/content/assistant';
+import { company } from '../../src/data/entreprise';
+
+// Adresse du site public, sans « / » final : astro.box.config.mjs l'exige.
+const siteUrl = Astro.site?.href.replace(/\/+$/u, '');
+if (!siteUrl) throw new Error('Page de la HAKO : adresse du site public manquante (SITE_URL).');
+
+const title = `${assistant.common.title} · ${company.name}`;
+---
+
+<!doctype html>
+<html lang="fr" data-todos={PUBLIC_SHOW_TODOS ? 'visible' : 'discreet'}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {/* Comme l'en-tête Referrer-Policy de la HAKO : les sites ouverts depuis
+        cette page ne reçoivent pas son adresse. */}
+    <meta name="referrer" content="no-referrer" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title}</title>
+    <FontPreloads />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#FDF7EF" />
+  </head>
+  <body class="surface-sable">
+    <main id="contenu" class="box-page" tabindex="-1">
+      <Assistant mode="box" siteUrl={siteUrl} />
+    </main>
+  </body>
+</html>
+
+<script>
+  import { initAssistant, readFacts } from '../../src/components/assistant/assistant-ui.ts';
+  import { BoxHttpAccess } from '../../src/lib/assistant/box-http.ts';
+
+  // La vraie HAKO : son API locale, à la même adresse que cette page. Le jeton
+  // de la session ne vit que dans la mémoire de la page.
+  for (const root of document.querySelectorAll<HTMLElement>('[data-assistant][data-mode="box"]')) {
+    const { loginDomain } = readFacts(root);
+    initAssistant(root, () => new BoxHttpAccess({ loginDomain }), { warnBeforeLeaving: true });
+  }
+</script>
+
+<style>
+  /* La page de la HAKO, centrée sur le fond sable, comme dans la démonstration.
+     Mise en page en bloc : le composant mesure sa largeur pour ses requêtes de
+     conteneur, il ne doit pas dépendre de celle de son contenu. */
+  .box-page {
+    padding: clamp(var(--space-s), 4vw, var(--space-2xl));
+  }
+
+  .box-page > :global(.assistant) {
+    margin-inline: auto;
+  }
+
+  @media print {
+    .box-page {
+      padding: 0;
+    }
+  }
+</style>

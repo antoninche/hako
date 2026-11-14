@@ -1,6 +1,8 @@
 # Dépendances et sorties de construction
 node_modules/
 dist/
+# Page de la HAKO (npm run build:box), construite à part du site
+dist-box/
 .astro/
 
 # Variables d'environnement locales (jamais versionnées)

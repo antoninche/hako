@@ -3,7 +3,8 @@
  * Écran d'attente ou d'erreur de la page de la HAKO, hors du parcours : la
  * HAKO se prépare encore, ne répond plus, la création des comptes s'est
  * arrêtée, réponse inattendue, ou HAKO installée (l'écran de tous les jours,
- * une fois la première installation faite). Même dessin que la
+ * une fois la première installation faite). L'installation déjà en cours a
+ * son propre composant, avec son formulaire (ElsewhereScreen.astro). Même dessin que la
  * fin du guide et la confirmation de commande (bloc sable, grand symbole,
  * titre) : ce qui se passe, « Que faire », puis le bouton principal
  * (« Réessayer », « Recharger la page »). Une HAKO installée montre à la
@@ -21,7 +22,7 @@ import { assistant, type StateScreen } from '../../content/assistant';
 import { viewAnchor, type StateId } from '../../lib/assistant/machine.ts';
 
 interface Props {
-  state: StateId;
+  state: Exclude<StateId, 'elsewhere'>;
   demo: boolean;
 }
 
@@ -36,7 +37,7 @@ const icons = {
   unreachable: 'wifi',
   stopped: 'plug',
   unexpected: 'info',
-} as const satisfies Record<Exclude<StateId, 'installed'>, UiIconName>;
+} as const satisfies Record<Exclude<StateId, 'installed' | 'elsewhere'>, UiIconName>;
 ---
 
 <section

@@ -12,7 +12,8 @@
  *
  * Dans l'ordre : l'en-tête (logo HAKO et « Première installation »),
  * l'indicateur des écrans, les sept écrans du parcours, puis les écrans
- * d'attente et d'erreur, « Besoin d'aide ? » et le pied de page.
+ * d'attente et d'erreur (dont « Une installation est déjà en cours »),
+ * « Besoin d'aide ? » et le pied de page.
  * - Sans JavaScript, en démonstration, les écrans du parcours se lisent l'un
  *   sous l'autre, avec des comptes d'exemple ; les boutons, les formulaires,
  *   l'indicateur et les écrans d'erreur restent cachés. Sur la HAKO, seul
@@ -35,6 +36,7 @@ import AccountsScreen from './AccountsScreen.astro';
 import CheckScreen from './CheckScreen.astro';
 import DemoBanner from './DemoBanner.astro';
 import DemoScenarios from './DemoScenarios.astro';
+import ElsewhereScreen from './ElsewhereScreen.astro';
 import GuideNote from '../installation/GuideNote.astro';
 import GuideText from '../installation/GuideText.astro';
 import Icon from '../Icon.astro';
@@ -54,7 +56,7 @@ import {
   LOGIN_DOMAIN,
   MAX_PEOPLE,
 } from '../../data/assistant';
-import { STATE_IDS } from '../../lib/assistant/machine.ts';
+import { STATE_IDS, type StateId } from '../../lib/assistant/machine.ts';
 
 interface Props {
   mode: 'demo' | 'box';
@@ -66,6 +68,10 @@ const { mode, siteUrl } = Astro.props;
 const demo = mode === 'demo';
 const { common, page } = assistant;
 const Page = demo ? 'section' : 'div';
+/** Écrans d'attente et d'erreur sans formulaire (StateScreen). */
+const plainStates = STATE_IDS.filter(
+  (state): state is Exclude<StateId, 'elsewhere'> => state !== 'elsewhere',
+);
 ---
 
 <div
@@ -78,6 +84,7 @@ const Page = demo ? 'section' : 'div';
   data-example-names={demo ? JSON.stringify(EXAMPLE_FIRST_NAMES) : undefined}
   data-example-passwords={demo ? JSON.stringify(EXAMPLE_PASSWORDS) : undefined}
   data-restarted={demo ? assistant.demo.restarted : undefined}
+  data-reopened={demo ? assistant.demo.reopened : undefined}
   data-new-tab={common.newTab}
   data-site-url={demo ? undefined : siteUrl}
   data-of-consonant={common.of.consonant}
@@ -120,9 +127,10 @@ const Page = demo ? 'section' : 'div';
         <CheckScreen demo={demo} />
         <AccountsScreen demo={demo} />
         <ReadyScreen demo={demo} />
-        {STATE_IDS.map((state) => (
+        {plainStates.map((state) => (
           <StateScreen state={state} demo={demo} />
         ))}
+        <ElsewhereScreen demo={demo} />
       </div>
 
       <div class="hako-page__help">

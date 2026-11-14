@@ -1,5 +1,6 @@
 # Sorties de construction et dépendances
 dist/
+dist-box/
 .astro/
 .tmp/
 node_modules/
