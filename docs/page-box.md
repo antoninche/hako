@@ -5,10 +5,10 @@ La page que la HAKO sert elle-même, chez la personne, à `http://hako.local`, p
 ## Construction
 
 ```sh
-SITE_URL=https://exemple.fr npm run build:box
+SITE_URL=https://antoninche.github.io/hako npm run build:box
 ```
 
-- `SITE_URL` (obligatoire, en `https`) : l’adresse du site public, avec son sous-dossier s’il en a un. Les liens de la page (guide, questions fréquentes, contact) la portent et s’ouvrent dans un nouvel onglet.
+- `SITE_URL` (obligatoire, en `https`) : l’adresse du site public, avec son sous-dossier s’il en a un. Pour la HAKO : `https://antoninche.github.io/hako` (décision du 14 novembre 2026 : le site reste chez antoninche). Les liens de la page (guide, questions fréquentes, contact) la portent et s’ouvrent dans un nouvel onglet.
 - Sortie : `dist-box/`, jamais versionnée. Une seule page (`index.html`), ses scripts et sa feuille de style dans `_astro/`, les polices et leurs licences, les icônes de l’onglet et la licence des icônes. Rien d’autre de `public/`.
 - Source : `box/pages/index.astro`, avec les composants du site. Configuration : `astro.box.config.mjs` ; script : `scripts/box/build.mjs`, qui contrôle le résultat (une page, en français, non indexée, rien de la démonstration, aucune ressource d’ailleurs ni code en ligne).
 - Les informations encore manquantes gardent leur texte provisoire, sans surlignage.

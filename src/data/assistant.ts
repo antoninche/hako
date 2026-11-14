@@ -159,11 +159,13 @@ export const pending: AssistantPendingFacts = withFrenchTypography<AssistantPend
     'Durée de la création des comptes (Immich puis Nextcloud) sur une HAKO de série, pour une personne et pour huit (par exemple « environ deux minutes »)',
     '[durée à mesurer]',
   ),
-  // Adresses fixées par la spécification de HakOS : une fois la première
-  // installation terminée, le nginx de la HAKO relaie :2283 vers Immich et
-  // :8080 vers Nextcloud (pare-feu ouvert seulement après l’installation).
-  photosAddress: `http://${BOX_HOST}:2283`,
-  filesAddress: `http://${BOX_HOST}:8080`,
+  // Adresses par nom (décision du 14 novembre 2026) : une fois la première
+  // installation terminée, la HAKO publie hako-photos.local et
+  // hako-fichiers.local, et son nginx dirige chaque nom vers Immich ou
+  // Nextcloud sur le port 80. Un nom à trois parties (photos.hako.local)
+  // n’est pas trouvé par Windows avec Bonjour, d’où le tiret.
+  photosAddress: `http://${BOX_HOST.replace(/\.local$/, '-photos.local')}`,
+  filesAddress: `http://${BOX_HOST.replace(/\.local$/, '-fichiers.local')}`,
   // Décisions du lot 5 de HakOS (14 novembre 2026) : après une coupure de
   // courant, nouveaux mots de passe pour tout le monde et nouvelle fiche ;
   // page fermée pendant la création, la création continue.
