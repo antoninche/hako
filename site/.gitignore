@@ -8,7 +8,6 @@ dist-box/
 # Variables d'environnement locales (jamais versionnées)
 .env
 .env.*
-!.env.example
 
 # Résultats de tests et rendus volumineux (régénérables)
 test-results/

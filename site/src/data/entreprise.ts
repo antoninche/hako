@@ -83,6 +83,7 @@ export const company: Company = withFrenchTypography<Company>({
 
   siteNotes: {
     privacy: 'Ce site ne vous piste pas : zéro cookie, zéro traceur.',
-    freeSoftware: 'Site construit avec des logiciels libres.',
+    freeSoftware:
+      'Site construit avec des logiciels libres, et libre lui aussi (GNU GPL v3 ou ultérieure).',
   },
 });

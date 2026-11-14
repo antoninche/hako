@@ -2,8 +2,8 @@
 """HakOS : API locale de la première installation (service hakos-assistant).
 
 Sert /api/installation/ (status, register, check, accounts) sur un socket Unix, derrière le nginx
-de l'accueil, qui sert aussi la page de la HAKO. Contrat : docs/page-box.md du dossier site/ de
-antoninche/hako.
+de l'accueil, qui sert aussi la page de la HAKO. Son client : site/src/lib/assistant/box-http.ts de
+antoninche/hako ; voir hakos/README.md, section « Ce que contient la box ».
 Bibliothèque standard de Python seulement.
 
 Variables (valeurs de la box par défaut ; les essais les changent) :

@@ -1,9 +1,0 @@
-# Pas d'issue vierge : chaque issue passe par un formulaire. Les failles de
-# sécurité passent par le lien « Report a security vulnerability », que GitHub
-# ajoute lui-même puisque le signalement privé est activé (SECURITY.md). GitHub
-# n'accepte que des adresses https : l'e-mail est donné par la page Contact.
-blank_issues_enabled: false
-contact_links:
-  - name: Nous écrire
-    url: https://antoninche.github.io/hako/contact/
-    about: Une question sur la box, une commande ou une installation ? Écrivez-nous à antonin.chenavaz@etu.univ-amu.fr.

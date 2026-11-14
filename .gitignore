@@ -4,7 +4,6 @@
 # Variables d'environnement locales (jamais versionnées)
 .env
 .env.*
-!.env.example
 
 # Fichiers de travail
 .DS_Store

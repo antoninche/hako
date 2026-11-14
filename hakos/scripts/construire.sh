@@ -43,7 +43,7 @@ erreur() {
 
 # Le chemin du dépôt passe sans guillemets dans PIGEN_DOCKER_OPTS (build-docker.sh) et dans
 # STAGE_LIST (build.sh) : ni espace, ni caractère spécial. Le sed de macOS réécrirait aussi un
-# « -c » placé dans le chemin de la config (voir docs/lot0-faisabilite.md).
+# « -c » placé dans le chemin de la config (voir hakos/README.md, section « Construire »).
 if LC_ALL=C grep -q '[^A-Za-z0-9._/-]' <<<"$RACINE"; then
 	erreur "le chemin du dépôt ($RACINE) contient une espace ou un caractère spécial. Le déplacer, par exemple dans ~/Code."
 fi

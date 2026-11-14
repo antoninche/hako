@@ -106,6 +106,15 @@ const storageOptions = formatList(
  */
 const recipeLink: Maybe<string> = 'https://github.com/antoninche/hako/tree/main/hakos';
 
+/**
+ * Dernière version publiée de HakOS : l'image à graver sur le SSD et ses
+ * sommes SHA-256, dans les releases du dépôt antoninche/hako.
+ */
+const downloadLink = {
+  label: 'Télécharger HakOS',
+  href: 'https://github.com/antoninche/hako/releases/latest',
+} as const satisfies Link;
+
 /* ---------- Page ---------- */
 
 export const laBox = {
@@ -333,6 +342,7 @@ export const laBox = {
       ] satisfies Paragraph,
       linkLabel: 'Dépôt de la recette',
       link: recipeLink,
+      download: downloadLink,
     },
   },
 

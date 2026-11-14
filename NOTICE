@@ -1,32 +1,37 @@
 HAKO
 Copyright 2026 Antonin Chenavaz, Maxime Pollaud, Martin Dugail
 
-Le code du site (site/) est distribué sous licence MIT (fichier site/LICENSE).
-Le code de HakOS (hakos/) est distribué sous licence GNU GPL version 3 ou
-ultérieure (fichier hakos/LICENSE). La licence de chaque fichier est donnée
-par REUSE.toml, et le texte de chaque licence est dans LICENSES/.
+Tout le code de ce dépôt, celui du site (site/) comme celui de HakOS (hakos/),
+est distribué sous licence GNU GPL version 3 ou ultérieure
+(GPL-3.0-or-later), dont le texte est dans le fichier LICENSE. Les versions du
+site publiées jusqu'à v0.4.3 restent sous licence MIT.
 
-Ces licences ne portent pas sur les éléments suivants, qui restent réservés
-(tous droits réservés, LicenseRef-HAKO-Reserve dans REUSE.toml) :
+Cette licence ne porte pas sur les éléments suivants, qui restent réservés
+(tous droits réservés) :
 
 - le nom et la marque HAKO ;
-- le logo et la marque en kanji 箱, sous toutes leurs formes : fichiers
-  d'origine (site/brand/), versions vectorisées (site/src/assets/brand/,
-  site/public/brand/), favicon, icônes d'application, image de partage
-  (site/public/og/), bannière (site/images/banniere-1512x256.png) et image de
-  partage du dépôt (.github/assets/) ;
-- les dessins du site (site/src/assets/illustrations/ et leurs sources dans
-  site/design/illustrations/) ;
-- les images et les photos : prototype de la box (site/design/prototype/,
-  site/src/assets/prototype/, site/public/images/), portraits de l'équipe
-  (site/public/equipe/) et captures d'écran (site/images/, .github/assets/) ;
+- le logo et la marque en kanji 箱, sous toutes leurs formes : versions
+  vectorisées (site/src/assets/brand/, site/public/brand/), favicon, icônes
+  d'application, image de partage (site/public/og/) et images de ce dépôt
+  (.github/assets/) ;
 - les textes du site (site/src/content/, et les phrases de site/src/data/) et
-  de sa documentation.
+  des README ;
+- les photos et les images : prototype de la box (site/src/assets/prototype/,
+  site/public/images/), captures d'écran (.github/assets/, hakos/captures/) ;
+- les portraits de l'équipe (site/public/equipe/) ;
+- les dessins du site (site/src/assets/illustrations/).
 
 Ces éléments ne peuvent être ni réutilisés, ni modifiés, ni utilisés pour
 désigner un autre produit, service ou site sans l'accord écrit des auteurs.
 
-Les polices servies avec le site (site/public/fonts/) et la page de la HAKO
-restent sous leur propre licence, la SIL Open Font License 1.1, jointe dans le
-dossier de chacune. Les icônes, three.js et les autres éléments tiers restent
-sous la licence de leurs auteurs : voir site/docs/licences.md.
+Éléments tiers, qui gardent la licence de leurs auteurs :
+
+- les polices servies par le site et par la page de la HAKO
+  (site/public/fonts/) : SIL Open Font License 1.1, dont le texte est joint
+  dans le dossier de chaque police ;
+- Bootstrap Icons, three.js et meshoptimizer : licence MIT, dont les textes
+  sont dans site/public/licences/ ;
+- la liste de mots des mots de passe (hakos/rootfs/opt/box/assistant/mots.txt),
+  tirée de la liste française de diceware : CC0 1.0 ;
+- les logiciels livrés dans l'image de HakOS (Raspberry Pi OS, Docker,
+  Immich, Nextcloud, nginx, Postgres, Valkey) : leur propre licence.

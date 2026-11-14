@@ -125,15 +125,21 @@ const { recipe } = openSource;
     <div class="recipe surface-sable">
       <h3 class="recipe__title">{recipe.title}</h3>
       <Prose paragraphs={[recipe.text]} />
-      <p class="recipe__link">
-        {isTodo(recipe.link) ? (
-          <>
-            {recipe.linkLabel}&nbsp;: <Todo what={recipe.link.todo}>{recipe.link.placeholder}</Todo>
-          </>
-        ) : (
-          <TextLink link={{ label: recipe.linkLabel, href: recipe.link }} />
-        )}
-      </p>
+      <div class="recipe__links">
+        <p class="recipe__link">
+          {isTodo(recipe.link) ? (
+            <>
+              {recipe.linkLabel}&nbsp;:{' '}
+              <Todo what={recipe.link.todo}>{recipe.link.placeholder}</Todo>
+            </>
+          ) : (
+            <TextLink link={{ label: recipe.linkLabel, href: recipe.link }} />
+          )}
+        </p>
+        <p class="recipe__link">
+          <TextLink link={recipe.download} />
+        </p>
+      </div>
     </div>
   </Section>
 
@@ -384,6 +390,12 @@ const { recipe } = openSource;
     font-size: var(--step-1);
     font-weight: 500;
     line-height: var(--leading-snug);
+  }
+
+  .recipe__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-l);
   }
 
   .recipe__link {

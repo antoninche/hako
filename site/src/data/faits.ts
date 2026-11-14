@@ -80,7 +80,8 @@ export const proOpening = {
 
 /**
  * Page d'accueil de la box (http://hako.local) : licence GPL-3.0-or-later,
- * celle de HakOS (décision des fondateurs du 14/11). Page La box.
+ * celle de tout le dépôt antoninche/hako, site et HakOS (décision des
+ * fondateurs du 14/11). Page La box.
  */
 export const homePageLicense = 'GNU GPL v3 ou version ultérieure';
 
