@@ -430,6 +430,103 @@ else
 	ok "Nextcloud : plus de compte technique dans .env"
 fi
 
+# --- Garde-fous du Pi 5, noms des applications, page d'état ---
+
+pages="$(getconf PAGESIZE 2>/dev/null || true)"
+if [ "$pages" = 4096 ] && [ ! -e "$ETAT/arret" ]; then
+	ok "pages mémoire de 4 Kio (noyau kernel8.img), premier démarrage pas arrêté"
+else
+	echec "pages mémoire de « $pages » octets, ou premier démarrage arrêté ($ETAT/arret : $(cat "$ETAT/arret" 2>/dev/null || echo absent))"
+fi
+
+if [ "$(systemctl is-enabled hakos-noms.service 2>/dev/null || true)" = enabled ] &&
+	[ "$(systemctl is-active hakos-noms.service 2>/dev/null || true)" = active ]; then
+	ok "unité hakos-noms activée et active"
+else
+	echec "unité hakos-noms : $(systemctl is-enabled hakos-noms.service 2>/dev/null || true), $(systemctl is-active hakos-noms.service 2>/dev/null || true)"
+fi
+# Nom pris par avahi (hako, hako-2…) et adresse IPv4 de la box (route par défaut).
+nom_avahi="$(busctl --system call org.freedesktop.Avahi / org.freedesktop.Avahi.Server GetHostName 2>/dev/null | sed -n 's/^s "\(.*\)"$/\1/p' || true)"
+adresse="$(ip -4 route get 192.0.2.1 2>/dev/null | sed -n 's/.* src \([0-9.]*\).*/\1/p' | head -n 1 || true)"
+if [ -z "$nom_avahi" ] || [ -z "$adresse" ]; then
+	echec "noms des applications : nom avahi « $nom_avahi » ou adresse IPv4 « $adresse » illisible (avahi-daemon actif ?)"
+else
+	resolus=""
+	for application in photos fichiers; do
+		resolus="$resolus $(timeout 10 avahi-resolve-host-name -4 "$nom_avahi-$application.local" 2>/dev/null | awk '{print $2}' || true)"
+	done
+	if [ "$resolus" = " $adresse $adresse" ]; then
+		ok "avahi : $nom_avahi-photos.local et $nom_avahi-fichiers.local → $adresse"
+	else
+		echec "avahi : $nom_avahi-photos.local et $nom_avahi-fichiers.local résolus en «$resolus », attendu $adresse"
+	fi
+fi
+
+photos_nom="$(curl -sS --max-time 10 -H 'Host: hako-photos.local' http://127.0.0.1/api/server/ping 2>/dev/null || true)"
+fichiers_nom="$(curl -sS --max-time 20 -H 'Host: hako-fichiers.local' http://127.0.0.1/status.php 2>/dev/null || true)"
+renvoi="$(curl -sS --max-time 10 -o /dev/null -w '%{redirect_url}' -H 'Host: hako-2.local' http://127.0.0.1/fichiers 2>/dev/null || true)"
+if [ "$installee" = 1 ]; then
+	if [[ "$photos_nom" == *pong* ]] && [[ "$fichiers_nom" == *'"installed":true'* ]] && [ "$renvoi" = http://hako-2-fichiers.local/ ]; then
+		ok "port 80 : hako-photos.local → Immich, hako-fichiers.local → Nextcloud, /fichiers de hako-2.local → hako-2-fichiers.local"
+	else
+		echec "port 80 par les noms : Immich « ${photos_nom:0:40} », Nextcloud « ${fichiers_nom:0:60} », renvoi « $renvoi »"
+	fi
+	domaines="$(docker exec -u www-data "$(docker ps -q --filter label=com.docker.compose.project=hakos-nextcloud --filter label=com.docker.compose.service=nextcloud)" php occ --no-interaction config:system:get trusted_domains 2>/dev/null | tr '\n' ' ' || true)"
+	manque=""
+	for domaine in hako.local hako-2.local hako-fichiers.local hako-2-fichiers.local "$adresse"; do
+		[[ " $domaines " == *" $domaine "* ]] || manque="$manque ${domaine:-(adresse illisible)}"
+	done
+	par_ip="$(curl -sS --max-time 20 -o /dev/null -w '%{http_code}' "http://$adresse:8080/login" 2>/dev/null || true)"
+	if [ -z "$manque" ] && [ "$par_ip" = 200 ]; then
+		ok "Nextcloud : domaines de confiance hako.local, hako-2.local, hako-fichiers.local, hako-2-fichiers.local et $adresse (http://$adresse:8080 répond)"
+	else
+		echec "Nextcloud : domaines de confiance, manque :${manque:- rien} ; http://$adresse:8080/login : code « $par_ip »"
+	fi
+elif [[ "$photos_nom" != *pong* ]] && [[ "$fichiers_nom" != *installed* ]]; then
+	ok "port 80 : hako-photos.local et hako-fichiers.local ne mènent pas aux applications avant l'installation"
+else
+	echec "port 80 : une application répond par son nom avant l'installation"
+fi
+
+json="/run/hakos-etat/etat.json"
+# Une mesure fraîche plutôt que celle de la dernière minute (applications peut-être en démarrage).
+systemctl start hakos-etat.service >/dev/null 2>&1 || true
+if [ "$(systemctl is-enabled hakos-etat.timer 2>/dev/null || true)" = enabled ] &&
+	[ "$(systemctl is-active hakos-etat.timer 2>/dev/null || true)" = active ] &&
+	python3 -I - "$json" "$ESSAI" <<'FIN'
+import json, sys, time
+etat = json.load(open(sys.argv[1], encoding='utf-8'))
+attendues = {'version', 'verifie', 'disque', 'photos', 'allumee_depuis', 'temperature', 'ralentissement',
+             'applications', 'sauvegarde'}
+assert set(etat) == attendues, sorted(set(etat) ^ attendues)
+assert abs(time.time() - etat['verifie']) < 180, 'mesure trop ancienne'
+assert etat['disque']['total'] > etat['disque']['utilise'] > 0
+assert isinstance(etat['photos'], int) and isinstance(etat['allumee_depuis'], int)
+assert etat['applications'] == {'photos': 'ok', 'fichiers': 'ok'}, etat['applications']
+if sys.argv[2] != '1':
+    assert isinstance(etat['temperature'], float) and isinstance(etat['ralentissement'], dict), 'vcgencmd'
+FIN
+then
+	ok "page d'état : hakos-etat.timer actif, $json à jour et complet ($(python3 -I -c 'import json,sys;e=json.load(open(sys.argv[1]));print(e["photos"],"photo(s),",e["temperature"],"°C")' "$json" 2>/dev/null || true))"
+else
+	echec "page d'état : hakos-etat.timer inactif, ou $json absent, ancien ou incomplet (journalctl -u hakos-etat)"
+fi
+# Comparaison dans bash : aucun secret ne passe en argument d'une commande.
+fuites=0
+contenu_json="$(cat "$json" 2>/dev/null || true)"
+for secret in "${!deja_vu[@]}"; do
+	if [[ "$contenu_json" == *"$secret"* ]]; then
+		fuites=$((fuites + 1))
+	fi
+done
+etat_http="$(curl -sS --max-time 10 -D - -o /dev/null -H 'Host: hako.local' http://127.0.0.1/api/etat 2>/dev/null | tr -d '\r' || true)"
+if [ "$fuites" -eq 0 ] && [ "${#deja_vu[@]}" -gt 0 ] && [ "$(stat -c '%a %U' "$json" 2>/dev/null)" = "644 root" ] &&
+	{ [ "$installee" = 0 ] || { grep -q '^HTTP/1.1 200' <<<"$etat_http" && grep -qi '^cache-control: no-store' <<<"$etat_http"; }; }; then
+	ok "page d'état : aucun des ${#deja_vu[@]} secrets de la box dans $json$([ "$installee" = 1 ] && echo ', servi sur http://hako.local/api/etat')"
+else
+	echec "page d'état : $fuites secret(s) dans $json, droits « $(stat -c '%a %U' "$json" 2>/dev/null) », ou /api/etat pas servi"
+fi
+
 # --- Système (pas en essai) ---
 
 if [ "$ESSAI" = 1 ]; then
@@ -512,6 +609,14 @@ else
 		ok "Wi-Fi disponible (radio débloquée)"
 	else
 		echec "Wi-Fi bloqué ou absent (rfkill :${wifi:- aucune radio wlan})"
+	fi
+	# EEPROM du Pi 5 : le démarrage sur SSD NVMe demande une version du 6/12/2023 ou plus récente.
+	eeprom="$(vcgencmd bootloader_version 2>/dev/null || true)"
+	date_eeprom="$(sed -n 's/^timestamp \([0-9]*\)$/\1/p' <<<"$eeprom")"
+	if [[ "$date_eeprom" =~ ^[0-9]+$ ]] && [ "$date_eeprom" -ge 1701820800 ]; then
+		ok "EEPROM du $(date -u -d "@$date_eeprom" '+%d/%m/%Y'), assez récent pour démarrer sur NVMe"
+	else
+		echec "EEPROM : version illisible ou antérieure au 6/12/2023 (« ${eeprom%%$'\n'*} »)"
 	fi
 	if [ "$(systemctl is-active bluetooth.service 2>/dev/null || true)" = active ]; then
 		ok "Bluetooth actif"

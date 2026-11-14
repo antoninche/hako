@@ -5,10 +5,14 @@
 #                        premier démarrage avant les services
 #   phase.sh fin         à l'arrêt de hakos-assistant (ExecStopPost) : si la HAKO est installée,
 #                        applique, recharge le nginx de l'accueil et masque le service
+#   phase.sh recharger   applique, puis recharge le nginx de l'accueil s'il tourne (premier
+#                        démarrage qui refuse le matériel)
 #
 # L'état fait foi : $HAKOS_ETAT/installee (défaut /var/lib/hakos), écrit par l'assistant une fois
 # les comptes créés. Absent, vide ou illisible : HAKO pas installée, ports 2283 et 8080 fermés,
 # le port 80 sert la page de la HAKO. Présent : ports ouverts, le port 80 sert l'accueil.
+# $HAKOS_ETAT/arret, posé par le premier démarrage quand il refuse le matériel (pages mémoire
+# différentes de 4 Kio), passe avant tout : ports fermés, le port 80 sert la page d'arrêt.
 # Variables d'essai : HAKOS_BOITE (défaut /opt/box), HAKOS_ETAT, HAKOS_ESSAI=1 (pas de masquage).
 set -euo pipefail
 umask 022
@@ -25,6 +29,11 @@ echec() {
 	exit 1
 }
 
+# arretee : vrai si le premier démarrage a refusé le matériel ($HAKOS_ETAT/arret).
+arretee() {
+	[ -e "$ETAT/arret" ]
+}
+
 installee() {
 	local ligne=""
 	[ -f "$ETAT/installee" ] && [ -r "$ETAT/installee" ] || return 1
@@ -32,7 +41,7 @@ installee() {
 	[[ $ligne == "HakOS installée le "* ]]
 }
 
-# ecrire_phase PAGE : phase.conf inclut accueil.conf ou assistant.conf ; rend 0 s'il a changé.
+# ecrire_phase PAGE : phase.conf inclut accueil.conf, assistant.conf ou arret.conf ; rend 0 s'il a changé.
 ecrire_phase() {
 	local voulu="include /etc/nginx/hakos/$1.conf;" fichier="$ETAT/accueil/phase.conf" provisoire
 	if [ -f "$fichier" ] && [ "$(cat "$fichier")" = "$voulu" ]; then
@@ -53,7 +62,10 @@ appliquer() {
 		chown "$UTILISATEUR:$UTILISATEUR" "$ETAT" "$ETAT/accueil"
 	fi
 	nft -f "$BOITE/parefeu/hakos.nft" || echec "nft a refusé $BOITE/parefeu/hakos.nft."
-	if installee; then
+	if arretee; then
+		page=arret
+		journal "Premier démarrage arrêté ($ETAT/arret) : pare-feu chargé, ports 2283 et 8080 fermés, page d'arrêt sur le port 80."
+	elif installee; then
 		nft flush set inet hakos ports_fermes
 		page=accueil
 		journal "HAKO installée : pare-feu chargé, ports 2283 et 8080 ouverts au réseau de la maison."
@@ -97,5 +109,9 @@ fin() {
 case ${1:-} in
 	appliquer) appliquer || true ;;
 	fin) fin ;;
-	*) echec "usage : $0 appliquer|fin" ;;
+	recharger)
+		appliquer || true
+		recharger_nginx || journal "attention : nginx de l'accueil pas rechargé."
+		;;
+	*) echec "usage : $0 appliquer|fin|recharger" ;;
 esac

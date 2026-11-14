@@ -118,6 +118,10 @@ echec() {
 valeur() {
 	awk -v cle="$1" 'index($0, cle "=") == 1 {v = substr($0, length(cle) + 2)} END {print v}' "$2" 2>/dev/null || true
 }
+# etat_paquet PAQUET : état du paquet dans l'image (installed, not-installed…), ou « absent ».
+etat_paquet() {
+	dpkg-query --admindir="$R/var/lib/dpkg" -W -f='${db:Status-Status}' "$1" 2>/dev/null || echo absent
+}
 # lien CHEMIN : cible du lien symbolique, vide si ce n'est pas un lien.
 lien() {
 	readlink "$1" 2>/dev/null || true
@@ -152,6 +156,7 @@ udevadm settle 2>/dev/null || true
 [ -b "${boucle}p1" ] && [ -b "${boucle}p2" ] || erreur "partitions de l'image introuvables sur $boucle."
 B="$travail/boot"
 R="$travail/racine"
+voulus="$R/etc/systemd/system/multi-user.target.wants"
 mkdir "$B" "$R"
 mount -t vfat -o ro "${boucle}p1" "$B"
 mount -t ext4 -o ro,noload "${boucle}p2" "$R"
@@ -202,13 +207,14 @@ else
 fi
 
 droits=""
-for script in firstboot.sh test-sur-boitier.sh essai-assistant.py lib/phase.sh assistant/assistant.py; do
+for script in firstboot.sh test-sur-boitier.sh essai-assistant.py lib/phase.sh assistant/assistant.py \
+	noms/noms.py etat/etat.py; do
 	droits="$droits $(stat -c '%a' "$boite/$script" 2>/dev/null || echo absent)"
 done
-if [ "$droits" = " 755 755 755 755 755" ]; then
-	ok "firstboot.sh, test-sur-boitier.sh, essai-assistant.py, lib/phase.sh et assistant/assistant.py exécutables (0755)"
+if [ "$droits" = " 755 755 755 755 755 755 755" ]; then
+	ok "firstboot.sh, test-sur-boitier.sh, essai-assistant.py, lib/phase.sh, assistant.py, noms.py et etat.py exécutables (0755)"
 else
-	echec "droits de firstboot.sh, test-sur-boitier.sh, essai-assistant.py, lib/phase.sh, assistant/assistant.py :$droits (attendu 755)"
+	echec "droits de firstboot.sh, test-sur-boitier.sh, essai-assistant.py, lib/phase.sh, assistant.py, noms.py, etat.py :$droits (attendu 755)"
 fi
 
 # --- Assistant de première installation (lot 5) ---
@@ -300,9 +306,48 @@ else
 	echec "archives d'images : $archives fichier(s) .tar, problème(s) :$probleme"
 fi
 
+# --- Noms des applications et page d'état ---
+
+manque=""
+for chemin in home/nginx/noms.conf home/nginx/mandataire-immich.conf home/nginx/arret.conf \
+	home/site/index.html home/site/accueil.js home/site/arret.html home/site/style.css noms/noms.py etat/etat.py; do
+	[ -s "$boite/$chemin" ] || manque="$manque $chemin"
+done
+if [ -z "$manque" ] && grep -q 'include /etc/nginx/hakos/noms.conf;' "$boite/home/nginx/accueil.conf" &&
+	! grep -q 'noms.conf' "$boite/home/nginx/assistant.conf" "$boite/home/nginx/arret.conf" &&
+	grep -q 'hako(-\[0-9\]+)?-photos' "$boite/home/nginx/noms.conf" && grep -q 'hako(-\[0-9\]+)?-fichiers' "$boite/home/nginx/noms.conf"; then
+	ok "nginx : hako-photos.local et hako-fichiers.local (et hako-N-…) servis sur le port 80, après l'installation seulement"
+else
+	echec "nginx : noms des applications absents, ou servis avant l'installation (manque :${manque:- rien})"
+fi
+domaines="$(valeur NEXTCLOUD_TRUSTED_DOMAINS "$boite/nextcloud/env.modele")"
+manque=""
+for domaine in hako.local hako-2.local hako-fichiers.local hako-2-fichiers.local; do
+	[[ " $domaines " == *" $domaine "* ]] || manque="$manque $domaine"
+done
+if [ -z "$manque" ]; then
+	ok "Nextcloud : domaines de confiance hako.local, hako-2.local, hako-fichiers.local, hako-2-fichiers.local (l'adresse IPv4 par hakos-noms)"
+else
+	echec "Nextcloud : domaines de confiance incomplets dans env.modele, manque :$manque"
+fi
+if [ "$(etat_paquet avahi-utils)" = installed ] && [ -x "$R/usr/bin/avahi-publish" ] &&
+	[ -f "$R/etc/systemd/system/hakos-noms.service" ] && [ -n "$(lien "$voulus/hakos-noms.service")" ]; then
+	ok "hakos-noms activé, avahi-publish présent (paquet avahi-utils)"
+else
+	echec "hakos-noms absent ou non activé, ou avahi-utils pas installé ($(etat_paquet avahi-utils))"
+fi
+if [ -f "$R/etc/systemd/system/hakos-etat.service" ] && [ -f "$R/etc/systemd/system/hakos-etat.timer" ] &&
+	[ -n "$(lien "$R/etc/systemd/system/timers.target.wants/hakos-etat.timer")" ] &&
+	grep -q '^d /run/hakos-etat 0755 root root' "$R/etc/tmpfiles.d/hakos.conf" &&
+	grep -q -- '- /run/hakos-etat:/run/hakos-etat:ro' "$boite/home/docker-compose.yml" &&
+	[[ "$(valeur HAKOS_VERSION "$boite/versions.env")" =~ ^20[0-9]{2}\.[01][0-9]\.[0-9]+$ ]]; then
+	ok "page d'état : hakos-etat.timer activé, /run/hakos-etat (tmpfiles.d) monté dans nginx, version $(valeur HAKOS_VERSION "$boite/versions.env")"
+else
+	echec "page d'état : hakos-etat.service ou .timer absent ou inactif, /run/hakos-etat ni créé ni monté, ou HAKOS_VERSION illisible"
+fi
+
 # --- Services systemd et paquets ---
 
-voulus="$R/etc/systemd/system/multi-user.target.wants"
 inactives=""
 for unite in hakos-premier-demarrage.service docker.service avahi-daemon.service; do
 	[ -n "$(lien "$voulus/$unite")" ] || inactives="$inactives $unite"
@@ -327,9 +372,6 @@ else
 	echec "utilisateur hakos-assistant absent, avec un shell (« $compte »), ou hors du groupe docker"
 fi
 
-etat_paquet() {
-	dpkg-query --admindir="$R/var/lib/dpkg" -W -f='${db:Status-Status}' "$1" 2>/dev/null || echo absent
-}
 etats="$(etat_paquet docker-ce) $(etat_paquet docker-compose-plugin) $(etat_paquet nftables) $(etat_paquet python3)"
 if [ "$etats" = "installed installed installed installed" ]; then
 	ok "paquets docker-ce, docker-compose-plugin, nftables et python3 installés"
@@ -396,6 +438,25 @@ if awk '/^\[/ {section = $0} section == "[pi5]" && $0 == "kernel=kernel8.img" {t
 	ok "config.txt : noyau à pages de 4 Kio (kernel8.img) sur Pi 5, avec son initramfs"
 else
 	echec "config.txt : « kernel=kernel8.img » absent de la section [pi5], ou kernel8.img / initramfs8 absent de bootfs"
+fi
+
+# Micrologiciel du Pi 5 : sur bootfs, les arbres de périphériques du Pi 5 (révisions C1 et D0) et
+# les overlays ; dans le système, rpi-eeprom avec les images du chargeur de démarrage du BCM2712,
+# que rpi-eeprom-update.service installe au démarrage si elles sont plus récentes que l'EEPROM.
+manque=""
+for fichier in bcm2712-rpi-5-b.dtb bcm2712d0-rpi-5-b.dtb overlays/README; do
+	[ -s "$B/$fichier" ] || manque="$manque $fichier"
+done
+shopt -s nullglob
+eeproms=("$R"/usr/lib/firmware/raspberrypi/bootloader-2712/default/pieeprom-*.bin)
+shopt -u nullglob
+if [ -z "$manque" ] && [ "$(etat_paquet rpi-eeprom)" = installed ] && [ "${#eeproms[@]}" -gt 0 ] &&
+	[ -s "$R/usr/lib/firmware/raspberrypi/bootloader-2712/default/recovery.bin" ] &&
+	[ -n "$(lien "$voulus/rpi-eeprom-update.service")" ]; then
+	plus_recent="$(basename "${eeproms[${#eeproms[@]}-1]}" .bin)"
+	ok "Pi 5 : arbres de périphériques et overlays sur bootfs ; rpi-eeprom installé (${plus_recent#pieeprom-}), rpi-eeprom-update activé"
+else
+	echec "Pi 5 : manque sur bootfs :${manque:- rien} ; rpi-eeprom « $(etat_paquet rpi-eeprom) », ${#eeproms[@]} image(s) de l'EEPROM, rpi-eeprom-update $([ -n "$(lien "$voulus/rpi-eeprom-update.service")" ] && echo activé || echo inactif)"
 fi
 
 ligne_commande="$(cat "$B/cmdline.txt" 2>/dev/null || true)"

@@ -18,7 +18,10 @@ Ce qui est vérifié, par l'API de la page (http://127.0.0.1/api/installation/, 
     ports ouverts au réseau de la maison seulement ; chaque personne se connecte à Immich et à
     Nextcloud avec son mot de passe (anciens mots de passe refusés), une seule administratrice ;
  7. aucun prénom, identifiant ni mot de passe dans le journal ni sur le disque ;
- 8. frein d'Immich : 10 essais de mot de passe par minute et par adresse, puis 429.
+ 8. frein d'Immich : 10 essais de mot de passe par minute et par adresse, puis 429 ;
+ 9. noms des applications (port 80) : hako-photos.local et hako-fichiers.local ne mènent à rien
+    avant l'installation ; après, ils mènent à Immich et à Nextcloud, depuis le voisin aussi, et
+    chacun s'y connecte.
 Durées mesurées : attente de la phase ready, création des comptes.
 Aucun mot de passe ni jeton n'est affiché.
 """
@@ -132,19 +135,22 @@ def occ(*arguments):
     return lancer('docker', 'exec', '-u', 'www-data', ident, 'php', 'occ', '--no-interaction', *arguments)
 
 
-def connexion_immich(login, mot, base=IMMICH):
-    """Connexion par le nginx (2283, freiné : 10 par minute) ou directement (12283, sans frein)."""
+def connexion_immich(login, mot, base=IMMICH, hote='hako.local:2283'):
+    """Connexion par le nginx (2283 ou nom sur le port 80, freinés : 10 par minute en tout) ou
+    directement (12283, sans frein)."""
     code, donnees, _ = http('POST', base + '/api/auth/login', {'email': login, 'password': mot},
-                            {'Host': 'hako.local:2283'})
+                            {'Host': hote})
     if code == 201 and isinstance(donnees, dict):
         http('POST', base + '/api/auth/logout', entetes={'Authorization': f'Bearer {donnees["accessToken"]}'})
     return code, donnees if isinstance(donnees, dict) else {}
 
 
-def connexion_nextcloud(login, mot):
+def connexion_nextcloud(login, mot, base=NEXTCLOUD, hote=None):
     valeur = base64.b64encode(f'{login}:{mot}'.encode()).decode()
-    code, donnees, _ = http('GET', NEXTCLOUD + '/ocs/v2.php/cloud/user?format=json',
-                            entetes={'Authorization': f'Basic {valeur}', 'OCS-APIRequest': 'true'})
+    entetes = {'Authorization': f'Basic {valeur}', 'OCS-APIRequest': 'true'}
+    if hote:
+        entetes['Host'] = hote
+    code, donnees, _ = http('GET', base + '/ocs/v2.php/cloud/user?format=json', entetes=entetes)
     ident = (((donnees or {}).get('ocs') or {}).get('data') or {}).get('id') if isinstance(donnees, dict) else None
     return code, ident
 
@@ -174,6 +180,24 @@ SONDE = ('import socket,sys\n'
          's.settimeout(3)\n'
          'try:\n s.connect((sys.argv[1],int(sys.argv[2])));print("ouvert")\n'
          'except Exception as e:print("fermé")\n')
+
+
+VOISIN_HTTP = ('import sys,urllib.request\n'
+               'r=urllib.request.Request(sys.argv[1],headers={"Host":sys.argv[2]})\n'
+               'try:print(urllib.request.urlopen(r,timeout=10).read(300).decode(errors="replace"))\n'
+               'except Exception as e:print(type(e).__name__)\n')
+NOMS = (('hako-photos.local', '/api/server/ping', 'pong'), ('hako-fichiers.local', '/status.php', '"installed":true'))
+
+
+def voisin_noms(bilan, installee):
+    """Le voisin (IPv4 privée) demande chaque application par son nom, sur le port 80."""
+    for nom, chemin, signe in NOMS:
+        obtenu = lancer('ip', 'netns', 'exec', NS, sys.executable, '-c', VOISIN_HTTP,
+                        f'http://{VOISIN["prive"][0]}{chemin}', nom).stdout.strip()
+        if installee:
+            bilan.verifier(signe in obtenu, f'voisin : http://{nom}{chemin} mène à l\'application')
+        else:
+            bilan.verifier(signe not in obtenu, f'voisin : http://{nom} ne mène pas à l\'application avant l\'installation')
 
 
 def voisin_sonde(adresse, port):
@@ -250,6 +274,7 @@ def main():
     voisin_creer()
     try:
         ports_voisin(bilan, installee=False)
+        voisin_noms(bilan, installee=False)
         intrus = ('import json,urllib.request\n'
                   'r=urllib.request.Request("http://192.168.77.1:2283/api/auth/admin-sign-up",'
                   'data=json.dumps({"email":"intrus@hako.local","name":"Intrus","password":"x"}).encode(),'
@@ -327,7 +352,9 @@ def main():
                        f'({len(vus or ())} états d\'avancement vus)')
 
         # 6. après
-        attendre(lambda: lancer('systemctl', 'is-active', 'hakos-assistant.service').stdout.strip() != 'active', 60)
+        # « deactivating » : phase.sh fin (ExecStopPost) n'a pas encore masqué le service.
+        attendre(lambda: lancer('systemctl', 'is-active', 'hakos-assistant.service').stdout.strip()
+                 in ('inactive', 'failed'), 60)
         code, etat = Appareil().etat()
         bilan.verifier((code, etat) == (200, {'phase': 'installed', 'busy': False}), 'status : installed (réponse de nginx)')
         bilan.verifier(Appareil().inscrire(['Intrus']) == (409, {'error': 'wrong_phase'}), 'register après : 409 wrong_phase')
@@ -339,6 +366,15 @@ def main():
         elements = lancer('nft', '-j', 'list', 'set', 'inet', 'hakos', 'ports_fermes').stdout
         bilan.verifier('"elem"' not in elements, 'pare-feu : ensemble ports_fermes vide')
         ports_voisin(bilan, installee=True)
+        voisin_noms(bilan, installee=True)
+
+        # Par les noms, sur le port 80 : une connexion à Immich (le frein compte aussi celles du
+        # port 2283 : 8 + 1 restent sous les 10), et chacun dans Nextcloud.
+        code, session = connexion_immich(logins[0], nouveaux[logins[0]], 'http://127.0.0.1', 'hako-photos.local')
+        bilan.verifier(code == 201 and session.get('isAdmin') is True, 'Immich par hako-photos.local : connexion de la responsable')
+        connectes = [connexion_nextcloud(login, mot, 'http://127.0.0.1', 'hako-fichiers.local') for login, mot in nouveaux.items()]
+        bilan.verifier(connectes == [(200, login) for login in nouveaux],
+                       f'Nextcloud par hako-fichiers.local : {len(connectes)} connexion(s)')
 
         for login, mot in nouveaux.items():
             code, session = connexion_immich(login, mot)

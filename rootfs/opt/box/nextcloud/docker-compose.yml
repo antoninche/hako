@@ -9,8 +9,11 @@
 # l'assistant de première installation (occ user:add, mot de passe par l'environnement).
 # Le port 8080 reste fermé au réseau (pare-feu) tant que ces comptes n'existent pas.
 #
-# Domaines de confiance : hako.local (et localhost). Ouvert par l'adresse IP de la box,
-# Nextcloud refuse la page (« domaine non approuvé »).
+# Domaines de confiance (NEXTCLOUD_TRUSTED_DOMAINS, séparés par des espaces) : hako.local,
+# hako-2.local, hako-fichiers.local et hako-2-fichiers.local (nom servi par le nginx de l'accueil),
+# et localhost. L'adresse IPv4 de la box, qui peut changer, est ajoutée et tenue à jour par le
+# service hakos-noms (index 9 de trusted_domains) : http://<adresse IP>:8080 marche en secours.
+# Le premier démarrage déclare le nginx de l'accueil comme mandataire de confiance.
 #
 # Le fichier .env de ce dossier est écrit au premier démarrage (mode 600). Les chemins de données
 # sont relatifs à ce dossier : ./html (Nextcloud, sa configuration et les fichiers dans
