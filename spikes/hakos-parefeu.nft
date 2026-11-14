@@ -1,0 +1,33 @@
+#!/usr/sbin/nft -f
+# HakOS, lot 5 (essai c) : ports des photos (2283) et des fichiers (8080) fermés au réseau
+# tant que les comptes ne sont pas créés ; le port 80 (page de la box) reste ouvert.
+#
+# Seule la table « inet hakos » est remplacée : les règles de Docker (tables ip et ip6
+# « filter », « nat », « raw ») restent intactes. Ne jamais faire « flush ruleset ».
+# Pour ouvrir les ports : nft flush set inet hakos ports_fermes
+
+table inet hakos
+delete table inet hakos
+
+table inet hakos {
+	# Ports fermés au réseau local. L'assistant vide cet ensemble à la fin de l'installation.
+	set ports_fermes {
+		type inet_service
+		elements = { 2283, 8080 }
+	}
+
+	# Connexions adressées à la box elle-même : docker-proxy écoute aussi en IPv6 ([::]:2283).
+	# La box garde l'accès par lo : l'assistant parle à Immich et à Nextcloud par 127.0.0.1.
+	chain entree {
+		type filter hook input priority filter - 10; policy accept;
+		iifname "lo" accept
+		tcp dport @ports_fermes reject with tcp reset
+	}
+
+	# Connexions que Docker traduit vers un conteneur (port publié) : elles passent par forward,
+	# pas par input. Le port demandé à l'origine reste lisible dans le suivi de connexion.
+	chain transit {
+		type filter hook forward priority filter - 10; policy accept;
+		meta l4proto tcp ct status dnat ct original proto-dst @ports_fermes reject with tcp reset
+	}
+}
