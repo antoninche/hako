@@ -2,6 +2,14 @@
 
 Les modifications notables du site sont notées ici, de la plus récente à la plus ancienne. Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et les numéros de version suivent la [gestion sémantique de version](https://semver.org/lang/fr/).
 
+## [0.4.2] - 2026-11-14
+
+### Modifié
+
+- Adresse e-mail de contact renseignée, en lien « mailto: » : page Contact, pied de page, mentions légales, CGV (nouvelle ligne de contact), Commander, guide d’installation, page de la HAKO et README.
+- Offre Hako Home : « mises à jour de sécurité du système pendant 5 ans, renouvelables ; mise à jour des applications par nos soins, à la demande », sur l’accueil, la page Offres et son tableau comparatif, la page Notre engagement, la FAQ (abonnement), le point à rédiger des CGV et le README (nouveau champ `appUpdates` dans `src/data/tarifs.ts`).
+- Page La box : le lien « Dépôt de la recette » mène au dossier `hakos/` du dépôt (https://github.com/antoninche/hako/tree/main/hakos).
+
 ## [0.4.1] - 2026-11-14
 
 ### Ajouté

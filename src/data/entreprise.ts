@@ -5,9 +5,7 @@
  * le site l'affiche surligné en jaune et `npm run todos` le recense dans TODO.md.
  * Quand l'information arrive, remplacez tout l'appel todo(…) par la valeur
  * entre apostrophes droites, par exemple :
- *   // Le numéro n'est pas affiché comme moyen de contact (décision des
-  // fondateurs) : seules les mentions légales le demandent encore.
-  phone: todo('Numéro de téléphone de contact', '[numéro de téléphone]'),
+ *   phone: todo('Numéro de téléphone de contact', '[numéro de téléphone]'),
  * devient
  *   phone: '04 00 00 00 00',
  *
@@ -31,10 +29,7 @@ export const company: Company = withFrenchTypography<Company>({
   headline: 'Vos souvenirs restent à la maison.',
   promise: 'Nous installons la box chez vous, de Salon-de-Provence à Toulon.',
 
-  email: todo(
-    'Adresse e-mail de contact, sur notre propre nom de domaine ou chez Proton Mail (jamais une adresse Gmail)',
-    '[adresse e-mail]',
-  ),
+  email: 'antonin.chenavaz@etu.univ-amu.fr',
   // Le numéro n'est pas affiché comme moyen de contact (décision des
   // fondateurs) : seules les mentions légales le demandent encore.
   phone: todo('Numéro de téléphone de contact', '[numéro de téléphone]'),

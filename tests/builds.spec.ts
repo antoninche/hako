@@ -71,7 +71,11 @@ test.describe('Constructions particulières', () => {
         expect(tag, `${file} : description gardée`).toMatch(/\sdata-todo="[^"]+"/);
       }
     }
-    expect(todoTags(home).length, 'informations manquantes du pied de page').toBeGreaterThan(0);
+    // Les CGV, en cours de rédaction, gardent des informations manquantes.
+    expect(
+      todoTags(readRepoFile(`${DEMO}/cgv/index.html`)).length,
+      'informations manquantes des CGV',
+    ).toBeGreaterThan(0);
 
     expect(home).toContain(`<link rel="canonical" href="${SITE}/">`);
     expect(readRepoFile(`${DEMO}/offres/index.html`)).toContain(
@@ -163,7 +167,8 @@ test.describe('Constructions particulières', () => {
 
     const home = readRepoFile(`${LOCAL}/index.html`);
     expect(home).toContain('<html lang="fr" data-todos="visible">');
-    const tags = todoTags(home);
+    // Les CGV, en cours de rédaction, gardent des informations manquantes.
+    const tags = todoTags(readRepoFile(`${LOCAL}/cgv/index.html`));
     expect(tags.length).toBeGreaterThan(0);
     for (const tag of tags) expect(tag).toMatch(/^<mark\b[^>]*\stitle="[^"]+"/);
     for (const file of PAGES) {

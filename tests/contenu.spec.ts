@@ -170,8 +170,8 @@ test.describe('Écran étroit', () => {
   });
 });
 
-test('/la-box/ : en mode discret, les repères ne sont plus surlignés', async ({ page }) => {
-  await page.goto('/la-box/');
+test('/cgv/ : en mode discret, les repères ne sont plus surlignés', async ({ page }) => {
+  await page.goto('/cgv/');
   const marks = page.locator('main mark.todo');
   expect(await marks.count()).toBeGreaterThan(0);
   await page.evaluate(() => {

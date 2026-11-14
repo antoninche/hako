@@ -3,7 +3,7 @@
 Ce fichier est produit par `npm run todos` : ne le modifiez pas à la main.
 Chaque ligne donne le numéro de ligne dans le fichier source, ce qui manque, puis le texte provisoire affiché sur le site.
 
-Total : 62 informations manquantes dans 13 fichiers.
+Total : 60 informations manquantes dans 12 fichiers.
 
 ## src/content/commande.ts
 
@@ -17,26 +17,22 @@ Total : 62 informations manquantes dans 13 fichiers.
 
 - L13 - Ce que deviennent les copies restées chez Google ou Apple après le déménagement, et ce que nous conseillons au client - [ce que nous conseillons]
 
-## src/content/la-box.ts
-
-- L109 - Adresse du dépôt public de la recette du système de la box (image système), à publier - [lien à venir]
-
 ## src/content/legal/cgv.mdx
 
 - L10 - Conditions générales de vente complètes : à faire rédiger et valider par un professionnel du droit, y compris le droit de rétractation pour la vente à distance - [texte à venir]
-- L16 - CGV : objet du contrat, et à qui s’appliquent ces conditions (particuliers, professionnels) - [objet du contrat, clients concernés]
-- L20 - CGV : contenu des offres Hako Home et Hako Pro, prix HT ou TTC, options de stockage - [contenu des offres, prix, options]
-- L24 - CGV : étapes de la commande, confirmation, paiement en une seule fois, avant l’installation - [étapes de la commande, paiement]
-- L28 - CGV : paiement par virement bancaire, la box en une seule fois avant l’installation et l’abonnement de Hako Pro chaque mois (le paiement en ligne n’existe pas encore) - [virement bancaire, date de chaque paiement]
-- L32 - CGV : délais, déroulement de l’installation à domicile et de la formation, zone d’intervention - [délais, installation, formation]
-- L36 - CGV : droit de rétractation pour la vente à distance (délai, conditions, formulaire type, cas d’une installation déjà faite) - [délai, conditions, formulaire de rétractation]
-- L40 - CGV : garantie légale de conformité (deux ans pour les particuliers) et garantie commerciale d’un an de HAKO, ce qu’elle couvre et comment la faire jouer - [garanties de la box]
-- L44 - CGV : fonctionnement du service après-vente (hors garantie, intervention facturée 100 € TTC pour Hako Home comme pour Hako Pro) - [fonctionnement et tarif]
-- L48 - CGV : abonnement d’assistance de Hako Pro (prix mensuel payé par virement, durée d’engagement, délai de réponse garanti, résiliation) - [prix, engagement, résiliation]
-- L52 - CGV : responsabilités de HAKO et du client - [responsabilités de chacun]
-- L56 - CGV : renvoi vers la politique de confidentialité pour les données liées aux commandes - [renvoi vers la politique de confidentialité]
-- L60 - CGV : règlement amiable des litiges et médiateur de la consommation - [règlement des litiges, médiation]
-- L64 - CGV : droit applicable et tribunal compétent - [droit applicable, tribunal compétent]
+- L18 - CGV : objet du contrat, et à qui s’appliquent ces conditions (particuliers, professionnels) - [objet du contrat, clients concernés]
+- L22 - CGV : contenu des offres Hako Home et Hako Pro, prix HT ou TTC, options de stockage, et pour Hako Home les mises à jour de sécurité du système pendant 5 ans, renouvelables ; mise à jour des applications par nos soins, à la demande - [contenu des offres, prix, options]
+- L26 - CGV : étapes de la commande, confirmation, paiement en une seule fois, avant l’installation - [étapes de la commande, paiement]
+- L30 - CGV : paiement par virement bancaire, la box en une seule fois avant l’installation et l’abonnement de Hako Pro chaque mois (le paiement en ligne n’existe pas encore) - [virement bancaire, date de chaque paiement]
+- L34 - CGV : délais, déroulement de l’installation à domicile et de la formation, zone d’intervention - [délais, installation, formation]
+- L38 - CGV : droit de rétractation pour la vente à distance (délai, conditions, formulaire type, cas d’une installation déjà faite) - [délai, conditions, formulaire de rétractation]
+- L42 - CGV : garantie légale de conformité (deux ans pour les particuliers) et garantie commerciale d’un an de HAKO, ce qu’elle couvre et comment la faire jouer - [garanties de la box]
+- L46 - CGV : fonctionnement du service après-vente (hors garantie, intervention facturée 100 € TTC pour Hako Home comme pour Hako Pro) - [fonctionnement et tarif]
+- L50 - CGV : abonnement d’assistance de Hako Pro (prix mensuel payé par virement, durée d’engagement, délai de réponse garanti, résiliation) - [prix, engagement, résiliation]
+- L54 - CGV : responsabilités de HAKO et du client - [responsabilités de chacun]
+- L58 - CGV : renvoi vers la politique de confidentialité pour les données liées aux commandes - [renvoi vers la politique de confidentialité]
+- L62 - CGV : règlement amiable des litiges et médiateur de la consommation - [règlement des litiges, médiation]
+- L66 - CGV : droit applicable et tribunal compétent - [droit applicable, tribunal compétent]
 
 ## src/content/legal/confidentialite.mdx
 
@@ -69,9 +65,8 @@ Total : 62 informations manquantes dans 13 fichiers.
 
 ## src/data/entreprise.ts
 
-- L34 - Adresse e-mail de contact, sur notre propre nom de domaine ou chez Proton Mail (jamais une adresse Gmail) - [adresse e-mail]
-- L40 - Numéro de téléphone de contact - [numéro de téléphone]
-- L41 - Nom de domaine du site - [nom de domaine]
+- L35 - Numéro de téléphone de contact - [numéro de téléphone]
+- L36 - Nom de domaine du site - [nom de domaine]
 
 ## src/data/faits.ts
 

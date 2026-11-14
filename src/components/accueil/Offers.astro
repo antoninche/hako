@@ -34,6 +34,7 @@ const withTax = (amountEur: number, tax: string | null | undefined): string =>
 const homeValues = {
   stockage: included.label,
   majSecurite: orMissing(home.securityUpdates, missingPrice.securityUpdates(home)),
+  majApplications: home.appUpdates ?? '',
   tarifSav:
     home.afterSalesRateEur == null
       ? missingPrice.afterSalesRate(home)

@@ -79,8 +79,9 @@ export const offerCopy: Readonly<Record<OfferId, OfferCopy>> = {
       ...moverItem('home'),
       [`${includedStorage.label} de stockage`],
       [
-        'Les mises à jour de sécurité pendant ',
+        'Les mises à jour de sécurité du système pendant ',
         orMissing(home.securityUpdates, missingPrice.securityUpdates(home)),
+        `\u00a0; la mise à jour des applications ${home.appUpdates ?? ''}`,
       ],
     ],
     note: [
@@ -221,8 +222,12 @@ export const offresPage = {
         pro: [`${extraStorageLabels}, en supplément`],
       },
       {
-        label: 'Mises à jour de sécurité',
-        home: ['Pendant ', orMissing(home.securityUpdates, missingPrice.securityUpdates(home))],
+        label: 'Mises à jour',
+        home: [
+          'Sécurité du système pendant ',
+          orMissing(home.securityUpdates, missingPrice.securityUpdates(home)),
+          `\u00a0; applications ${home.appUpdates ?? ''}`,
+        ],
         pro: ['Comprises, gérées par nous'],
       },
       {

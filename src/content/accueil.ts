@@ -258,7 +258,8 @@ export interface OfferCopy {
   readonly details: readonly string[];
   /**
    * Ce que comprend l’offre. Valeurs possibles : {stockage} capacité incluse ;
-   * {majSecurite} durée des mises à jour de sécurité (Home) ; {delai} délai
+   * {majSecurite} durée des mises à jour de sécurité du système (Home) ;
+   * {majApplications} mise à jour des applications (Home) ; {delai} délai
    * de réponse garanti (Pro).
    */
   readonly features: readonly string[];
@@ -300,7 +301,7 @@ export const offers: OffersCopy = {
       'La box, avec {stockage} de stockage',
       'L’installation et la formation chez vous',
       ...moverFeature('home'),
-      'Les mises à jour de sécurité pendant {majSecurite}',
+      'Les mises à jour de sécurité du système pendant {majSecurite} ; la mise à jour des applications {majApplications}',
     ],
     cta: 'Commander Hako Home',
   },

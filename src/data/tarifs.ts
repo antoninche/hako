@@ -39,8 +39,10 @@ export interface Offer {
   readonly taxStatus: string | null;
   /** Abonnement d'assistance, seulement pour les offres qui en ont un. */
   readonly subscription?: Subscription;
-  /** Durée des mises à jour de sécurité incluses (offre sans abonnement). */
+  /** Durée des mises à jour de sécurité du système incluses (offre sans abonnement). */
   readonly securityUpdates?: string | null;
+  /** Mise à jour des applications (offre sans abonnement), par exemple « par nos soins, à la demande ». */
+  readonly appUpdates?: string;
   /** Tarif d'une intervention de service après-vente, en euros. */
   readonly afterSalesRateEur?: number | null;
   /** Statut de TVA de ce tarif : « TTC », « HT »… ; null = à confirmer. */
@@ -73,6 +75,7 @@ export const pricing: Pricing = {
       priceEur: 750,
       taxStatus: 'TTC',
       securityUpdates: '5 ans, renouvelables',
+      appUpdates: 'par nos soins, à la demande',
       afterSalesRateEur: 100,
       afterSalesTaxStatus: 'TTC',
     },

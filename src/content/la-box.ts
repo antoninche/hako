@@ -22,7 +22,7 @@ import { boxAddress } from '../data/installation';
 import { routes, type NavLink } from '../data/navigation';
 import { pricing } from '../data/tarifs';
 import { formatList } from '../lib/format';
-import { isTodo, todo, type Maybe } from '../lib/todo';
+import { isTodo, type Maybe } from '../lib/todo';
 
 /** Un mot en japonais (le kanji du logo), lu avec la bonne langue par les lecteurs d'écran. */
 export interface Japanese {
@@ -100,16 +100,11 @@ const storageOptions = formatList(
 /* ---------- Recette du système de la box ---------- */
 
 /**
- * Adresse du dépôt public de la recette. Décision du 14/11 : le dossier
- * hakos/ du dépôt antoninche/hako
- * (https://github.com/antoninche/hako/tree/main/hakos). Une fois ce dossier
- * publié, remplacez l'appel todo(…) par cette adresse entre apostrophes
- * droites : le lien et la phrase qui l'annonce changent tout seuls.
+ * Adresse du dépôt public de la recette : le dossier hakos/ du dépôt
+ * antoninche/hako (décision du 14/11). Le lien et la phrase qui l'annonce
+ * en dépendent.
  */
-const recipeLink: Maybe<string> = todo(
-  'Adresse du dépôt public de la recette du système de la box (image système), à publier',
-  '[lien à venir]',
-);
+const recipeLink: Maybe<string> = 'https://github.com/antoninche/hako/tree/main/hakos';
 
 /* ---------- Page ---------- */
 

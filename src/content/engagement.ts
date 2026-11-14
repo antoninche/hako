@@ -135,9 +135,9 @@ export const engagement = {
       title: 'Pas d’abonnement caché',
       text: [
         [
-          `${home.name} s’achète une fois, sans abonnement. Les mises à jour de sécurité sont incluses pendant `,
+          `${home.name} s’achète une fois, sans abonnement. Les mises à jour de sécurité du système sont incluses pendant `,
           homeUpdates,
-          '. Hors garantie, le service après-vente est facturé ',
+          `\u00a0; les applications sont mises à jour ${home.appUpdates ?? ''}. Hors garantie, le service après-vente est facturé `,
           homeAfterSalesRate,
           ' par intervention.',
         ],

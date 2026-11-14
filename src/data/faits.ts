@@ -174,7 +174,10 @@ export const missingPrice = {
   responseTime: (offer: Offer): TodoValue =>
     missing(`Délai de réponse garanti du support prioritaire de ${offer.name}`, '[délai]'),
   securityUpdates: (offer: Offer): TodoValue =>
-    missing(`Durée des mises à jour de sécurité comprises dans ${offer.name}`, '[durée]'),
+    missing(
+      `Durée des mises à jour de sécurité du système comprises dans ${offer.name}`,
+      '[durée]',
+    ),
   afterSalesRate: (offer: Offer): TodoValue =>
     missing(`Tarif d’une intervention du service après-vente (${offer.name})`, '[tarif]'),
   afterSalesTax: (offer: Offer): TodoValue =>

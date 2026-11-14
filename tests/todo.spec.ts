@@ -6,7 +6,8 @@
 import { expect, test } from '@playwright/test';
 
 test('surlignage jaune, puis mode discret', async ({ page }) => {
-  await page.goto('/');
+  // Les CGV, en cours de rédaction, gardent des informations manquantes.
+  await page.goto('/cgv/');
   await expect(page.locator('html')).toHaveAttribute('data-todos', 'visible');
 
   const mark = page.locator('mark.todo').first();

@@ -19,10 +19,10 @@ Nous sommes trois étudiants d'Aix-Marseille, et HAKO est notre projet pour le 3
 
 ## Les offres
 
-| Offre     | Pour                    | Prix                    | Ensuite                                                                                                          |
-| --------- | ----------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Hako Home | les familles            | 750 € TTC, achat unique | sans abonnement ; mises à jour de sécurité pendant 5 ans, renouvelables                                          |
-| Hako Pro  | les petites entreprises | 1 000 € TTC             | 25 € TTC par mois, engagement de 2 ans : assistance prioritaire (réponse sous 48 h), mises à jour et maintenance |
+| Offre     | Pour                    | Prix                    | Ensuite                                                                                                                                       |
+| --------- | ----------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Hako Home | les familles            | 750 € TTC, achat unique | sans abonnement ; mises à jour de sécurité du système pendant 5 ans, renouvelables ; mise à jour des applications par nos soins, à la demande |
+| Hako Pro  | les petites entreprises | 1 000 € TTC             | 25 € TTC par mois, engagement de 2 ans : assistance prioritaire (réponse sous 48 h), mises à jour et maintenance                              |
 
 - 1 To de stockage compris ; 2 To pour 200 € de plus, 4 To pour 400 € de plus.
 - Dans notre zone, l'installation chez le client et la formation sur place sont comprises dans les deux offres, comme le déménageur.
@@ -38,6 +38,8 @@ Nous sommes trois étudiants d'Aix-Marseille, et HAKO est notre projet pour le 3
 | [Maxime Pollaud](https://www.linkedin.com/in/maxime-pollaud-488a77397/)     | Commerce et relation client | BUT Techniques de commercialisation, IUT d'Aix-Marseille |
 | [Martin Dugail](https://www.linkedin.com/in/martin-dugail-15a5a742b/)       | Design et finance           | Licence MPCI, Aix-Marseille Université                   |
 
+Nous écrire : [antonin.chenavaz@etu.univ-amu.fr](mailto:antonin.chenavaz@etu.univ-amu.fr).
+
 ## Le site
 
 Treize pages, plus la page 404 : accueil, offres, la box, notre engagement, questions fréquentes, tutoriels, guide d'installation en huit étapes, démonstration de la première installation, commande, contact, conditions générales de vente, mentions légales et données personnelles.
@@ -48,7 +50,7 @@ Treize pages, plus la page 404 : accueil, offres, la box, notre engagement, ques
 - Accessibilité visée WCAG 2.2 niveau AA, contrôlée avec axe-core, à 390 et 1440 px de large ; contraste d'au moins 4,5:1 pour chaque couple texte et fond, cibles tactiles de 44 px, menu au clavier, moins d'animations sur demande.
 - 237 tests unitaires et 429 tests Playwright dans Chromium : chaque page, chaque lien interne, aucune requête hors du site, aucun cookie, la politique de sécurité et tout le parcours de la démonstration.
 - Une vue 3D de la box avec three.js, chargée seulement quand elle approche de l'écran, avec une image fixe à la place si les animations sont réduites ou sans WebGL.
-- Une information encore inconnue (adresse e-mail, durée à mesurer…) garde un texte provisoire, et `npm run todos` en tient la liste dans [TODO.md](TODO.md).
+- Une information encore inconnue (numéro de téléphone, durée à mesurer…) garde un texte provisoire, et `npm run todos` en tient la liste dans [TODO.md](TODO.md).
 - La page de la box est construite à part (`npm run build:box`), avec les mêmes composants que la démonstration, et copiée dans l'image de HakOS.
 
 ![Page d'accueil](images/accueil.png)

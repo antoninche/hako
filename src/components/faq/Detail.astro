@@ -4,7 +4,8 @@
  * src/data/entreprise.ts et src/data/faits.ts), à écrire dans un texte MDX
  * sans la recopier :
  *
- *   <Detail of="security-updates" />   durée des mises à jour de sécurité de Hako Home
+ *   <Detail of="security-updates" />   durée des mises à jour de sécurité du système de Hako Home
+ *   <Detail of="app-updates" />        mise à jour des applications de Hako Home
  *   <Detail of="pro-commitment" />     durée d'engagement de l'abonnement de Hako Pro
  *   <Detail of="pro-response-time" />  délai de réponse garanti de Hako Pro
  *   <Detail of="included-storage" />   stockage inclus (« 1 To »)
@@ -50,6 +51,7 @@ import { isTodo, type Maybe } from '../../lib/todo';
 
 export type DetailId =
   | 'security-updates'
+  | 'app-updates'
   | 'pro-commitment'
   | 'pro-response-time'
   | 'included-storage'
@@ -85,6 +87,7 @@ const options = pricing.storage
 
 const values: Record<DetailId, Maybe<string>> = {
   'security-updates': orMissing(home.securityUpdates, missingPrice.securityUpdates(home)),
+  'app-updates': home.appUpdates ?? '',
   'pro-commitment': orMissing(pro.subscription?.commitment, missingPrice.commitment(pro)),
   'pro-response-time': orMissing(pro.subscription?.responseTime, missingPrice.responseTime(pro)),
   'included-storage': included.label,
