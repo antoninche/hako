@@ -1,0 +1,272 @@
+[
+ {
+  "entree": [
+   "Hélène"
+  ],
+  "propres": [
+   "Hélène"
+  ],
+  "erreurs": [],
+  "identifiants": [
+   "helene@hako.local"
+  ]
+ },
+ {
+  "entree": [
+   "  Jean   Marc ",
+   "Zoé",
+   "Zoë",
+   "zoe"
+  ],
+  "propres": [
+   "Jean Marc",
+   "Zoé",
+   "Zoë",
+   "zoe"
+  ],
+  "erreurs": [],
+  "identifiants": [
+   "jeanmarc@hako.local",
+   "zoe@hako.local",
+   "zoe2@hako.local",
+   "zoe3@hako.local"
+  ]
+ },
+ {
+  "entree": [
+   "Camille",
+   "Camille",
+   "Camille",
+   "Camille2"
+  ],
+  "propres": [
+   "Camille",
+   "Camille",
+   "Camille",
+   "Camille2"
+  ],
+  "erreurs": [
+   {
+    "index": 3,
+    "code": "characters"
+   }
+  ],
+  "identifiants": [
+   "camille@hako.local",
+   "camille2@hako.local",
+   "camille3@hako.local",
+   "camille4@hako.local"
+  ]
+ },
+ {
+  "entree": [
+   "Anne-Sophie",
+   "D’Artagnan",
+   "O'Neil",
+   "Ægir",
+   "Œdipe",
+   "Strauß",
+   "Bjørn",
+   "Łukasz"
+  ],
+  "propres": [
+   "Anne-Sophie",
+   "D’Artagnan",
+   "O'Neil",
+   "Ægir",
+   "Œdipe",
+   "Strauß",
+   "Bjørn",
+   "Łukasz"
+  ],
+  "erreurs": [],
+  "identifiants": [
+   "anne-sophie@hako.local",
+   "dartagnan@hako.local",
+   "oneil@hako.local",
+   "aegir@hako.local",
+   "oedipe@hako.local",
+   "strauss@hako.local",
+   "bjorn@hako.local",
+   "lukasz@hako.local"
+  ]
+ },
+ {
+  "entree": [
+   "Þór",
+   "Đorđe",
+   "Iñigo",
+   "François",
+   "Ğül",
+   "Ångström",
+   "Nguyễn",
+   "Ðức"
+  ],
+  "propres": [
+   "Þór",
+   "Đorđe",
+   "Iñigo",
+   "François",
+   "Ğül",
+   "Ångström",
+   "Nguyễn",
+   "Ðức"
+  ],
+  "erreurs": [],
+  "identifiants": [
+   "thor@hako.local",
+   "dorde@hako.local",
+   "inigo@hako.local",
+   "francois@hako.local",
+   "gul@hako.local",
+   "angstrom@hako.local",
+   "nguyen@hako.local",
+   "duc@hako.local"
+  ]
+ },
+ {
+  "entree": [
+   " Lou﻿",
+   "Lou Anne",
+   "Lou--Anne",
+   "Lou''Anne",
+   "Lou-",
+   "-Lou",
+   "李",
+   "Μαρία"
+  ],
+  "propres": [
+   "Lou",
+   "Lou Anne",
+   "Lou--Anne",
+   "Lou''Anne",
+   "Lou-",
+   "-Lou",
+   "李",
+   "Μαρία"
+  ],
+  "erreurs": [
+   {
+    "index": 2,
+    "code": "characters"
+   },
+   {
+    "index": 3,
+    "code": "characters"
+   },
+   {
+    "index": 4,
+    "code": "characters"
+   },
+   {
+    "index": 5,
+    "code": "characters"
+   },
+   {
+    "index": 6,
+    "code": "characters"
+   },
+   {
+    "index": 7,
+    "code": "characters"
+   }
+  ],
+  "identifiants": [
+   "lou@hako.local",
+   "louanne@hako.local",
+   "lou-anne@hako.local",
+   "louanne2@hako.local",
+   "lou2@hako.local",
+   "lou3@hako.local",
+   "",
+   ""
+  ]
+ },
+ {
+  "entree": [
+   "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+   "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+   "éééééééééééééééééééééééééééééééééééééééé",
+   "Jean-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  ],
+  "propres": [
+   "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+   "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+   "éééééééééééééééééééééééééééééééééééééééé",
+   "Jean-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  ],
+  "erreurs": [
+   {
+    "index": 1,
+    "code": "tooLong"
+   },
+   {
+    "index": 3,
+    "code": "tooLong"
+   }
+  ],
+  "identifiants": [
+   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@hako.local",
+   "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb@hako.local",
+   "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee@hako.local",
+   "jean-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx@hako.local"
+  ]
+ },
+ {
+  "entree": [
+   "Marie-Ève",
+   "Maël",
+   "Noël",
+   "Chloé",
+   "Inès",
+   "Léo",
+   "Théo",
+   "Zoé"
+  ],
+  "propres": [
+   "Marie-Ève",
+   "Maël",
+   "Noël",
+   "Chloé",
+   "Inès",
+   "Léo",
+   "Théo",
+   "Zoé"
+  ],
+  "erreurs": [],
+  "identifiants": [
+   "marie-eve@hako.local",
+   "mael@hako.local",
+   "noel@hako.local",
+   "chloe@hako.local",
+   "ines@hako.local",
+   "leo@hako.local",
+   "theo@hako.local",
+   "zoe@hako.local"
+  ]
+ },
+ {
+  "entree": [
+   "ı",
+   "İlker",
+   "ǅemal",
+   "élise",
+   "ﬁfi"
+  ],
+  "propres": [
+   "ı",
+   "İlker",
+   "ǅemal",
+   "élise",
+   "ﬁfi"
+  ],
+  "erreurs": [],
+  "identifiants": [
+   "i@hako.local",
+   "ilker@hako.local",
+   "emal@hako.local",
+   "elise@hako.local",
+   "fi@hako.local"
+  ]
+ }
+]

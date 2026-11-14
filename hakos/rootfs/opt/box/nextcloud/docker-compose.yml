@@ -1,0 +1,62 @@
+# Nextcloud (fichiers) : image officielle nextcloud:<version>-apache et sa base Postgres.
+# Documentation de l'image : https://github.com/nextcloud/docker (README).
+#
+# Installation sans installateur web : au premier démarrage, le .env reçoit en plus un
+# administrateur technique (NEXTCLOUD_ADMIN_USER et NEXTCLOUD_ADMIN_PASSWORD, tiré au hasard) ;
+# l'image installe alors Nextcloud avant de démarrer Apache, avec la base des variables POSTGRES_*
+# et le domaine de confiance NEXTCLOUD_TRUSTED_DOMAINS. Le premier démarrage supprime ensuite ce
+# compte, retire ces lignes et recrée le conteneur. Les comptes de la famille viennent de
+# l'assistant de première installation (occ user:add, mot de passe par l'environnement).
+# Le port 8080 reste fermé au réseau (pare-feu) tant que ces comptes n'existent pas.
+#
+# Domaines de confiance (NEXTCLOUD_TRUSTED_DOMAINS, séparés par des espaces) : hako.local,
+# hako-2.local, hako-fichiers.local et hako-2-fichiers.local (nom servi par le nginx de l'accueil),
+# et localhost. L'adresse IPv4 de la box, qui peut changer, est ajoutée et tenue à jour par le
+# service hakos-noms (index 9 de trusted_domains) : http://<adresse IP>:8080 marche en secours.
+# Le premier démarrage déclare le nginx de l'accueil comme mandataire de confiance.
+#
+# Le fichier .env de ce dossier est écrit au premier démarrage (mode 600). Les chemins de données
+# sont relatifs à ce dossier : ./html (Nextcloud, sa configuration et les fichiers dans
+# ./html/data) et ./db (base Postgres).
+name: hakos-nextcloud
+
+services:
+  db:
+    image: ${NEXTCLOUD_POSTGRES_IMAGE:?absent du fichier .env}
+    pull_policy: never
+    env_file:
+      - .env
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      # Par TCP : pendant sa préparation, la base n'écoute que sur son socket local.
+      test: ['CMD-SHELL', 'pg_isready -q -h 127.0.0.1 -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 2m
+      start_interval: 5s
+
+  nextcloud:
+    image: ${NEXTCLOUD_IMAGE:?absent du fichier .env}
+    pull_policy: never
+    env_file:
+      - .env
+    ports:
+      - '8080:80'
+    volumes:
+      - ./html:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      # status.php répond 200 avant comme après l'installation ; localhost est toujours accepté.
+      # Au premier lancement, l'image copie d'abord Nextcloud dans ./html, d'où le délai.
+      test: ['CMD', 'curl', '-fsS', '-o', '/dev/null', 'http://localhost/status.php']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+      start_interval: 5s

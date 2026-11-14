@@ -1,0 +1,10 @@
+# HakOS : annonce de hako.local sur le réseau local (déjà présent dans Lite, gardé explicitement)
+avahi-daemon
+# Noms des applications (hako-photos.local, hako-fichiers.local) : avahi-publish (service hakos-noms)
+avahi-utils
+# Correctifs de sécurité de Debian appliqués seuls (origine limitée par files/52hakos-securite)
+unattended-upgrades
+# Pare-feu de la box (lib/phase.sh, parefeu/hakos.nft) : nft
+nftables
+# Assistant de première installation (/opt/box/assistant), bibliothèque standard seulement
+python3

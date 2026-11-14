@@ -1,0 +1,54 @@
+#!/usr/sbin/nft -f
+# HakOS : pare-feu de la box, chargé par /opt/box/lib/phase.sh (service hakos-parefeu, avant Docker).
+#   - rien n'entre en IPv6, sauf ce qu'il faut au réseau lui-même (ICMPv6, DHCPv6, mDNS) ;
+#   - TCP entrant depuis les IPv4 privées seulement (réseau de la maison) ;
+#   - ports des photos (2283) et des fichiers (8080) fermés tant que la HAKO n'est pas installée :
+#     phase.sh vide alors l'ensemble ports_fermes ; le port 80 (page de la HAKO) reste ouvert ;
+#   - port interne d'Immich (12283, sur 127.0.0.1) fermé au réseau dans tous les cas.
+# La box garde l'accès à tout par lo. Seule la table « inet hakos » est remplacée : les règles de
+# Docker (tables ip et ip6) restent intactes. Ne jamais faire « flush ruleset ».
+
+table inet hakos
+delete table inet hakos
+
+table inet hakos {
+	set ports_fermes {
+		type inet_service
+		elements = { 2283, 8080 }
+	}
+
+	set ports_internes {
+		type inet_service
+		elements = { 12283 }
+	}
+
+	set reseaux_maison {
+		type ipv4_addr
+		flags interval
+		elements = { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16 }
+	}
+
+	# Connexions adressées à la box elle-même (nginx de l'accueil sur le réseau de l'hôte,
+	# docker-proxy de Nextcloud en IPv6, SSH du profil dev).
+	chain entree {
+		type filter hook input priority filter - 10; policy accept;
+		iifname "lo" accept
+		ct state established,related accept
+		meta l4proto ipv6-icmp accept
+		meta nfproto ipv6 udp dport { 546, 5353 } accept
+		meta nfproto ipv6 drop
+		meta l4proto tcp ip saddr != @reseaux_maison reject with tcp reset
+		tcp dport @ports_internes reject with tcp reset
+		tcp dport @ports_fermes reject with tcp reset
+	}
+
+	# Connexions que Docker traduit vers un conteneur (port publié de Nextcloud) : elles passent par
+	# forward ; le port demandé à l'origine reste lisible dans le suivi de connexion.
+	chain transit {
+		type filter hook forward priority filter - 10; policy accept;
+		ct status dnat meta nfproto ipv6 drop
+		ct status dnat meta l4proto tcp ip saddr != @reseaux_maison reject with tcp reset
+		ct status dnat meta l4proto tcp ct original proto-dst @ports_internes reject with tcp reset
+		ct status dnat meta l4proto tcp ct original proto-dst @ports_fermes reject with tcp reset
+	}
+}

@@ -1,0 +1,79 @@
+# Immich (photos), d'après le docker-compose.yml officiel de la v3.4.1 :
+# https://github.com/immich-app/immich/releases/download/v3.4.1/docker-compose.yml
+# Services, noms des conteneurs, contrôles de santé et réglages officiels sont gardés. Écarts :
+#   - images désignées par leur seule étiquette, lue dans .env (lignes de versions.env) :
+#     « docker load » ne garde pas l'empreinte du registre ;
+#   - pull_policy: never sur chaque service : rien ne se télécharge chez le client ;
+#   - restart: unless-stopped au lieu de always ;
+#   - immich-machine-learning sous le profil compose « ml », que le premier démarrage active
+#     (COMPOSE_PROFILES=ml dans .env) si la box a au moins 7 Gio de mémoire ;
+#   - ./config monté dans immich-server : sans le profil « ml », IMMICH_CONFIG_FILE y désigne
+#     immich-sans-ml.json, qui coupe l'apprentissage automatique ;
+#   - cache des modèles dans ./model-cache au lieu d'un volume nommé ;
+#   - port publié sur 127.0.0.1:12283 seulement : le nginx de l'accueil sert le port 2283 au
+#     réseau de la maison et freine les essais de mot de passe (home/nginx/photos.conf).
+# Le fichier .env de ce dossier est écrit au premier démarrage (mode 600). Les chemins de données
+# sont relatifs à ce dossier : ./library (photos), ./postgres (base), ./model-cache.
+name: hakos-immich
+
+services:
+  immich-server:
+    container_name: immich_server
+    image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:?absent du fichier .env}
+    pull_policy: never
+    volumes:
+      # UPLOAD_LOCATION vaut ./library dans le fichier .env.
+      - ${UPLOAD_LOCATION:?absent du fichier .env}:/data
+      - /etc/localtime:/etc/localtime:ro
+      - ./config:/usr/src/app/hakos:ro
+    env_file:
+      - .env
+    ports:
+      - '127.0.0.1:12283:2283'
+    depends_on:
+      - redis
+      - database
+    restart: unless-stopped
+    healthcheck:
+      disable: false
+
+  immich-machine-learning:
+    container_name: immich_machine_learning
+    image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:?absent du fichier .env}
+    pull_policy: never
+    profiles:
+      - ml
+    volumes:
+      - ./model-cache:/cache
+    env_file:
+      - .env
+    environment:
+      MACHINE_LEARNING_MODEL_REVISION: v2
+    restart: unless-stopped
+    healthcheck:
+      disable: false
+
+  redis:
+    container_name: immich_redis
+    image: ${IMMICH_VALKEY_IMAGE:?absent du fichier .env}
+    pull_policy: never
+    healthcheck:
+      test: redis-cli ping | grep -q PONG || exit 1
+    restart: unless-stopped
+
+  database:
+    container_name: immich_postgres
+    image: ${IMMICH_POSTGRES_IMAGE:?absent du fichier .env}
+    pull_policy: never
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?absent du fichier .env}
+      POSTGRES_USER: ${DB_USERNAME:?absent du fichier .env}
+      POSTGRES_DB: ${DB_DATABASE_NAME:?absent du fichier .env}
+      POSTGRES_INITDB_ARGS: '--data-checksums'
+    volumes:
+      # DB_DATA_LOCATION vaut ./postgres dans le fichier .env (la box démarre sur SSD).
+      - ${DB_DATA_LOCATION:?absent du fichier .env}:/var/lib/postgresql/data
+    shm_size: 128mb
+    restart: unless-stopped
+    healthcheck:
+      disable: false

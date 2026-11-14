@@ -1,0 +1,11 @@
+// HakOS : les mises à jour automatiques se limitent aux correctifs de sécurité de Debian.
+// Ce fichier est lu après 50unattended-upgrades : « #clear » vide la liste de Debian, qui accepte
+// aussi les mises à jour de la version stable, puis seule l'origine Debian-Security est autorisée.
+// Les dépôts Raspberry Pi (archive.raspberrypi.com : noyau, firmware) et Docker (moteur Docker)
+// ne sont PAS mis à jour seuls, pas plus que les images Docker des applications : ils changent
+// seulement avec une nouvelle image HakOS.
+#clear Unattended-Upgrade::Origins-Pattern;
+Unattended-Upgrade::Origins-Pattern {
+	"origin=Debian,codename=${distro_codename},label=Debian-Security";
+	"origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
+};

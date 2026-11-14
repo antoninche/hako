@@ -1,0 +1,23 @@
+# HakOS : pare-feu de la box et page du port 80, selon l'état de la première installation.
+# Charge /opt/box/parefeu/hakos.nft avant Docker : tant que la HAKO n'est pas installée, personne
+# sur le réseau n'atteint Immich ni Nextcloud, donc personne ne peut y créer un administrateur.
+# Requis par docker.service : sans pare-feu, aucune application ne démarre.
+# Installé dans /etc/systemd/system et activé par stage-box/03-premier-demarrage.
+
+[Unit]
+Description=HakOS : pare-feu de la box (ports des applications fermés avant l'installation)
+DefaultDependencies=no
+After=local-fs.target systemd-tmpfiles-setup.service
+Before=network-pre.target docker.service hakos-premier-demarrage.service hakos-assistant.service
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/opt/box/lib/phase.sh appliquer
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+RequiredBy=docker.service

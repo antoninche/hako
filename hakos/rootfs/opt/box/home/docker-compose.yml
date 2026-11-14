@@ -1,0 +1,37 @@
+# Accueil de la box : nginx, sur le réseau de la box elle-même (network_mode: host), en IPv4.
+#   - port 80 : avant l'installation, la page de la HAKO (./assistant) et son API locale
+#     (socket Unix du service hakos-assistant) ; ensuite, la page d'état (./site), qui lit
+#     /api/etat (fichier écrit chaque minute par hakos-etat dans /run/hakos-etat), et les
+#     applications par leur nom : hako-photos.local (Immich), hako-fichiers.local (Nextcloud) ;
+#   - port 2283 : Immich, publié sur 127.0.0.1:12283 seulement, avec le frein des mots de passe
+#     (adresse de secours ; Nextcloud garde la sienne, le port 8080, publié par Docker).
+# Configuration dans ./nginx (lecture seule) ; le choix du port 80 dans phase.conf, du dossier
+# /var/lib/hakos/accueil, écrit par l'assistant et par /opt/box/lib/phase.sh.
+# Le fichier .env de ce dossier est écrit au premier démarrage (lignes de versions.env, puis
+# env.modele) : il donne le nom de l'image et le fuseau horaire.
+name: hakos-accueil
+
+services:
+  nginx:
+    image: ${NGINX_IMAGE:?absent du fichier .env}
+    pull_policy: never
+    environment:
+      TZ: ${TZ:-Europe/Paris}
+    network_mode: host
+    volumes:
+      - ./nginx/defaut.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx:/etc/nginx/hakos:ro
+      - /var/lib/hakos/accueil:/etc/nginx/hakos-etat:ro
+      - /run/hakos-assistant:/run/hakos-assistant:ro
+      - /run/hakos-etat:/run/hakos-etat:ro
+      - ./site:/usr/share/nginx/html:ro
+      - ./assistant:/usr/share/nginx/assistant:ro
+    restart: unless-stopped
+    healthcheck:
+      # wget de busybox, présent dans l'image alpine.
+      test: ['CMD', 'wget', '-q', '--spider', 'http://127.0.0.1/']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+      start_interval: 2s
