@@ -15,7 +15,6 @@ Les textes affichés sur le site sont dans `src/content/la-box.ts`. Si un logici
 | Docker Engine (projet Moby) | fait tourner chaque logiciel dans son conteneur | Apache 2.0                                                                                                 | https://docs.docker.com/engine/          | https://github.com/moby/moby/blob/master/LICENSE et https://docs.docker.com/engine/ |
 | Raspberry Pi OS Lite        | système de base                                 | pas de licence unique : logiciels libres de Debian et de Raspberry Pi, plus quelques micrologiciels fermés | https://www.raspberrypi.com/software/    | notes de version et recette de construction (voir plus bas)                         |
 | Debian 13 « trixie »        | socle de Raspberry Pi OS                        | logiciels libres selon les principes du logiciel libre selon Debian                                        | https://www.debian.org/                  | https://www.debian.org/social_contract.fr.html                                      |
-| PeerTube (page Tutoriels)   | plateforme vidéo libre                          | GNU AGPL v3                                                                                                | https://joinpeertube.org/fr              | https://github.com/Chocobozzz/PeerTube/blob/develop/LICENSE                         |
 
 ## Détail des preuves
 
@@ -31,8 +30,6 @@ Raspberry Pi OS Lite : les notes de version officielles (https://downloads.raspb
 
 Debian 13 « trixie » : la page https://www.debian.org/releases/trixie/ indique que la version 13.0 a été publiée le 9 août 2025, avec un suivi complet jusqu’au 9 août 2028 puis un suivi à long terme jusqu’au 30 juin 2030. Le contrat social de Debian (https://www.debian.org/social_contract.fr.html) dit : « Debian demeurera totalement libre » ; les paquets non libres sont rangés à part et « ne font pas partie du système Debian ».
 
-PeerTube : le fichier `LICENSE` de la branche `develop` est la GNU AGPL v3. Le site officiel le présente comme « un outil de partage de vidéos en ligne conçu par Framasoft, une association française à but non lucratif ».
-
 ## Ce qui n’est pas libre
 
 Le programme de démarrage de la Raspberry Pi 5 est enregistré dans une petite puce mémoire de la carte (l’EEPROM). Il est publié dans https://github.com/raspberrypi/rpi-eeprom sous forme de fichiers binaires seulement. Le fichier `LICENSE` de ce dépôt place le dossier `firmware-2712/*` (les images de la Raspberry Pi 5) sous une licence « custom » : « All rights reserved. Redistribution and use in binary form, without modification, are permitted… This software may only be used for the purposes of developing for, running or using a Raspberry Pi device. » Le code source de ce programme n’est pas publié. Seuls les scripts d’outillage du dépôt sont sous licence BSD.
@@ -43,7 +40,7 @@ La carte Raspberry Pi 5 n’est pas du matériel libre. Sa documentation officie
 
 ## Ce qui reste à préciser
 
-Le logiciel qui affiche la page d’accueil de la box (http://hako.local) et sa licence ne sont pas encore fixés. La recette qui fabrique le système de la box est notre propre travail, mais son dépôt n’est pas encore publié. Ces deux informations manquantes sont signalées en jaune sur la page « La box » (et, pour la page d’accueil, sur la page « Notre engagement ») et recensées dans TODO.md. Tant qu’elles manquent, le site ne dit pas que tous les logiciels de la box sont libres : il nomme ceux qui le sont (Immich, Nextcloud, Docker et Raspberry Pi OS).
+La page d’accueil de la box (http://hako.local) est notre propre travail, sous licence GNU GPL v3 ou version ultérieure (GPL-3.0-or-later, décision des fondateurs du 14/11). La recette qui fabrique le système de la box est elle aussi notre travail : elle sera publiée dans le dossier `hakos/` du dépôt antoninche/hako ; tant que ce dossier n’est pas en ligne, son lien reste signalé en jaune sur la page « La box » et recensé dans TODO.md. Le site ne dit pas que tous les logiciels de la box sont libres : il nomme ceux qui le sont (Immich, Nextcloud, Docker et Raspberry Pi OS).
 
 ## Refaire les vérifications
 
@@ -51,7 +48,7 @@ Les commandes suivantes, avec l’outil `gh` connecté à GitHub, redonnent les 
 
 ```sh
 for depot in immich-app/immich nextcloud/server nextcloud/calendar nextcloud/contacts \
-  moby/moby docker/cli raspberrypi/rpi-eeprom RPi-Distro/pi-gen Chocobozzz/PeerTube; do
+  moby/moby docker/cli raspberrypi/rpi-eeprom RPi-Distro/pi-gen; do
   gh api "repos/$depot/license" --jq '"\(.path) \(.license.spdx_id)"' | sed "s|^|$depot |"
 done
 gh api repos/raspberrypi/rpi-eeprom/contents/LICENSE --jq .content | base64 -d

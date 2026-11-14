@@ -51,7 +51,7 @@ import {
   toConfirm,
 } from '../data/installation';
 import { routes } from '../data/navigation';
-import { emailLink, phoneLink } from '../lib/commande/inline';
+import { emailLink } from '../lib/commande/inline';
 import type { Maybe } from '../lib/todo';
 import type { Link } from './la-box';
 import { videosOnline } from './tutoriels';
@@ -326,7 +326,7 @@ const tutorialsSentence = (lead: string): Sentence =>
         lead + ' : ',
         tutorialsLink,
         ', bientôt en ligne. En attendant, ',
-        contactLink('écrivez-nous ou appelez-nous'),
+        contactLink('écrivez-nous'),
         '.',
       ];
 
@@ -1236,7 +1236,7 @@ const steps = [
           ['Réglage à vérifier : ', toConfirm.windows, '.'],
           [
             'Vous n’avez pas d’autre appareil ? ',
-            contactLink('Écrivez-nous ou appelez-nous'),
+            contactLink('Écrivez-nous'),
             ' avant d’aller plus loin.',
           ],
         ],
@@ -2043,7 +2043,7 @@ export const installation = {
     /** Sous « Ça ne marche pas ? », dans chaque étape. */
     stillStuck: [
       'Ça bloque toujours ? ',
-      contactLink('Écrivez-nous ou appelez-nous'),
+      contactLink('Écrivez-nous'),
       ', en nous disant à quelle étape vous en êtes.',
     ] satisfies Sentence,
     /** Sans JavaScript, en haut du guide. */
@@ -2078,14 +2078,11 @@ export const installation = {
     title: 'Besoin d’aide ?',
     text: [
       [
-        'Écrivez-nous ou appelez-nous, en nous disant à quelle étape vous en êtes et ce que vous voyez à l’écran. Une fois votre HAKO installée, nous pouvons aussi vous aider par appel vidéo.',
+        'Écrivez-nous, en nous disant à quelle étape vous en êtes et ce que vous voyez à l’écran. Une fois votre HAKO installée, nous pouvons aussi vous aider par appel vidéo.',
       ],
     ] satisfies readonly Sentence[],
-    /** Coordonnées (src/data/entreprise.ts) : repère jaune tant qu’elles manquent. */
-    contacts: [
-      ['Par e-mail : ', emailLink(company.email)],
-      ['Par téléphone : ', phoneLink(company.phone)],
-    ] satisfies readonly Sentence[],
+    /** Adresse e-mail (src/data/entreprise.ts) : repère jaune tant qu’elle manque. */
+    contacts: [['Par e-mail : ', emailLink(company.email)]] satisfies readonly Sentence[],
     link: { label: 'Toutes nos coordonnées', href: routes.contact } satisfies Link,
   },
 } as const;

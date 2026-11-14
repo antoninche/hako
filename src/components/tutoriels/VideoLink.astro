@@ -1,13 +1,12 @@
 ---
 /**
- * Lien vers une vidéo sur YouTube ou sur PeerTube. Aucune vidéo n'est
- * intégrée dans la page.
+ * Lien vers une vidéo sur YouTube. Aucune vidéo n'est intégrée dans la
+ * page.
  *
  * La carte du tutoriel ne l'affiche que pour une adresse connue : tant
  * qu'elle manque (todo(…) dans src/content/tutoriels.ts), pas de ligne du
  * tout, donc jamais de lien mort (voir videos.ts).
  */
-import PeerTubeIcon from '../../assets/icons/social/peertube.svg';
 import YouTubeIcon from '../../assets/icons/social/youtube.svg';
 import { tutoriels, type Platform } from '../../content/tutoriels';
 
@@ -21,7 +20,7 @@ interface Props {
 const { platform, url, title } = Astro.props;
 const { labels } = tutoriels;
 const name = labels.platforms[platform];
-const Icon = platform === 'youtube' ? YouTubeIcon : PeerTubeIcon;
+const Icon = YouTubeIcon;
 ---
 
 <a class="video" href={url}>

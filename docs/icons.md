@@ -1,6 +1,6 @@
 # Icônes des réseaux sociaux
 
-Les cinq icônes du pied de page sont dans `src/assets/icons/social/` : `linkedin.svg`, `youtube.svg`, `facebook.svg`, `instagram.svg` et `peertube.svg`. Le composant `Icon` les insère dans la page. Chaque fichier a le même format : un `viewBox` de 24 × 24, un seul tracé rempli avec `fill="currentColor"` (l’icône prend la couleur du texte), pas de titre ni de dimensions. Le nom du réseau est toujours écrit à côté de l’icône, qui reste donc ignorée par les lecteurs d’écran.
+Les cinq icônes de réseaux sont dans `src/assets/icons/social/` : `linkedin.svg`, `youtube.svg`, `facebook.svg`, `instagram.svg` et `peertube.svg`. Le pied de page ne montre que les réseaux où HAKO a un compte (LinkedIn et YouTube, liste dans `src/data/entreprise.ts`) ; la page `/charte/` les montre toutes. Le composant `Icon` les insère dans la page. Chaque fichier a le même format : un `viewBox` de 24 × 24, un seul tracé rempli avec `fill="currentColor"` (l’icône prend la couleur du texte), pas de titre ni de dimensions. Le nom du réseau est toujours écrit à côté de l’icône, qui reste donc ignorée par les lecteurs d’écran.
 
 Les tracés sont recopiés caractère pour caractère depuis leur source officielle et rangés dans `scripts/logo/social.mjs`. `npm run logo:build` réécrit les cinq fichiers à partir de ce script et vérifie que chaque fichier livré se rend exactement comme le tracé d’origine (rapport dans `qa/logo/report.json`, rubrique `social`).
 

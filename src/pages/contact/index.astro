@@ -33,12 +33,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         {copy.reach.title}
       </h2>
       <ContactMethods />
-      <p class="block__note">
-        <Icon name="clock" class="block__note-icon" />
-        <span>
-          <Fact value={copy.reach.responseTime} />
-        </span>
-      </p>
 
       <div class="follow">
         <h3 class="kicker follow__title">{copy.social.title}</h3>
@@ -131,20 +125,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     font-size: var(--step-1);
     line-height: 1.5;
     color: var(--text-muted);
-  }
-
-  .block__note {
-    display: flex;
-    gap: var(--space-xs);
-    align-items: baseline;
-    margin: var(--space-m) 0 0;
-    color: var(--text-muted);
-  }
-
-  .block__note :global(.block__note-icon) {
-    width: 1.25rem;
-    height: 1.25rem;
-    transform: translateY(0.2em);
   }
 
   /* ---------- Tutoriels vidéo (fin de « Nous joindre ») ----------

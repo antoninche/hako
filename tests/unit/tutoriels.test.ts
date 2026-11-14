@@ -10,34 +10,21 @@ import { describe, it } from 'node:test';
 import { isComingSoon, onlineVideos } from '../../src/components/tutoriels/videos.ts';
 import { todo } from '../../src/lib/todo.ts';
 
-const platforms = ['youtube', 'peertube'] as const;
+const platforms = ['youtube'] as const;
 const youtube = 'https://www.youtube.com/watch?v=exemple';
-const peertube = 'https://peertube.exemple.fr/w/exemple';
-const missing = (platform: string) => todo(`Adresse de la vidéo sur ${platform}`, '[lien à venir]');
+const missing = todo('Adresse de la vidéo sur YouTube', '[lien à venir]');
 
 describe('vidéos d’un tutoriel', () => {
-  it('adresses inconnues : aucune ligne, « Bientôt »', () => {
-    const tutorial = { videos: { youtube: missing('YouTube'), peertube: missing('PeerTube') } };
+  it('adresse inconnue : aucune ligne, « Bientôt »', () => {
+    const tutorial = { videos: { youtube: missing } };
     assert.deepEqual(onlineVideos(tutorial, platforms), []);
     assert.equal(isComingSoon(tutorial, platforms), true);
   });
 
-  it('une seule adresse connue : un seul lien, sans « Bientôt »', () => {
-    const tutorial = { videos: { youtube: missing('YouTube'), peertube } };
-    assert.deepEqual(onlineVideos(tutorial, platforms), [{ platform: 'peertube', url: peertube }]);
+  it('adresse connue : un lien, sans « Bientôt »', () => {
+    const tutorial = { videos: { youtube } };
+    assert.deepEqual(onlineVideos(tutorial, platforms), [{ platform: 'youtube', url: youtube }]);
     assert.equal(isComingSoon(tutorial, platforms), false);
-  });
-
-  it('deux adresses connues : dans l’ordre des plateformes donné', () => {
-    const tutorial = { videos: { peertube, youtube } };
-    assert.deepEqual(onlineVideos(tutorial, platforms), [
-      { platform: 'youtube', url: youtube },
-      { platform: 'peertube', url: peertube },
-    ]);
-    assert.deepEqual(
-      onlineVideos(tutorial, ['peertube', 'youtube']).map((video) => video.platform),
-      ['peertube', 'youtube'],
-    );
   });
 
   it('sans vidéos du tout : « Bientôt »', () => {
@@ -46,6 +33,6 @@ describe('vidéos d’un tutoriel', () => {
   });
 
   it('tutoriel annoncé (soon: true) : « Bientôt », même avec une adresse', () => {
-    assert.equal(isComingSoon({ soon: true, videos: { youtube, peertube } }, platforms), true);
+    assert.equal(isComingSoon({ soon: true, videos: { youtube } }, platforms), true);
   });
 });

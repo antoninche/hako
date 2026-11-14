@@ -1,12 +1,13 @@
 ---
 /**
- * Moyens de nous joindre : e-mail, téléphone, et un renvoi vers le
- * formulaire de commande. Il n'y a pas de formulaire de contact : pour une
- * commande, la page Commander en tient lieu.
+ * Moyens de nous joindre : l'e-mail, et un renvoi vers le formulaire de
+ * commande. Il n'y a pas de formulaire de contact : pour une commande, la
+ * page Commander en tient lieu. Pas de téléphone : les fondateurs ont choisi
+ * de ne pas l'afficher.
  *
  * Textes : src/content/contact.ts. Coordonnées : src/data/entreprise.ts.
- * Tant qu'une coordonnée manque, le texte provisoire s'affiche surligné,
- * sans lien ; une fois connue, <Fact> en fait un lien « mailto: » ou « tel: ».
+ * Tant que l'adresse manque, le texte provisoire s'affiche surligné, sans
+ * lien ; une fois connue, <Fact> en fait un lien « mailto: ».
  */
 import Fact from '../Fact.astro';
 import Icon from '../Icon.astro';
@@ -14,7 +15,7 @@ import { contactPage } from '../../content/contact';
 import { company } from '../../data/entreprise';
 
 const { reach } = contactPage;
-const { email, phone } = company;
+const { email } = company;
 ---
 
 <ul class="methods">
@@ -29,16 +30,6 @@ const { email, phone } = company;
   </li>
 
   <li class="method">
-    <span class="method__badge">
-      <Icon name="phone" />
-    </span>
-    <h3 class="kicker method__title">{reach.phoneLabel}</h3>
-    <p class="method__value">
-      <Fact value={phone} link="phone" />
-    </p>
-  </li>
-
-  <li class="method method--order">
     <span class="method__badge">
       <Icon name="box" />
     </span>
@@ -63,20 +54,6 @@ const { email, phone } = company;
   @media (min-width: 40rem) {
     .methods {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .method--order {
-      grid-column: 1 / -1;
-    }
-  }
-
-  @media (min-width: 64rem) {
-    .methods {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .method--order {
-      grid-column: auto;
     }
   }
 
@@ -126,26 +103,5 @@ const { email, phone } = company;
   .method__button {
     gap: 0.5em;
     margin-block-start: var(--space-2xs);
-  }
-
-  /* Entre deux et trois colonnes, la carte « commander » occupe toute la
-     largeur : le bouton se place à droite du texte. */
-  @media (min-width: 40rem) and (max-width: 63.99rem) {
-    .method--order {
-      grid-template-columns: auto minmax(0, 1fr) auto;
-      align-items: center;
-      column-gap: var(--space-m);
-    }
-
-    .method--order .method__badge {
-      grid-row: 1 / 3;
-      margin: 0;
-    }
-
-    .method--order .method__button {
-      grid-column: 3;
-      grid-row: 1 / 3;
-      margin: 0;
-    }
   }
 </style>

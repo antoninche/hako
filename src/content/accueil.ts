@@ -238,7 +238,7 @@ export const steps: StepsCopy = {
     {
       illustration: 'etape-chez-vous',
       title: 'Au quotidien, chez vous',
-      text: 'Vos photos et vos fichiers restent à la maison. Pour une question, écrivez-nous ou appelez-nous. De courts tutoriels vidéo sont en préparation.',
+      text: 'Vos photos et vos fichiers restent à la maison. Pour une question, écrivez-nous. De courts tutoriels vidéo sont en préparation.',
     },
   ],
 };
@@ -374,7 +374,7 @@ export const trust: TrustCopy = {
     {
       icon: 'icones/engagement-humain-proche',
       title: 'Un humain près de chez vous',
-      text: 'Nous venons chez vous pour l’installation et la formation. Ensuite, nous restons joignables par téléphone et par e-mail, ou en appel vidéo si vous êtes loin.',
+      text: 'Nous venons chez vous pour l’installation et la formation. Ensuite, nous restons joignables par e-mail, ou en appel vidéo si vous êtes loin.',
     },
     {
       icon: 'icones/engagement-sans-pistage',
@@ -434,7 +434,7 @@ export interface FinalCallCopy {
 
 export const finalCall: FinalCallCopy = {
   title: 'Ramenez vos souvenirs à la maison',
-  text: 'Commandez votre box, ou posez-nous d’abord vos questions par e-mail ou par téléphone.',
+  text: 'Commandez votre box, ou posez-nous d’abord vos questions par e-mail.',
   primary: orderLink,
   secondary: { label: 'Nous poser une question', href: routes.contact },
   faq: { label: 'Lire les questions fréquentes', href: routes.faq },

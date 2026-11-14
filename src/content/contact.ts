@@ -1,7 +1,7 @@
 /**
  * Textes de la page « Contact et équipe » (/contact/).
  *
- * Les coordonnées (e-mail, téléphone, réseaux sociaux), la zone
+ * Les coordonnées (e-mail, réseaux sociaux), la zone
  * d’intervention et l’équipe (noms, portraits, présentations) viennent de
  * src/data/entreprise.ts : elles se renseignent là-bas, une seule fois pour
  * tout le site. Ici, seulement les phrases propres à cette page.
@@ -12,7 +12,6 @@
  * todo(…) par la phrase entre apostrophes droites.
  */
 import { routes, type NavLink } from '../data/navigation';
-import { todo, type Maybe } from '../lib/todo';
 
 export interface ContactPageCopy {
   readonly title: string;
@@ -22,9 +21,6 @@ export interface ContactPageCopy {
   readonly reach: {
     readonly title: string;
     readonly emailLabel: string;
-    readonly phoneLabel: string;
-    /** Phrase sur le délai habituel de réponse. */
-    readonly responseTime: Maybe<string>;
     readonly order: {
       readonly title: string;
       readonly text: string;
@@ -53,21 +49,16 @@ export interface ContactPageCopy {
 export const contactPage: ContactPageCopy = {
   title: 'Contact et équipe',
   description:
-    'Écrire ou téléphoner à HAKO, et faire connaissance avec l’équipe : trois étudiants en Provence, qui installent votre box chez vous.',
+    'Écrire à HAKO, et faire connaissance avec l’équipe : trois étudiants en Provence, qui installent votre box chez vous.',
   intro:
-    'Pour toute question sur la box ou sur votre commande, écrivez-nous ou appelez-nous. Nous sommes trois étudiants, en Provence.',
+    'Pour toute question sur la box ou sur votre commande, écrivez-nous. Nous sommes trois étudiants, en Provence.',
 
   reach: {
     title: 'Nous joindre',
     emailLabel: 'Par e-mail',
-    phoneLabel: 'Par téléphone',
-    responseTime: todo(
-      'Phrase sur le délai habituel de réponse aux messages et aux appels, avec les jours et les heures où quelqu’un répond au téléphone (par exemple « Nous répondons sous deux jours ouvrés. Au téléphone, du lundi au vendredi, de 9 h à 18 h. »)',
-      'Nous répondons sous [délai à préciser].',
-    ),
     order: {
       title: 'Pour commander',
-      text: 'Le formulaire vous guide en trois étapes. Pour l’instant, c’est une démonstration : pour commander, écrivez-nous ou appelez-nous.',
+      text: 'Le formulaire vous guide en trois étapes. Pour l’instant, c’est une démonstration : pour commander, écrivez-nous.',
       link: { label: 'Voir le formulaire', href: routes.order },
     },
   },
@@ -89,7 +80,7 @@ export const contactPage: ContactPageCopy = {
     title: 'Tutoriels vidéo',
     // Au futur tant qu’aucune vidéo n’est en ligne (voir src/content/tutoriels.ts),
     // au présent ensuite : « Nos tutoriels vidéo sont publiés sur… ».
-    text: 'Nos tutoriels vidéo seront publiés sur YouTube et sur PeerTube, une plateforme vidéo libre.',
+    text: 'Nos tutoriels vidéo seront publiés sur YouTube.',
     link: { label: 'Voir les tutoriels', href: routes.tutorials },
   },
 };

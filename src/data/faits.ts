@@ -79,13 +79,10 @@ export const proOpening = {
 /* ---------- Logiciels de la box ---------- */
 
 /**
- * Page d'accueil de la box (http://hako.local) : le logiciel qui l'affiche
- * et sa licence ne sont pas encore fixés (pages La box et Notre engagement).
+ * Page d'accueil de la box (http://hako.local) : licence GPL-3.0-or-later,
+ * celle de HakOS (décision des fondateurs du 14/11). Page La box.
  */
-export const homePageLicense = todo(
-  'Page d’accueil de la box (http://hako.local) : logiciel utilisé et licence, à préciser',
-  '[licence à préciser]',
-);
+export const homePageLicense = 'GNU GPL v3 ou version ultérieure';
 
 /* ---------- Copie de secours ---------- */
 
@@ -132,10 +129,11 @@ export const payment =
   'Le paiement en ligne n’est pas encore possible : la box se règle en une seule fois, par virement bancaire, avant l’installation.';
 
 /**
- * L'abonnement de Hako Pro se paie lui aussi par virement, chaque mois
- * (décision de l'équipe). Pages Offres et FAQ.
+ * L'abonnement de Hako Pro se paie lui aussi par virement, chaque mois, dès
+ * l'installation (décisions de l'équipe). Pages Offres et FAQ.
  */
-export const proSubscriptionPayment = 'L’abonnement de Hako Pro se paie chaque mois, par virement.';
+export const proSubscriptionPayment =
+  'L’abonnement de Hako Pro se paie chaque mois, par virement, dès l’installation.';
 
 /* ---------- Garantie ---------- */
 

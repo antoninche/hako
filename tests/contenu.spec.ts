@@ -94,17 +94,13 @@ test('/tutoriels/ : « Bientôt » sans vidéo en ligne, sinon un lien nommé pa
         await links.evaluateAll((all) => all.map((link) => link.getAttribute('href'))),
       ).toEqual(urls);
       for (const link of await links.all()) {
-        await expect(link).toHaveAccessibleName(
-          new RegExp(`(YouTube|PeerTube).*${literal(item.title)}`),
-        );
+        await expect(link).toHaveAccessibleName(new RegExp(`YouTube.*${literal(item.title)}`));
       }
     }
   }
 });
 
-test('pied de page : réseaux sans adresse affichés sans lien, avec un seul repère jaune', async ({
-  page,
-}) => {
+test('pied de page : un lien par réseau connu, un nom sans lien sinon', async ({ page }) => {
   await page.goto('/');
   const footer = page.locator('footer.site-footer');
   const known = company.social.flatMap((network) => (isTodo(network.url) ? [] : [network.url]));
@@ -117,12 +113,7 @@ test('pied de page : réseaux sans adresse affichés sans lien, avec un seul rep
       .locator('.social-links a')
       .evaluateAll((all) => all.map((a) => a.getAttribute('href'))),
   ).toEqual(known);
-  // Aucun repère par réseau : un seul, après la liste, tant qu'une adresse manque.
   await expect(footer.locator('.social-links mark.todo')).toHaveCount(0);
-  const marker = footer.locator(
-    'mark.todo[data-todo="Adresses des pages et chaînes de HAKO sur les réseaux sociaux"]',
-  );
-  await expect(marker).toHaveCount(known.length < company.social.length ? 1 : 0);
 });
 
 test('/contact/ : les réseaux sociaux ne sont listés qu’une fois, dans le pied de page', async ({

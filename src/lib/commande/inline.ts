@@ -50,8 +50,3 @@ export function plainText(parts: readonly Inline[]): string {
 export function emailLink(value: Maybe<string>): TodoValue | LinkValue {
   return isTodo(value) ? value : { label: value, href: `mailto:${value}` };
 }
-
-/** Numéro de téléphone : un lien « tel: » une fois connu, le repère jaune avant. */
-export function phoneLink(value: Maybe<string>): TodoValue | LinkValue {
-  return isTodo(value) ? value : { label: value, href: `tel:${value.replace(/[^\d+]/g, '')}` };
-}

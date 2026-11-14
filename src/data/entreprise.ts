@@ -5,7 +5,9 @@
  * le site l'affiche surligné en jaune et `npm run todos` le recense dans TODO.md.
  * Quand l'information arrive, remplacez tout l'appel todo(…) par la valeur
  * entre apostrophes droites, par exemple :
- *   phone: todo('Numéro de téléphone de contact', '[numéro de téléphone]'),
+ *   // Le numéro n'est pas affiché comme moyen de contact (décision des
+  // fondateurs) : seules les mentions légales le demandent encore.
+  phone: todo('Numéro de téléphone de contact', '[numéro de téléphone]'),
  * devient
  *   phone: '04 00 00 00 00',
  *
@@ -33,6 +35,8 @@ export const company: Company = withFrenchTypography<Company>({
     'Adresse e-mail de contact, sur notre propre nom de domaine ou chez Proton Mail (jamais une adresse Gmail)',
     '[adresse e-mail]',
   ),
+  // Le numéro n'est pas affiché comme moyen de contact (décision des
+  // fondateurs) : seules les mentions légales le demandent encore.
   phone: todo('Numéro de téléphone de contact', '[numéro de téléphone]'),
   domain: todo('Nom de domaine du site', '[nom de domaine]'),
 
@@ -43,34 +47,18 @@ export const company: Company = withFrenchTypography<Company>({
       'bientôt, nous vous enverrons la box, et vous l’installerez vous-même avec notre guide pas à pas et nos tutoriels vidéo',
   },
 
+  // Seuls les réseaux où HAKO a un compte (décision des fondateurs du 14/11 :
+  // ni Facebook, ni Instagram, ni PeerTube).
   social: [
     {
       id: 'linkedin',
       name: 'LinkedIn',
-      url: todo('Adresse de la page LinkedIn de HAKO', '[lien à venir]'),
+      url: 'https://www.linkedin.com/company/box-hako/',
     },
     {
       id: 'youtube',
       name: 'YouTube',
-      url: todo('Adresse de la chaîne YouTube de HAKO', '[lien à venir]'),
-    },
-    {
-      id: 'facebook',
-      name: 'Facebook',
-      url: todo('Adresse de la page Facebook de HAKO', '[lien à venir]'),
-    },
-    {
-      id: 'instagram',
-      name: 'Instagram',
-      url: todo('Adresse du compte Instagram de HAKO', '[lien à venir]'),
-    },
-    {
-      id: 'peertube',
-      name: 'PeerTube',
-      url: todo(
-        'Adresse de la chaîne PeerTube de HAKO, et instance qui l’héberge',
-        '[lien à venir]',
-      ),
+      url: 'https://www.youtube.com/@hako-v1k',
     },
   ],
 
@@ -78,21 +66,21 @@ export const company: Company = withFrenchTypography<Company>({
     {
       role: 'Logiciel & système',
       name: 'Antonin Chenavaz',
-      portrait: todo('Portrait d’Antonin Chenavaz (logiciel et système)', '[portrait]'),
+      portrait: '/equipe/antonin.jpg',
       bio: 'Étudiant en licence MPCI (mathématiques, physique, chimie, informatique) à Aix-Marseille Université.',
       linkedin: 'https://www.linkedin.com/in/antonin-chenavaz-9b9215421/',
     },
     {
       role: 'Commerce & relation client',
       name: 'Maxime Pollaud',
-      portrait: todo('Portrait de Maxime Pollaud (commerce et relation client)', '[portrait]'),
+      portrait: '/equipe/maxime.jpg',
       bio: 'Étudiant en première année de BUT Techniques de commercialisation à l’IUT d’Aix-Marseille.',
       linkedin: 'https://www.linkedin.com/in/maxime-pollaud-488a77397/',
     },
     {
       role: 'Design & finance',
       name: 'Martin Dugail',
-      portrait: todo('Portrait de Martin Dugail (design et finance)', '[portrait]'),
+      portrait: '/equipe/martin.jpg',
       bio: 'Étudiant en licence MPCI (mathématiques, physique, chimie, informatique) à Aix-Marseille Université.',
       linkedin: 'https://www.linkedin.com/in/martin-dugail-15a5a742b/',
     },

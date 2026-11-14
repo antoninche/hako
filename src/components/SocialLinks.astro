@@ -4,26 +4,15 @@
  * src/data/entreprise.ts).
  *
  * Un réseau dont l'adresse est connue devient un lien. Tant qu'elle ne l'est
- * pas, on affiche son icône et son nom sans lien (jamais de lien mort), en
- * couleur plus discrète, et un seul repère jaune après la liste vaut pour
- * tous les réseaux. Chaque adresse reste un todo(…) dans entreprise.ts :
- * TODO.md les liste une par une.
+ * pas (todo(…) dans entreprise.ts, listé dans TODO.md), on affiche son icône
+ * et son nom sans lien (jamais de lien mort), en couleur plus discrète.
  * Les noms sont en police d'interface (D-DIN gras), comme le plan du site.
  *
  *   <SocialLinks />
  */
 import Icon from './Icon.astro';
-import Todo from './Todo.astro';
 import { company } from '../data/entreprise';
-import { isTodo, todo } from '../lib/todo';
-
-const anyMissing = company.social.some((network) => isTodo(network.url));
-// Le repère commun, recensé aussi dans TODO.md. Il disparaît de la page dès
-// que toutes les adresses sont connues : retirez alors aussi cette ligne.
-const missingLinks = todo(
-  'Adresses des pages et chaînes de HAKO sur les réseaux sociaux',
-  '[liens à venir]',
-);
+import { isTodo } from '../lib/todo';
 ---
 
 <ul class="social-links">
@@ -43,11 +32,6 @@ const missingLinks = todo(
     </li>
   ))}
 </ul>
-{anyMissing && (
-  <p class="social-links__todo">
-    <Todo what={missingLinks.todo}>{missingLinks.placeholder}</Todo>
-  </p>
-)}
 
 <style>
   .social-links {
@@ -87,9 +71,5 @@ const missingLinks = todo(
   .social-links__link:hover {
     color: var(--text);
     text-decoration: underline;
-  }
-
-  .social-links__todo {
-    margin-block-start: var(--space-2xs);
   }
 </style>

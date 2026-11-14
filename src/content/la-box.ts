@@ -100,9 +100,11 @@ const storageOptions = formatList(
 /* ---------- Recette du système de la box ---------- */
 
 /**
- * Adresse du dépôt public de la recette. Une fois le dépôt publié, remplacez
- * l'appel todo(…) par l'adresse entre apostrophes droites : le lien et la
- * phrase qui l'annonce changent tout seuls.
+ * Adresse du dépôt public de la recette. Décision du 14/11 : le dossier
+ * hakos/ du dépôt antoninche/hako
+ * (https://github.com/antoninche/hako/tree/main/hakos). Une fois ce dossier
+ * publié, remplacez l'appel todo(…) par cette adresse entre apostrophes
+ * droites : le lien et la phrase qui l'annonce changent tout seuls.
  */
 const recipeLink: Maybe<string> = todo(
   'Adresse du dépôt public de la recette du système de la box (image système), à publier',

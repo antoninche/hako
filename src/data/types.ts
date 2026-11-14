@@ -5,7 +5,12 @@
  */
 import type { Maybe } from '../lib/todo';
 
-export type SocialId = 'linkedin' | 'youtube' | 'facebook' | 'instagram' | 'peertube';
+/**
+ * Réseaux où HAKO a un compte. Les icônes de Facebook, d'Instagram et de
+ * PeerTube existent aussi (src/assets/icons/social/) : pour ajouter l'un de
+ * ces réseaux, ajoutez son nom ici puis sa ligne dans entreprise.ts.
+ */
+export type SocialId = 'linkedin' | 'youtube';
 
 export interface SocialLink {
   readonly id: SocialId;

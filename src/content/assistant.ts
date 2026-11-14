@@ -89,7 +89,7 @@ import {
 } from '../data/assistant';
 import { boxAddress, toConfirm } from '../data/installation';
 import { routes } from '../data/navigation';
-import { emailLink, phoneLink } from '../lib/commande/inline';
+import { emailLink } from '../lib/commande/inline';
 import type { Maybe } from '../lib/todo';
 import { installation, type StepId as GuideStepId } from './installation';
 import { videosOnline } from './tutoriels';
@@ -615,7 +615,7 @@ export const assistant = {
     /** Sous « Ça ne marche pas ? », sur chaque écran. */
     stillStuck: [
       'Ça bloque toujours ? ',
-      contact('Écrivez-nous ou appelez-nous'),
+      contact('Écrivez-nous'),
       ', en nous disant sur quel écran vous êtes.',
     ] satisfies Sentence,
     /** Après chaque lien de la page de la HAKO vers le site, qui s’ouvre dans un nouvel onglet. */
@@ -1588,7 +1588,7 @@ export const assistant = {
     date: 'Date :',
     footer: [
       ['Fiche créée par votre HAKO, chez vous. Notre équipe n’en a aucune copie.'],
-      ['Besoin d’aide ? ', emailLink(company.email), ' · ', phoneLink(company.phone)],
+      ['Besoin d’aide ? ', emailLink(company.email)],
     ],
   } satisfies Printout,
 } as const;

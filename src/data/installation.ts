@@ -312,10 +312,8 @@ export const toConfirm: PendingFacts = withFrenchTypography<PendingFacts>({
     'Chrome en mode le plus strict (« Toujours utiliser des connexions sécurisées ») : message exact avant d’ouvrir la page de la HAKO en http://, et bouton à choisir pour continuer',
     '[bouton à confirmer]',
   ),
-  neverAsk: todo(
-    'Engagement à confirmer par les fondateurs : ne jamais demander leurs mots de passe aux clients',
-    '[Nous ne vous demanderons jamais vos mots de passe, ni par téléphone, ni par e-mail.]',
-  ),
+  // Engagement confirmé par les fondateurs (14/11).
+  neverAsk: 'Nous ne vous demanderons jamais vos mots de passe, ni par téléphone, ni par e-mail.',
   iosOtherBrowser: todo(
     'iPhone ou iPad : Chrome, Firefox et Edge (bâtis sur WebKit) sont exemptés de l’autorisation « Réseau local » comme Safari (Apple TN3179) ; les navigateurs à moteur propre autorisés dans l’Union européenne ne sont pas vérifiés',
     '[à vérifier]',

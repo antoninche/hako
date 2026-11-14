@@ -3,19 +3,11 @@
 Ce fichier est produit par `npm run todos` : ne le modifiez pas à la main.
 Chaque ligne donne le numéro de ligne dans le fichier source, ce qui manque, puis le texte provisoire affiché sur le site.
 
-Total : 79 informations manquantes dans 17 fichiers.
-
-## src/components/SocialLinks.astro
-
-- L23 - Adresses des pages et chaînes de HAKO sur les réseaux sociaux - [liens à venir]
+Total : 62 informations manquantes dans 13 fichiers.
 
 ## src/content/commande.ts
 
-- L32 - Durée de conservation des informations d’une demande de commande - [durée de conservation]
-
-## src/content/contact.ts
-
-- L64 - Phrase sur le délai habituel de réponse aux messages et aux appels, avec les jours et les heures où quelqu’un répond au téléphone (par exemple « Nous répondons sous deux jours ouvrés. Au téléphone, du lundi au vendredi, de 9 h à 18 h. ») - Nous répondons sous [délai à préciser].
+- L31 - Durée de conservation des informations d’une demande de commande - [durée de conservation]
 
 ## src/content/faq/consommation-electrique.mdx
 
@@ -25,13 +17,9 @@ Total : 79 informations manquantes dans 17 fichiers.
 
 - L13 - Ce que deviennent les copies restées chez Google ou Apple après le déménagement, et ce que nous conseillons au client - [ce que nous conseillons]
 
-## src/content/faq/si-hako-disparait.mdx
-
-- L11 - Ce que nous prévoyons si HAKO cesse son activité : ce que nous remettons au client (documentation, accès d’administration) pour qu’il continue seul ou avec un autre prestataire - [ce que nous prévoyons dans ce cas]
-
 ## src/content/la-box.ts
 
-- L107 - Adresse du dépôt public de la recette du système de la box (image système), à publier - [lien à venir]
+- L109 - Adresse du dépôt public de la recette du système de la box (image système), à publier - [lien à venir]
 
 ## src/content/legal/cgv.mdx
 
@@ -66,18 +54,11 @@ Total : 79 informations manquantes dans 17 fichiers.
 - L17 - Mentions légales : numéro de TVA intracommunautaire, ou mention « TVA non applicable, art. 293 B du CGI » en franchise de TVA - [numéro de TVA ou mention de franchise]
 - L21 - Mentions légales : prénom et nom de la personne responsable de la publication du site - [Prénom Nom]
 
-## src/content/offres.ts
-
-- L35 - Délai sous lequel nous rappelons après une demande de commande - [délai]
-
 ## src/content/tutoriels.ts
 
-- L70 - Adresse de la vidéo « Prise en main et installation » sur YouTube - [lien à venir]
-- L74 - Adresse de la vidéo « Prise en main et installation » sur PeerTube - [lien à venir]
-- L89 - Adresse de la vidéo « Accéder à ses données » sur YouTube - [lien à venir]
-- L90 - Adresse de la vidéo « Accéder à ses données » sur PeerTube - [lien à venir]
-- L111 - Adresse de la vidéo « Récupérer ses photos depuis Google Photos ou iCloud » sur YouTube - [lien à venir]
-- L115 - Adresse de la vidéo « Récupérer ses photos depuis Google Photos ou iCloud » sur PeerTube - [lien à venir]
+- L67 - Adresse de la vidéo « Prise en main et installation » sur YouTube - [lien à venir]
+- L82 - Adresse de la vidéo « Accéder à ses données » sur YouTube - [lien à venir]
+- L100 - Adresse de la vidéo « Récupérer ses photos depuis Google Photos ou iCloud » sur YouTube - [lien à venir]
 
 ## src/data/assistant.ts
 
@@ -88,22 +69,13 @@ Total : 79 informations manquantes dans 17 fichiers.
 
 ## src/data/entreprise.ts
 
-- L32 - Adresse e-mail de contact, sur notre propre nom de domaine ou chez Proton Mail (jamais une adresse Gmail) - [adresse e-mail]
-- L36 - Numéro de téléphone de contact - [numéro de téléphone]
-- L37 - Nom de domaine du site - [nom de domaine]
-- L50 - Adresse de la page LinkedIn de HAKO - [lien à venir]
-- L55 - Adresse de la chaîne YouTube de HAKO - [lien à venir]
-- L60 - Adresse de la page Facebook de HAKO - [lien à venir]
-- L65 - Adresse du compte Instagram de HAKO - [lien à venir]
-- L70 - Adresse de la chaîne PeerTube de HAKO, et instance qui l’héberge - [lien à venir]
-- L81 - Portrait d’Antonin Chenavaz (logiciel et système) - [portrait]
-- L88 - Portrait de Maxime Pollaud (commerce et relation client) - [portrait]
-- L95 - Portrait de Martin Dugail (design et finance) - [portrait]
+- L34 - Adresse e-mail de contact, sur notre propre nom de domaine ou chez Proton Mail (jamais une adresse Gmail) - [adresse e-mail]
+- L40 - Numéro de téléphone de contact - [numéro de téléphone]
+- L41 - Nom de domaine du site - [nom de domaine]
 
 ## src/data/faits.ts
 
-- L85 - Page d’accueil de la box (http://hako.local) : logiciel utilisé et licence, à préciser - [licence à préciser]
-- L142 - Garantie d’un an de la box : ce qu’elle couvre (pièces, main-d’œuvre, envoi ou déplacement) et comment la faire jouer - [à confirmer]
+- L140 - Garantie d’un an de la box : ce qu’elle couvre (pièces, main-d’œuvre, envoi ou déplacement) et comment la faire jouer - [à confirmer]
 
 ## src/data/installation.ts
 
@@ -125,11 +97,10 @@ Total : 79 informations manquantes dans 17 fichiers.
 - L303 - Ordinateur Windows 10 ou 11 : réglage à vérifier quand hako.local ne s’ouvre pas (profil réseau « Public » ?), avec son chemin exact - [à vérifier]
 - L307 - Deux HAKO sur le même réseau : les noms hako.local et hako-2.local restent-ils attachés à la même HAKO après une coupure de courant qui les redémarre toutes les deux ? - [à vérifier]
 - L311 - Chrome en mode le plus strict (« Toujours utiliser des connexions sécurisées ») : message exact avant d’ouvrir la page de la HAKO en http://, et bouton à choisir pour continuer - [bouton à confirmer]
-- L315 - Engagement à confirmer par les fondateurs : ne jamais demander leurs mots de passe aux clients - [Nous ne vous demanderons jamais vos mots de passe, ni par téléphone, ni par e-mail.]
-- L319 - iPhone ou iPad : Chrome, Firefox et Edge (bâtis sur WebKit) sont exemptés de l’autorisation « Réseau local » comme Safari (Apple TN3179) ; les navigateurs à moteur propre autorisés dans l’Union européenne ne sont pas vérifiés - [à vérifier]
-- L323 - Procédure exacte dans Immich (version figée sur la HAKO) pour activer la sauvegarde des photos, et autorisation « Photos » demandée par l’iPhone et par Android (choix à faire) - [procédure à confirmer]
-- L327 - Connexion dans l’application Nextcloud, sur iPhone et sur Android, avec la version figée sur la HAKO : adresse en http:// acceptée ? invite « Réseau local » ? page de connexion et bouton pour autoriser l’application (libellés exacts) - [gestes à vérifier]
-- L331 - Application Immich ou Nextcloud du téléphone, mise à jour par sa boutique, qui refuse la version figée sur la HAKO (Immich v3.4.1) : message affiché, cause et que faire - [à vérifier]
+- L317 - iPhone ou iPad : Chrome, Firefox et Edge (bâtis sur WebKit) sont exemptés de l’autorisation « Réseau local » comme Safari (Apple TN3179) ; les navigateurs à moteur propre autorisés dans l’Union européenne ne sont pas vérifiés - [à vérifier]
+- L321 - Procédure exacte dans Immich (version figée sur la HAKO) pour activer la sauvegarde des photos, et autorisation « Photos » demandée par l’iPhone et par Android (choix à faire) - [procédure à confirmer]
+- L325 - Connexion dans l’application Nextcloud, sur iPhone et sur Android, avec la version figée sur la HAKO : adresse en http:// acceptée ? invite « Réseau local » ? page de connexion et bouton pour autoriser l’application (libellés exacts) - [gestes à vérifier]
+- L329 - Application Immich ou Nextcloud du téléphone, mise à jour par sa boutique, qui refuse la version figée sur la HAKO (Immich v3.4.1) : message affiché, cause et que faire - [à vérifier]
 
 ## src/data/model.config.json
 

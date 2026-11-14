@@ -7,7 +7,7 @@
  * jaune et `npm run todos` la recense dans TODO.md.
  *
  * Une phrase qui contient une information manquante, un lien ou un prix
- * s'écrit comme une liste de morceaux : ['Nous vous appelons sous ', délai, '.'].
+ * s'écrit comme une liste de morceaux : ['La box coûte ', prix, '.'].
  *
  * Typographie : apostrophe ’, espace insécable avant « : » « ? » « ! » « ; »
  * et à l'intérieur des guillemets « ».
@@ -29,13 +29,6 @@ import { orMissing, price } from '../lib/commande/inline.ts';
 import { findStorage } from '../lib/commande/pricing.ts';
 import type { LinkValue, RichText } from '../lib/commande/types.ts';
 import { formatEur, formatList } from '../lib/format.ts';
-import { todo } from '../lib/todo.ts';
-
-/** Délai sous lequel nous rappelons après une demande (repris par la page Commander). */
-export const callbackDelay = todo(
-  'Délai sous lequel nous rappelons après une demande de commande',
-  '[délai]',
-);
 
 const home = pricing.offers.home;
 
@@ -306,9 +299,7 @@ export const offresPage = {
       {
         title: 'Nous vous appelons',
         text: [
-          'Nous vous appelons sous ',
-          callbackDelay,
-          ' pour confirmer votre commande et fixer le rendez-vous d’installation.',
+          'Nous vous appelons pour confirmer votre commande et fixer le rendez-vous d’installation.',
         ],
       },
       {

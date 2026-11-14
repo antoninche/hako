@@ -2,6 +2,24 @@
 
 Les modifications notables du site sont notées ici, de la plus récente à la plus ancienne. Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et les numéros de version suivent la [gestion sémantique de version](https://semver.org/lang/fr/).
 
+## [0.4.1] - 2026-11-14
+
+### Ajouté
+
+- Portraits des trois fondateurs sur la page Contact (`public/equipe/`, recadrés en 4:5).
+- Liens vers la page LinkedIn et la chaîne YouTube de HAKO, dans le pied de page et sur la page Tutoriels.
+
+### Modifié
+
+- Réponses des fondateurs écrites à la place des informations manquantes : licence de la page d’accueil de la box (GNU GPL v3 ou version ultérieure), engagement de ne jamais demander les mots de passe, abonnement de Hako Pro payé dès l’installation, FAQ « Et si HAKO disparaît ? » (« Vous, vous gardez tout »).
+- Les tutoriels vidéo sont annoncés sur YouTube seulement.
+
+### Retiré
+
+- Téléphone comme moyen de contact (page Contact, accueil, FAQ, Commander, guide d’installation, page de la HAKO et sa fiche) : seules les mentions légales le demandent encore.
+- Délai de réponse de la page Contact et délai de rappel après une demande de commande (pages Offres et Commander).
+- Facebook, Instagram et PeerTube : liens du pied de page, chaîne et vidéos PeerTube de la page Tutoriels, repère « liens à venir ».
+
 ## [0.4.0] - 2026-11-14
 
 ### Ajouté

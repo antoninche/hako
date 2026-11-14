@@ -1,9 +1,10 @@
 /**
  * Textes de la page « Tutoriels » (/tutoriels/).
  *
- * Les vidéos sont publiées sur YouTube et sur PeerTube. Elles ne sont jamais
- * intégrées dans le site (aucun lecteur vidéo, aucune requête vers ces
- * plateformes) : chaque carte propose de simples liens.
+ * Les vidéos sont publiées sur YouTube (pas de PeerTube : décision des
+ * fondateurs du 14/11). Elles ne sont jamais intégrées dans le site (aucun
+ * lecteur vidéo, aucune requête vers YouTube) : chaque carte propose un
+ * simple lien.
  *
  * Pour publier une vidéo, remplacez l'appel todo(…) de son adresse par
  * l'adresse complète entre apostrophes droites, par exemple :
@@ -26,7 +27,7 @@ import type { Link, Paragraph } from './la-box';
 export type TutorialSlug =
   'prise-en-main' | 'acceder-donnees' | 'recuperer-photos' | 'verifier-sauvegarde';
 
-export type Platform = 'youtube' | 'peertube';
+export type Platform = 'youtube';
 
 export interface Tutorial {
   readonly slug: TutorialSlug;
@@ -38,11 +39,8 @@ export interface Tutorial {
   readonly soon?: boolean;
 }
 
-/** Les deux plateformes, dans l'ordre d'affichage. */
-const platforms = { youtube: 'YouTube', peertube: 'PeerTube' } as const satisfies Record<
-  Platform,
-  string
->;
+/** Les plateformes, dans l'ordre d'affichage. */
+const platforms = { youtube: 'YouTube' } as const satisfies Record<Platform, string>;
 
 /** Vrai dès qu'une vidéo a une adresse : les textes passent alors du futur au présent. */
 const published = (items: readonly Tutorial[]): boolean =>
@@ -51,8 +49,7 @@ const published = (items: readonly Tutorial[]): boolean =>
   );
 
 const channels = company.social.filter(
-  (link): link is (typeof company.social)[number] & { id: Platform } =>
-    link.id === 'youtube' || link.id === 'peertube',
+  (link): link is (typeof company.social)[number] & { id: Platform } => link.id === 'youtube',
 );
 
 const items = [
@@ -68,12 +65,8 @@ const items = [
     ],
     videos: {
       youtube: todo(
-        'Adresse de la vidéo « Prise en main et installation » sur YouTube',
-        '[lien à venir]',
-      ),
-      peertube: todo(
-        'Adresse de la vidéo « Prise en main et installation » sur PeerTube',
-        '[lien à venir]',
+        'Adresse de la vidéo « Prise en main et installation » sur YouTube',
+        '[lien à venir]',
       ),
     },
   },
@@ -86,11 +79,7 @@ const items = [
       ],
     ],
     videos: {
-      youtube: todo('Adresse de la vidéo « Accéder à ses données » sur YouTube', '[lien à venir]'),
-      peertube: todo(
-        'Adresse de la vidéo « Accéder à ses données » sur PeerTube',
-        '[lien à venir]',
-      ),
+      youtube: todo('Adresse de la vidéo « Accéder à ses données » sur YouTube', '[lien à venir]'),
     },
   },
   {
@@ -109,12 +98,8 @@ const items = [
     ],
     videos: {
       youtube: todo(
-        'Adresse de la vidéo « Récupérer ses photos depuis Google Photos ou iCloud » sur YouTube',
-        '[lien à venir]',
-      ),
-      peertube: todo(
-        'Adresse de la vidéo « Récupérer ses photos depuis Google Photos ou iCloud » sur PeerTube',
-        '[lien à venir]',
+        'Adresse de la vidéo « Récupérer ses photos depuis Google Photos ou iCloud » sur YouTube',
+        '[lien à venir]',
       ),
     },
   },
@@ -139,15 +124,15 @@ export const tutoriels = {
     title: 'Tutoriels vidéo pour prendre en main votre box',
     // Futur tant qu'aucune vidéo n'est en ligne, présent ensuite (voir published()).
     description: videosOnline
-      ? 'Les tutoriels vidéo de HAKO : prise en main de la box, accès à vos données, photos récupérées depuis Google Photos ou iCloud. Sur YouTube et sur PeerTube.'
-      : 'Les tutoriels vidéo de HAKO : prise en main de la box, accès à vos données, photos récupérées depuis Google Photos ou iCloud. À venir sur YouTube et PeerTube.',
+      ? 'Les tutoriels vidéo de HAKO : prise en main de la box, accès à vos données, photos récupérées depuis Google Photos ou iCloud. Sur YouTube.'
+      : 'Les tutoriels vidéo de HAKO : prise en main de la box, accès à vos données, photos récupérées depuis Google Photos ou iCloud. À venir sur YouTube.',
   },
 
   intro: {
     title: 'Tutoriels',
     lead: videosOnline
-      ? 'De courtes vidéos pour prendre votre box en main, à votre rythme, à regarder sur YouTube ou sur PeerTube.'
-      : 'De courtes vidéos pour prendre votre box en main, à votre rythme. Vous pourrez les regarder sur YouTube ou sur PeerTube.',
+      ? 'De courtes vidéos pour prendre votre box en main, à votre rythme, à regarder sur YouTube.'
+      : 'De courtes vidéos pour prendre votre box en main, à votre rythme. Vous pourrez les regarder sur YouTube.',
     // Bientôt, hors de notre zone, la personne installera la HAKO elle-même : le guide écrit, pas à pas.
     guide: {
       text: 'Bientôt, hors de notre zone, vous installerez votre HAKO vous-même.',
@@ -159,7 +144,7 @@ export const tutoriels = {
   },
 
   labels: {
-    /** « Regarder sur YouTube », « Regarder sur PeerTube ». */
+    /** « Regarder sur YouTube ». */
     watchOn: 'Regarder sur',
     soon: 'Bientôt',
     platforms,
@@ -171,22 +156,15 @@ export const tutoriels = {
   items,
 
   platformsNote: {
-    title: 'YouTube et PeerTube',
+    title: 'YouTube',
     text: [
       [
-        'Pour que ce site reste sans traceur, les vidéos n’y sont pas intégrées : chaque lien ouvre la vidéo directement sur YouTube ou sur PeerTube.',
-      ],
-      [
-        'PeerTube est un outil libre de partage de vidéos, conçu par Framasoft, une association française à but non lucratif.',
+        'Pour que ce site reste sans traceur, les vidéos n’y sont pas intégrées : chaque lien ouvre la vidéo directement sur YouTube.',
       ],
     ] satisfies readonly Paragraph[],
-    /** Nos chaînes (adresses dans src/data/entreprise.ts). */
-    channelsLabel: 'Nos chaînes',
+    /** Notre chaîne (adresse dans src/data/entreprise.ts). */
+    channelsLabel: 'Notre chaîne',
     channels,
-    peertubeSite: {
-      label: 'Découvrir PeerTube',
-      href: 'https://joinpeertube.org/fr',
-    } satisfies Link,
   },
 
   help: {

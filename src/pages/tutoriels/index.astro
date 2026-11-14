@@ -1,8 +1,8 @@
 ---
 /**
- * Page « Tutoriels » : quatre courtes vidéos, publiées sur YouTube et sur
- * PeerTube. Aucun lecteur intégré : la page ne fait aucune requête vers
- * ces plateformes, elle propose de simples liens.
+ * Page « Tutoriels » : quatre courtes vidéos, publiées sur YouTube. Aucun
+ * lecteur intégré : la page ne fait aucune requête vers YouTube, elle
+ * propose de simples liens.
  * Tous les textes sont dans src/content/tutoriels.ts.
  */
 import PageIntro from '../../components/PageIntro.astro';
@@ -44,9 +44,6 @@ const { meta, intro, listLabel, items, platformsNote, help } = tutoriels;
       <div class="platforms__text">
         <h2 id="titre-plateformes">{platformsNote.title}</h2>
         <Prose paragraphs={platformsNote.text} />
-        <p class="platforms__more">
-          <TextLink link={platformsNote.peertubeSite} />
-        </p>
       </div>
       <div class="channels surface-creme">
         <h3 class="channels__title">{platformsNote.channelsLabel}</h3>
@@ -93,7 +90,7 @@ const { meta, intro, listLabel, items, platformsNote, help } = tutoriels;
     }
   }
 
-  /* ---------- YouTube et PeerTube ---------- */
+  /* ---------- YouTube ---------- */
   .platforms {
     display: grid;
     gap: var(--space-xl);
@@ -103,10 +100,6 @@ const { meta, intro, listLabel, items, platformsNote, help } = tutoriels;
     display: grid;
     align-content: start;
     gap: var(--space-s);
-  }
-
-  .platforms__more {
-    margin: 0;
   }
 
   .channels {

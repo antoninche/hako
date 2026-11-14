@@ -14,12 +14,11 @@ import { company } from '../data/entreprise.ts';
 import { payment } from '../data/faits.ts';
 import { routes } from '../data/navigation.ts';
 import { pricing } from '../data/tarifs.ts';
-import { emailLink, phoneLink } from '../lib/commande/inline.ts';
+import { emailLink } from '../lib/commande/inline.ts';
 import { findStorage } from '../lib/commande/pricing.ts';
 import type { LinkValue, RichText, TimeSlotId } from '../lib/commande/types.ts';
 import type { OrderField, ValidationCode } from '../lib/commande/validation.ts';
 import { isTodo, todo } from '../lib/todo.ts';
-import { callbackDelay } from './offres.ts';
 
 export interface FieldCopy {
   readonly label: string;
@@ -35,7 +34,6 @@ const retention = todo(
 );
 
 const email = emailLink(company.email);
-const phone = phoneLink(company.phone);
 const includedStorage = findStorage(pricing, pricing.includedStorage);
 
 /** Hors de la zone : la box est envoyée (src/data/entreprise.ts), écrit ici en début de phrase. */
@@ -60,8 +58,6 @@ export const commandePage = {
     text: [
       'Ce formulaire n’envoie encore rien : ce que vous saisissez reste dans votre navigateur. Pour commander dès maintenant, écrivez-nous à ',
       email,
-      ' ou appelez le ',
-      phone,
       '.',
     ] satisfies RichText,
   },
@@ -69,8 +65,6 @@ export const commandePage = {
   noscript: [
     'Ce formulaire a besoin de JavaScript pour calculer votre total et préparer votre demande. Sans JavaScript, vous pouvez lire les deux premières étapes ci-dessous, mais pas envoyer votre demande. Pour commander, écrivez-nous à ',
     email,
-    ' ou appelez le ',
-    phone,
     '.',
   ] satisfies RichText,
   requiredNote: 'Tous les champs sont obligatoires, sauf ceux marqués « facultatif ».',
@@ -221,9 +215,7 @@ export const commandePage = {
     note: 'Précisions',
   },
   payment: [
-    'Aucun paiement maintenant : nous vous appelons sous ',
-    callbackDelay,
-    ' pour confirmer votre commande et convenir de l’installation ou de l’envoi. ',
+    'Aucun paiement maintenant : nous vous appelons pour confirmer votre commande et convenir de l’installation ou de l’envoi. ',
     payment,
   ] satisfies RichText,
   consents: {
@@ -246,13 +238,7 @@ export const commandePage = {
   confirmation: {
     title: 'Mode démonstration : aucune donnée n’a été envoyée',
     text: 'Ce formulaire n’est pas encore en service : votre demande ne nous est pas parvenue.',
-    contact: [
-      'Pour commander dès maintenant, écrivez-nous à ',
-      email,
-      ' ou appelez le ',
-      phone,
-      '.',
-    ] satisfies RichText,
+    contact: ['Pour commander dès maintenant, écrivez-nous à ', email, '.'] satisfies RichText,
     back: 'Revenir à ma demande',
   },
 
