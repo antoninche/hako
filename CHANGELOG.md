@@ -2,6 +2,13 @@
 
 Les versions de HakOS (MaBox OS jusqu'au Lot 0) ont suivi les lots du projet jusqu'au Lot 5. Depuis 2026.11.1, elles portent un numéro AAAA.MM.n (HAKOS_VERSION de versions.env), affiché sur la page d'état.
 
+## [2026.11.2] - 2026-11-14
+
+### Modifié
+
+- Page de la HAKO reconstruite depuis hako-site 0.4.2 (commit 4fcd7dd, SITE_URL=https://antoninche.github.io/hako) : elle donne les adresses http://hako-photos.local et http://hako-fichiers.local, sans les ports 2283 et 8080, et l'adresse e-mail de contact.
+- Adresse du site public : https://antoninche.github.io/hako (HAKO_SITE_URL de versions.env, liens de la page d'état et de la page d'arrêt).
+
 ## [2026.11.1] - 2026-11-14
 
 ### Ajouté

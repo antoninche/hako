@@ -182,7 +182,6 @@ C'est le format netplan v2 de l'exemple commenté que Raspberry Pi met dans ce m
 - Sous 7 Gio de mémoire (Pi 5 de 4 Go), l'apprentissage automatique d'Immich est coupé par un fichier de configuration (IMMICH_CONFIG_FILE) : d'après la documentation d'Immich, les réglages ne sont alors plus modifiables dans l'interface web.
 - Nextcloud accepte hako.local, hako-2.local, hako-fichiers.local, hako-2-fichiers.local et l'adresse IPv4 de la box (tenue à jour par hakos-noms). Une troisième box (hako-3) n'aurait que ses noms en .local et son adresse IP.
 - Deux box sur le même réseau : la seconde répond à hako-2.local, hako-2-photos.local et hako-2-fichiers.local (avahi), alors que sa fiche d'installation indique les noms de la première.
-- La page de la HAKO (assistant, construite depuis hako-site au commit HAKO_SITE_COMMIT) affiche encore les adresses http://hako.local:2283 et :8080 : elles marchent, en secours, jusqu'à la reconstruction de la page avec les nouveaux noms.
 - Les noms hako-photos.local et hako-fichiers.local ne sont pas encore essayés sur de vrais téléphones et ordinateurs (seulement dans la VM, par avahi).
 - En prod, la fiche /root/fiche-installation.txt n'est lisible par personne : la box n'a ni SSH ni compte ouvert.
 - cloud-init est gardé : qui a le SSD en main peut, par les fichiers de bootfs, faire lancer des commandes en root au démarrage. Il pourrait aussi lire les données, le disque n'étant pas chiffré.
