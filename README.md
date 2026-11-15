@@ -35,9 +35,6 @@ Il vous faut :
 
 HakOS a été testé dans des machines virtuelles seulement, jamais sur un vrai Raspberry Pi 5. Le détail de chaque étape et les limites sont dans [hakos/README.md](hakos/README.md#installer).
 
-## Construire HakOS
-
-L'image se construit sur un Mac Apple Silicon : voir [hakos/README.md](hakos/README.md#construire).
 
 ## Licence
 
