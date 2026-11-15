@@ -1,4 +1,4 @@
-# HAKO 箱
+# 箱 HAKO 
 
 [![Aperçu en ligne](https://github.com/antoninche/hako/actions/workflows/apercu.yml/badge.svg)](https://github.com/antoninche/hako/actions/workflows/apercu.yml)
 [![HakOS](https://github.com/antoninche/hako/actions/workflows/hakos.yml/badge.svg)](https://github.com/antoninche/hako/actions/workflows/hakos.yml)
