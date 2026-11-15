@@ -7,7 +7,9 @@
  *   (Content-Security-Policy « default-src 'self' ») : pas de script en
  *   ligne exécutable, pas d'attribut style, pas de <style> en ligne, pas
  *   d'URI data: ;
- * - aucun cookie ni stockage persistant dans le JavaScript.
+ * - aucun cookie ni stockage persistant dans le JavaScript ;
+ * - aucune information manquante (texte provisoire de src/lib/todo.ts,
+ *   marqué data-todo) : le site publié n'en montre jamais.
  * Les liens <a href> vers d'autres sites sont permis (ce ne sont pas des
  * téléchargements) : ils sont seulement listés pour information.
  */
@@ -219,6 +221,9 @@ function checkHtml(text, file, report, links, localOrigins, standaloneSvg) {
 
   for (const tag of scanTags(text)) {
     const excerpt = excerptOf(text, tag.start, tag.end);
+    if (attributeOf(tag, 'data-todo')) {
+      add('violation', tag.start, 'information manquante affichée (data-todo)', excerpt);
+    }
     const checkUrl = (value, label, offset) => {
       const kind = classifyUrl(value, localOrigins);
       if (kind === 'external') add('violation', offset, `ressource externe (${label})`, excerpt);

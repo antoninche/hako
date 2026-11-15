@@ -24,7 +24,7 @@ export type TextField =
   | 'users'
   | 'availabilityNote';
 
-export type ConsentField = 'acceptTerms' | 'acceptPrivacy';
+export type ConsentField = 'acceptPrivacy';
 
 export type OrderField = TextField | ConsentField;
 
@@ -53,7 +53,7 @@ export const FIELD_RULES: Readonly<Record<TextField, FieldRule>> = {
   availabilityNote: { required: false, maxLength: 500 },
 };
 
-const CONSENT_FIELDS: readonly ConsentField[] = ['acceptTerms', 'acceptPrivacy'];
+const CONSENT_FIELDS: readonly ConsentField[] = ['acceptPrivacy'];
 
 /** Champs vérifiés à chaque étape (l'étape 1 n'a que des choix déjà faits). */
 export const STEP_FIELDS: Readonly<Record<StepNumber, readonly OrderField[]>> = {
@@ -70,7 +70,7 @@ export const STEP_FIELDS: Readonly<Record<StepNumber, readonly OrderField[]>> = 
     'users',
     'availabilityNote',
   ],
-  3: ['acceptTerms', 'acceptPrivacy'],
+  3: ['acceptPrivacy'],
 };
 
 /** Adresse e-mail : un @, puis un nom de domaine avec au moins un point. */
@@ -151,7 +151,6 @@ export interface OrderDraft {
   readonly users: string;
   readonly timeSlots: readonly TimeSlotId[];
   readonly availabilityNote: string;
-  readonly acceptTerms: boolean;
   readonly acceptPrivacy: boolean;
 }
 
@@ -219,7 +218,6 @@ export function toOrderRequest(draft: OrderDraft, quote: Quote): OrderRequest {
     timeSlots: [...draft.timeSlots],
     availabilityNote: draft.availabilityNote.trim(),
     outsideServiceArea: isOutsideServiceArea(postalCode),
-    acceptedTerms: draft.acceptTerms,
     acknowledgedPrivacy: draft.acceptPrivacy,
     displayedQuote: {
       oneTimeTotalEur: quote.oneTimeTotalEur,

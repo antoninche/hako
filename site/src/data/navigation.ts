@@ -27,7 +27,6 @@ export const routes = {
   contact: '/contact/',
   legalNotice: '/mentions-legales/',
   privacy: '/confidentialite/',
-  terms: '/cgv/',
 } as const;
 
 const offers: NavLink = { label: 'Offres', href: routes.offers };
@@ -64,7 +63,6 @@ export const footerNav: readonly NavLink[] = [
 export const legalNav: readonly NavLink[] = [
   { label: 'Mentions légales', href: routes.legalNotice },
   { label: 'Confidentialité', href: routes.privacy },
-  { label: 'Conditions générales de vente', href: routes.terms },
 ];
 
 /** Vrai si `href` désigne la page affichée (`pathname` vient de Astro.url). */

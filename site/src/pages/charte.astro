@@ -12,7 +12,6 @@ import Icon, { type IconName } from '../components/Icon.astro';
 import { uiIcons as uiIconPaths } from '../components/icons';
 import Logo from '../components/Logo.astro';
 import Section from '../components/Section.astro';
-import Todo from '../components/Todo.astro';
 import { LOGO_VARIANTS, logoFile } from '../components/logo-files';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { formatEur, formatNumber } from '../lib/format';
@@ -92,14 +91,6 @@ const px = (n: number) => `${Math.round(n * 10) / 10} px`;
 // ---------- Exemples ----------
 
 const price = formatEur(1000);
-
-// Exemples de texte provisoire. Écrits en variables, ils ne sont pas comptés
-// par `npm run todos` : ce ne sont pas de vraies informations manquantes.
-const todoExamples = {
-  surface: { what: 'Exemple de la charte : texte provisoire', placeholder: '[texte provisoire]' },
-  sentence: { what: 'Exemple de la charte : durée des mises à jour', placeholder: '[durée]' },
-  price: { what: 'Exemple de la charte : prix TTC ou HT', placeholder: '[TTC ou HT]' },
-};
 
 // Toutes les icônes d'interface, lues dans la liste du composant : la charte
 // ne peut pas en oublier une.
@@ -198,10 +189,6 @@ const logos = LOGO_VARIANTS.map((variant) => ({ variant, available: Boolean(logo
               </p>
               <p class="role-success">
                 Réussite, rôle <code>--success</code>.
-              </p>
-              <p>
-                Information manquante&nbsp;:{' '}
-                <Todo what={todoExamples.surface.what}>{todoExamples.surface.placeholder}</Todo>
               </p>
               <div class="cluster cluster--xs">
                 <span class="btn btn--primary">Principal</span>
@@ -312,7 +299,6 @@ const logos = LOGO_VARIANTS.map((variant) => ({ variant, available: Boolean(logo
         <div class="price-samples">
           <span class="ui product">Hako Pro</span>
           <span class="price price--large">{price}</span>
-          <Todo what={todoExamples.price.what}>{todoExamples.price.placeholder}</Todo>
           <span class="small text-muted">
             Espace insécable entre les milliers et avant € (src/lib/format.ts).
           </span>
@@ -363,27 +349,6 @@ const logos = LOGO_VARIANTS.map((variant) => ({ variant, available: Boolean(logo
           est toujours souligné&nbsp;; le soulignement s’épaissit au survol.
         </p>
       </div>
-    </div>
-  </Section>
-
-  <!-- ---------- Informations manquantes ---------- -->
-  <Section surface="sable" labelledby="todo">
-    <div class="stack">
-      <h2 id="todo">Informations manquantes</h2>
-      <p>
-        Tout ce que l’équipe n’a pas encore fourni s’affiche surligné en jaune, avec un texte
-        provisoire entre crochets. Avec <code>PUBLIC_SHOW_TODOS=false</code>, le texte reste mais
-        n’est plus surligné.
-      </p>
-      <p>
-        Dans une phrase&nbsp;: les mises à jour de sécurité sont incluses pendant{' '}
-        <Todo what={todoExamples.sentence.what}>{todoExamples.sentence.placeholder}</Todo>.
-      </p>
-      <p class="price-line">
-        <span class="ui product">Hako Pro</span>
-        <span class="price">{price}</span>
-        <Todo what={todoExamples.price.what}>{todoExamples.price.placeholder}</Todo>
-      </p>
     </div>
   </Section>
 
@@ -726,8 +691,7 @@ const logos = LOGO_VARIANTS.map((variant) => ({ variant, available: Boolean(logo
   }
 
   .ui-samples,
-  .price-samples,
-  .price-line {
+  .price-samples {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-s) var(--space-l);
@@ -739,10 +703,6 @@ const logos = LOGO_VARIANTS.map((variant) => ({ variant, available: Boolean(logo
   }
 
   .product {
-    font-size: var(--step-1);
-  }
-
-  .price-line .price {
     font-size: var(--step-1);
   }
 

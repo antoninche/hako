@@ -287,7 +287,7 @@ export const offresPage = {
       },
       {
         title: 'La garantie',
-        text: [warranty.sentence, ' ', warranty.termsLead, warranty.terms, '.'],
+        text: [warranty.sentence],
       },
     ] satisfies readonly { title: string; text: RichText }[],
   },

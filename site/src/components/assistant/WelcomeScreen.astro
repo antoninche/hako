@@ -39,12 +39,6 @@ const { welcome } = assistant.screens;
         {welcome.plan.title}
       </h3>
       <ActionList items={welcome.plan.items} labelledby="ecran-bienvenue-plan" />
-      <p class="welcome__duration">
-        <Icon name="clock" class="welcome__icon" />
-        <span>
-          <GuideText parts={welcome.duration} />
-        </span>
-      </p>
     </div>
 
     <div class="welcome__block welcome__block--needs">
@@ -112,18 +106,6 @@ const { welcome } = assistant.screens;
     font-size: var(--step-0);
     font-weight: 700;
     letter-spacing: var(--tracking-ui);
-  }
-
-  .welcome__duration {
-    display: flex;
-    gap: var(--space-xs);
-    align-items: flex-start;
-    margin: 0;
-  }
-
-  .welcome__duration :global(.welcome__icon) {
-    margin-block-start: 0.2em;
-    color: var(--text-muted);
   }
 
   .welcome__needs {

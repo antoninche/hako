@@ -16,7 +16,6 @@
  *   <Detail of="payment" />            paiement : par virement, pas encore en ligne (phrase)
  *   <Detail of="pro-subscription-payment" /> abonnement de Hako Pro : chaque mois, par virement (phrase)
  *   <Detail of="warranty" />           garantie d'un an, en plus de la garantie légale (phrase)
- *   <Detail of="warranty-terms" />     ce que couvre la garantie, et comment la faire jouer
  *   <Detail of="service-area" />       phrase sur la zone d'intervention
  *   <Detail of="outside-area" />       ce que nous proposons hors de cette zone
  *   <Detail of="email" />              adresse e-mail de contact (lien)
@@ -62,7 +61,6 @@ export type DetailId =
   | 'payment'
   | 'pro-subscription-payment'
   | 'warranty'
-  | 'warranty-terms'
   | 'service-area'
   | 'outside-area'
   | 'email'
@@ -98,7 +96,6 @@ const values: Record<DetailId, Maybe<string>> = {
   payment,
   'pro-subscription-payment': proSubscriptionPayment,
   warranty: warranty.sentence,
-  'warranty-terms': warranty.terms,
   'service-area': company.serviceArea.sentence,
   'outside-area': company.serviceArea.outside,
   email: company.email,

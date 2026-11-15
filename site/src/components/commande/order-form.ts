@@ -132,7 +132,6 @@ export function initOrderForm(root: HTMLElement, submitter: OrderSubmitter): voi
       users: value('users'),
       timeSlots: selectedTimeSlots().map((input) => input.value as TimeSlotId),
       availabilityNote: value('availabilityNote'),
-      acceptTerms: checkbox('acceptTerms').checked,
       acceptPrivacy: checkbox('acceptPrivacy').checked,
     };
   }

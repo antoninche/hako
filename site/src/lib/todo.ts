@@ -3,8 +3,11 @@
  *
  * Toute information que l'équipe n'a pas encore fournie s'écrit
  * `todo('ce qui manque', '[texte provisoire]')` dans les fichiers de
- * src/data/. Le site l'affiche surlignée en jaune (composant <Fact> ou
- * <Todo>), et `npm run todos` la recense dans TODO.md.
+ * src/data/, et `npm run todos` la recense dans TODO.md. Le site publié n'en
+ * montre jamais : le texte des pages est écrit sans elle, et
+ * `npm run check:dist` refuse toute page qui contient encore un composant
+ * <Fact> ou <Todo> (attribut data-todo). Pendant le développement, ce
+ * composant la surligne en jaune.
  *
  * Pour renseigner l'information, remplacez simplement l'appel :
  *   email: todo('Adresse e-mail de contact', '[adresse e-mail]'),

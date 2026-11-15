@@ -74,7 +74,6 @@ export interface OrderRequest {
    * possible, la box est alors envoyée et installée avec notre guide.
    */
   readonly outsideServiceArea: boolean;
-  readonly acceptedTerms: boolean;
   readonly acknowledgedPrivacy: boolean;
   readonly displayedQuote: {
     readonly oneTimeTotalEur: number | null;

@@ -18,7 +18,7 @@ import { emailLink } from '../lib/commande/inline.ts';
 import { findStorage } from '../lib/commande/pricing.ts';
 import type { LinkValue, RichText, TimeSlotId } from '../lib/commande/types.ts';
 import type { OrderField, ValidationCode } from '../lib/commande/validation.ts';
-import { isTodo, todo } from '../lib/todo.ts';
+import { isTodo } from '../lib/todo.ts';
 
 export interface FieldCopy {
   readonly label: string;
@@ -27,11 +27,6 @@ export interface FieldCopy {
   /** Message affiché pour chaque raison de refus possible. */
   readonly messages: Partial<Record<ValidationCode, string>>;
 }
-
-const retention = todo(
-  'Durée de conservation des informations d’une demande de commande',
-  '[durée de conservation]',
-);
 
 const email = emailLink(company.email);
 const includedStorage = findStorage(pricing, pricing.includedStorage);
@@ -159,12 +154,6 @@ export const commandePage = {
       hint: 'Par exemple : un jour à éviter.',
       messages: {},
     },
-    acceptTerms: {
-      label: 'J’ai lu et j’accepte les conditions générales de vente.',
-      messages: {
-        unchecked: 'Pour envoyer votre demande, acceptez les conditions générales de vente.',
-      },
-    },
     acceptPrivacy: {
       label: 'J’ai lu comment mes données sont utilisées.',
       messages: {
@@ -220,10 +209,6 @@ export const commandePage = {
   ] satisfies RichText,
   consents: {
     legend: 'Avant d’envoyer',
-    termsLink: {
-      label: 'Lire les conditions générales de vente',
-      href: routes.terms,
-    } satisfies LinkValue,
     newTab: '(s’ouvre dans un nouvel onglet)',
     privacyLink: {
       label: 'Lire « Vos données », plus bas sur cette page',
@@ -249,10 +234,6 @@ export const commandePage = {
       {
         term: 'À quoi elles servent',
         text: ['À traiter votre demande : vous appeler, fixer le rendez-vous et installer la box.'],
-      },
-      {
-        term: 'Combien de temps nous les gardons',
-        text: ['Nous les gardons ', retention, '.'],
       },
       {
         term: 'Vos droits',

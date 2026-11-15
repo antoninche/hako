@@ -347,13 +347,7 @@ const steps = [
         'Pour vérifier que rien ne manque et que rien n’a souffert du transport, avant de brancher quoi que ce soit.',
       ],
     ],
-    success: [
-      [
-        'Vous avez devant vous votre HAKO et son bloc d’alimentation. Dans le carton : ',
-        toConfirm.boxContents,
-        '.',
-      ],
-    ],
+    success: [['Vous avez devant vous votre HAKO et son bloc d’alimentation.']],
     problems: [
       {
         id: 'pas-de-cable',
@@ -451,11 +445,7 @@ const steps = [
     short: 'Le câble',
     title: titles.cable,
     actions: [
-      [
-        'Branchez un bout du câble réseau dans la prise réseau de la HAKO : ',
-        toConfirm.networkPort,
-        '.',
-      ],
+      ['Branchez un bout du câble réseau dans la prise réseau de la HAKO.'],
       [
         'Poussez le bout du câble jusqu’à entendre un petit « clic » : son clip en plastique le bloque.',
       ],
@@ -564,17 +554,13 @@ const steps = [
     title: titles.alimentation,
     actions: [
       [
-        'Branchez le câble du bloc d’alimentation sur la HAKO, dans la petite prise ovale (on l’appelle USB-C) : ',
-        toConfirm.powerPort,
-        '. N’utilisez aucune autre prise.',
+        'Branchez le câble du bloc d’alimentation sur la HAKO, dans la petite prise ovale (on l’appelle USB-C). N’utilisez aucune autre prise.',
       ],
       ['Branchez le bloc d’alimentation sur une prise électrique.'],
     ],
     why: [
       [
-        'La HAKO a besoin de courant pour fonctionner. Elle démarre toute seule dès qu’elle est branchée : vous n’avez aucun bouton à presser. Son petit bouton rond sert à l’éteindre ',
-        toConfirm.powerButton,
-        ' : n’y touchez pas.',
+        'La HAKO a besoin de courant pour fonctionner. Elle démarre toute seule dès qu’elle est branchée : vous n’avez aucun bouton à presser.',
       ],
       [
         'Le bloc fourni lui donne tout le courant dont elle a besoin : un autre chargeur pourrait être trop faible.',
@@ -583,13 +569,6 @@ const steps = [
     success: [
       [
         'Le bloc d’alimentation est branché des deux côtés : sur la prise électrique et sur la HAKO.',
-      ],
-      [
-        'Le voyant de la HAKO : ',
-        toConfirm.led,
-        '. Même allumé, il ne dit pas si la HAKO est prête : elle doit encore se préparer, à ',
-        toStep('preparation'),
-        '.',
       ],
     ],
     nextHint: [
@@ -633,41 +612,6 @@ const steps = [
           ],
         ],
       },
-      {
-        id: 'voyant',
-        title: 'Le voyant de la HAKO clignote, ou reste rouge.',
-        why: [['Le voyant de la HAKO : ', toConfirm.led, '.']],
-        fix: [
-          [
-            'Vérifiez que vous utilisez le bloc d’alimentation fourni, bien enfoncé des deux côtés.',
-          ],
-          [
-            'Débranchez le bloc de la prise électrique, attendez 10 secondes, puis rebranchez-le : la HAKO redémarre.',
-          ],
-          [
-            'Le voyant clignote encore, ou reste rouge ? ',
-            contactLink('Écrivez-nous'),
-            ' en nous décrivant ce qu’il fait.',
-          ],
-        ],
-      },
-      {
-        id: 'bouton',
-        title: 'Vous avez appuyé sur le petit bouton rond de la HAKO.',
-        why: [
-          [
-            'Ce bouton éteint la HAKO, même pendant sa préparation : son voyant passe alors au rouge ',
-            toConfirm.powerButton,
-            '.',
-          ],
-        ],
-        fix: [
-          ['Appuyez une fois sur ce bouton : la HAKO redémarre ', toConfirm.powerButton, '.'],
-          [
-            'Si rien ne change, débranchez le bloc d’alimentation de la prise électrique, attendez 10 secondes, puis rebranchez-le.',
-          ],
-        ],
-      },
     ],
   },
   {
@@ -684,7 +628,7 @@ const steps = [
       [
         'Notez l’heure du branchement sur un papier, puis lancez le chronomètre : il repart de zéro si ce guide se recharge.',
       ],
-      ['Patientez : comptez ', toConfirm.firstBoot, '.'],
+      ['Patientez.'],
     ],
     why: [
       [
@@ -743,10 +687,7 @@ const steps = [
         id: 'debranchee',
         title: 'La HAKO a été débranchée pendant sa préparation.',
         why: [['Sans courant, la HAKO s’arrête, et sa préparation avec elle.']],
-        fix: [
-          ['Rebranchez-la, puis remettez le chronomètre à zéro.'],
-          ['Ce qui se passe ensuite : ', toConfirm.resumeAfterUnplug, '.'],
-        ],
+        fix: [['Rebranchez-la, puis remettez le chronomètre à zéro.']],
       },
       {
         id: 'chronometre-a-zero',
@@ -768,13 +709,7 @@ const steps = [
         ],
         fix: [
           ['Laissez-la branchée et patientez encore.'],
-          [
-            'Sa page ne s’ouvre toujours pas au bout de ',
-            toConfirm.slowBoot,
-            ' ? ',
-            contactLink('Écrivez-nous'),
-            '.',
-          ],
+          ['Sa page ne s’ouvre toujours pas ? ', contactLink('Écrivez-nous'), '.'],
         ],
       },
     ],
@@ -1115,11 +1050,7 @@ const steps = [
           ],
         ],
         fix: [
-          [
-            'Laissez la HAKO branchée et patientez : comptez ',
-            toConfirm.firstBoot,
-            ' depuis le branchement.',
-          ],
+          ['Laissez la HAKO branchée et patientez.'],
           ['Puis réessayez : ', boxLink, '.'],
           [
             'Si la page affiche ' +
@@ -1158,11 +1089,6 @@ const steps = [
           [
             'Faites l’installation avec un autre appareil, même emprunté : un ordinateur, un iPhone, un iPad, ou un appareil Android plus récent.',
           ],
-          [
-            'Solution de secours, pour l’installation comme pour les applications : ',
-            toConfirm.fallbackAddress,
-            '.',
-          ],
         ],
       },
       {
@@ -1173,9 +1099,7 @@ const steps = [
           [
             'Android ' +
               requirements.android +
-              ' ne trouve les adresses en « .local » qu’avec une mise à jour récente du système Google Play ',
-            toConfirm.android12,
-            '.',
+              ' ne trouve pas toujours les adresses en « .local » : une mise à jour récente du système Google Play peut être nécessaire.',
           ],
         ],
         fix: [
@@ -1192,9 +1116,7 @@ const steps = [
         why: [
           ['Safari ouvre toujours la page de votre HAKO, sans autorisation à donner.'],
           [
-            'Chrome, Firefox et Edge aussi, en principe ',
-            toConfirm.iosOtherBrowser,
-            ' : la cause est sans doute ailleurs (Wi-Fi, VPN, adresse tapée sans http://).',
+            'Chrome, Firefox et Edge aussi, en principe : la cause est sans doute ailleurs (Wi-Fi, VPN, adresse tapée sans http://).',
           ],
         ],
         fix: [['Ouvrez Safari et tapez ', boxAddress.display, ' dans la barre d’adresse.']],
@@ -1233,7 +1155,6 @@ const steps = [
           [
             'Essayez avec un autre appareil, même emprunté : un iPhone, un iPad, un Mac ou un appareil Android récent.',
           ],
-          ['Réglage à vérifier : ', toConfirm.windows, '.'],
           [
             'Vous n’avez pas d’autre appareil ? ',
             contactLink('Écrivez-nous'),
@@ -1251,11 +1172,7 @@ const steps = [
               ' ».',
           ],
           ['L’adresse ', boxAddress.display, ' ouvre alors la page de l’autre HAKO.'],
-          [
-            'Après une coupure de courant, les deux HAKO peuvent échanger leurs noms ',
-            toConfirm.namesAfterOutage,
-            '.',
-          ],
+          ['Après une coupure de courant, les deux HAKO peuvent échanger leurs noms.'],
         ],
         fix: [
           [
@@ -1281,9 +1198,7 @@ const steps = [
             ' avant d’aller plus loin.',
           ],
           [
-            'Chrome vous demande de confirmer avant d’ouvrir la page ? Cela n’arrive que s’il est réglé au plus strict. Appuyez sur ',
-            toConfirm.browserWarnings,
-            '.',
+            'Chrome vous demande de confirmer avant d’ouvrir la page ? Cela n’arrive que s’il est réglé au plus strict : confirmez pour continuer.',
           ],
         ],
       },
@@ -1472,11 +1387,8 @@ const steps = [
         ],
         fix: [
           [
-            'Une personne a oublié son mot de passe ? La personne responsable de la HAKO peut lui en donner un nouveau, dans Immich puis dans Nextcloud : ',
-            toConfirm.resetPassword,
-            '.',
+            'Une personne a oublié son mot de passe ? La personne responsable de la HAKO peut lui en donner un nouveau, dans Immich puis dans Nextcloud.',
           ],
-          ['La personne responsable a perdu le sien, ou la fiche : ', toConfirm.lostSheet, '.'],
           [contactLink('Écrivez-nous'), ' : nous vous guiderons.'],
         ],
       },
@@ -1486,7 +1398,7 @@ const steps = [
         why: [
           ['Chaque personne a besoin de son propre compte pour garder ses photos et ses fichiers.'],
         ],
-        fix: [['Pour ajouter une personne : ', toConfirm.addPerson, '.']],
+        fix: [[contactLink('Écrivez-nous'), ' : nous vous guiderons.']],
       },
     ],
   },
@@ -1545,14 +1457,11 @@ const steps = [
           '.',
       ],
       ['Sur iPhone et iPad, Immich demande l’accès au « Réseau local » : acceptez.'],
-      ['Dans Nextcloud, après l’adresse : ', toConfirm.nextcloudLogin, '.'],
       [
         'Connectez-vous avec l’identifiant et le mot de passe de la personne, écrits sur la fiche de secours. Dans Immich, la case de connexion demande une adresse e-mail : tapez l’identifiant de la fiche, pas votre adresse e-mail habituelle.',
       ],
       [
-        'Dans Immich, activez la sauvegarde : l’application copie alors sur votre HAKO les photos du téléphone. Comment faire : ',
-        toConfirm.immichBackup,
-        '.',
+        'Dans Immich, activez la sauvegarde : l’application copie alors sur votre HAKO les photos du téléphone.',
       ],
     ],
     notes: [
@@ -1722,7 +1631,6 @@ const steps = [
           ],
         ],
         fix: [
-          ['Solution de secours : ', toConfirm.fallbackAddress, '.'],
           [
             'En attendant, ouvrez vos photos et vos fichiers depuis un ordinateur, un iPhone ou un iPad de la maison.',
           ],
@@ -1734,9 +1642,7 @@ const steps = [
         title: 'L’application dit que la version de votre HAKO ne convient pas.',
         why: [
           [
-            'Votre téléphone met souvent ses applications à jour tout seul : l’application peut alors être plus récente que la version installée sur votre HAKO ',
-            toConfirm.appTooNew,
-            '.',
+            'Votre téléphone met souvent ses applications à jour tout seul : l’application peut alors être plus récente que la version installée sur votre HAKO.',
           ],
         ],
         fix: [
@@ -1810,11 +1716,6 @@ export const installation = {
   intro: {
     title: 'Installer votre HAKO',
     lead: 'Suivez les huit étapes dans l’ordre. Chacune dit quoi faire, comment vérifier que c’est bon, et quoi faire si ça bloque.',
-    duration: [
-      'Comptez ',
-      toConfirm.totalDuration,
-      ' en tout, dont une attente pendant que votre HAKO se prépare toute seule.',
-    ] satisfies Sentence,
     /**
      * Ce guide servira quand nous enverrons la HAKO hors de notre zone
      * (company.serviceArea.outside) : ce n’est pas encore possible. Dans la
@@ -1836,7 +1737,6 @@ export const installation = {
       {
         id: 'hako',
         text: ['Votre HAKO et son bloc d’alimentation'],
-        detail: [['Dans le carton : ', toConfirm.boxContents, '.']],
       },
       {
         id: 'cable',

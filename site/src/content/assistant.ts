@@ -158,7 +158,6 @@ interface ScreenBase {
 export interface WelcomeScreen extends ScreenBase {
   /** Ce que la personne va faire, dans l’ordre. */
   readonly plan: ListBlock;
-  readonly duration: Sentence;
   /** Ce qu’il faut avoir sous la main. */
   readonly needs: ListBlock;
   readonly start: string;
@@ -681,7 +680,6 @@ export const assistant = {
           ['Vérifier votre fiche, puis laisser votre HAKO créer les comptes.'],
         ],
       },
-      duration: ['Comptez ', pending.duration, '.'],
       needs: {
         title: 'Ce qu’il vous faut',
         items: [
@@ -861,7 +859,7 @@ export const assistant = {
           why: [[`La première installation crée ${MAX_PEOPLE}\u00a0comptes au plus.`]],
           fix: [
             [`Créez d’abord les comptes de ${MAX_PEOPLE}\u00a0personnes.`],
-            ['Pour ajouter les autres ensuite : ', toConfirm.addPerson, '.'],
+            ['Pour ajouter les autres ensuite, ', contact('écrivez-nous'), '.'],
           ],
         },
         {
@@ -1004,7 +1002,6 @@ export const assistant = {
               [
                 'Un fichier PDF est un document enregistré sur votre appareil, à imprimer plus tard. Sur un ordinateur ou sur Android, appuyez sur le même bouton, puis choisissez « Enregistrer au format PDF » à la place de votre imprimante.',
               ],
-              ['Sur un iPhone ou un iPad : ', pending.iosPdf, '.'],
               [
                 'Imprimez ce fichier dès que possible, puis supprimez-le, sans oublier la corbeille : il peut être copié tout seul hors de chez vous (iCloud, Google Drive, OneDrive).',
               ],
@@ -1091,11 +1088,8 @@ export const assistant = {
               'Sur un ordinateur, ouvrez la liste des imprimantes, dans la fenêtre d’impression : « Enregistrer au format PDF » y figure en général. Sur un Mac, avec Safari, cherchez le bouton « PDF », en bas de la fenêtre.',
             ],
             [
-              'Sur Android, touchez la liste des imprimantes, en haut de l’écran, puis « Enregistrer au format PDF ». Ensuite : ',
-              pending.androidPdf,
-              '.',
+              'Sur Android, touchez la liste des imprimantes, en haut de l’écran, puis « Enregistrer au format PDF ».',
             ],
-            ['Sur un iPhone ou un iPad : ', pending.iosPdf, '.'],
             ['Vous ne le trouvez toujours pas ? Recopiez la fiche à la main.'],
           ],
         },
@@ -1231,9 +1225,7 @@ export const assistant = {
       title: 'Votre HAKO crée vos comptes',
       lead: [
         [
-          'Elle prépare un espace pour chaque personne, dans l’application des photos, puis dans celle des fichiers. Comptez ',
-          pending.accountsDuration,
-          '.',
+          'Elle prépare un espace pour chaque personne, dans l’application des photos, puis dans celle des fichiers.',
         ],
       ],
       tasks: [
@@ -1481,7 +1473,6 @@ export const assistant = {
           'Vous n’avez pas fait la première installation ? Demandez aux personnes de la maison qui l’a faite : elle a la fiche de secours.',
         ],
         ['Personne ne l’a faite ? ', contact('Écrivez-nous'), ' avant d’aller plus loin.'],
-        ['Vous avez perdu la fiche de secours ? ', toConfirm.lostSheet, '.'],
       ],
     },
     /**
@@ -1577,9 +1568,7 @@ export const assistant = {
           'Vous changez un mot de passe ? Changez-le dans l’application des photos et dans celle des fichiers, puis notez-le ci-dessous.',
         ],
         [
-          'Une personne a oublié son mot de passe ? La personne responsable de la HAKO peut lui en donner un nouveau : ',
-          toConfirm.resetPassword,
-          '.',
+          'Une personne a oublié son mot de passe ? La personne responsable de la HAKO peut lui en donner un nouveau.',
         ],
         [toConfirm.neverAsk],
       ],

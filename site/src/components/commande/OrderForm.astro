@@ -418,13 +418,6 @@ const stepLabel = (step: StepNumber) => copy.stepOf.replace('{n}', String(step))
         <legend class="group__legend">{copy.consents.legend}</legend>
         <div class="fields">
           <CheckField
-            field="acceptTerms"
-            id="cgv"
-            name="cgv"
-            link={copy.consents.termsLink}
-            newTab
-          />
-          <CheckField
             field="acceptPrivacy"
             id="donnees"
             name="donnees"

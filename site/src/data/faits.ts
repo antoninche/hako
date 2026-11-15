@@ -24,7 +24,7 @@
  */
 import { missing } from '../lib/commande/inline.ts';
 import { formatList } from '../lib/format.ts';
-import { todo, type TodoValue } from '../lib/todo.ts';
+import { type TodoValue } from '../lib/todo.ts';
 import { company } from './entreprise.ts';
 import { pricing, type Offer, type OfferId, type StorageOption } from './tarifs.ts';
 
@@ -138,11 +138,6 @@ export const proSubscriptionPayment =
 
 /* ---------- Garantie ---------- */
 
-const warrantyTerms = todo(
-  'Garantie d’un an de la box : ce qu’elle couvre (pièces, main-d’œuvre, envoi ou déplacement) et comment la faire jouer',
-  '[à confirmer]',
-);
-
 /**
  * Garantie commerciale d'un an (confirmée par l'équipe). Elle s'ajoute à la
  * garantie légale de conformité, qu'elle ne remplace jamais : deux ans pour
@@ -151,8 +146,6 @@ const warrantyTerms = todo(
 export const warranty = {
   sentence:
     'La box est garantie un an par HAKO, en plus de la garantie légale de conformité (deux ans pour les particuliers).',
-  termsLead: 'Ce que couvre cette garantie, et comment la faire jouer : ',
-  terms: warrantyTerms,
 } as const;
 
 /* ---------- Prix pas encore fixés (null dans src/data/tarifs.ts) ---------- */

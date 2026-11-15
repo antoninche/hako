@@ -147,8 +147,8 @@ export interface AssistantPendingFacts {
 /**
  * Informations que l’équipe doit encore confirmer, surtout par une mesure
  * ou un essai sur une HAKO de série. Rien ici ne s’invente : tant qu’une
- * valeur n’est pas connue, la page affiche le texte provisoire surligné en
- * jaune.
+ * valeur n’est pas connue, la page n’en parle pas (src/lib/todo.ts) ; une
+ * fois connue, l’ajouter à la phrase qui la concerne.
  */
 export const pending: AssistantPendingFacts = withFrenchTypography<AssistantPendingFacts>({
   duration: todo(

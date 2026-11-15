@@ -230,7 +230,8 @@ export const appsMinVersion =
 /**
  * Informations que l’équipe doit encore confirmer, surtout par une
  * mesure sur une HAKO de série. Rien ici ne s’invente : tant qu’une valeur
- * n’est pas connue, le guide affiche le texte provisoire surligné en jaune.
+ * n’est pas connue, le guide n’en parle pas (src/lib/todo.ts) ; une fois
+ * connue, l’ajouter à la phrase du guide qui la concerne.
  * Pour les prises et le voyant, le texte provisoire décrit le prototype
  * (docs/model-contract.md, « Le modèle provisoire et le prototype ») : il
  * reste à confirmer sur une HAKO de série.
