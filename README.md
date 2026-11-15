@@ -6,7 +6,6 @@
 [![Licence : GPL-3.0-or-later](https://img.shields.io/badge/licence-GPL--3.0--or--later-blue)](LICENSE)
 [![Site](https://img.shields.io/website?url=https%3A%2F%2Fantoninche.github.io%2Fhako%2F&label=site)](https://antoninche.github.io/hako/)
 
-**Vos souvenirs restent à la maison.**
 
 ![Page d'accueil du site de HAKO : vos souvenirs restent à la maison](.github/assets/accueil.png)
 
